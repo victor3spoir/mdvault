@@ -1,0 +1,270 @@
+'use client'
+
+import { useState, useRef, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import type { MDXEditorMethods } from '@mdxeditor/editor'
+import { ForwardRefEditor } from './forward-ref-editor'
+import { ImageSelector } from './image-selector'
+import type { UploadedImage } from './image-selector'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Badge } from '@/components/ui/badge'
+import {
+  IconDeviceFloppy,
+  IconSend,
+  IconArrowLeft,
+  IconX,
+  IconPlus,
+} from '@tabler/icons-react'
+import type { Post, CreatePostInput } from '../types'
+import { createPostAction, updatePostAction } from '../actions/posts.actions'
+import { uploadImageAction } from '../actions/images.actions'
+
+interface PostEditorProps {
+  post?: Post
+  mode: 'create' | 'edit'
+}
+
+export function PostEditor({ post, mode }: PostEditorProps) {
+  const router = useRouter()
+  const editorRef = useRef<MDXEditorMethods>(null)
+
+  const [title, setTitle] = useState(post?.title ?? '')
+  const [slug, setSlug] = useState(post?.slug ?? '')
+  const [description, setDescription] = useState(post?.description ?? '')
+  const [tags, setTags] = useState<string[]>(post?.tags ?? [])
+  const [tagInput, setTagInput] = useState('')
+  const [coverImage, setCoverImage] = useState(post?.coverImage ?? '')
+  const [isSaving, setIsSaving] = useState(false)
+  const [isPublishing, setIsPublishing] = useState(false)
+
+  // Auto-generate slug from title
+  const handleTitleChange = (value: string) => {
+    setTitle(value)
+    if (mode === 'create') {
+      const generatedSlug = value
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/(^-|-$)/g, '')
+      setSlug(generatedSlug)
+    }
+  }
+
+  // Tag management
+  const addTag = () => {
+    const trimmedTag = tagInput.trim()
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      setTags([...tags, trimmedTag])
+      setTagInput('')
+    }
+  }
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter((tag) => tag !== tagToRemove))
+  }
+
+  // Image upload handler for MDXEditor
+  const handleImageUpload = useCallback(async (file: File): Promise<string> => {
+    const uploadedImage = await uploadImageAction(file)
+    return uploadedImage.url
+  }, [])
+
+  // Save as draft
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      const content = editorRef.current?.getMarkdown() ?? ''
+      const input: CreatePostInput = {
+        title,
+        slug,
+        content,
+        description,
+        tags,
+        coverImage,
+        published: false,
+      }
+
+      if (mode === 'create') {
+        await createPostAction(input)
+      } else if (post?.sha) {
+        await updatePostAction(slug, { ...input, sha: post.sha })
+      }
+
+      router.push('/cms/posts')
+      router.refresh()
+    } catch (error) {
+      console.error('Error saving post:', error)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Publish post
+  const handlePublish = async () => {
+    setIsPublishing(true)
+    try {
+      const content = editorRef.current?.getMarkdown() ?? ''
+      const input: CreatePostInput = {
+        title,
+        slug,
+        content,
+        description,
+        tags,
+        coverImage,
+        published: true,
+      }
+
+      if (mode === 'create') {
+        await createPostAction(input)
+      } else if (post?.sha) {
+        await updatePostAction(slug, { ...input, sha: post.sha })
+      }
+
+      router.push('/cms/posts')
+      router.refresh()
+    } catch (error) {
+      console.error('Error publishing post:', error)
+    } finally {
+      setIsPublishing(false)
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Actions Bar */}
+      <div className="flex items-center justify-between">
+        <Button
+          variant="ghost"
+          onClick={() => router.back()}
+          className="gap-2"
+        >
+          <IconArrowLeft className="size-4" />
+          Back
+        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleSave}
+            disabled={isSaving || !title || !slug}
+            className="gap-2"
+          >
+            <IconDeviceFloppy className="size-4" />
+            {isSaving ? 'Saving...' : 'Save Draft'}
+          </Button>
+          <Button
+            onClick={handlePublish}
+            disabled={isPublishing || !title || !slug}
+            className="gap-2"
+          >
+            <IconSend className="size-4" />
+            {isPublishing ? 'Publishing...' : 'Publish'}
+          </Button>
+        </div>
+      </div>
+
+      {/* Metadata Section */}
+      <div className="grid gap-6 rounded-xl border bg-card p-6 md:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="title">Title</Label>
+          <Input
+            id="title"
+            placeholder="Enter post title..."
+            value={title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="slug">Slug</Label>
+          <Input
+            id="slug"
+            placeholder="post-url-slug"
+            value={slug}
+            onChange={(e) => setSlug(e.target.value)}
+            disabled={mode === 'edit'}
+          />
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            placeholder="Brief description of your post..."
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={2}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Cover Image</Label>
+          <ImageSelector
+            selectedImageUrl={coverImage}
+            onSelectImage={(image: UploadedImage) => setCoverImage(image.url)}
+            showUpload={true}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Tags</Label>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add a tag..."
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  addTag()
+                }
+              }}
+            />
+            <Button type="button" variant="outline" size="icon" onClick={addTag}>
+              <IconPlus className="size-4" />
+            </Button>
+          </div>
+          {tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 pt-2">
+              {tags.map((tag) => (
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="gap-1 pr-1"
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => removeTag(tag)}
+                    className="ml-1 rounded-full p-0.5 hover:bg-muted"
+                  >
+                    <IconX className="size-3" />
+                  </button>
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Editor Section */}
+      <div className="overflow-hidden rounded-xl border bg-card">
+        <div className="border-b bg-muted/30 px-4 py-3">
+          <h3 className="font-medium">Content</h3>
+          <p className="text-sm text-muted-foreground">
+            Write your post content using the rich text editor below
+          </p>
+        </div>
+        <div className="min-h-125">
+          <ForwardRefEditor
+            ref={editorRef}
+            markdown={post?.content ?? '# Start writing...\n\nYour content goes here.'}
+            onImageUpload={handleImageUpload}
+            contentEditableClassName="prose prose-neutral dark:prose-invert max-w-none p-6 min-h-[500px] focus:outline-none"
+          />
+        </div>
+      </div>
+    </div>
+  )
+}

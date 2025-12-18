@@ -1,0 +1,107 @@
+"use server";
+
+import octokit, { githubRepoInfo } from "@/lib/octokit";
+import { v4 as uuidv4 } from "uuid";
+
+export interface UploadedImage {
+  id: string;
+  name: string;
+  path: string;
+  url: string;
+  uploadedAt: string;
+}
+
+const IMAGES_PATH = "contents/images";
+
+export async function listImagesAction(): Promise<UploadedImage[]> {
+  try {
+    const response = await octokit.repos.getContent({
+      owner: githubRepoInfo.owner,
+      repo: githubRepoInfo.repo,
+      path: IMAGES_PATH,
+    });
+
+    if (!Array.isArray(response.data)) {
+      return [];
+    }
+
+    const files = response.data as Array<{ name: string; path: string }>;
+    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+    const imageFiles = files.filter((f) =>
+      imageExtensions.some((ext) => f.name.toLowerCase().endsWith(ext)),
+    );
+
+    const images: UploadedImage[] = imageFiles.map((file) => ({
+      id: file.name.split(".")[0], // UUID part
+      name: file.name,
+      path: file.path,
+      url: `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${file.path}`,
+      uploadedAt: new Date().toISOString(),
+    }));
+
+    return images.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
+  } catch (error: unknown) {
+    // Handle 404 gracefully - directory doesn't exist yet
+    if (error instanceof Object && "status" in error && error.status === 404) {
+      return [];
+    }
+    console.error("Error listing images:", error);
+    return [];
+  }
+}
+
+export async function uploadImageAction(file: File): Promise<UploadedImage> {
+  // Generate UUID and keep original extension
+  const fileExtension = file.name.split(".").pop();
+  const imageId = uuidv4();
+  const fileName = `${imageId}.${fileExtension}`;
+  const filePath = `${IMAGES_PATH}/${fileName}`;
+
+  try {
+    // Read file as base64
+    const arrayBuffer = await file.arrayBuffer();
+    const base64Content = Buffer.from(arrayBuffer).toString("base64");
+
+    await octokit.repos.createOrUpdateFileContents({
+      owner: githubRepoInfo.owner,
+      repo: githubRepoInfo.repo,
+      path: filePath,
+      message: `Upload image: ${fileName}`,
+      content: base64Content,
+    });
+
+    const imageUrl = `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${filePath}`;
+
+    return {
+      id: imageId,
+      name: fileName,
+      path: filePath,
+      url: imageUrl,
+      uploadedAt: new Date().toISOString(),
+    };
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    throw error;
+  }
+}
+
+export async function deleteImageAction(
+  _imageId: string,
+  fileName: string,
+  sha: string,
+): Promise<void> {
+  const filePath = `${IMAGES_PATH}/${fileName}`;
+
+  try {
+    await octokit.repos.deleteFile({
+      owner: githubRepoInfo.owner,
+      repo: githubRepoInfo.repo,
+      path: filePath,
+      message: `Delete image: ${fileName}`,
+      sha,
+    });
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    throw error;
+  }
+}

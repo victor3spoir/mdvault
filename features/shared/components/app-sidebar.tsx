@@ -1,0 +1,181 @@
+'use client'
+
+import { useState } from 'react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
+  SidebarSeparator,
+} from '@/components/ui/sidebar'
+import {
+  IconHome,
+  IconFileText,
+  IconPlus,
+  IconList,
+  IconPhoto,
+  IconSettings,
+  IconChevronDown,
+  IconChevronRight,
+  IconBrandGithub,
+} from '@tabler/icons-react'
+import { cn } from '@/lib/utils'
+
+interface NavItem {
+  title: string
+  href?: string
+  icon: React.ReactNode
+  children?: { title: string; href: string }[]
+}
+
+const navItems: NavItem[] = [
+  {
+    title: 'Dashboard',
+    href: '/cms',
+    icon: <IconHome className="size-4" />,
+  },
+  {
+    title: 'Posts',
+    icon: <IconFileText className="size-4" />,
+    children: [
+      { title: 'All Posts', href: '/cms/posts' },
+      { title: 'New Post', href: '/cms/posts/new' },
+    ],
+  },
+  {
+    title: 'Media',
+    href: '/cms/media',
+    icon: <IconPhoto className="size-4" />,
+  },
+  {
+    title: 'Settings',
+    href: '/cms/settings',
+    icon: <IconSettings className="size-4" />,
+  },
+]
+
+const AppSidebar = () => {
+  const pathname = usePathname()
+  const [openMenus, setOpenMenus] = useState<string[]>(['Posts'])
+
+  const toggleMenu = (title: string) => {
+    setOpenMenus((prev) =>
+      prev.includes(title) ? prev.filter((t) => t !== title) : [...prev, title]
+    )
+  }
+
+  const isActive = (href?: string) => {
+    if (!href) return false
+    return pathname === href
+  }
+
+  const isChildActive = (item: NavItem) => {
+    if (!item.children) return false
+    return item.children.some((child) => pathname === child.href)
+  }
+
+  return (
+    <Sidebar variant="inset">
+      <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
+        <Link href="/cms" className="flex items-center gap-3">
+          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <IconBrandGithub className="size-5" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold">CMS</span>
+            <span className="text-xs text-muted-foreground">Content Manager</span>
+          </div>
+        </Link>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  {item.children ? (
+                    <>
+                      <SidebarMenuButton
+                        onClick={() => toggleMenu(item.title)}
+                        isActive={isChildActive(item)}
+                        className="justify-between"
+                      >
+                        <span className="flex items-center gap-2">
+                          {item.icon}
+                          <span>{item.title}</span>
+                        </span>
+                        {openMenus.includes(item.title) ? (
+                          <IconChevronDown className="size-4" />
+                        ) : (
+                          <IconChevronRight className="size-4" />
+                        )}
+                      </SidebarMenuButton>
+                      <SidebarMenuSub
+                        className={cn(
+                          'transition-all duration-200',
+                          openMenus.includes(item.title) ? 'block' : 'hidden'
+                        )}
+                      >
+                        {item.children.map((child) => (
+                          <SidebarMenuSubItem key={child.href}>
+                            <SidebarMenuSubButton asChild isActive={isActive(child.href)}>
+                              <Link href={child.href as '/'}>
+                                {child.title === 'New Post' && (
+                                  <IconPlus className="size-3" />
+                                )}
+                                {child.title === 'All Posts' && (
+                                  <IconList className="size-3" />
+                                )}
+                                <span>{child.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    </>
+                  ) : (
+                    <SidebarMenuButton asChild isActive={isActive(item.href)}>
+                      <Link href={(item.href ?? '/') as '/'}>
+                        {item.icon}
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  )}
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarSeparator />
+
+      <SidebarFooter className="p-4">
+        <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+          <div className="flex size-8 items-center justify-center rounded-full bg-primary/10">
+            <IconBrandGithub className="size-4 text-primary" />
+          </div>
+          <div className="flex flex-col text-xs">
+            <span className="font-medium">Connected</span>
+            <span className="text-muted-foreground">GitHub Repository</span>
+          </div>
+        </div>
+      </SidebarFooter>
+    </Sidebar>
+  )
+}
+
+export default AppSidebar
