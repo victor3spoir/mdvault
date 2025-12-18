@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { MDXEditorMethods } from '@mdxeditor/editor'
 import { ForwardRefEditor } from './forward-ref-editor'
 import { ImageSelector } from './image-selector'
+import { ImageInsertDialog } from './image-insert-dialog'
 import type { UploadedImage } from './image-selector'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,6 +40,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
   const [coverImage, setCoverImage] = useState(post?.coverImage ?? '')
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
+  const [imageInsertDialogOpen, setImageInsertDialogOpen] = useState(false)
 
   // Auto-generate slug from title
   const handleTitleChange = (value: string) => {
@@ -70,6 +72,14 @@ export function PostEditor({ post, mode }: PostEditorProps) {
     const uploadedImage = await uploadImageAction(file)
     return uploadedImage.url
   }, [])
+
+  // Handle image insert from dialog
+  const handleImageInsert = (imageUrl: string) => {
+    if (editorRef.current) {
+      editorRef.current.insertMarkdown(`![image](${imageUrl})`)
+    }
+    setImageInsertDialogOpen(false)
+  }
 
   // Save as draft
   const handleSave = async () => {
@@ -261,10 +271,18 @@ export function PostEditor({ post, mode }: PostEditorProps) {
             ref={editorRef}
             markdown={post?.content ?? '# Start writing...\n\nYour content goes here.'}
             onImageUpload={handleImageUpload}
+            onImageInsertClick={() => setImageInsertDialogOpen(true)}
             contentEditableClassName="prose prose-neutral dark:prose-invert max-w-none p-6 min-h-[500px] focus:outline-none"
           />
         </div>
       </div>
+
+      {/* Image Insert Dialog */}
+      <ImageInsertDialog
+        open={imageInsertDialogOpen}
+        onClose={() => setImageInsertDialogOpen(false)}
+        onSelect={handleImageInsert}
+      />
     </div>
   )
 }

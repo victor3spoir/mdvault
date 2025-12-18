@@ -18,6 +18,7 @@ const Editor = dynamic(() => import('./initialized-mdx-editor'), {
 
 export interface ForwardRefEditorProps extends MDXEditorProps {
   onImageUpload?: (file: File) => Promise<string>
+  onImageInsertClick?: () => void
 }
 
 export const ForwardRefEditor = forwardRef<MDXEditorMethods, ForwardRefEditorProps>(

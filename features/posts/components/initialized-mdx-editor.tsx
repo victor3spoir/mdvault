@@ -25,23 +25,40 @@ import {
   ListsToggle,
   BlockTypeSelect,
   CreateLink,
-  InsertImage,
   InsertTable,
   InsertThematicBreak,
   InsertFrontmatter,
   Separator,
   DiffSourceToggleWrapper,
 } from '@mdxeditor/editor'
+import { IconPhoto } from '@tabler/icons-react'
 import '@mdxeditor/editor/style.css'
 
 export interface InitializedMDXEditorProps extends MDXEditorProps {
   editorRef: ForwardedRef<MDXEditorMethods> | null
   onImageUpload?: (file: File) => Promise<string>
+  onImageInsertClick?: () => void
+}
+
+// Custom InsertImage button that opens the image selector dialog
+function InsertImageButton({ onImageInsertClick }: { onImageInsertClick?: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={() => onImageInsertClick?.()}
+      title="Insert image from store"
+      className="mdxeditor-toolbar-button"
+      aria-label="Insert image"
+    >
+      <IconPhoto className="h-4 w-4" />
+    </button>
+  )
 }
 
 export default function InitializedMDXEditor({
   editorRef,
   onImageUpload,
+  onImageInsertClick,
   ...props
 }: InitializedMDXEditorProps) {
   const imageUploadHandler = async (image: File): Promise<string> => {
@@ -100,7 +117,7 @@ export default function InitializedMDXEditor({
               <BlockTypeSelect />
               <Separator />
               <CreateLink />
-              <InsertImage />
+              <InsertImageButton onImageInsertClick={onImageInsertClick} />
               <InsertTable />
               <InsertThematicBreak />
               <Separator />
