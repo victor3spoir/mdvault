@@ -221,14 +221,16 @@ export function PostEditor({ post, mode }: PostEditorProps) {
             <IconDeviceFloppy className="size-4" />
             {isSaving ? 'Saving...' : 'Save Draft'}
           </Button>
-          <Button
-            onClick={handlePublish}
-            disabled={isPublishing || !title || !slug}
-            className="gap-2"
-          >
-            <IconSend className="size-4" />
-            {isPublishing ? 'Publishing...' : 'Publish'}
-          </Button>
+          {!post?.published && (
+            <Button
+              onClick={handlePublish}
+              disabled={isPublishing || !title || !slug}
+              className="gap-2"
+            >
+              <IconSend className="size-4" />
+              {isPublishing ? 'Publishing...' : 'Publish'}
+            </Button>
+          )}
           {mode === 'edit' && (
             <Button
               variant="destructive"
