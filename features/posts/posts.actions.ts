@@ -177,13 +177,30 @@ export async function updatePostAction(slug: string, input: UpdatePostInput): Pr
   const fileContent = `${frontmatter}\n\n${cleanContent}`
   const path = `${POSTS_PATH}/${slug}.md`
 
+  // Fetch the latest SHA from GitHub to avoid 409 conflicts
+  let latestSha: string | undefined
+  try {
+    const fileData = await octokit.repos.getContent({
+      owner: githubRepoInfo.owner,
+      repo: githubRepoInfo.repo,
+      path,
+    })
+    if (!Array.isArray(fileData.data) && 'sha' in fileData.data) {
+      latestSha = fileData.data.sha
+    }
+  } catch (error) {
+    console.error('Failed to fetch latest file SHA:', error)
+    // If we can't fetch the latest SHA, use the one provided by the client
+    latestSha = input.sha
+  }
+
   const response = await octokit.repos.createOrUpdateFileContents({
     owner: githubRepoInfo.owner,
     repo: githubRepoInfo.repo,
     path,
     message: `Update post: ${input.title ?? existingPost.title}`,
     content: Buffer.from(fileContent).toString('base64'),
-    sha: input.sha,
+    sha: latestSha || input.sha,
   })
 
   return {
