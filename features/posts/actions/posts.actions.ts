@@ -205,6 +205,10 @@ export async function getPostAction(slug: string): Promise<Post | null> {
 
 export async function createPostAction(input: CreatePostInput): Promise<Post> {
   const now = new Date().toISOString()
+  
+  // Strip any existing frontmatter from the editor content
+  const { body: cleanContent } = parseFrontmatter(input.content)
+  
   const frontmatter = generateFrontmatter({
     title: input.title,
     description: input.description,
@@ -215,7 +219,7 @@ export async function createPostAction(input: CreatePostInput): Promise<Post> {
     updatedAt: now,
   })
 
-  const fileContent = `${frontmatter}\n\n${input.content}`
+  const fileContent = `${frontmatter}\n\n${cleanContent}`
   const path = `${POSTS_PATH}/${input.slug}.md`
 
   const response = await octokit.repos.createOrUpdateFileContents({
@@ -230,7 +234,7 @@ export async function createPostAction(input: CreatePostInput): Promise<Post> {
     slug: input.slug,
     title: input.title,
     description: input.description,
-    content: input.content,
+    content: cleanContent,
     createdAt: now,
     updatedAt: now,
     published: input.published ?? false,
@@ -247,6 +251,11 @@ export async function updatePostAction(slug: string, input: UpdatePostInput): Pr
   }
 
   const now = new Date().toISOString()
+  
+  // Strip any existing frontmatter from the editor content
+  const rawContent = input.content ?? existingPost.content
+  const { body: cleanContent } = parseFrontmatter(rawContent)
+  
   const frontmatter = generateFrontmatter({
     title: input.title ?? existingPost.title,
     description: input.description ?? existingPost.description,
@@ -257,8 +266,7 @@ export async function updatePostAction(slug: string, input: UpdatePostInput): Pr
     updatedAt: now,
   })
 
-  const content = input.content ?? existingPost.content
-  const fileContent = `${frontmatter}\n\n${content}`
+  const fileContent = `${frontmatter}\n\n${cleanContent}`
   const path = `${POSTS_PATH}/${slug}.md`
 
   const response = await octokit.repos.createOrUpdateFileContents({
@@ -274,7 +282,7 @@ export async function updatePostAction(slug: string, input: UpdatePostInput): Pr
     ...existingPost,
     title: input.title ?? existingPost.title,
     description: input.description ?? existingPost.description,
-    content,
+    content: cleanContent,
     updatedAt: now,
     published: input.published ?? existingPost.published,
     tags: input.tags ?? existingPost.tags,
