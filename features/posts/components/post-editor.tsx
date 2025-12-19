@@ -17,9 +17,21 @@ import {
   IconArrowLeft,
   IconX,
   IconPlus,
+  IconTrash,
+  IconEyeOff,
 } from '@tabler/icons-react'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import type { Post, CreatePostInput } from '../posts.types'
-import { createPostAction, updatePostAction } from '../posts.actions'
+import { createPostAction, updatePostAction, deletePostAction, unpublishPostAction } from '../posts.actions'
 import { uploadImageAction } from '../../medias/medias.actions'
 import type { UploadedImage } from "@/features/medias/medias.types"
 
@@ -40,7 +52,11 @@ export function PostEditor({ post, mode }: PostEditorProps) {
   const [coverImage, setCoverImage] = useState(post?.coverImage ?? '')
   const [isSaving, setIsSaving] = useState(false)
   const [isPublishing, setIsPublishing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [isUnpublishing, setIsUnpublishing] = useState(false)
   const [imageInsertDialogOpen, setImageInsertDialogOpen] = useState(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [unpublishDialogOpen, setUnpublishDialogOpen] = useState(false)
 
   // Auto-generate slug from title
   const handleTitleChange = (value: string) => {
@@ -141,6 +157,37 @@ export function PostEditor({ post, mode }: PostEditorProps) {
     }
   }
 
+  // Delete post
+  const handleDelete = async () => {
+    if (!post?.sha) return
+    setIsDeleting(true)
+    try {
+      await deletePostAction(slug, post.sha)
+      router.push('/cms/posts')
+      router.refresh()
+    } catch (error) {
+      console.error('Error deleting post:', error)
+    } finally {
+      setIsDeleting(false)
+      setDeleteDialogOpen(false)
+    }
+  }
+
+  // Unpublish post
+  const handleUnpublish = async () => {
+    if (!post?.sha) return
+    setIsUnpublishing(true)
+    try {
+      await unpublishPostAction(slug, post.sha)
+      router.refresh()
+      setUnpublishDialogOpen(false)
+    } catch (error) {
+      console.error('Error unpublishing post:', error)
+    } finally {
+      setIsUnpublishing(false)
+    }
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {/* Actions Bar */}
@@ -154,6 +201,17 @@ export function PostEditor({ post, mode }: PostEditorProps) {
           Back
         </Button>
         <div className="flex items-center gap-2">
+          {mode === 'edit' && post?.published && (
+            <Button
+              variant="outline"
+              onClick={() => setUnpublishDialogOpen(true)}
+              disabled={isUnpublishing}
+              className="gap-2"
+            >
+              <IconEyeOff className="size-4" />
+              {isUnpublishing ? 'Unpublishing...' : 'Unpublish'}
+            </Button>
+          )}
           <Button
             variant="outline"
             onClick={handleSave}
@@ -171,6 +229,17 @@ export function PostEditor({ post, mode }: PostEditorProps) {
             <IconSend className="size-4" />
             {isPublishing ? 'Publishing...' : 'Publish'}
           </Button>
+          {mode === 'edit' && (
+            <Button
+              variant="destructive"
+              onClick={() => setDeleteDialogOpen(true)}
+              disabled={isDeleting}
+              size="icon"
+              className="gap-2"
+            >
+              <IconTrash className="size-4" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -282,6 +351,49 @@ export function PostEditor({ post, mode }: PostEditorProps) {
         onClose={() => setImageInsertDialogOpen(false)}
         onSelect={handleImageInsert}
       />
+
+      {/* Delete Post Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this post? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unpublish Post Confirmation Dialog */}
+      <AlertDialog open={unpublishDialogOpen} onOpenChange={setUnpublishDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unpublish Post</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to unpublish this post? It will no longer be visible to readers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnpublish}
+              disabled={isUnpublishing}
+            >
+              {isUnpublishing ? 'Unpublishing...' : 'Unpublish'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
