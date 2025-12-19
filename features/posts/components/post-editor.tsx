@@ -4,8 +4,8 @@ import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { MDXEditorMethods } from '@mdxeditor/editor'
 import { ForwardRefEditor } from './forward-ref-editor'
-import { CoverImageSelector } from './cover-image-selector'
-import { ImageInsertDialog } from './image-insert-dialog'
+import { CoverImageSelector } from '../../medias/components/cover-image-selector'
+import { ImageInsertDialog } from '../../medias/components/image-insert-dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -18,10 +18,10 @@ import {
   IconX,
   IconPlus,
 } from '@tabler/icons-react'
-import type { Post, CreatePostInput } from '../types'
+import type { Post, CreatePostInput } from '../posts.types'
 import { createPostAction, updatePostAction } from '../posts.actions'
-import { uploadImageAction } from '../images/images.actions'
-import type { UploadedImage } from '../images/images.actions'
+import { uploadImageAction } from '../../medias/medias.actions'
+import type { UploadedImage } from "@/features/medias/medias.types"
 
 interface PostEditorProps {
   post?: Post

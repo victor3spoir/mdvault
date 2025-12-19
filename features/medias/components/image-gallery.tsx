@@ -8,7 +8,7 @@ import {
   IconCheck,
   IconX,
 } from '@tabler/icons-react'
-import { listImagesAction } from '../images/images.actions'
+import { listImagesAction } from '../medias.actions'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import type { UploadedImage } from '../images/images.actions'
+import type { UploadedImage } from "../medias.types"
 
 const Image = dynamic(() => import('next/image'), { ssr: false })
 

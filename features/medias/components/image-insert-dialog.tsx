@@ -13,7 +13,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { IconUpload, IconPhoto } from '@tabler/icons-react'
-import type { UploadedImage } from '../images/images.actions'
+import type { UploadedImage } from "../medias.types"
 
 interface ImageInsertDialogProps {
   open: boolean

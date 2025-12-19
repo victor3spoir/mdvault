@@ -2,16 +2,9 @@
 
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import { v4 as uuidv4 } from "uuid";
+import type { UploadedImage } from "./medias.types";
 
-export interface UploadedImage {
-  id: string;
-  name: string;
-  path: string;
-  url: string;
-  uploadedAt: string;
-}
-
-const IMAGES_PATH = "contents/images";
+const IMAGES_PATH = githubRepoInfo.IMAGES_PATH;
 
 export async function listImagesAction(): Promise<UploadedImage[]> {
   try {

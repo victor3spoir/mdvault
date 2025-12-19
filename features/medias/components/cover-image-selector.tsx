@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { ImageInsertDialog } from './image-insert-dialog'
 import { IconEdit, IconTrash } from '@tabler/icons-react'
-import type { UploadedImage } from '../images/images.actions'
+import type { UploadedImage } from "../medias.types"
 
 interface CoverImageSelectorProps {
   selectedImageUrl: string

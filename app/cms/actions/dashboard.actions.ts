@@ -1,6 +1,6 @@
 "use server";
 
-import { listImagesAction } from "@/features/posts/images/images.actions";
+import { listImagesAction } from "@/features/medias/medias.actions";
 import { listPostsAction } from "@/features/posts/posts.actions";
 
 export interface DashboardStats {

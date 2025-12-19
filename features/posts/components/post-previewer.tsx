@@ -1,22 +1,10 @@
 'use client'
 
-import type { Post } from '../types'
+import type { Post } from '../posts.types'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { IconEye, IconCode } from '@tabler/icons-react'
-import {
-  MDXEditor,
-  headingsPlugin,
-  listsPlugin,
-  linkPlugin,
-  imagePlugin,
-  codeBlockPlugin,
-  quotePlugin,
-  thematicBreakPlugin,
-  frontmatterPlugin,
-  tablePlugin,
-} from '@mdxeditor/editor'
-import '@mdxeditor/editor/style.css'
+import { ForwardRefPreviewer } from './forward-ref-previewer'
 
 type ViewMode = 'preview' | 'code'
 
@@ -50,20 +38,8 @@ const PostPreviewer = ({ post }: { post: Post }) => {
       {/* Preview Content */}
       {viewMode === 'preview' ? (
         <div className="rounded-b-lg border bg-card p-8 mdx-preview">
-          <MDXEditor
+          <ForwardRefPreviewer
             markdown={post.content}
-            readOnly={true}
-            plugins={[
-              headingsPlugin(),
-              listsPlugin(),
-              linkPlugin(),
-              imagePlugin(),
-              codeBlockPlugin(),
-              quotePlugin(),
-              thematicBreakPlugin(),
-              frontmatterPlugin(),
-              tablePlugin(),
-            ]}
             contentEditableClassName="prose prose-neutral dark:prose-invert max-w-none"
           />
         </div>

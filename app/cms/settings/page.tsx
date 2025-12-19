@@ -15,7 +15,7 @@ export default function SettingsPage() {
         { label: 'Settings' },
       ]}
     >
-      <div className="mx-auto max-w-2xl space-y-8">
+      <div className=" space-y-8">
         {/* GitHub Configuration */}
         <div className="rounded-xl border bg-card">
           <div className="flex items-center gap-3 border-b p-6">

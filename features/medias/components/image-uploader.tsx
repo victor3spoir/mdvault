@@ -2,8 +2,8 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { IconUpload, IconLoader2, IconX } from '@tabler/icons-react'
-import { uploadImageAction } from '../images/images.actions'
-import type { UploadedImage } from '../images/images.actions'
+import { uploadImageAction } from '../medias.actions'
+import type { UploadedImage } from "../medias.types"
 
 interface ImageUploaderProps {
   onUploadSuccess?: (image: UploadedImage) => void

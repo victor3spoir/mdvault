@@ -8,7 +8,9 @@ const octokit = new Octokit({
 
 export const githubRepoInfo = {
   owner: GITHUB_OWNER,
-  repo: GITHUB_REPO
+  repo: GITHUB_REPO,
+  POSTS_PATH: 'contents/posts',
+  IMAGES_PATH: 'contents/images'
 }
 
 export default octokit;

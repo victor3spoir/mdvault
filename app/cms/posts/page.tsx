@@ -3,8 +3,9 @@ import PageLayout from '@/features/shared/components/page-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { IconPlus, IconSearch, IconFilter, IconFileText, IconCalendar } from '@tabler/icons-react'
+import { IconPlus, IconSearch, IconFilter, IconFileText } from '@tabler/icons-react'
 import { listPostsAction } from '@/features/posts/posts.actions'
+import { PostCard } from '@/features/posts/components/post-card'
 
 export default async function PostsPage() {
   const posts = await listPostsAction()
@@ -61,64 +62,7 @@ export default async function PostsPage() {
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => {
-            const formattedDate = new Date(post.createdAt).toLocaleDateString('fr-FR', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-            })
-
-            return (
-              <div
-                key={post.slug}
-                className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md"
-              >
-                {post.coverImage && (
-                  <div className="relative aspect-video w-full overflow-hidden bg-muted">
-                    <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-                  </div>
-                )}
-
-                <div className="p-5">
-                  <div className="mb-3 flex flex-wrap items-center gap-2">
-                    <Badge variant={post.published ? 'default' : 'secondary'}>
-                      {post.published ? 'Published' : 'Draft'}
-                    </Badge>
-                    {post.tags?.slice(0, 2).map((tag) => (
-                      <Badge key={tag} variant="outline" className="text-xs">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  <h3 className="mb-2 text-lg font-semibold leading-tight line-clamp-2">
-                    {post.title}
-                  </h3>
-                  {post.description && (
-                    <p className="mb-4 text-sm text-muted-foreground line-clamp-2">
-                      {post.description}
-                    </p>
-                  )}
-
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <IconCalendar className="size-3.5" />
-                      {formattedDate}
-                    </span>
-                  </div>
-
-                  <div className="mt-4 flex items-center gap-2 border-t pt-4">
-                    <Button asChild variant="ghost" size="sm" className="flex-1">
-                      <Link href={`/cms/posts/${post.slug}` as '/'}>View</Link>
-                    </Button>
-                    <Button asChild variant="ghost" size="sm" className="flex-1">
-                      <Link href={`/cms/posts/${post.slug}/edit` as '/'}>Edit</Link>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
+          {posts.map((post) => <PostCard post={post} key={post.slug} />)}
         </div>
       )}
     </PageLayout>

@@ -1,5 +1,5 @@
-import { ImageUploader } from '@/features/posts/components/image-uploader'
-import { ImageGallery } from '@/features/posts/components/image-gallery'
+import { ImageUploader } from '@/features/medias/components/image-uploader'
+import { ImageGallery } from '@/features/medias/components/image-gallery'
 import PageLayout from '@/features/shared/components/page-layout'
 
 export default function MediaPage() {

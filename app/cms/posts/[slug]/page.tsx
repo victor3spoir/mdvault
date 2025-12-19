@@ -56,7 +56,7 @@ export default async function PostPage({ params }: PostPageProps) {
         </div>
       }
     >
-      <article className="mx-auto max-w-4xl">
+      <article className="">
         {/* Header */}
         <header className="mb-8 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
