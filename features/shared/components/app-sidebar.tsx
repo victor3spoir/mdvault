@@ -93,8 +93,8 @@ const AppSidebar = () => {
             <IconBrandGithub className="size-5" />
           </div>
           <div className="flex flex-col">
-            <span className="text-sm font-semibold">CMS</span>
-            <span className="text-xs text-muted-foreground">Content Manager</span>
+            <span className="text-sm font-semibold">MDVault</span>
+            <span className="text-xs text-muted-foreground">Markdown Editor</span>
           </div>
         </Link>
       </SidebarHeader>

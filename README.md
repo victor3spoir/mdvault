@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MDVault
+
+GitHub-powered Markdown content management system. Create, edit, and manage your posts with a modern, intuitive interface.
 
 ## Getting Started
 

@@ -10,8 +10,8 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
     <Card className={cn("relative w-full max-w-sm overflow-hidden space-y-5 text-center", className)}
       {...props} >
       <CardHeader>
-        <CardTitle>Welcome here</CardTitle>
-        <CardDescription>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dolor, incidunt.</CardDescription>
+        <CardTitle>Welcome to MDVault</CardTitle>
+        <CardDescription>GitHub-powered Markdown content management system. Create, edit, and manage your posts with ease.</CardDescription>
       </CardHeader>
       <CardContent>
         <Button variant={"link"} asChild>

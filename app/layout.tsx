@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "PostsCMS",
-  description: "Create your posts using github as backend",
+  title: "MDVault",
+  description: "GitHub-powered Markdown content management system",
 };
 
 export default function RootLayout({
