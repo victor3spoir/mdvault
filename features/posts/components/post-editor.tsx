@@ -4,9 +4,8 @@ import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import type { MDXEditorMethods } from '@mdxeditor/editor'
 import { ForwardRefEditor } from './forward-ref-editor'
-import { ImageSelector } from './image-selector'
+import { CoverImageSelector } from './cover-image-selector'
 import { ImageInsertDialog } from './image-insert-dialog'
-import type { UploadedImage } from './image-selector'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -22,6 +21,7 @@ import {
 import type { Post, CreatePostInput } from '../types'
 import { createPostAction, updatePostAction } from '../actions/posts.actions'
 import { uploadImageAction } from '../actions/images.actions'
+import type { UploadedImage } from '../actions/images.actions'
 
 interface PostEditorProps {
   post?: Post
@@ -210,10 +210,9 @@ export function PostEditor({ post, mode }: PostEditorProps) {
 
         <div className="space-y-2">
           <Label>Cover Image</Label>
-          <ImageSelector
+          <CoverImageSelector
             selectedImageUrl={coverImage}
             onSelectImage={(image: UploadedImage) => setCoverImage(image.url)}
-            showUpload={true}
           />
         </div>
 
