@@ -29,12 +29,14 @@ export function PostCard({ post, onDelete }: PostCardProps) {
     <div className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md">
       {/* Cover Image */}
       {post.coverImage && (
-        <div className="relative aspect-video w-full overflow-hidden">
+        <div className="relative aspect-video w-full overflow-hidden rounded-t-xl">
           <Image
             src={post.coverImage}
             alt={post.title}
             fill
+            priority
             className="object-cover transition-transform group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
         </div>
