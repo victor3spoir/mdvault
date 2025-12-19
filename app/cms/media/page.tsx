@@ -1,8 +1,11 @@
 import { ImageUploader } from '@/features/medias/components/image-uploader'
 import { ImageGallery } from '@/features/medias/components/image-gallery'
 import PageLayout from '@/features/shared/components/page-layout'
+import { listImagesAction } from '@/features/medias/medias.actions'
 
-export default function MediaPage() {
+export default async function MediaPage() {
+   const loadedImages = await listImagesAction()
+
   return (
     <PageLayout
       title="Media Library"
@@ -13,7 +16,7 @@ export default function MediaPage() {
       ]}
     >
       <div className="space-y-6">
-        {/* Upload Section */}
+      
         <div className="rounded-xl border bg-card p-6">
           <h2 className="mb-4 text-lg font-semibold">Upload Images</h2>
           <p className="mb-4 text-sm text-muted-foreground">
@@ -24,7 +27,7 @@ export default function MediaPage() {
 
         <div className="rounded-xl border bg-card p-6">
           <h2 className="mb-4 text-lg font-semibold">Your Images</h2>
-          <ImageGallery />
+          <ImageGallery images={loadedImages} />
         </div>
       </div>
     </PageLayout>

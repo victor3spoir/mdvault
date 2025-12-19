@@ -1,21 +1,28 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
-import { IconUpload, IconLoader2, IconX } from '@tabler/icons-react'
+import { useState, useRef, useCallback, useTransition } from 'react'
+import { IconUpload, IconLoader2, IconX, IconCheck } from '@tabler/icons-react'
 import { uploadImageAction } from '../medias.actions'
 import type { UploadedImage } from "../medias.types"
+import { Button } from '@/components/ui/button'
+
+interface ImageFile {
+  file: File
+  preview: string
+  progress: number
+  error: string | null
+  uploaded: boolean
+}
 
 interface ImageUploaderProps {
   onUploadSuccess?: (image: UploadedImage) => void
   maxSize?: number // in MB
 }
 
-export function ImageUploader({ onUploadSuccess, maxSize = 10 }: ImageUploaderProps) {
+export function ImageUploader({ onUploadSuccess, maxSize = 5 }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false)
-  const [uploading, setUploading] = useState(false)
-  const [uploadedFiles, setUploadedFiles] = useState<
-    Array<{ file: File; progress: number; error?: string }>
-  >([])
+  const [uploadedFiles, setUploadedFiles] = useState<ImageFile[]>([])
+  const [isPending, startTransition] = useTransition()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const validateFile = useCallback(
@@ -32,60 +39,26 @@ export function ImageUploader({ onUploadSuccess, maxSize = 10 }: ImageUploaderPr
   )
 
   const handleFiles = useCallback(
-    async (files: FileList) => {
+    (files: FileList) => {
       const fileArray = Array.from(files)
-      const validFiles = fileArray.filter((file) => {
+      const newFiles: ImageFile[] = fileArray.map((file) => {
         const error = validateFile(file)
-        if (error) {
-          setUploadedFiles((prev) => [
-            ...prev,
-            { file, progress: 0, error },
-          ])
-          return false
+        const preview = error ? '' : URL.createObjectURL(file)
+        return {
+          file,
+          preview,
+          progress: 0,
+          error: error || null,
+          uploaded: false,
         }
-        return true
       })
 
-      setUploadedFiles((prev) => [
-        ...prev,
-        ...validFiles.map((f) => ({ file: f, progress: 0 })),
-      ])
-
-      setUploading(true)
-
-      for (const file of validFiles) {
-        try {
-          const uploadedImage = await uploadImageAction(file)
-          setUploadedFiles((prev) =>
-            prev.map((f) =>
-              f.file === file
-                ? { ...f, progress: 100 }
-                : f
-            )
-          )
-          onUploadSuccess?.(uploadedImage)
-
-          // Remove from list after 2 seconds
-          setTimeout(() => {
-            setUploadedFiles((prev) => prev.filter((f) => f.file !== file))
-          }, 2000)
-        } catch (error) {
-          setUploadedFiles((prev) =>
-            prev.map((f) =>
-              f.file === file
-                ? { ...f, error: 'Failed to upload' }
-                : f
-            )
-          )
-        }
-      }
-
-      setUploading(false)
+      setUploadedFiles((prev) => [...prev, ...newFiles])
     },
-    [validateFile, onUploadSuccess]
+    [validateFile]
   )
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(false)
     if (e.dataTransfer.files) {
@@ -93,7 +66,7 @@ export function ImageUploader({ onUploadSuccess, maxSize = 10 }: ImageUploaderPr
     }
   }
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+  const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragging(true)
   }
@@ -109,14 +82,45 @@ export function ImageUploader({ onUploadSuccess, maxSize = 10 }: ImageUploaderPr
     }
   }
 
+  const handleUpload = (imageFile: ImageFile) => {
+    startTransition(async () => {
+      try {
+        const uploadedImage = await uploadImageAction(imageFile.file)
+        setUploadedFiles((prev) =>
+          prev.map((f) =>
+            f.file === imageFile.file
+              ? { ...f, progress: 100, uploaded: true }
+              : f
+          )
+        )
+        onUploadSuccess?.(uploadedImage)
+
+        // Remove from list after 2 seconds
+        setTimeout(() => {
+          setUploadedFiles((prev) => prev.filter((f) => f.file !== imageFile.file))
+        }, 2000)
+      } catch {
+        setUploadedFiles((prev) =>
+          prev.map((f) =>
+            f.file === imageFile.file
+              ? { ...f, error: 'Failed to upload' }
+              : f
+          )
+        )
+      }
+    })
+  }
+
   const removeFile = (file: File) => {
+    URL.revokeObjectURL(uploadedFiles.find(f => f.file === file)?.preview || '')
     setUploadedFiles((prev) => prev.filter((f) => f.file !== file))
   }
 
   return (
     <div className="space-y-4">
       {/* Drop Zone */}
-      <div
+      <button
+        type="button"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -133,7 +137,7 @@ export function ImageUploader({ onUploadSuccess, maxSize = 10 }: ImageUploaderPr
           multiple
           accept="image/*"
           onChange={handleFileInput}
-          disabled={uploading}
+          disabled={isPending}
           className="hidden"
         />
 
@@ -146,7 +150,7 @@ export function ImageUploader({ onUploadSuccess, maxSize = 10 }: ImageUploaderPr
               <div>
                 <p className="font-medium text-foreground">Drop images here</p>
                 <p className="text-sm text-muted-foreground">
-                  Release to upload
+                  Release to add to queue
                 </p>
               </div>
             </>
@@ -166,50 +170,101 @@ export function ImageUploader({ onUploadSuccess, maxSize = 10 }: ImageUploaderPr
             </>
           )}
         </div>
-      </div>
+      </button>
 
-      {/* Upload Progress */}
+      {/* Image Preview and Upload */}
       {uploadedFiles.length > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-3">
           {uploadedFiles.map((item) => (
             <div
-              key={item.file.name}
-              className="flex items-center gap-3 rounded-lg border bg-card p-3"
+              key={item.file.name + item.file.lastModified}
+              className="flex items-start gap-4 rounded-lg border bg-card p-4"
             >
+              {/* Image Preview */}
+              {item.preview && !item.error && (
+                <div
+                  className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-muted"
+                  style={{
+                    backgroundImage: `url(${item.preview})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                  }}
+                />
+              )}
+
+              {/* File Info and Progress */}
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">
-                    {item.file.name}
-                  </p>
-                  {item.error && (
-                    <span className="text-xs text-destructive">
-                      {item.error}
-                    </span>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-medium truncate">
+                      {item.file.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {(item.file.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                  {item.uploaded && (
+                    <div className="shrink-0 rounded-full bg-green-100 p-1 dark:bg-green-900">
+                      <IconCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    </div>
                   )}
                 </div>
-                <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-muted">
-                  <div
-                    className={`h-full transition-all ${
-                      item.error
-                        ? 'bg-destructive'
-                        : item.progress === 100
-                          ? 'bg-primary'
-                          : 'bg-primary/60'
-                    }`}
-                    style={{ width: `${item.progress}%` }}
-                  />
-                </div>
+
+                {item.error && (
+                  <span className="text-xs text-destructive mt-2 block">
+                    {item.error}
+                  </span>
+                )}
+
+                {/* Progress Bar */}
+                {(item.progress > 0 || isPending) && (
+                  <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className={`h-full transition-all ${
+                        item.error
+                          ? 'bg-destructive'
+                          : item.progress === 100
+                            ? 'bg-green-600'
+                            : 'bg-primary'
+                      }`}
+                      style={{ width: `${item.progress}%` }}
+                    />
+                  </div>
+                )}
               </div>
-              {item.progress === 100 || item.error ? (
-                <button
+
+              {/* Actions */}
+              <div className="flex flex-col gap-2 shrink-0">
+                {!item.uploaded && !item.error ? (
+                  <Button
+                    onClick={() => handleUpload(item)}
+                    disabled={isPending}
+                    size="sm"
+                    className="gap-2"
+                  >
+                    {isPending ? (
+                      <>
+                        <IconLoader2 className="h-4 w-4 animate-spin" />
+                        Uploading
+                      </>
+                    ) : (
+                      <>
+                        <IconUpload className="h-4 w-4" />
+                        Upload
+                      </>
+                    )}
+                  </Button>
+                ) : null}
+                <Button
                   onClick={() => removeFile(item.file)}
-                  className="rounded p-1 hover:bg-muted"
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2 text-destructive hover:text-destructive"
                 >
-                  <IconX className="h-4 w-4 text-muted-foreground" />
-                </button>
-              ) : (
-                <IconLoader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-              )}
+                  <IconX className="h-4 w-4" />
+                  Remove
+                </Button>
+              </div>
             </div>
           ))}
         </div>

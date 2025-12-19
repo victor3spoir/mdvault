@@ -1,14 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import dynamic from 'next/dynamic'
 import {
-  IconLoader2,
   IconCopy,
   IconCheck,
   IconX,
+  IconEye,
 } from '@tabler/icons-react'
-import { listImagesAction } from '../medias.actions'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -21,34 +20,16 @@ import type { UploadedImage } from "../medias.types"
 const Image = dynamic(() => import('next/image'), { ssr: false })
 
 interface ImageGalleryProps {
-  selectedImageUrl?: string
+  images: UploadedImage[]
 }
 
 export function ImageGallery({
-  selectedImageUrl = '',
+  images
 }: ImageGalleryProps) {
-  const [images, setImages] = useState<UploadedImage[]>([])
-  const [loading, setLoading] = useState(true)
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [selectedImageForPreview, setSelectedImageForPreview] =
     useState<UploadedImage | null>(null)
 
-  const loadImages = useCallback(async () => {
-    try {
-      setLoading(true)
-      const loadedImages = await listImagesAction()
-      setImages(loadedImages)
-    } catch (error) {
-      console.error('Failed to load images:', error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  // Load images on mount
-  useEffect(() => {
-    void loadImages()
-  }, [loadImages])
 
   const copyUrlToClipboard = useCallback(
     (url: string, imageId: string) => {
@@ -59,13 +40,7 @@ export function ImageGallery({
     []
   )
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <IconLoader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-      </div>
-    )
-  }
+
 
   return (
     <>
@@ -89,11 +64,7 @@ export function ImageGallery({
                 onClick={() => {
                   setSelectedImageForPreview(image)
                 }}
-                className={`group relative w-full overflow-hidden rounded-lg border-2 transition-all aspect-square ${
-                  selectedImageUrl === image.url
-                    ? 'border-primary ring-2 ring-primary/20'
-                    : 'border-muted hover:border-muted-foreground/50'
-                }`}
+                className={`group relative w-full overflow-hidden rounded-lg border-2 transition-all aspect-square border-muted hover:border-muted-foreground/50`}
               >
                 <div className="relative w-full h-full bg-muted">
                   <Image
@@ -114,25 +85,7 @@ export function ImageGallery({
                     }}
                     title="Preview"
                   >
-                    <svg
-                      className="h-full w-full"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                      />
-                    </svg>
+                    <IconEye />
                   </button>
                   <button
                     type="button"
