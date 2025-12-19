@@ -111,6 +111,19 @@ export function ImageUploader({ onUploadSuccess, maxSize = 5 }: ImageUploaderPro
     })
   }
 
+  const handleRetry = (imageFile: ImageFile) => {
+    // Reset error state and progress
+    setUploadedFiles((prev) =>
+      prev.map((f) =>
+        f.file === imageFile.file
+          ? { ...f, error: null, progress: 0 }
+          : f
+      )
+    )
+    // Start upload
+    handleUpload(imageFile)
+  }
+
   const removeFile = (file: File) => {
     URL.revokeObjectURL(uploadedFiles.find(f => f.file === file)?.preview || '')
     setUploadedFiles((prev) => prev.filter((f) => f.file !== file))
@@ -251,6 +264,27 @@ export function ImageUploader({ onUploadSuccess, maxSize = 5 }: ImageUploaderPro
                       <>
                         <IconUpload className="h-4 w-4" />
                         Upload
+                      </>
+                    )}
+                  </Button>
+                ) : null}
+                {item.error ? (
+                  <Button
+                    onClick={() => handleRetry(item)}
+                    disabled={isPending}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                  >
+                    {isPending ? (
+                      <>
+                        <IconLoader2 className="h-4 w-4 animate-spin" />
+                        Retrying
+                      </>
+                    ) : (
+                      <>
+                        <IconUpload className="h-4 w-4" />
+                        Retry
                       </>
                     )}
                   </Button>
