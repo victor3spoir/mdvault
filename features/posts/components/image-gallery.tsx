@@ -10,9 +10,12 @@ import {
 } from '@tabler/icons-react'
 import { listImagesAction } from '../actions/images.actions'
 import {
-  Dialog,
-  DialogContent,
-} from '@/components/ui/dialog'
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import type { UploadedImage } from '../actions/images.actions'
 
 const Image = dynamic(() => import('next/image'), { ssr: false })
@@ -160,22 +163,30 @@ export function ImageGallery({
       )}
 
       {/* Image Preview Dialog */}
-      <Dialog
+      <AlertDialog
         open={!!selectedImageForPreview}
         onOpenChange={(open) => {
           if (!open) setSelectedImageForPreview(null)
         }}
       >
-        <DialogContent className="max-w-3xl">
+        <AlertDialogContent className="max-w-3xl">
           {selectedImageForPreview && (
             <div className="space-y-4">
               {/* Close Button */}
               <button
+                type="button"
                 onClick={() => setSelectedImageForPreview(null)}
                 className="absolute right-4 top-4 rounded-lg p-1 hover:bg-muted"
               >
                 <IconX className="h-5 w-5" />
               </button>
+
+              <AlertDialogHeader>
+                <AlertDialogTitle>Image Preview</AlertDialogTitle>
+                <AlertDialogDescription>
+                  {selectedImageForPreview.name}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
 
               {/* Image Preview */}
               <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
@@ -212,6 +223,7 @@ export function ImageGallery({
                     className="flex-1 rounded border border-border bg-muted px-3 py-2 text-sm text-muted-foreground"
                   />
                   <button
+                    type="button"
                     onClick={() =>
                       copyUrlToClipboard(
                         selectedImageForPreview.url,
@@ -236,8 +248,8 @@ export function ImageGallery({
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }

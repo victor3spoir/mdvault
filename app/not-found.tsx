@@ -63,11 +63,11 @@ export default function NotFound() {
             Common pages you might be looking for:
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {[
-              { href: '/cms', label: 'Dashboard' },
-              { href: '/cms/posts', label: 'Posts' },
-              { href: '/cms/posts/new', label: 'New Post' },
-            ].map((link) => (
+            {([
+              { href: '/cms' as const, label: 'Dashboard' },
+              { href: '/cms/posts' as const, label: 'Posts' },
+              { href: '/cms/posts/new' as const, label: 'New Post' },
+            ] as const).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
