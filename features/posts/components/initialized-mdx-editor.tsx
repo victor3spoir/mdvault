@@ -24,6 +24,7 @@ import {
   ListsToggle,
   BlockTypeSelect,
   CreateLink,
+  InsertCodeBlock,
   InsertTable,
   InsertThematicBreak,
   InsertFrontmatter,
@@ -115,6 +116,7 @@ export default function InitializedMDXEditor({
               <BlockTypeSelect />
               <Separator />
               <CreateLink />
+              <InsertCodeBlock />
               <InsertImageButton onImageInsertClick={onImageInsertClick} />
               <InsertTable />
               <InsertThematicBreak />
