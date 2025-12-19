@@ -291,3 +291,32 @@
     opacity: 0.8;
   }
 }
+
+/* MDXEditor styling for read-only preview mode */
+.mdx-preview {
+  --accentBase: hsl(var(--primary));
+  --accentBg: hsl(var(--accent) / 0.1);
+  --accentBgHover: hsl(var(--accent) / 0.2);
+  --accentText: hsl(var(--accent-foreground));
+  --accentSolid: hsl(var(--accent));
+  --baseBg: hsl(var(--background));
+  --baseBorder: hsl(var(--border));
+  --baseText: hsl(var(--foreground));
+  --baseTextContrast: hsl(var(--foreground));
+}
+
+.mdx-preview .mdxeditor {
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  padding: 0;
+}
+
+.mdx-preview .mdxeditor.focused {
+  outline: none;
+  box-shadow: none;
+}
+
+.mdx-preview .mdxeditor .editor-root {
+  padding: 0;
+}
