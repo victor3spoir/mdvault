@@ -7,7 +7,7 @@ import type {
   Post,
   PostFrontmatter,
   UpdatePostInput,
-} from "../types";
+} from "./types";
 
 const POSTS_PATH = "posts";
 

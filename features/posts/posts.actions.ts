@@ -7,7 +7,7 @@ import type {
   Post,
   PostFrontmatter,
   UpdatePostInput,
-} from '../types'
+} from './types'
 
 const POSTS_PATH = 'contents/posts'
 const IMAGES_PATH = 'contents/images'

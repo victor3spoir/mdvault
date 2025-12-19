@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { IconPlus, IconSearch, IconFilter, IconFileText, IconCalendar } from '@tabler/icons-react'
-import { listPostsAction } from '@/features/posts/actions/posts.actions'
+import { listPostsAction } from '@/features/posts/posts.actions'
 
 export default async function PostsPage() {
   const posts = await listPostsAction()

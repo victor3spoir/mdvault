@@ -7,7 +7,7 @@ export {
 } from "./components/post-card";
 export { PostEditor } from "./components/post-editor";
 // Services
-export * from "./services/posts-service";
+export * from "./posts-service";
 // Types
 export * from "./types";
 

@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-import { listImagesAction } from '../actions/images.actions'
-import type { UploadedImage } from '../actions/images.actions'
+import { listImagesAction } from '../images/images.actions'
+import type { UploadedImage } from '../images/images.actions'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/lib/utils'
 import { IconPhoto } from '@tabler/icons-react'

@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation'
 import PageLayout from '@/features/shared/components/page-layout'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { getPostAction } from '@/features/posts/actions/posts.actions'
+import { getPostAction } from '@/features/posts/posts.actions'
 import { IconEdit, IconArrowLeft, IconCalendar, IconUser, IconTag } from '@tabler/icons-react'
+import Image from 'next/image'
+import PostPreviewer from '@/features/posts/components/post-previewer'
 
 interface PostPageProps {
   params: Promise<{ slug: string }>
@@ -99,15 +101,14 @@ export default async function PostPage({ params }: PostPageProps) {
         {post.coverImage && (
           <div className="relative mb-8 aspect-video w-full overflow-hidden rounded-xl bg-muted">
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-              Cover Image
+              <Image src={post.coverImage} alt={post.title} width={200} height={200}
+                className='w-full' />
             </div>
           </div>
         )}
 
         {/* Content */}
-        <div className="prose prose-neutral dark:prose-invert max-w-none rounded-xl border bg-card p-8">
-          <pre className="whitespace-pre-wrap font-sans">{post.content}</pre>
-        </div>
+        <PostPreviewer post={post}/>
       </article>
     </PageLayout>
   )

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import PageLayout from '@/features/shared/components/page-layout'
 import { PostEditor } from '@/features/posts/components/post-editor'
-import { getPostAction } from '@/features/posts/actions/posts.actions'
+import { getPostAction } from '@/features/posts/posts.actions'
 
 interface EditPostPageProps {
   params: Promise<{ slug: string }>

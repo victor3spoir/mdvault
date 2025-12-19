@@ -1,7 +1,7 @@
 "use server";
 
-import { listImagesAction } from "@/features/posts/actions/images.actions";
-import { listPostsAction } from "@/features/posts/actions/posts.actions";
+import { listImagesAction } from "@/features/posts/images/images.actions";
+import { listPostsAction } from "@/features/posts/posts.actions";
 
 export interface DashboardStats {
   totalPosts: number;
@@ -46,7 +46,9 @@ export async function getDashboardStatsAction(): Promise<DashboardStats> {
   }
 }
 
-export async function getRecentActivityAction(limit: number = 8): Promise<Activity[]> {
+export async function getRecentActivityAction(
+  limit: number = 8,
+): Promise<Activity[]> {
   try {
     const [posts, images] = await Promise.all([
       listPostsAction(),
@@ -94,7 +96,10 @@ export async function getRecentActivityAction(limit: number = 8): Promise<Activi
 
     // Sort by timestamp (newest first) and limit results
     return activities
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      .sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      )
       .slice(0, limit);
   } catch (error) {
     console.error("Error fetching recent activity:", error);

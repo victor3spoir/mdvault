@@ -8,7 +8,7 @@ import {
   IconCheck,
   IconX,
 } from '@tabler/icons-react'
-import { listImagesAction } from '../actions/images.actions'
+import { listImagesAction } from '../images/images.actions'
 import {
   AlertDialog,
   AlertDialogContent,
@@ -16,17 +16,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import type { UploadedImage } from '../actions/images.actions'
+import type { UploadedImage } from '../images/images.actions'
 
 const Image = dynamic(() => import('next/image'), { ssr: false })
 
 interface ImageGalleryProps {
-  onSelectImage?: (image: UploadedImage) => void
   selectedImageUrl?: string
 }
 
 export function ImageGallery({
-  onSelectImage,
   selectedImageUrl = '',
 }: ImageGalleryProps) {
   const [images, setImages] = useState<UploadedImage[]>([])
@@ -90,7 +88,6 @@ export function ImageGallery({
                 type="button"
                 onClick={() => {
                   setSelectedImageForPreview(image)
-                  onSelectImage?.(image)
                 }}
                 className={`group relative w-full overflow-hidden rounded-lg border-2 transition-all aspect-square ${
                   selectedImageUrl === image.url

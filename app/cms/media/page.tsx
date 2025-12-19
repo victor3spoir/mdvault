@@ -1,5 +1,3 @@
-'use client'
-
 import { ImageUploader } from '@/features/posts/components/image-uploader'
 import { ImageGallery } from '@/features/posts/components/image-gallery'
 import PageLayout from '@/features/shared/components/page-layout'
@@ -24,7 +22,6 @@ export default function MediaPage() {
           <ImageUploader />
         </div>
 
-        {/* Media Library */}
         <div className="rounded-xl border bg-card p-6">
           <h2 className="mb-4 text-lg font-semibold">Your Images</h2>
           <ImageGallery />

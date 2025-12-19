@@ -19,9 +19,9 @@ import {
   IconPlus,
 } from '@tabler/icons-react'
 import type { Post, CreatePostInput } from '../types'
-import { createPostAction, updatePostAction } from '../actions/posts.actions'
-import { uploadImageAction } from '../actions/images.actions'
-import type { UploadedImage } from '../actions/images.actions'
+import { createPostAction, updatePostAction } from '../posts.actions'
+import { uploadImageAction } from '../images/images.actions'
+import type { UploadedImage } from '../images/images.actions'
 
 interface PostEditorProps {
   post?: Post
