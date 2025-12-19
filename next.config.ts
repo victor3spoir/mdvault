@@ -1,12 +1,14 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig & { serverActions?: { bodySizeLimit: string } } = {
+const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   typedRoutes: true,
   output: "standalone",
-  serverActions: {
-    bodySizeLimit: "10mb", // Allow up to 10MB for file uploads
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "2mb"
+    }
   },
   images: {
     remotePatterns: [
