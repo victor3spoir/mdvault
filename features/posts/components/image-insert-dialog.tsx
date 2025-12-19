@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { ImageSelector } from './image-selector'
 import { Button } from '@/components/ui/button'
 import {
@@ -15,7 +15,7 @@ import type { UploadedImage } from '../actions/images.actions'
 interface ImageInsertDialogProps {
   open: boolean
   onClose: () => void
-  onSelect: (imageUrl: string) => void
+  onSelect: (image: UploadedImage) => void
 }
 
 export function ImageInsertDialog({
@@ -23,16 +23,16 @@ export function ImageInsertDialog({
   onClose,
   onSelect,
 }: ImageInsertDialogProps) {
-  const [selectedImage, setSelectedImage] = useState<string>('')
+  const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(null)
 
   const handleSelect = (image: UploadedImage) => {
-    setSelectedImage(image.url)
+    setSelectedImage(image)
   }
 
   const handleInsert = () => {
     if (selectedImage) {
       onSelect(selectedImage)
-      setSelectedImage('')
+      setSelectedImage(null)
       onClose()
     }
   }
@@ -49,7 +49,7 @@ export function ImageInsertDialog({
 
         <div className="mt-6 space-y-6">
           <ImageSelector
-            selectedImageUrl={selectedImage}
+            selectedImageUrl={selectedImage?.url ?? ''}
             onSelectImage={handleSelect}
             showUpload={true}
           />

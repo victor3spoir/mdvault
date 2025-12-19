@@ -74,9 +74,9 @@ export function PostEditor({ post, mode }: PostEditorProps) {
   }, [])
 
   // Handle image insert from dialog
-  const handleImageInsert = (imageUrl: string) => {
+  const handleImageInsert = (image: UploadedImage) => {
     if (editorRef.current) {
-      editorRef.current.insertMarkdown(`![image](${imageUrl})`)
+      editorRef.current.insertMarkdown(`![image](${image.url})`)
     }
     setImageInsertDialogOpen(false)
   }
@@ -212,7 +212,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
           <Label>Cover Image</Label>
           <CoverImageSelector
             selectedImageUrl={coverImage}
-            onSelectImage={(image: UploadedImage) => setCoverImage(image.url)}
+            onSelectImage={(image: UploadedImage) => setCoverImage(image.url || '')}
           />
         </div>
 
