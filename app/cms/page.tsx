@@ -11,9 +11,16 @@ const statsCards = [
   {
     title: 'Total Posts',
     value: '12',
+    description: 'Total articles',
+    icon: IconFileText,
+    color: 'text-blue-500',
+    bg: 'bg-blue-500/10',
+  },
+  {
+    title: 'Published Posts',
+    value: '12',
     description: 'Published articles',
     icon: IconFileText,
-    trend: '+2 this month',
     color: 'text-blue-500',
     bg: 'bg-blue-500/10',
   },
@@ -22,28 +29,10 @@ const statsCards = [
     value: '48',
     description: 'Images & files',
     icon: IconPhoto,
-    trend: '+8 this month',
     color: 'text-purple-500',
     bg: 'bg-purple-500/10',
   },
-  {
-    title: 'Total Views',
-    value: '2.4k',
-    description: 'All time views',
-    icon: IconEye,
-    trend: '+12% vs last month',
-    color: 'text-green-500',
-    bg: 'bg-green-500/10',
-  },
-  {
-    title: 'Growth',
-    value: '+24%',
-    description: 'Engagement rate',
-    icon: IconTrendingUp,
-    trend: 'Trending up',
-    color: 'text-orange-500',
-    bg: 'bg-orange-500/10',
-  },
+ 
 ]
 
 const quickActions = [
@@ -76,10 +65,7 @@ const Page = () => {
                 <stat.icon className={`size-5 ${stat.color}`} />
               </div>
             </div>
-            <div className="mt-4 flex items-center gap-1 text-xs text-muted-foreground">
-              <IconTrendingUp className="size-3 text-green-500" />
-              <span>{stat.trend}</span>
-            </div>
+            
           </div>
         ))}
       </div>

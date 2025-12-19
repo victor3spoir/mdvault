@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { ImageUploader } from './image-uploader'
-import { ImageGallery } from './image-gallery'
+import { ImageSelector } from './image-selector'
 import { Button } from '@/components/ui/button'
+import { Separator } from '@/components/ui/separator'
 import {
   Sheet,
   SheetContent,
@@ -46,53 +47,68 @@ export function ImageInsertDialog({
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-2xl flex flex-col">
-        <SheetHeader>
-          <SheetTitle>Insert Image</SheetTitle>
+        <SheetHeader className="pb-6">
+          <SheetTitle className="text-2xl">Insert Image</SheetTitle>
           <SheetDescription>
-            Upload a new image or select one from your store
+            Upload a new image or select from your library
           </SheetDescription>
         </SheetHeader>
 
-        <div className="mt-6 flex-1 space-y-6 overflow-y-auto">
+        <div className="flex-1 space-y-8 overflow-y-auto pr-4">
           {/* Upload Section */}
-          <div>
-            <h3 className="mb-3 font-semibold text-sm text-foreground flex items-center gap-2">
-              <IconUpload className="h-4 w-4" />
-              Upload Image
-            </h3>
-            <ImageUploader onUploadSuccess={handleUploadSuccess} />
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <IconUpload className="h-4 w-4 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">Upload New Image</h3>
+                <p className="text-xs text-muted-foreground">Drag & drop or click to select</p>
+              </div>
+            </div>
+            <div className="rounded-xl border border-muted bg-muted/30 p-4">
+              <ImageUploader onUploadSuccess={handleUploadSuccess} />
+            </div>
           </div>
 
           {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or select existing</span>
-            </div>
-          </div>
+          <Separator className="my-6" />
 
           {/* Gallery Section */}
-          <div>
-            <h3 className="mb-3 font-semibold text-sm text-foreground flex items-center gap-2">
-              <IconPhoto className="h-4 w-4" />
-              Your Images
-            </h3>
-            <ImageGallery
-              selectedImageUrl={selectedImage?.url ?? ''}
-              onSelectImage={handleSelect}
-            />
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="rounded-lg bg-secondary/50 p-2">
+                <IconPhoto className="h-4 w-4 text-foreground/70" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm">Select from Library</h3>
+                <p className="text-xs text-muted-foreground">Choose an image to insert</p>
+              </div>
+            </div>
+            <div>
+              <ImageSelector
+                selectedImageUrl={selectedImage?.url ?? ''}
+                onSelectImage={handleSelect}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="mt-6 flex justify-end gap-2 border-t border-border pt-4">
-          <Button variant="outline" onClick={onClose}>
+        {/* Actions Footer */}
+        <div className="mt-8 flex justify-end gap-3 border-t border-muted bg-muted/30 -mx-6 px-6 py-4">
+          <Button 
+            variant="outline" 
+            onClick={onClose}
+            className="px-6"
+          >
             Cancel
           </Button>
-          <Button onClick={handleInsert} disabled={!selectedImage}>
-            Insert Image
+          <Button 
+            onClick={handleInsert} 
+            disabled={!selectedImage}
+            className="px-6"
+          >
+            {selectedImage ? 'Insert Image' : 'Select an Image'}
           </Button>
         </div>
       </SheetContent>
