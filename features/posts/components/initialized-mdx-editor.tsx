@@ -21,7 +21,6 @@ import {
   diffSourcePlugin,
   UndoRedo,
   BoldItalicUnderlineToggles,
-  CodeToggle,
   ListsToggle,
   BlockTypeSelect,
   CreateLink,
@@ -110,7 +109,6 @@ export default function InitializedMDXEditor({
               <UndoRedo />
               <Separator />
               <BoldItalicUnderlineToggles />
-              <CodeToggle />
               <Separator />
               <ListsToggle />
               <Separator />
