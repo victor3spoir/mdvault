@@ -1,47 +1,56 @@
 import PageLayout from '@/features/shared/components/page-layout'
+import { getDashboardStatsAction } from './actions/dashboard.actions'
 import {
   IconFileText,
   IconPhoto,
   IconEye,
-  IconTrendingUp,
 } from '@tabler/icons-react'
 import Link from 'next/link'
 
-const statsCards = [
-  {
-    title: 'Total Posts',
-    value: '12',
-    description: 'Total articles',
-    icon: IconFileText,
-    color: 'text-blue-500',
-    bg: 'bg-blue-500/10',
-  },
-  {
-    title: 'Published Posts',
-    value: '12',
-    description: 'Published articles',
-    icon: IconFileText,
-    color: 'text-blue-500',
-    bg: 'bg-blue-500/10',
-  },
-  {
-    title: 'Media Files',
-    value: '48',
-    description: 'Images & files',
-    icon: IconPhoto,
-    color: 'text-purple-500',
-    bg: 'bg-purple-500/10',
-  },
- 
-]
+const Page = async () => {
+  const stats = await getDashboardStatsAction()
 
-const quickActions = [
-  { title: 'New Post', href: '/cms/posts/new', icon: IconFileText },
-  { title: 'View Posts', href: '/cms/posts', icon: IconEye },
-  { title: 'Upload Media', href: '/cms/media', icon: IconPhoto },
-]
+  const statsCards = [
+    {
+      title: 'Total Posts',
+      value: stats.totalPosts.toString(),
+      description: 'Total articles',
+      icon: IconFileText,
+      color: 'text-blue-500',
+      bg: 'bg-blue-500/10',
+    },
+    {
+      title: 'Published Posts',
+      value: stats.publishedPosts.toString(),
+      description: 'Published articles',
+      icon: IconEye,
+      color: 'text-green-500',
+      bg: 'bg-green-500/10',
+    },
+    {
+      title: 'Draft Posts',
+      value: stats.draftPosts.toString(),
+      description: 'Unpublished articles',
+      icon: IconFileText,
+      color: 'text-amber-500',
+      bg: 'bg-amber-500/10',
+    },
+    {
+      title: 'Media Files',
+      value: stats.mediaFiles.toString(),
+      description: 'Images & files',
+      icon: IconPhoto,
+      color: 'text-purple-500',
+      bg: 'bg-purple-500/10',
+    },
+  ]
 
-const Page = () => {
+  const quickActions = [
+    { title: 'New Post', href: '/cms/posts/new', icon: IconFileText },
+    { title: 'View Posts', href: '/cms/posts', icon: IconEye },
+    { title: 'Upload Media', href: '/cms/media', icon: IconPhoto },
+  ]
+
   return (
     <PageLayout
       title="Dashboard"
