@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   compress: true,
   experimental: {
+    viewTransition:true,
     serverActions: {
       bodySizeLimit: "2mb"
     }

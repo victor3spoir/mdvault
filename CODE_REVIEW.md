@@ -129,7 +129,7 @@ Problems:
 
 **Fix:**
 ```typescript
-import sharp from "sharp"; // Already in package.json
+import { fromBuffer } from "file-type";
 import { lookup } from "mime-types";
 
 export async function uploadImageAction(file: File): Promise<UploadedImage> {
@@ -148,19 +148,14 @@ export async function uploadImageAction(file: File): Promise<UploadedImage> {
   // 3. Verify file magic bytes (true file type)
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  
-  try {
-    // Verify it's actually an image using sharp
-    const metadata = await sharp(buffer).metadata();
-    if (!metadata.format) {
-      throw new Error("Invalid image file");
-    }
-  } catch {
+
+  const ft = await fromBuffer(buffer);
+  if (!ft || !allowedMimes.includes(ft.mime)) {
     throw new Error("File is not a valid image");
   }
 
   // 4. Rename file to UUID to prevent overwrite attacks
-  const fileExtension = `.${metadata.format}`;
+  const fileExtension = `.${ft.ext}`;
   const imageId = uuidv4();
   const fileName = `${imageId}${fileExtension}`;
 

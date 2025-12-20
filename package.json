@@ -41,11 +41,9 @@
     "typescript": "^5.9.3"
   },
   "ignoreScripts": [
-    "sharp",
     "unrs-resolver"
   ],
   "trustedDependencies": [
-    "sharp",
     "unrs-resolver"
   ]
 }

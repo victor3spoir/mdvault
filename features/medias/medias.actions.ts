@@ -1,7 +1,7 @@
 "use server";
 
-import octokit, { githubRepoInfo } from "@/lib/octokit";
 import { validateImageFile } from "@/lib/file-validation";
+import octokit, { githubRepoInfo } from "@/lib/octokit";
 import { v4 as uuidv4 } from "uuid";
 import type { UploadedImage } from "./medias.types";
 
@@ -19,7 +19,11 @@ export async function listImagesAction(): Promise<UploadedImage[]> {
       return [];
     }
 
-    const files = response.data as Array<{ name: string; path: string; sha: string }>;
+    const files = response.data as Array<{
+      name: string;
+      path: string;
+      sha: string;
+    }>;
     const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
     const imageFiles = files.filter((f) =>
       imageExtensions.some((ext) => f.name.toLowerCase().endsWith(ext)),
