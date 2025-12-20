@@ -17,6 +17,7 @@ import {
   frontmatterPlugin,
   codeBlockPlugin,
   codeMirrorPlugin,
+  CodeMirrorEditor,
 } from '@mdxeditor/editor'
 import '@mdxeditor/editor/style.css'
 
@@ -41,15 +42,22 @@ export default function InitializedMDXPreviewer({
         linkDialogPlugin(),
         tablePlugin(),
         frontmatterPlugin(),
-        codeBlockPlugin({ defaultCodeBlockLanguage: 'typescript' }),
+        codeBlockPlugin({ 
+          defaultCodeBlockLanguage: 'ts',
+          codeBlockEditorDescriptors: [{ priority: -10, match: () => true, Editor: CodeMirrorEditor }]
+        }),
         codeMirrorPlugin({
           codeBlockLanguages: {
             js: 'JavaScript',
-            jsx: 'JavaScript (JSX)',
+            jsx: 'JSX',
             ts: 'TypeScript',
-            tsx: 'TypeScript (TSX)',
+            tsx: 'TSX',
             css: 'CSS',
             html: 'HTML',
+            python: 'Python',
+            bash: 'Bash',
+            json: 'JSON',
+            md: 'Markdown',
           },
         }),
         imagePlugin({
