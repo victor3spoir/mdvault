@@ -50,11 +50,6 @@ export default function InitializedMDXPreviewer({
             tsx: 'TypeScript (TSX)',
             css: 'CSS',
             html: 'HTML',
-            json: 'JSON',
-            markdown: 'Markdown',
-            python: 'Python',
-            bash: 'Bash',
-            shell: 'Shell',
           },
         }),
         imagePlugin({

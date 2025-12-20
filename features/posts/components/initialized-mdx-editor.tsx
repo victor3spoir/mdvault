@@ -85,16 +85,13 @@ export default function InitializedMDXEditor({
         codeMirrorPlugin({
           codeBlockLanguages: {
             js: 'JavaScript',
-            jsx: 'JavaScript (JSX)',
+            jsx: 'JSX',
             ts: 'TypeScript',
-            tsx: 'TypeScript (TSX)',
+            tsx: 'TSX',
             css: 'CSS',
             html: 'HTML',
-            json: 'JSON',
-            markdown: 'Markdown',
             python: 'Python',
             bash: 'Bash',
-            shell: 'Shell',
           },
         }),
         imagePlugin({
