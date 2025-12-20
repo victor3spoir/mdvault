@@ -329,7 +329,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
       </div>
 
       {/* Editor Section */}
-      <div className="overflow-hidden rounded-xl border bg-card">
+      <div className="rounded-xl border bg-card">
         <div className="border-b bg-muted/30 px-4 py-3">
           <h3 className="font-medium">Content</h3>
           <p className="text-sm text-muted-foreground">

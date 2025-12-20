@@ -30,6 +30,9 @@ import {
   InsertFrontmatter,
   Separator,
   DiffSourceToggleWrapper,
+  ConditionalContents,
+  ChangeCodeMirrorLanguage,
+  CodeMirrorEditor,
 } from '@mdxeditor/editor'
 import { IconPhoto } from '@tabler/icons-react'
 import '@mdxeditor/editor/style.css'
@@ -76,12 +79,20 @@ export default function InitializedMDXEditor({
         listsPlugin(),
         quotePlugin(),
         thematicBreakPlugin(),
-        markdownShortcutPlugin(),
         linkPlugin(),
         linkDialogPlugin(),
         tablePlugin(),
         frontmatterPlugin(),
-        codeBlockPlugin({ defaultCodeBlockLanguage: 'typescript' }),
+        codeBlockPlugin({ 
+          defaultCodeBlockLanguage: 'ts',
+          codeBlockEditorDescriptors: [
+            {
+              priority: -10,
+              match: () => true,
+              Editor: CodeMirrorEditor
+            }
+          ]
+        }),
         codeMirrorPlugin({
           codeBlockLanguages: {
             js: 'JavaScript',
@@ -92,6 +103,8 @@ export default function InitializedMDXEditor({
             html: 'HTML',
             python: 'Python',
             bash: 'Bash',
+            json: 'JSON',
+            md: 'Markdown',
           },
         }),
         imagePlugin({
@@ -101,24 +114,39 @@ export default function InitializedMDXEditor({
         diffSourcePlugin({
           viewMode: 'rich-text',
         }),
+        markdownShortcutPlugin(),
         toolbarPlugin({
           toolbarContents: () => (
             <DiffSourceToggleWrapper>
-              <UndoRedo />
-              <Separator />
-              <BoldItalicUnderlineToggles />
-              <Separator />
-              <ListsToggle />
-              <Separator />
-              <BlockTypeSelect />
-              <Separator />
-              <CreateLink />
-              <InsertCodeBlock />
-              <InsertImageButton onImageInsertClick={onImageInsertClick} />
-              <InsertTable />
-              <InsertThematicBreak />
-              <Separator />
-              <InsertFrontmatter />
+              <ConditionalContents
+                options={[
+                  {
+                    when: (editor) => editor?.editorType === 'codeblock',
+                    contents: () => <ChangeCodeMirrorLanguage />
+                  },
+                  {
+                    fallback: () => (
+                      <>
+                        <UndoRedo />
+                        <Separator />
+                        <BoldItalicUnderlineToggles />
+                        <Separator />
+                        <ListsToggle />
+                        <Separator />
+                        <BlockTypeSelect />
+                        <Separator />
+                        <CreateLink />
+                        <InsertCodeBlock />
+                        <InsertImageButton onImageInsertClick={onImageInsertClick} />
+                        <InsertTable />
+                        <InsertThematicBreak />
+                        <Separator />
+                        <InsertFrontmatter />
+                      </>
+                    )
+                  }
+                ]}
+              />
             </DiffSourceToggleWrapper>
           ),
         }),
