@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { IconRocket, IconBrandGithub, IconMarkdown } from "@tabler/icons-react";
 import Link from "next/link";
+import { Logo } from "./logo";
 
 const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
   return (
@@ -17,8 +18,13 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
       <div className="absolute top-0 left-1/2 -z-10 h-100 w-150 -translate-x-1/2 bg-primary/10 blur-[120px] opacity-50" />
 
       <div className="container relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-8">
+        {/* Logo */}
+        <div className="animate-in fade-in slide-in-from-top-8 duration-1000">
+          <Logo className="scale-125" />
+        </div>
+
         {/* Badge */}
-        <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-1.5 text-sm font-medium text-muted-foreground backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-1000">
+        <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-1.5 text-sm font-medium text-muted-foreground backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-1000 delay-150">
           <IconBrandGithub className="h-4 w-4" />
           <span>Powered by GitHub API</span>
         </div>

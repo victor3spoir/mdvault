@@ -31,6 +31,7 @@ import {
   IconBrandGithub,
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
+import { Logo } from './logo'
 
 interface NavItem {
   title: string
@@ -89,13 +90,7 @@ const AppSidebar = () => {
     <Sidebar variant="inset">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-4">
         <Link href="/cms" className="flex items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <IconBrandGithub className="size-5" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-sm font-semibold">MDVault</span>
-            <span className="text-xs text-muted-foreground">Markdown Editor</span>
-          </div>
+          <Logo />
         </Link>
       </SidebarHeader>
 
