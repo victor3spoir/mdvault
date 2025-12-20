@@ -1,6 +1,7 @@
 "use server";
 
 import octokit, { githubRepoInfo } from "@/lib/octokit";
+import { validateImageFile } from "@/lib/file-validation";
 import { v4 as uuidv4 } from "uuid";
 import type { UploadedImage } from "./medias.types";
 
@@ -18,18 +19,19 @@ export async function listImagesAction(): Promise<UploadedImage[]> {
       return [];
     }
 
-    const files = response.data as Array<{ name: string; path: string }>;
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"];
+    const files = response.data as Array<{ name: string; path: string; sha: string }>;
+    const imageExtensions = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
     const imageFiles = files.filter((f) =>
       imageExtensions.some((ext) => f.name.toLowerCase().endsWith(ext)),
     );
 
     const images: UploadedImage[] = imageFiles.map((file) => ({
-      id: file.name.split(".")[0], // UUID part
+      id: file.name.split(".")[0],
       name: file.name,
       path: file.path,
       url: `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${file.path}`,
       uploadedAt: new Date().toISOString(),
+      sha: file.sha,
     }));
 
     return images.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
@@ -39,22 +41,22 @@ export async function listImagesAction(): Promise<UploadedImage[]> {
       return [];
     }
     console.error("Error listing images:", error);
-    return [];
+    throw new Error("Failed to list images");
   }
 }
 
 export async function uploadImageAction(file: File): Promise<UploadedImage> {
-  // Generate UUID and keep original extension
-  const fileExtension = file.name.split(".").pop();
-  const imageId = uuidv4();
-  const fileName = `${imageId}.${fileExtension}`;
-  const filePath = `${IMAGES_PATH}/${fileName}`;
-
   try {
-    // Read file as base64
-    const arrayBuffer = await file.arrayBuffer();
-    const base64Content = Buffer.from(arrayBuffer).toString("base64");
+    // Validate file (MIME type, magic bytes, size, format)
+    const validatedFile = await validateImageFile(file);
 
+    // Generate UUID with verified extension
+    const imageId = uuidv4();
+    const fileName = `${imageId}.${validatedFile.format}`;
+    const filePath = `${IMAGES_PATH}/${fileName}`;
+
+    // Upload to GitHub
+    const base64Content = validatedFile.buffer.toString("base64");
     await octokit.repos.createOrUpdateFileContents({
       owner: githubRepoInfo.owner,
       repo: githubRepoInfo.repo,
@@ -71,10 +73,15 @@ export async function uploadImageAction(file: File): Promise<UploadedImage> {
       path: filePath,
       url: imageUrl,
       uploadedAt: new Date().toISOString(),
+      sha: "",
     };
   } catch (error) {
+    if (error instanceof Error) {
+      console.error("Error uploading image:", error.message);
+      throw error;
+    }
     console.error("Error uploading image:", error);
-    throw error;
+    throw new Error("Failed to upload image");
   }
 }
 
@@ -95,6 +102,6 @@ export async function deleteImageAction(
     });
   } catch (error) {
     console.error("Error deleting image:", error);
-    throw error;
+    throw new Error("Failed to delete image");
   }
 }

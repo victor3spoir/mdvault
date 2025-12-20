@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import type { MDXEditorMethods } from '@mdxeditor/editor'
 import { ForwardRefEditor } from './forward-ref-editor'
 import { CoverImageSelector } from '../../medias/components/cover-image-selector'
@@ -30,7 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import type { Post, CreatePostInput } from '../posts.types'
+import type { Post } from '../posts.types'
 import { createPostAction, updatePostAction, deletePostAction, unpublishPostAction } from '../posts.actions'
 import { uploadImageAction } from '../../medias/medias.actions'
 import type { UploadedImage } from "@/features/medias/medias.types"
@@ -118,9 +119,12 @@ export function PostEditor({ post, mode }: PostEditorProps) {
         await updatePostAction(slug, { ...input, sha: post.sha })
       }
 
+      toast.success('Post saved as draft')
       router.push('/cms/posts')
       router.refresh()
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save post'
+      toast.error(message)
       console.error('Error saving post:', error)
     } finally {
       setIsSaving(false)
@@ -148,9 +152,12 @@ export function PostEditor({ post, mode }: PostEditorProps) {
         await updatePostAction(slug, { ...input, sha: post.sha })
       }
 
+      toast.success('Post published successfully')
       router.push('/cms/posts')
       router.refresh()
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to publish post'
+      toast.error(message)
       console.error('Error publishing post:', error)
     } finally {
       setIsPublishing(false)
@@ -163,9 +170,12 @@ export function PostEditor({ post, mode }: PostEditorProps) {
     setIsDeleting(true)
     try {
       await deletePostAction(slug, post.sha)
+      toast.success('Post deleted successfully')
       router.push('/cms/posts')
       router.refresh()
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to delete post'
+      toast.error(message)
       console.error('Error deleting post:', error)
     } finally {
       setIsDeleting(false)
@@ -179,9 +189,12 @@ export function PostEditor({ post, mode }: PostEditorProps) {
     setIsUnpublishing(true)
     try {
       await unpublishPostAction(slug, post.sha)
+      toast.success('Post unpublished successfully')
       router.refresh()
       setUnpublishDialogOpen(false)
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to unpublish post'
+      toast.error(message)
       console.error('Error unpublishing post:', error)
     } finally {
       setIsUnpublishing(false)

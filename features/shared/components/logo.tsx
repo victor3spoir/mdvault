@@ -21,17 +21,12 @@ export const Logo = ({ className, iconOnly = false }: LogoProps) => {
           aria-labelledby="logo-title"
         >
           <title id="logo-title">mdvault logo</title>
-          {/* Vault Door Shape */}
           <rect x="3" y="3" width="18" height="18" rx="4" />
-          {/* Vault Dial / Inner Circle */}
           <circle cx="12" cy="12" r="5" className="opacity-40" strokeDasharray="2 2" />
-          {/* Markdown M */}
           <path d="M8 10.5v3l1.5-1.5 1.5 1.5v-3" strokeWidth="1.5" />
-          {/* Markdown Arrow */}
           <path d="M14 10.5v3m-1-1 1 1 1-1" strokeWidth="1.5" />
         </svg>
         
-        {/* Decorative Vault Bolts */}
         <div className="absolute top-1.5 left-1.5 h-0.5 w-0.5 rounded-full bg-primary-foreground/40" />
         <div className="absolute top-1.5 right-1.5 h-0.5 w-0.5 rounded-full bg-primary-foreground/40" />
         <div className="absolute bottom-1.5 left-1.5 h-0.5 w-0.5 rounded-full bg-primary-foreground/40" />

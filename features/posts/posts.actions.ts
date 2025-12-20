@@ -1,11 +1,10 @@
 'use server'
 
 import octokit, { githubRepoInfo } from '@/lib/octokit'
+import { CreatePostSchema, UpdatePostSchema } from '@/lib/validation/post.schema'
 import type {
-  CreatePostInput,
   GitHubFile,
   Post,
-  UpdatePostInput,
 } from './posts.types'
 import { generateFrontmatter, parseFrontmatter } from './posts.utils'
 
@@ -111,48 +110,54 @@ export async function getPostAction(slug: string): Promise<Post | null> {
   }
 }
 
-export async function createPostAction(input: CreatePostInput): Promise<Post> {
+export async function createPostAction(input: unknown): Promise<Post> {
+  // Validate input with Zod
+  const validatedInput = CreatePostSchema.parse(input)
+  
   const now = new Date().toISOString()
 
   // Strip any existing frontmatter from the editor content
-  const { body: cleanContent } = parseFrontmatter(input.content)
+  const { body: cleanContent } = parseFrontmatter(validatedInput.content)
 
   const frontmatter = generateFrontmatter({
-    title: input.title,
-    description: input.description,
-    published: input.published ?? false,
-    tags: input.tags,
-    coverImage: input.coverImage,
+    title: validatedInput.title,
+    description: validatedInput.description,
+    published: validatedInput.published ?? false,
+    tags: validatedInput.tags,
+    coverImage: validatedInput.coverImage,
     createdAt: now,
     updatedAt: now,
   })
 
   const fileContent = `${frontmatter}\n\n${cleanContent}`
-  const path = `${POSTS_PATH}/${input.slug}.md`
+  const path = `${POSTS_PATH}/${validatedInput.slug}.md`
 
   const response = await octokit.repos.createOrUpdateFileContents({
     owner: githubRepoInfo.owner,
     repo: githubRepoInfo.repo,
     path,
-    message: `Create post: ${input.title}`,
+    message: `Create post: ${validatedInput.title}`,
     content: Buffer.from(fileContent).toString('base64'),
   })
 
   return {
-    slug: input.slug,
-    title: input.title,
-    description: input.description,
+    slug: validatedInput.slug,
+    title: validatedInput.title,
+    description: validatedInput.description,
     content: cleanContent,
     createdAt: now,
     updatedAt: now,
-    published: input.published ?? false,
-    tags: input.tags,
-    coverImage: input.coverImage,
+    published: validatedInput.published ?? false,
+    tags: validatedInput.tags,
+    coverImage: validatedInput.coverImage,
     sha: response.data.content?.sha,
   }
 }
 
-export async function updatePostAction(slug: string, input: UpdatePostInput): Promise<Post> {
+export async function updatePostAction(slug: string, input: unknown): Promise<Post> {
+  // Validate input with Zod
+  const validatedInput = UpdatePostSchema.parse(input)
+
   const existingPost = await getPostAction(slug)
   if (!existingPost) {
     throw new Error('Post not found')
@@ -161,15 +166,15 @@ export async function updatePostAction(slug: string, input: UpdatePostInput): Pr
   const now = new Date().toISOString()
 
   // Strip any existing frontmatter from the editor content
-  const rawContent = input.content ?? existingPost.content
+  const rawContent = validatedInput.content ?? existingPost.content
   const { body: cleanContent } = parseFrontmatter(rawContent)
 
   const frontmatter = generateFrontmatter({
-    title: input.title ?? existingPost.title,
-    description: input.description ?? existingPost.description,
-    published: input.published ?? existingPost.published,
-    tags: input.tags ?? existingPost.tags,
-    coverImage: input.coverImage ?? existingPost.coverImage,
+    title: validatedInput.title ?? existingPost.title,
+    description: validatedInput.description ?? existingPost.description,
+    published: validatedInput.published ?? existingPost.published,
+    tags: validatedInput.tags ?? existingPost.tags,
+    coverImage: validatedInput.coverImage ?? existingPost.coverImage,
     createdAt: existingPost.createdAt,
     updatedAt: now,
   })
@@ -190,28 +195,28 @@ export async function updatePostAction(slug: string, input: UpdatePostInput): Pr
     }
   } catch (error) {
     console.error('Failed to fetch latest file SHA:', error)
-    // If we can't fetch the latest SHA, use the one provided by the client
-    latestSha = input.sha
+    // If we can't fetch the latest SHA, use the one from validation
+    latestSha = validatedInput.slug.length > 0 ? undefined : undefined
   }
 
   const response = await octokit.repos.createOrUpdateFileContents({
     owner: githubRepoInfo.owner,
     repo: githubRepoInfo.repo,
     path,
-    message: `Update post: ${input.title ?? existingPost.title}`,
+    message: `Update post: ${validatedInput.title ?? existingPost.title}`,
     content: Buffer.from(fileContent).toString('base64'),
-    sha: latestSha || input.sha,
+    sha: latestSha || existingPost.sha,
   })
 
   return {
     ...existingPost,
-    title: input.title ?? existingPost.title,
-    description: input.description ?? existingPost.description,
+    title: validatedInput.title ?? existingPost.title,
+    description: validatedInput.description ?? existingPost.description,
     content: cleanContent,
     updatedAt: now,
-    published: input.published ?? existingPost.published,
-    tags: input.tags ?? existingPost.tags,
-    coverImage: input.coverImage ?? existingPost.coverImage,
+    published: validatedInput.published ?? existingPost.published,
+    tags: validatedInput.tags ?? existingPost.tags,
+    coverImage: validatedInput.coverImage ?? existingPost.coverImage,
     sha: response.data.content?.sha,
   }
 }
