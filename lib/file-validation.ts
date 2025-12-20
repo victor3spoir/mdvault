@@ -1,4 +1,3 @@
-import sharp from 'sharp'
 import { fileTypeFromBuffer } from 'file-type'
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
@@ -16,7 +15,6 @@ export interface ValidatedImageFile {
  * 1. Check MIME type
  * 2. Verify magic bytes (true file type)
  * 3. Validate file size
- * 4. Process with sharp to ensure valid image
  */
 export async function validateImageFile(file: File): Promise<ValidatedImageFile> {
   // 1. Check MIME type
@@ -33,22 +31,23 @@ export async function validateImageFile(file: File): Promise<ValidatedImageFile>
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
 
-  // 4. Verify actual file type using magic bytes
-  const detectedType = await fileTypeFromBuffer(buffer)
-  if (!detectedType || !ALLOWED_MIME_TYPES.includes(detectedType.mime)) {
-    throw new Error('File does not appear to be a valid image. Please check the file.')
-  }
+  // 4. Verify actual file type using magic bytes (prevents file spoofing)
+  try {
+    const detectedType = await fileTypeFromBuffer(buffer)
+    if (!detectedType || !ALLOWED_MIME_TYPES.includes(detectedType.mime)) {
+      throw new Error('File does not appear to be a valid image. Please check the file.')
+    }
 
-  // 5. Validate and analyze image with sharp
-  const metadata = await sharp(buffer).metadata()
-  if (!metadata.format) {
-    throw new Error('Unable to process image file')
-  }
-
-  return {
-    buffer,
-    format: metadata.format,
-    size: buffer.length,
-    mimeType: detectedType.mime,
+    return {
+      buffer,
+      format: detectedType.ext || 'png',
+      size: buffer.length,
+      mimeType: detectedType.mime,
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('valid image')) {
+      throw error
+    }
+    throw new Error('Invalid or corrupted image file')
   }
 }
