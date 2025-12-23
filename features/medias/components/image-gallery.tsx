@@ -1,46 +1,33 @@
-'use client'
+"use client";
 
-import { useCallback, useState } from 'react'
-import dynamic from 'next/dynamic'
-import {
-  IconCopy,
-  IconCheck,
-  IconX,
-  IconEye,
-} from '@tabler/icons-react'
+import { IconCheck, IconCopy, IconEye, IconX } from "@tabler/icons-react";
+import dynamic from "next/dynamic";
+import { useCallback, useState } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import type { UploadedImage } from "../medias.types"
+} from "@/components/ui/alert-dialog";
+import type { UploadedImage } from "../medias.types";
 
-const Image = dynamic(() => import('next/image'), { ssr: false })
+const Image = dynamic(() => import("next/image"), { ssr: false });
 
 interface ImageGalleryProps {
-  images: UploadedImage[]
+  images: UploadedImage[];
 }
 
-export function ImageGallery({
-  images
-}: ImageGalleryProps) {
-  const [copiedId, setCopiedId] = useState<string | null>(null)
+export function ImageGallery({ images }: ImageGalleryProps) {
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedImageForPreview, setSelectedImageForPreview] =
-    useState<UploadedImage | null>(null)
+    useState<UploadedImage | null>(null);
 
-
-  const copyUrlToClipboard = useCallback(
-    (url: string, imageId: string) => {
-      navigator.clipboard.writeText(url)
-      setCopiedId(imageId)
-      setTimeout(() => setCopiedId(null), 2000)
-    },
-    []
-  )
-
-
+  const copyUrlToClipboard = useCallback((url: string, imageId: string) => {
+    navigator.clipboard.writeText(url);
+    setCopiedId(imageId);
+    setTimeout(() => setCopiedId(null), 2000);
+  }, []);
 
   return (
     <>
@@ -56,13 +43,13 @@ export function ImageGallery({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+        <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
           {images.map((image) => (
             <div key={image.id} className="space-y-2">
               <button
                 type="button"
                 onClick={() => {
-                  setSelectedImageForPreview(image)
+                  setSelectedImageForPreview(image);
                 }}
                 className={`group relative w-full overflow-hidden rounded-lg border-2 transition-all aspect-square border-muted hover:border-muted-foreground/50`}
               >
@@ -80,8 +67,8 @@ export function ImageGallery({
                     type="button"
                     className="h-8 w-8 rounded bg-white/20 p-1.5 text-white hover:bg-white/30 transition"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      setSelectedImageForPreview(image)
+                      e.stopPropagation();
+                      setSelectedImageForPreview(image);
                     }}
                     title="Preview"
                   >
@@ -91,8 +78,8 @@ export function ImageGallery({
                     type="button"
                     className="h-8 w-8 rounded bg-white/20 p-1.5 text-white hover:bg-white/30 transition"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      copyUrlToClipboard(image.url, image.id)
+                      e.stopPropagation();
+                      copyUrlToClipboard(image.url, image.id);
                     }}
                     title="Copy URL"
                   >
@@ -116,7 +103,7 @@ export function ImageGallery({
       <AlertDialog
         open={!!selectedImageForPreview}
         onOpenChange={(open) => {
-          if (!open) setSelectedImageForPreview(null)
+          if (!open) setSelectedImageForPreview(null);
         }}
       >
         <AlertDialogContent className="max-w-3xl">
@@ -157,9 +144,9 @@ export function ImageGallery({
                     {selectedImageForPreview.name}
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    Uploaded:{' '}
+                    Uploaded:{" "}
                     {new Date(
-                      selectedImageForPreview.uploadedAt
+                      selectedImageForPreview.uploadedAt,
                     ).toLocaleDateString()}
                   </p>
                 </div>
@@ -177,7 +164,7 @@ export function ImageGallery({
                     onClick={() =>
                       copyUrlToClipboard(
                         selectedImageForPreview.url,
-                        selectedImageForPreview.id
+                        selectedImageForPreview.id,
                       )
                     }
                     className="rounded bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition flex items-center gap-2"
@@ -201,5 +188,5 @@ export function ImageGallery({
         </AlertDialogContent>
       </AlertDialog>
     </>
-  )
+  );
 }

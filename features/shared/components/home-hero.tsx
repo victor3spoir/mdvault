@@ -1,15 +1,15 @@
+import { IconBrandGithub, IconMarkdown, IconRocket } from "@tabler/icons-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { IconRocket, IconBrandGithub, IconMarkdown } from "@tabler/icons-react";
-import Link from "next/link";
 import { Logo } from "./logo";
 
 const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
   return (
     <div
       className={cn(
-        "relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-24 text-center md:px-6",
-        className
+        "relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-10 text-center ",
+        className,
       )}
       {...props}
     >
@@ -38,21 +38,37 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
             </span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground sm:text-xl">
-            MDVault is a modern, straightforward CMS for your GitHub-hosted markdown content. 
-            Create, edit, and manage your posts with a rich editor and seamless integration.
+            MDVault is a modern, straightforward CMS for your GitHub-hosted
+            markdown content.
+            <br />
+            Create, edit, and manage your{" "}
+            <span className="font-semibold ">posts</span> with a rich editor and
+            seamless integration.
           </p>
         </div>
 
         {/* CTAs */}
         <div className="flex flex-col items-center gap-4 sm:flex-row animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500">
-          <Button size="lg" className="h-12 px-8 text-base font-semibold" asChild>
+          <Button
+            size="lg"
+            className="h-12 px-8 text-base font-semibold"
+            asChild
+          >
             <Link href="/cms">
               <IconRocket className="mr-2 h-5 w-5" />
               Commencer
             </Link>
           </Button>
-          <Button size="lg" variant="outline" className="h-12 px-8 text-base font-semibold" asChild>
-            <Link href="https://github.com/victor3spoir/mdvault" target="_blank">
+          <Button
+            size="lg"
+            variant="outline"
+            className="h-12 px-8 text-base font-semibold"
+            asChild
+          >
+            <Link
+              href="https://github.com/victor3spoir/mdvault"
+              target="_blank"
+            >
               <IconBrandGithub className="mr-2 h-5 w-5" />
               View Source
             </Link>

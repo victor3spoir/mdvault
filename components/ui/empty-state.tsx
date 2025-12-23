@@ -1,18 +1,23 @@
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import type { ReactNode } from 'react'
+import Link from "next/link";
+import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 
 interface EmptyStateProps {
-  icon: ReactNode
-  title: string
-  description: string
+  icon: ReactNode;
+  title: string;
+  description: string;
   action?: {
-    label: string
-    href: string
-  }
+    label: string;
+    href: string;
+  };
 }
 
-export function EmptyState({ icon, title, description, action }: EmptyStateProps) {
+export function EmptyState({
+  icon,
+  title,
+  description,
+  action,
+}: EmptyStateProps) {
   return (
     <div className="flex min-h-96 flex-col items-center justify-center gap-4 rounded-lg border border-dashed bg-muted/30 p-8 text-center">
       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-muted-foreground">
@@ -24,10 +29,9 @@ export function EmptyState({ icon, title, description, action }: EmptyStateProps
       </div>
       {action && (
         <Button asChild className="mt-4">
-          <Link href={action.href}>{action.label}</Link>
+          <Link href={{ pathname:action.href }}>{action.label}</Link>
         </Button>
       )}
     </div>
-  )
+  );
 }
-

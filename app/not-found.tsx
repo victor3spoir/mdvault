@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { IconError404, IconHome, IconArrowLeft } from '@tabler/icons-react'
+import { IconArrowLeft, IconError404, IconHome } from "@tabler/icons-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -33,7 +33,9 @@ export default function NotFound() {
           </div>
 
           <p className="text-sm text-muted-foreground/80 max-w-md mx-auto leading-relaxed">
-            The page you're looking for might have been removed, had its name changed, or is temporarily unavailable. Double-check the URL and try again.
+            The page you're looking for might have been removed, had its name
+            changed, or is temporarily unavailable. Double-check the URL and try
+            again.
           </p>
         </div>
 
@@ -63,11 +65,13 @@ export default function NotFound() {
             Common pages you might be looking for:
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {([
-              { href: '/cms' as const, label: 'Dashboard' },
-              { href: '/cms/posts' as const, label: 'Posts' },
-              { href: '/cms/posts/new' as const, label: 'New Post' },
-            ] as const).map((link) => (
+            {(
+              [
+                { href: "/cms" as const, label: "Dashboard" },
+                { href: "/cms/posts" as const, label: "Posts" },
+                { href: "/cms/posts/new" as const, label: "New Post" },
+              ] as const
+            ).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -80,5 +84,5 @@ export default function NotFound() {
         </div>
       </div>
     </div>
-  )
+  );
 }

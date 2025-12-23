@@ -1,1 +1,1 @@
-FROM oven/bun:latest AS base
+FROM oven/bun:1.3.5-alpine AS base

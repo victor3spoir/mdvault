@@ -1,6 +1,6 @@
-'use client'
+"use client";
 
-import { Toaster } from 'sonner'
+import { Toaster } from "sonner";
 
 export function ToastProvider() {
   return (
@@ -12,13 +12,13 @@ export function ToastProvider() {
       theme="system"
       toastOptions={{
         style: {
-          borderRadius: '0.5rem',
-          background: 'hsl(var(--background))',
-          color: 'hsl(var(--foreground))',
-          border: '1px solid hsl(var(--border))',
+          borderRadius: "0.5rem",
+          background: "hsl(var(--background))",
+          color: "hsl(var(--foreground))",
+          border: "1px solid hsl(var(--border))",
         },
-        className: 'text-sm',
+        className: "text-sm",
       }}
     />
-  )
+  );
 }

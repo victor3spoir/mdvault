@@ -1,26 +1,23 @@
-import { ImageUploader } from '@/features/medias/components/image-uploader'
-import { ImageGallery } from '@/features/medias/components/image-gallery'
-import PageLayout from '@/features/shared/components/page-layout'
-import { listImagesAction } from '@/features/medias/medias.actions'
+import { ImageGallery } from "@/features/medias/components/image-gallery";
+import { ImageUploader } from "@/features/medias/components/image-uploader";
+import { listImagesAction } from "@/features/medias/medias.actions";
+import PageLayout from "@/features/shared/components/page-layout";
 
 export default async function MediaPage() {
-   const loadedImages = await listImagesAction()
+  const loadedImages = await listImagesAction();
 
   return (
     <PageLayout
       title="Media Library"
       description="Upload and manage your images"
-      breadcrumbs={[
-        { label: 'Dashboard', href: '/cms' },
-        { label: 'Media' },
-      ]}
+      breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Media" }]}
     >
       <div className="space-y-6">
-      
         <div className="rounded-xl border bg-card p-6">
           <h2 className="mb-4 text-lg font-semibold">Upload Images</h2>
           <p className="mb-4 text-sm text-muted-foreground">
-            Upload images to use in your posts. Supported formats: JPG, PNG, GIF, SVG, WebP
+            Upload images to use in your posts. Supported formats: JPG, PNG,
+            GIF, SVG, WebP
           </p>
           <ImageUploader />
         </div>
@@ -31,5 +28,5 @@ export default async function MediaPage() {
         </div>
       </div>
     </PageLayout>
-  )
+  );
 }

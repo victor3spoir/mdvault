@@ -1,33 +1,33 @@
-'use client'
+"use client";
 
-import type { Post } from '../posts.types'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { IconEye, IconCode } from '@tabler/icons-react'
-import { ForwardRefPreviewer } from './forward-ref-previewer'
+import { IconCode, IconEye } from "@tabler/icons-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import type { Post } from "../posts.types";
+import { ForwardRefPreviewer } from "./forward-ref-previewer";
 
-type ViewMode = 'preview' | 'code'
+type ViewMode = "preview" | "code";
 
 const PostPreviewer = ({ post }: { post: Post }) => {
-  const [viewMode, setViewMode] = useState<ViewMode>('preview')
+  const [viewMode, setViewMode] = useState<ViewMode>("preview");
 
   return (
     <div className="space-y-4">
       {/* View Mode Tabs */}
       <div className="flex gap-2 border-b bg-muted/30 rounded-t-lg p-2">
         <Button
-          variant={viewMode === 'preview' ? 'default' : 'ghost'}
+          variant={viewMode === "preview" ? "default" : "ghost"}
           size="sm"
-          onClick={() => setViewMode('preview')}
+          onClick={() => setViewMode("preview")}
           className="gap-2"
         >
           <IconEye className="size-4" />
           Preview
         </Button>
         <Button
-          variant={viewMode === 'code' ? 'default' : 'ghost'}
+          variant={viewMode === "code" ? "default" : "ghost"}
           size="sm"
-          onClick={() => setViewMode('code')}
+          onClick={() => setViewMode("code")}
           className="gap-2"
         >
           <IconCode className="size-4" />
@@ -36,7 +36,7 @@ const PostPreviewer = ({ post }: { post: Post }) => {
       </div>
 
       {/* Preview Content */}
-      {viewMode === 'preview' ? (
+      {viewMode === "preview" ? (
         <div className="rounded-b-lg border bg-card p-8 mdx-preview">
           <ForwardRefPreviewer
             markdown={post.content}
@@ -51,7 +51,7 @@ const PostPreviewer = ({ post }: { post: Post }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default PostPreviewer
+export default PostPreviewer;

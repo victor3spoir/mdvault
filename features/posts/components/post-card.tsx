@@ -1,29 +1,107 @@
-'use client'
+"use client";
 
-import type { Post } from '@/features/posts/posts.types'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import {
-  IconEdit,
-  IconTrash,
-  IconEye,
   IconCalendar,
-  IconDotsVertical,
-} from '@tabler/icons-react'
-import Link from 'next/link'
-import Image from 'next/image'
+  IconCheck,
+  IconEdit,
+  IconEye,
+  IconLoader2,
+  IconTrash,
+  IconX,
+} from "@tabler/icons-react";
+import Image from "next/image";
+import Link from "next/link";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import type { Post } from "@/features/posts/posts.types";
+import {
+  deletePostAction,
+  publishPostAction,
+  unpublishPostAction,
+} from "../posts.actions";
 
 interface PostCardProps {
-  post: Post
-  onDelete?: (post: Post) => void
+  post: Post;
+  onDelete?: (post: Post) => void;
+  onPublishChange?: (post: Post) => void;
 }
 
-export function PostCard({ post, onDelete }: PostCardProps) {
-  const formattedDate = new Date(post.createdAt).toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  })
+export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
+  const [isPending, startTransition] = useTransition();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const formattedDate = new Date(post.createdAt).toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+
+  const handlePublish = async () => {
+    startTransition(async () => {
+      try {
+        const updatedPost = await publishPostAction(post.slug, post.sha || "");
+        toast.success("Post published", {
+          description: `"${post.title}" is now live`,
+        });
+        onPublishChange?.(updatedPost);
+      } catch (error) {
+        toast.error("Failed to publish", {
+          description:
+            error instanceof Error ? error.message : "Try again later",
+        });
+      }
+    });
+  };
+
+  const handleUnpublish = async () => {
+    startTransition(async () => {
+      try {
+        const updatedPost = await unpublishPostAction(
+          post.slug,
+          post.sha || "",
+        );
+        toast.success("Post unpublished", {
+          description: `"${post.title}" is now a draft`,
+        });
+        onPublishChange?.(updatedPost);
+      } catch (error) {
+        toast.error("Failed to unpublish", {
+          description:
+            error instanceof Error ? error.message : "Try again later",
+        });
+      }
+    });
+  };
+
+  const handleDelete = async () => {
+    if (!isDeleting) {
+      setIsDeleting(true);
+      toast.error("Delete?", {
+        description: "Click again to confirm deletion",
+        duration: 3000,
+      });
+      setTimeout(() => setIsDeleting(false), 3000);
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        await deletePostAction(post.slug, post.sha || "");
+        toast.success("Post deleted", {
+          description: `"${post.title}" has been removed`,
+        });
+        onDelete?.(post);
+      } catch (error) {
+        setIsDeleting(false);
+        toast.error("Failed to delete", {
+          description:
+            error instanceof Error ? error.message : "Try again later",
+        });
+      }
+    });
+  };
 
   return (
     <div className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md">
@@ -45,8 +123,8 @@ export function PostCard({ post, onDelete }: PostCardProps) {
       <div className="p-5">
         {/* Status & Tags */}
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Badge variant={post.published ? 'default' : 'secondary'}>
-            {post.published ? 'Published' : 'Draft'}
+          <Badge variant={post.published ? "default" : "secondary"}>
+            {post.published ? "Published" : "Draft"}
           </Badge>
           {post.tags?.slice(0, 2).map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
@@ -72,60 +150,76 @@ export function PostCard({ post, onDelete }: PostCardProps) {
             {formattedDate}
           </span>
           {post.author && (
-            <span className="flex items-center gap-1">
-              By {post.author}
-            </span>
+            <span className="flex items-center gap-1">By {post.author}</span>
           )}
         </div>
 
         {/* Actions */}
         <div className="mt-4 flex items-center gap-2 border-t pt-4">
-          <Button asChild variant="ghost" size="sm" className="flex-1">
-            <Link href={`/cms/posts/${post.slug}` as '/'}>
-              <IconEye className="mr-1.5 size-4" />
-              View
+          <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+            <Link href={`/cms/posts/${post.slug}` as "/"} title="View post">
+              <IconEye className="size-4" />
             </Link>
           </Button>
-          <Button asChild variant="ghost" size="sm" className="flex-1">
-            <Link href={`/cms/posts/${post.slug}/edit` as '/'}>
-              <IconEdit className="mr-1.5 size-4" />
-              Edit
-            </Link>
-          </Button>
-          {onDelete && (
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              className="text-destructive hover:text-destructive"
-              onClick={() => onDelete(post)}
+          <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+            <Link
+              href={`/cms/posts/${post.slug}/edit` as "/"}
+              title="Edit post"
             >
-              <IconTrash className="size-4" />
+              <IconEdit className="size-4" />
+            </Link>
+          </Button>
+          {post.published ? (
+            <Button
+              onClick={handleUnpublish}
+              disabled={isPending}
+              variant="outline"
+              size="icon"
+              className="h-8 w-8"
+              title="Unpublish post"
+            >
+              {isPending ? (
+                <IconLoader2 className="size-4 animate-spin" />
+              ) : (
+                <IconX className="size-4" />
+              )}
+            </Button>
+          ) : (
+            <Button
+              onClick={handlePublish}
+              disabled={isPending}
+              size="icon"
+              className="h-8 w-8"
+              title="Publish post"
+            >
+              {isPending ? (
+                <IconLoader2 className="size-4 animate-spin" />
+              ) : (
+                <IconCheck className="size-4" />
+              )}
             </Button>
           )}
+          <Button
+            onClick={handleDelete}
+            disabled={isPending}
+            variant={isDeleting ? "destructive" : "ghost"}
+            size="icon"
+            className="h-8 w-8"
+            title={isDeleting ? "Click again to confirm" : "Delete post"}
+          >
+            {isPending ? (
+              <IconLoader2 className="size-4 animate-spin" />
+            ) : (
+              <IconTrash className="size-4" />
+            )}
+          </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-// Empty State Component
-export function PostsEmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-muted/30 px-6 py-16 text-center">
-      <div className="mb-4 rounded-full bg-muted p-4">
-        <IconDotsVertical className="size-8 text-muted-foreground" />
-      </div>
-      <h3 className="mb-2 text-lg font-semibold">No posts yet</h3>
-      <p className="mb-6 max-w-sm text-sm text-muted-foreground">
-        Get started by creating your first post. You can write in Markdown with
-        full support for images, tables, and code blocks.
-      </p>
-      <Button asChild>
-        <Link href="/cms/posts/new">Create First Post</Link>
-      </Button>
-    </div>
-  )
-}
+
 
 // Loading Skeleton
 export function PostCardSkeleton() {
@@ -146,5 +240,5 @@ export function PostCardSkeleton() {
         </div>
       </div>
     </div>
-  )
+  );
 }

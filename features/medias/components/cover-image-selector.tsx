@@ -1,27 +1,27 @@
-'use client'
+"use client";
 
-import Image from 'next/image'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { ImageInsertDialog } from './image-insert-dialog'
-import { IconEdit, IconTrash } from '@tabler/icons-react'
-import type { UploadedImage } from "../medias.types"
+import { IconEdit, IconTrash } from "@tabler/icons-react";
+import Image from "next/image";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import type { UploadedImage } from "../medias.types";
+import { ImageInsertDialog } from "./image-insert-dialog";
 
 interface CoverImageSelectorProps {
-  selectedImageUrl: string
-  onSelectImage: (image: UploadedImage) => void
+  selectedImageUrl: string;
+  onSelectImage: (image: UploadedImage) => void;
 }
 
 export function CoverImageSelector({
   selectedImageUrl,
   onSelectImage,
 }: CoverImageSelectorProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleImageSelect = (image: UploadedImage) => {
-    onSelectImage(image)
-    setIsDialogOpen(false)
-  }
+    onSelectImage(image);
+    setIsDialogOpen(false);
+  };
 
   return (
     <>
@@ -49,7 +49,15 @@ export function CoverImageSelector({
                 type="button"
                 size="sm"
                 variant="destructive"
-                onClick={() => onSelectImage({ id: '', name: '', path: '', url: '', uploadedAt: '' })}
+                onClick={() =>
+                  onSelectImage({
+                    id: "",
+                    name: "",
+                    path: "",
+                    url: "",
+                    uploadedAt: "",
+                  })
+                }
                 className="gap-2"
               >
                 <IconTrash className="h-4 w-4" />
@@ -60,7 +68,9 @@ export function CoverImageSelector({
         ) : (
           <div className="flex h-40 w-full items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30">
             <div className="text-center">
-              <p className="text-sm text-muted-foreground">No cover image selected</p>
+              <p className="text-sm text-muted-foreground">
+                No cover image selected
+              </p>
             </div>
           </div>
         )}
@@ -71,7 +81,7 @@ export function CoverImageSelector({
           className="w-full"
           onClick={() => setIsDialogOpen(true)}
         >
-          {selectedImageUrl ? 'Change Cover Image' : 'Select Cover Image'}
+          {selectedImageUrl ? "Change Cover Image" : "Select Cover Image"}
         </Button>
       </div>
 
@@ -81,5 +91,5 @@ export function CoverImageSelector({
         onSelect={handleImageSelect}
       />
     </>
-  )
+  );
 }

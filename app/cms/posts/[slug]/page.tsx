@@ -1,42 +1,54 @@
-import Link from 'next/link'
-import { notFound } from 'next/navigation'
-import PageLayout from '@/features/shared/components/page-layout'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { getPostAction } from '@/features/posts/posts.actions'
-import { IconEdit, IconArrowLeft, IconCalendar, IconUser, IconTag } from '@tabler/icons-react'
-import Image from 'next/image'
-import PostPreviewer from '@/features/posts/components/post-previewer'
+import {
+  IconArrowLeft,
+  IconCalendar,
+  IconEdit,
+  IconTag,
+  IconUser,
+} from "@tabler/icons-react";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import PostPreviewer from "@/features/posts/components/post-previewer";
+import { getPostAction } from "@/features/posts/posts.actions";
+import PageLayout from "@/features/shared/components/page-layout";
 
 interface PostPageProps {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }
 
 export default async function PostPage({ params }: PostPageProps) {
-  const { slug } = await params
-  const post = await getPostAction(slug)
+  const { slug } = await params;
+  const post = await getPostAction(slug);
 
   if (!post) {
-    notFound()
+    notFound();
   }
 
-  const formattedCreatedAt = new Date(post.createdAt).toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const formattedCreatedAt = new Date(post.createdAt).toLocaleDateString(
+    "fr-FR",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    },
+  );
 
-  const formattedUpdatedAt = new Date(post.updatedAt).toLocaleDateString('fr-FR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const formattedUpdatedAt = new Date(post.updatedAt).toLocaleDateString(
+    "fr-FR",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    },
+  );
 
   return (
     <PageLayout
       breadcrumbs={[
-        { label: 'Dashboard', href: '/cms' },
-        { label: 'Posts', href: '/cms/posts' },
+        { label: "Dashboard", href: "/cms" },
+        { label: "Posts", href: "/cms/posts" },
         { label: post.title },
       ]}
       actions={
@@ -48,7 +60,7 @@ export default async function PostPage({ params }: PostPageProps) {
             </Link>
           </Button>
           <Button asChild className="gap-2">
-            <Link href={`/cms/posts/${slug}/edit` as '/'}>
+            <Link href={`/cms/posts/${slug}/edit` as "/"}>
               <IconEdit className="size-4" />
               Edit Post
             </Link>
@@ -60,8 +72,8 @@ export default async function PostPage({ params }: PostPageProps) {
         {/* Header */}
         <header className="mb-8 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant={post.published ? 'default' : 'secondary'}>
-              {post.published ? 'Published' : 'Draft'}
+            <Badge variant={post.published ? "default" : "secondary"}>
+              {post.published ? "Published" : "Draft"}
             </Badge>
             {post.tags?.map((tag) => (
               <Badge key={tag} variant="outline">
@@ -101,15 +113,20 @@ export default async function PostPage({ params }: PostPageProps) {
         {post.coverImage && (
           <div className="relative mb-8 aspect-video w-full overflow-hidden rounded-xl bg-muted">
             <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-              <Image src={post.coverImage} alt={post.title} width={200} height={200}
-                className='w-full' />
+              <Image
+                src={post.coverImage}
+                alt={post.title}
+                width={200}
+                height={200}
+                className="w-full"
+              />
             </div>
           </div>
         )}
 
         {/* Content */}
-        <PostPreviewer post={post}/>
+        <PostPreviewer post={post} />
       </article>
     </PageLayout>
-  )
+  );
 }

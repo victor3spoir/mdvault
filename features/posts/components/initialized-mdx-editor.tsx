@@ -1,50 +1,54 @@
-'use client'
+"use client";
 
-import type { ForwardedRef } from 'react'
 import {
+  BlockTypeSelect,
+  BoldItalicUnderlineToggles,
+  ChangeCodeMirrorLanguage,
+  CodeMirrorEditor,
+  ConditionalContents,
+  CreateLink,
+  codeBlockPlugin,
+  codeMirrorPlugin,
+  DiffSourceToggleWrapper,
+  diffSourcePlugin,
+  frontmatterPlugin,
+  headingsPlugin,
+  InsertCodeBlock,
+  InsertFrontmatter,
+  InsertTable,
+  InsertThematicBreak,
+  imagePlugin,
+  ListsToggle,
+  linkDialogPlugin,
+  linkPlugin,
+  listsPlugin,
   MDXEditor,
   type MDXEditorMethods,
   type MDXEditorProps,
-  headingsPlugin,
-  listsPlugin,
-  quotePlugin,
-  thematicBreakPlugin,
   markdownShortcutPlugin,
-  toolbarPlugin,
-  linkPlugin,
-  linkDialogPlugin,
-  imagePlugin,
-  tablePlugin,
-  frontmatterPlugin,
-  codeBlockPlugin,
-  codeMirrorPlugin,
-  diffSourcePlugin,
-  UndoRedo,
-  BoldItalicUnderlineToggles,
-  ListsToggle,
-  BlockTypeSelect,
-  CreateLink,
-  InsertCodeBlock,
-  InsertTable,
-  InsertThematicBreak,
-  InsertFrontmatter,
+  quotePlugin,
   Separator,
-  DiffSourceToggleWrapper,
-  ConditionalContents,
-  ChangeCodeMirrorLanguage,
-  CodeMirrorEditor,
-} from '@mdxeditor/editor'
-import { IconPhoto } from '@tabler/icons-react'
-import '@mdxeditor/editor/style.css'
+  tablePlugin,
+  thematicBreakPlugin,
+  toolbarPlugin,
+  UndoRedo,
+} from "@mdxeditor/editor";
+import { IconPhoto } from "@tabler/icons-react";
+import type { ForwardedRef } from "react";
+import "@mdxeditor/editor/style.css";
 
 export interface InitializedMDXEditorProps extends MDXEditorProps {
-  editorRef: ForwardedRef<MDXEditorMethods> | null
-  onImageUpload?: (file: File) => Promise<string>
-  onImageInsertClick?: () => void
+  editorRef: ForwardedRef<MDXEditorMethods> | null;
+  onImageUpload?: (file: File) => Promise<string>;
+  onImageInsertClick?: () => void;
 }
 
 // Custom InsertImage button that opens the image selector dialog
-function InsertImageButton({ onImageInsertClick }: { onImageInsertClick?: () => void }) {
+function InsertImageButton({
+  onImageInsertClick,
+}: {
+  onImageInsertClick?: () => void;
+}) {
   return (
     <button
       type="button"
@@ -55,7 +59,7 @@ function InsertImageButton({ onImageInsertClick }: { onImageInsertClick?: () => 
     >
       <IconPhoto className="h-4 w-4" />
     </button>
-  )
+  );
 }
 
 export default function InitializedMDXEditor({
@@ -66,11 +70,11 @@ export default function InitializedMDXEditor({
 }: InitializedMDXEditorProps) {
   const imageUploadHandler = async (image: File): Promise<string> => {
     if (onImageUpload) {
-      return onImageUpload(image)
+      return onImageUpload(image);
     }
     // Default: return a placeholder URL
-    return URL.createObjectURL(image)
-  }
+    return URL.createObjectURL(image);
+  };
 
   return (
     <MDXEditor
@@ -83,28 +87,28 @@ export default function InitializedMDXEditor({
         linkDialogPlugin(),
         tablePlugin(),
         frontmatterPlugin(),
-        codeBlockPlugin({ 
-          defaultCodeBlockLanguage: 'ts',
+        codeBlockPlugin({
+          defaultCodeBlockLanguage: "ts",
           codeBlockEditorDescriptors: [
             {
               priority: -10,
               match: () => true,
-              Editor: CodeMirrorEditor
-            }
-          ]
+              Editor: CodeMirrorEditor,
+            },
+          ],
         }),
         codeMirrorPlugin({
           codeBlockLanguages: {
-            js: 'JavaScript',
-            jsx: 'JSX',
-            ts: 'TypeScript',
-            tsx: 'TSX',
-            css: 'CSS',
-            html: 'HTML',
-            python: 'Python',
-            bash: 'Bash',
-            json: 'JSON',
-            md: 'Markdown',
+            js: "JavaScript",
+            jsx: "JSX",
+            ts: "TypeScript",
+            tsx: "TSX",
+            css: "CSS",
+            html: "HTML",
+            python: "Python",
+            bash: "Bash",
+            json: "JSON",
+            md: "Markdown",
           },
         }),
         imagePlugin({
@@ -112,7 +116,7 @@ export default function InitializedMDXEditor({
           imageAutocompleteSuggestions: [],
         }),
         diffSourcePlugin({
-          viewMode: 'rich-text',
+          viewMode: "rich-text",
         }),
         markdownShortcutPlugin(),
         toolbarPlugin({
@@ -121,8 +125,8 @@ export default function InitializedMDXEditor({
               <ConditionalContents
                 options={[
                   {
-                    when: (editor) => editor?.editorType === 'codeblock',
-                    contents: () => <ChangeCodeMirrorLanguage />
+                    when: (editor) => editor?.editorType === "codeblock",
+                    contents: () => <ChangeCodeMirrorLanguage />,
                   },
                   {
                     fallback: () => (
@@ -137,14 +141,16 @@ export default function InitializedMDXEditor({
                         <Separator />
                         <CreateLink />
                         <InsertCodeBlock />
-                        <InsertImageButton onImageInsertClick={onImageInsertClick} />
+                        <InsertImageButton
+                          onImageInsertClick={onImageInsertClick}
+                        />
                         <InsertTable />
                         <InsertThematicBreak />
                         <Separator />
                         <InsertFrontmatter />
                       </>
-                    )
-                  }
+                    ),
+                  },
                 ]}
               />
             </DiffSourceToggleWrapper>
@@ -155,5 +161,5 @@ export default function InitializedMDXEditor({
       ref={editorRef}
       className="mdx-editor-wrapper"
     />
-  )
+  );
 }

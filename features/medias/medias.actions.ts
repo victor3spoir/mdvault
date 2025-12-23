@@ -2,12 +2,15 @@
 
 import { validateImageFile } from "@/lib/file-validation";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
+import { cacheTag, updateTag } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
 import type { UploadedImage } from "./medias.types";
 
 const IMAGES_PATH = githubRepoInfo.IMAGES_PATH;
 
 export async function listImagesAction(): Promise<UploadedImage[]> {
+  "use cache";
+  cacheTag("medias");
   try {
     const response = await octokit.repos.getContent({
       owner: githubRepoInfo.owner,
@@ -70,7 +73,7 @@ export async function uploadImageAction(file: File): Promise<UploadedImage> {
     });
 
     const imageUrl = `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${filePath}`;
-
+    updateTag("medias");
     return {
       id: imageId,
       name: fileName,
@@ -104,6 +107,7 @@ export async function deleteImageAction(
       message: `Delete image: ${fileName}`,
       sha,
     });
+    updateTag("medias");
   } catch (error) {
     console.error("Error deleting image:", error);
     throw new Error("Failed to delete image");

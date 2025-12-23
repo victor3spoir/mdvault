@@ -1,133 +1,136 @@
-'use client'
+"use client";
 
-import { useState, useRef, useCallback, useTransition } from 'react'
-import { IconUpload, IconLoader2, IconX, IconCheck } from '@tabler/icons-react'
-import { uploadImageAction } from '../medias.actions'
-import type { UploadedImage } from "../medias.types"
-import { Button } from '@/components/ui/button'
+import { IconCheck, IconLoader2, IconUpload, IconX } from "@tabler/icons-react";
+import { useCallback, useRef, useState, useTransition } from "react";
+import { Button } from "@/components/ui/button";
+import { uploadImageAction } from "../medias.actions";
+import type { UploadedImage } from "../medias.types";
 
 interface ImageFile {
-  file: File
-  preview: string
-  progress: number
-  error: string | null
-  uploaded: boolean
+  file: File;
+  preview: string;
+  progress: number;
+  error: string | null;
+  uploaded: boolean;
 }
 
 interface ImageUploaderProps {
-  onUploadSuccess?: (image: UploadedImage) => void
-  maxSize?: number // in MB
+  onUploadSuccess?: (image: UploadedImage) => void;
+  maxSize?: number; // in MB
 }
 
-export function ImageUploader({ onUploadSuccess, maxSize = 5 }: ImageUploaderProps) {
-  const [isDragging, setIsDragging] = useState(false)
-  const [uploadedFiles, setUploadedFiles] = useState<ImageFile[]>([])
-  const [isPending, startTransition] = useTransition()
-  const fileInputRef = useRef<HTMLInputElement>(null)
+export function ImageUploader({
+  onUploadSuccess,
+  maxSize = 5,
+}: ImageUploaderProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<ImageFile[]>([]);
+  const [isPending, startTransition] = useTransition();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const validateFile = useCallback(
     (file: File) => {
-      if (!file.type.startsWith('image/')) {
-        return 'Only image files are allowed'
+      if (!file.type.startsWith("image/")) {
+        return "Only image files are allowed";
       }
       if (file.size > maxSize * 1024 * 1024) {
-        return `File size must be less than ${maxSize}MB`
+        return `File size must be less than ${maxSize}MB`;
       }
-      return null
+      return null;
     },
-    [maxSize]
-  )
+    [maxSize],
+  );
 
   const handleFiles = useCallback(
     (files: FileList) => {
-      const fileArray = Array.from(files)
+      const fileArray = Array.from(files);
       const newFiles: ImageFile[] = fileArray.map((file) => {
-        const error = validateFile(file)
-        const preview = error ? '' : URL.createObjectURL(file)
+        const error = validateFile(file);
+        const preview = error ? "" : URL.createObjectURL(file);
         return {
           file,
           preview,
           progress: 0,
           error: error || null,
           uploaded: false,
-        }
-      })
+        };
+      });
 
-      setUploadedFiles((prev) => [...prev, ...newFiles])
+      setUploadedFiles((prev) => [...prev, ...newFiles]);
     },
-    [validateFile]
-  )
+    [validateFile],
+  );
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
+    e.preventDefault();
+    setIsDragging(false);
     if (e.dataTransfer.files) {
-      handleFiles(e.dataTransfer.files)
+      handleFiles(e.dataTransfer.files);
     }
-  }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      handleFiles(e.target.files)
-      e.target.value = ''
+      handleFiles(e.target.files);
+      e.target.value = "";
     }
-  }
+  };
 
   const handleUpload = (imageFile: ImageFile) => {
     startTransition(async () => {
       try {
-        const uploadedImage = await uploadImageAction(imageFile.file)
+        const uploadedImage = await uploadImageAction(imageFile.file);
         setUploadedFiles((prev) =>
           prev.map((f) =>
             f.file === imageFile.file
               ? { ...f, progress: 100, uploaded: true }
-              : f
-          )
-        )
-        onUploadSuccess?.(uploadedImage)
+              : f,
+          ),
+        );
+        onUploadSuccess?.(uploadedImage);
 
         // Remove from list after 2 seconds
         setTimeout(() => {
-          setUploadedFiles((prev) => prev.filter((f) => f.file !== imageFile.file))
-        }, 2000)
+          setUploadedFiles((prev) =>
+            prev.filter((f) => f.file !== imageFile.file),
+          );
+        }, 2000);
       } catch {
         setUploadedFiles((prev) =>
           prev.map((f) =>
-            f.file === imageFile.file
-              ? { ...f, error: 'Failed to upload' }
-              : f
-          )
-        )
+            f.file === imageFile.file ? { ...f, error: "Failed to upload" } : f,
+          ),
+        );
       }
-    })
-  }
+    });
+  };
 
   const handleRetry = (imageFile: ImageFile) => {
     // Reset error state and progress
     setUploadedFiles((prev) =>
       prev.map((f) =>
-        f.file === imageFile.file
-          ? { ...f, error: null, progress: 0 }
-          : f
-      )
-    )
+        f.file === imageFile.file ? { ...f, error: null, progress: 0 } : f,
+      ),
+    );
     // Start upload
-    handleUpload(imageFile)
-  }
+    handleUpload(imageFile);
+  };
 
   const removeFile = (file: File) => {
-    URL.revokeObjectURL(uploadedFiles.find(f => f.file === file)?.preview || '')
-    setUploadedFiles((prev) => prev.filter((f) => f.file !== file))
-  }
+    URL.revokeObjectURL(
+      uploadedFiles.find((f) => f.file === file)?.preview || "",
+    );
+    setUploadedFiles((prev) => prev.filter((f) => f.file !== file));
+  };
 
   return (
     <div className="space-y-4">
@@ -140,8 +143,8 @@ export function ImageUploader({ onUploadSuccess, maxSize = 5 }: ImageUploaderPro
         onClick={() => fileInputRef.current?.click()}
         className={`relative rounded-lg border-2 border-dashed transition-all cursor-pointer p-8 text-center ${
           isDragging
-            ? 'border-primary bg-primary/5'
-            : 'border-muted-foreground/30 hover:border-muted-foreground/50 hover:bg-muted/30'
+            ? "border-primary bg-primary/5"
+            : "border-muted-foreground/30 hover:border-muted-foreground/50 hover:bg-muted/30"
         }`}
       >
         <input
@@ -185,6 +188,27 @@ export function ImageUploader({ onUploadSuccess, maxSize = 5 }: ImageUploaderPro
         </div>
       </button>
 
+      {uploadedFiles.some((f) => !f.uploaded && !f.error) && (
+        <div className="flex justify-end">
+          <Button
+            onClick={() => {
+              const toUpload = uploadedFiles.filter(
+                (f) => !f.uploaded && !f.error,
+              );
+              toUpload.forEach((f) => {
+                handleUpload(f);
+              });
+            }}
+            disabled={isPending}
+            size="sm"
+            className="gap-2 mb-2"
+          >
+            <IconUpload className="h-4 w-4" />
+            Upload All
+          </Button>
+        </div>
+      )}
+
       {/* Image Preview and Upload */}
       {uploadedFiles.length > 0 && (
         <div className="space-y-3">
@@ -199,8 +223,8 @@ export function ImageUploader({ onUploadSuccess, maxSize = 5 }: ImageUploaderPro
                   className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-muted"
                   style={{
                     backgroundImage: `url(${item.preview})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
                   }}
                 />
               )}
@@ -235,10 +259,10 @@ export function ImageUploader({ onUploadSuccess, maxSize = 5 }: ImageUploaderPro
                     <div
                       className={`h-full transition-all ${
                         item.error
-                          ? 'bg-destructive'
+                          ? "bg-destructive"
                           : item.progress === 100
-                            ? 'bg-green-600'
-                            : 'bg-primary'
+                            ? "bg-green-600"
+                            : "bg-primary"
                       }`}
                       style={{ width: `${item.progress}%` }}
                     />
@@ -304,5 +328,5 @@ export function ImageUploader({ onUploadSuccess, maxSize = 5 }: ImageUploaderPro
         </div>
       )}
     </div>
-  )
+  );
 }

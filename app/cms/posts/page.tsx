@@ -1,23 +1,25 @@
-import Link from 'next/link'
-import PageLayout from '@/features/shared/components/page-layout'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { IconPlus, IconSearch, IconFilter, IconFileText } from '@tabler/icons-react'
-import { listPostsAction } from '@/features/posts/posts.actions'
-import { PostCard } from '@/features/posts/components/post-card'
+import {
+  IconFileText,
+  IconFilter,
+  IconPlus,
+  IconSearch,
+} from "@tabler/icons-react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PostCard } from "@/features/posts/components/post-card";
+import { listPostsAction } from "@/features/posts/posts.actions";
+import PageLayout from "@/features/shared/components/page-layout";
 
 export default async function PostsPage() {
-  const posts = await listPostsAction()
+  const posts = await listPostsAction();
 
   return (
     <PageLayout
       title="Posts"
       description="Manage your blog posts and articles"
-      breadcrumbs={[
-        { label: 'Dashboard', href: '/cms' },
-        { label: 'Posts' },
-      ]}
+      breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Posts" }]}
       actions={
         <Button asChild className="gap-2">
           <Link href="/cms/posts/new">
@@ -31,10 +33,7 @@ export default async function PostsPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative max-w-sm flex-1">
           <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="Search posts..."
-            className="pl-9"
-          />
+          <Input placeholder="Search posts..." className="pl-9" />
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" className="gap-2">
@@ -53,18 +52,20 @@ export default async function PostsPage() {
           </div>
           <h3 className="mb-2 text-lg font-semibold">No posts yet</h3>
           <p className="mb-6 max-w-sm text-sm text-muted-foreground">
-            Get started by creating your first post. You can write in Markdown with
-            full support for images, tables, and code blocks.
+            Get started by creating your first post. You can write in Markdown
+            with full support for images, tables, and code blocks.
           </p>
           <Button asChild>
             <Link href="/cms/posts/new">Create First Post</Link>
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => <PostCard post={post} key={post.slug} />)}
+        <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] ">
+          {posts.map((post) => (
+            <PostCard post={post} key={post.slug} />
+          ))}
         </div>
       )}
     </PageLayout>
-  )
+  );
 }

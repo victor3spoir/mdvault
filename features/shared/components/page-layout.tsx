@@ -1,16 +1,22 @@
-import type { ReactNode } from 'react'
-import { SidebarTrigger } from '@/components/ui/sidebar'
-import { Separator } from '@/components/ui/separator'
+import type { ReactNode } from "react";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface PageLayoutProps {
-  children: ReactNode
-  title?: string
-  description?: string
-  actions?: ReactNode
-  breadcrumbs?: { label: string; href?: string }[]
+  children: ReactNode;
+  title?: string;
+  description?: string;
+  actions?: ReactNode;
+  breadcrumbs?: { label: string; href?: string }[];
 }
 
-const PageLayout = ({ children, title, description, actions, breadcrumbs }: PageLayoutProps) => {
+const PageLayout = ({
+  children,
+  title,
+  description,
+  actions,
+  breadcrumbs,
+}: PageLayoutProps) => {
   return (
     <div className="flex flex-1 flex-col">
       {/* Header */}
@@ -25,11 +31,16 @@ const PageLayout = ({ children, title, description, actions, breadcrumbs }: Page
               <span key={crumb.label} className="flex items-center gap-1">
                 {index > 0 && <span>/</span>}
                 {crumb.href ? (
-                  <a href={crumb.href} className="hover:text-foreground transition-colors">
+                  <a
+                    href={crumb.href}
+                    className="hover:text-foreground transition-colors"
+                  >
                     {crumb.label}
                   </a>
                 ) : (
-                  <span className="text-foreground font-medium">{crumb.label}</span>
+                  <span className="text-foreground font-medium">
+                    {crumb.label}
+                  </span>
                 )}
               </span>
             ))}
@@ -47,7 +58,9 @@ const PageLayout = ({ children, title, description, actions, breadcrumbs }: Page
       <main className="flex-1 p-6">
         {(title || description) && (
           <div className="mb-6">
-            {title && <h1 className="text-2xl font-bold tracking-tight">{title}</h1>}
+            {title && (
+              <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+            )}
             {description && (
               <p className="mt-1 text-muted-foreground">{description}</p>
             )}
@@ -56,7 +69,7 @@ const PageLayout = ({ children, title, description, actions, breadcrumbs }: Page
         <div className="space-y-6">{children}</div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default PageLayout
+export default PageLayout;

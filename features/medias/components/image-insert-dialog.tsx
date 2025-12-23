@@ -1,24 +1,24 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { ImageUploader } from './image-uploader'
-import { ImageSelector } from './image-selector'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
+import { IconPhoto, IconUpload } from "@tabler/icons-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/ui/sheet'
-import { IconUpload, IconPhoto } from '@tabler/icons-react'
-import type { UploadedImage } from "../medias.types"
+} from "@/components/ui/sheet";
+import type { UploadedImage } from "../medias.types";
+import { ImageSelector } from "./image-selector";
+import { ImageUploader } from "./image-uploader";
 
 interface ImageInsertDialogProps {
-  open: boolean
-  onClose: () => void
-  onSelect: (image: UploadedImage) => void
+  open: boolean;
+  onClose: () => void;
+  onSelect: (image: UploadedImage) => void;
 }
 
 export function ImageInsertDialog({
@@ -26,27 +26,32 @@ export function ImageInsertDialog({
   onClose,
   onSelect,
 }: ImageInsertDialogProps) {
-  const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(null)
+  const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(
+    null,
+  );
 
   const handleSelect = (image: UploadedImage) => {
-    setSelectedImage(image)
-  }
+    setSelectedImage(image);
+  };
 
   const handleInsert = () => {
     if (selectedImage) {
-      onSelect(selectedImage)
-      setSelectedImage(null)
-      onClose()
+      onSelect(selectedImage);
+      setSelectedImage(null);
+      onClose();
     }
-  }
+  };
 
   const handleUploadSuccess = (image: UploadedImage) => {
-    setSelectedImage(image)
-  }
+    setSelectedImage(image);
+  };
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-2xl flex flex-col">
+      <SheetContent
+        side="right"
+        className="w-full overflow-y-auto sm:max-w-2xl flex flex-col"
+      >
         <SheetHeader className="pb-6">
           <SheetTitle className="text-2xl">Insert Image</SheetTitle>
           <SheetDescription>
@@ -63,7 +68,9 @@ export function ImageInsertDialog({
               </div>
               <div>
                 <h3 className="font-semibold text-sm">Upload New Image</h3>
-                <p className="text-xs text-muted-foreground">Drag & drop or click to select</p>
+                <p className="text-xs text-muted-foreground">
+                  Drag & drop or click to select
+                </p>
               </div>
             </div>
             <div className="rounded-xl border border-muted bg-muted/30 p-4">
@@ -82,12 +89,14 @@ export function ImageInsertDialog({
               </div>
               <div>
                 <h3 className="font-semibold text-sm">Select from Library</h3>
-                <p className="text-xs text-muted-foreground">Choose an image to insert</p>
+                <p className="text-xs text-muted-foreground">
+                  Choose an image to insert
+                </p>
               </div>
             </div>
             <div>
               <ImageSelector
-                selectedImageUrl={selectedImage?.url ?? ''}
+                selectedImageUrl={selectedImage?.url ?? ""}
                 onSelectImage={handleSelect}
               />
             </div>
@@ -96,22 +105,18 @@ export function ImageInsertDialog({
 
         {/* Actions Footer */}
         <div className="mt-8 flex justify-end gap-3 border-t border-muted bg-muted/30 -mx-6 px-6 py-4">
-          <Button 
-            variant="outline" 
-            onClick={onClose}
-            className="px-6"
-          >
+          <Button variant="outline" onClick={onClose} className="px-6">
             Cancel
           </Button>
-          <Button 
-            onClick={handleInsert} 
+          <Button
+            onClick={handleInsert}
             disabled={!selectedImage}
             className="px-6"
           >
-            {selectedImage ? 'Insert Image' : 'Select an Image'}
+            {selectedImage ? "Insert Image" : "Select an Image"}
           </Button>
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

@@ -1,9 +1,14 @@
-import PageLayout from '@/features/shared/components/page-layout'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Separator } from '@/components/ui/separator'
-import { IconDeviceFloppy, IconBrandGithub, IconKey, IconWorld } from '@tabler/icons-react'
+import {
+  IconBrandGithub,
+  IconDeviceFloppy,
+  IconKey,
+  IconWorld,
+} from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import PageLayout from "@/features/shared/components/page-layout";
 
 export default function SettingsPage() {
   return (
@@ -11,8 +16,8 @@ export default function SettingsPage() {
       title="Settings"
       description="Configure your CMS preferences"
       breadcrumbs={[
-        { label: 'Dashboard', href: '/cms' },
-        { label: 'Settings' },
+        { label: "Dashboard", href: "/cms" },
+        { label: "Settings" },
       ]}
     >
       <div className=" space-y-8">
@@ -33,11 +38,19 @@ export default function SettingsPage() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="owner">Repository Owner</Label>
-                <Input id="owner" placeholder="username" defaultValue="victor3spoir" />
+                <Input
+                  id="owner"
+                  placeholder="username"
+                  defaultValue="victor3spoir"
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="repo">Repository Name</Label>
-                <Input id="repo" placeholder="my-content" defaultValue="victorespoir-contents" />
+                <Input
+                  id="repo"
+                  placeholder="my-content"
+                  defaultValue="victorespoir-contents"
+                />
               </div>
             </div>
             <div className="space-y-2">
@@ -111,5 +124,5 @@ export default function SettingsPage() {
         </div>
       </div>
     </PageLayout>
-  )
+  );
 }

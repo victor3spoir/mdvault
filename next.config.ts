@@ -6,33 +6,34 @@ const nextConfig: NextConfig = {
   typedRoutes: true,
   output: "standalone",
   compress: true,
+  cacheComponents: true,
   experimental: {
-    viewTransition:true,
+    viewTransition: true,
     serverActions: {
-      bodySizeLimit: "2mb"
-    }
+      bodySizeLimit: "3mb",
+    },
   },
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'raw.githubusercontent.com',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "picsum.photos",
+        pathname: "/**",
       },
     ],
   },
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           {
-            key: 'Content-Security-Policy',
+            key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -43,27 +44,27 @@ const nextConfig: NextConfig = {
               "frame-ancestors 'none'",
               "base-uri 'self'",
               "form-action 'self'",
-            ].join('; '),
+            ].join("; "),
           },
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
           },
           {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+            key: "X-XSS-Protection",
+            value: "1; mode=block",
           },
           {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
           },
           {
-            key: 'Permissions-Policy',
-            value: 'geolocation=(), microphone=(), camera=()',
+            key: "Permissions-Policy",
+            value: "geolocation=(), microphone=(), camera=()",
           },
         ],
       },
@@ -72,4 +73,3 @@ const nextConfig: NextConfig = {
 };
 
 export default nextConfig;
-

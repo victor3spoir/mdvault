@@ -1,39 +1,39 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import Image from 'next/image'
-import { listImagesAction } from '../medias.actions'
-import type { UploadedImage } from "../medias.types"
-import { Skeleton } from '@/components/ui/skeleton'
-import { cn } from '@/lib/utils'
-import { IconPhoto } from '@tabler/icons-react'
+import { IconPhoto } from "@tabler/icons-react";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { listImagesAction } from "../medias.actions";
+import type { UploadedImage } from "../medias.types";
 
 interface ImageSelectorProps {
-  selectedImageUrl?: string
-  onSelectImage: (image: UploadedImage) => void
+  selectedImageUrl?: string;
+  onSelectImage: (image: UploadedImage) => void;
 }
 
 export function ImageSelector({
-  selectedImageUrl = '',
+  selectedImageUrl = "",
   onSelectImage,
 }: ImageSelectorProps) {
-  const [images, setImages] = useState<UploadedImage[]>([])
-  const [loading, setLoading] = useState(true)
+  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadImages = async () => {
       try {
-        const imageList = await listImagesAction()
-        setImages(imageList)
+        const imageList = await listImagesAction();
+        setImages(imageList);
       } catch (error) {
-        console.error('Failed to load images:', error)
+        console.error("Failed to load images:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    loadImages()
-  }, [])
+    loadImages();
+  }, []);
 
   if (loading) {
     return (
@@ -47,7 +47,7 @@ export function ImageSelector({
         <Skeleton className="aspect-square rounded-lg" />
         <Skeleton className="aspect-square rounded-lg" />
       </div>
-    )
+    );
   }
 
   if (images.length === 0) {
@@ -55,9 +55,11 @@ export function ImageSelector({
       <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-muted-foreground/25 bg-muted/50 py-12">
         <IconPhoto className="mb-3 h-8 w-8 text-muted-foreground/50" />
         <p className="text-sm text-muted-foreground">No images uploaded yet</p>
-        <p className="text-xs text-muted-foreground/70">Upload an image to get started</p>
+        <p className="text-xs text-muted-foreground/70">
+          Upload an image to get started
+        </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -68,10 +70,10 @@ export function ImageSelector({
           type="button"
           onClick={() => onSelectImage(image)}
           className={cn(
-            'group relative aspect-square overflow-hidden rounded-lg border-2 transition-all duration-200',
+            "group relative aspect-square overflow-hidden rounded-lg border-2 transition-all duration-200",
             selectedImageUrl === image.url
-              ? 'border-primary ring-2 ring-primary ring-offset-2 shadow-md'
-              : 'border-muted hover:border-primary/50 hover:shadow-sm'
+              ? "border-primary ring-2 ring-primary ring-offset-2 shadow-md"
+              : "border-muted hover:border-primary/50 hover:shadow-sm",
           )}
         >
           <Image
@@ -81,10 +83,10 @@ export function ImageSelector({
             className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
-          
+
           {/* Subtle overlay on hover */}
           <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/5" />
-          
+
           {/* Checkmark for selected */}
           {selectedImageUrl === image.url && (
             <div className="absolute inset-0 flex items-center justify-center bg-primary/90">
@@ -111,5 +113,5 @@ export function ImageSelector({
         </button>
       ))}
     </div>
-  )
+  );
 }
