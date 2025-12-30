@@ -49,7 +49,7 @@ export function ImageUploader({
       const newFiles: ImageFile[] = fileArray.map((file) => {
         const error = validateFile(file);
         const preview = error ? "" : URL.createObjectURL(file);
-        console.debug("preview", preview)
+      
         return {
           file,
           preview,
