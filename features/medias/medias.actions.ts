@@ -4,7 +4,8 @@ import { validateImageFile } from "@/lib/file-validation";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import { cacheTag, updateTag } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
-import type { UploadedImage } from "./medias.types";
+import { listPostsAction } from "../posts/posts.actions";
+import type { MediaUsage, UploadedImage } from "./medias.types";
 
 const IMAGES_PATH = githubRepoInfo.IMAGES_PATH;
 
@@ -111,5 +112,33 @@ export async function deleteImageAction(
   } catch (error) {
     console.error("Error deleting image:", error);
     throw new Error("Failed to delete image");
+  }
+}
+
+export async function checkMediaUsageAction(
+  imageUrl: string,
+): Promise<MediaUsage> {
+  try {
+    const posts = await listPostsAction();
+
+    const usedInPosts = posts
+      .filter((post) => {
+        // Check if image is used in coverImage or in post content
+        const isInCover = post.coverImage === imageUrl;
+        const isInContent = post.content.includes(imageUrl);
+        return isInCover || isInContent;
+      })
+      .map((post) => ({
+        slug: post.slug,
+        title: post.title,
+      }));
+
+    return {
+      isUsed: usedInPosts.length > 0,
+      usedInPosts,
+    };
+  } catch (error) {
+    console.error("Error checking media usage:", error);
+    throw new Error("Failed to check media usage");
   }
 }

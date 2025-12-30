@@ -43,6 +43,7 @@ export async function listPostsAction(): Promise<Post[]> {
           content: body,
           createdAt: frontmatter.createdAt || new Date().toISOString(),
           updatedAt: frontmatter.updatedAt || new Date().toISOString(),
+          publishedDate: frontmatter.publishedDate,
           published: frontmatter.published,
           author: frontmatter.author,
           tags: frontmatter.tags,
@@ -109,6 +110,7 @@ export async function getPostAction(slug: string): Promise<Post | null> {
       content: body,
       createdAt: frontmatter.createdAt || new Date().toISOString(),
       updatedAt: frontmatter.updatedAt || new Date().toISOString(),
+      publishedDate: frontmatter.publishedDate,
       published: frontmatter.published,
       author: frontmatter.author,
       tags: frontmatter.tags,
@@ -162,6 +164,7 @@ export async function createPostAction(input: unknown): Promise<Post> {
     published: validatedInput.published ?? false,
     tags: validatedInput.tags,
     coverImage: validatedInput.coverImage,
+    publishedDate: undefined,
     sha: response.data.content?.sha,
   };
 }
@@ -364,6 +367,70 @@ export async function publishPostAction(
   return {
     ...existingPost,
     published: true,
+    updatedAt: now,
+    sha: response.data.content?.sha,
+  };
+}
+
+export async function updatePostMetadataAction(
+  slug: string,
+  metadata: {
+    createdAt?: string;
+    publishedDate?: string;
+  },
+): Promise<Post> {
+  const existingPost = await getPostAction(slug);
+  if (!existingPost) {
+    throw new Error("Post not found");
+  }
+
+  const now = new Date().toISOString();
+
+  const frontmatter = generateFrontmatter({
+    title: existingPost.title,
+    description: existingPost.description,
+    published: existingPost.published,
+    tags: existingPost.tags,
+    coverImage: existingPost.coverImage,
+    createdAt: metadata.createdAt ?? existingPost.createdAt,
+    updatedAt: now,
+    publishedDate: metadata.publishedDate ?? existingPost.publishedDate,
+  });
+
+  const fileContent = `${frontmatter}\n\n${existingPost.content}`;
+  const path = `${POSTS_PATH}/${slug}.md`;
+
+  // Fetch the latest SHA from GitHub to avoid 409 conflicts
+  let latestSha: string | undefined;
+  try {
+    const fileData = await octokit.repos.getContent({
+      owner: githubRepoInfo.owner,
+      repo: githubRepoInfo.repo,
+      path,
+    });
+    if (!Array.isArray(fileData.data) && "sha" in fileData.data) {
+      latestSha = fileData.data.sha;
+    }
+  } catch (error) {
+    console.error("Failed to fetch latest file SHA:", error);
+    latestSha = existingPost.sha;
+  }
+
+  const response = await octokit.repos.createOrUpdateFileContents({
+    owner: githubRepoInfo.owner,
+    repo: githubRepoInfo.repo,
+    path,
+    message: `Update post metadata: ${existingPost.title}`,
+    content: Buffer.from(fileContent).toString("base64"),
+    sha: latestSha || existingPost.sha,
+  });
+
+  updateTag("posts");
+
+  return {
+    ...existingPost,
+    createdAt: metadata.createdAt ?? existingPost.createdAt,
+    publishedDate: metadata.publishedDate ?? existingPost.publishedDate,
     updatedAt: now,
     sha: response.data.content?.sha,
   };

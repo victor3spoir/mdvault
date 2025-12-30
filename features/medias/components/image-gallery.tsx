@@ -1,33 +1,97 @@
 "use client";
 
-import { IconCheck, IconCopy, IconEye, IconX } from "@tabler/icons-react";
+import { IconCheck, IconCopy, IconEye, IconX, IconTrash, IconLoader2 } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useTransition } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogCancel,
+  AlertDialogAction,
 } from "@/components/ui/alert-dialog";
-import type { UploadedImage } from "../medias.types";
+import { Button } from "@/components/ui/button";
+import type { UploadedImage, MediaUsage } from "../medias.types";
+import { checkMediaUsageAction, deleteImageAction } from "../medias.actions";
 
 const Image = dynamic(() => import("next/image"), { ssr: false });
 
 interface ImageGalleryProps {
   images: UploadedImage[];
+  isLoading?: boolean;
+  onImageDeleted?: (imageId: string) => void;
 }
 
-export function ImageGallery({ images }: ImageGalleryProps) {
+export function ImageGallery({ images, isLoading = false, onImageDeleted }: ImageGalleryProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedImageForPreview, setSelectedImageForPreview] =
     useState<UploadedImage | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{
+    image: UploadedImage;
+    usage: MediaUsage;
+  } | null>(null);
+  const [isPending, startTransition] = useTransition();
 
   const copyUrlToClipboard = useCallback((url: string, imageId: string) => {
     navigator.clipboard.writeText(url);
     setCopiedId(imageId);
     setTimeout(() => setCopiedId(null), 2000);
   }, []);
+
+  const handleDeleteClick = async (image: UploadedImage) => {
+    startTransition(async () => {
+      try {
+        const usage = await checkMediaUsageAction(image.url);
+        setDeleteConfirmation({ image, usage });
+      } catch (error) {
+        toast.error("Failed to check image usage", {
+          description: error instanceof Error ? error.message : "Try again later",
+        });
+      }
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmation?.image) return;
+
+    startTransition(async () => {
+      try {
+        await deleteImageAction(
+          deleteConfirmation.image.id,
+          deleteConfirmation.image.name,
+          deleteConfirmation.image.sha || "",
+        );
+        toast.success("Image deleted", {
+          description: `"${deleteConfirmation.image.name}" has been removed`,
+        });
+        setDeleteConfirmation(null);
+        setSelectedImageForPreview(null);
+        onImageDeleted?.(deleteConfirmation.image.id);
+      } catch (error) {
+        toast.error("Failed to delete image", {
+          description: error instanceof Error ? error.message : "Try again later",
+        });
+      }
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
+        {Array.from({ length: 6 }, () => `skeleton-${Math.random()}`).map(
+          (id) => (
+            <div
+              key={id}
+              className="aspect-square rounded-lg bg-muted animate-pulse"
+            />
+          ),
+        )}
+      </div>
+    );
+  }
 
   return (
     <>
@@ -43,7 +107,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
           </div>
         </div>
       ) : (
-        <div className="grid gap-3 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
+        <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(150px,1fr))]">
           {images.map((image) => (
             <div key={image.id} className="space-y-2">
               <button
@@ -87,6 +151,22 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                       <IconCheck className="h-full w-full" />
                     ) : (
                       <IconCopy className="h-full w-full" />
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    className="h-8 w-8 rounded bg-white/20 p-1.5 text-white hover:bg-destructive/80 transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteClick(image);
+                    }}
+                    title="Delete"
+                    disabled={isPending}
+                  >
+                    {isPending ? (
+                      <IconLoader2 className="h-full w-full animate-spin" />
+                    ) : (
+                      <IconTrash className="h-full w-full" />
                     )}
                   </button>
                 </div>
@@ -138,7 +218,7 @@ export function ImageGallery({ images }: ImageGalleryProps) {
               </div>
 
               {/* Image Info */}
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <div>
                   <h3 className="font-semibold text-foreground">
                     {selectedImageForPreview.name}
@@ -182,9 +262,77 @@ export function ImageGallery({ images }: ImageGalleryProps) {
                     )}
                   </button>
                 </div>
+
+                {/* Delete Button */}
+                <Button
+                  onClick={() => handleDeleteClick(selectedImageForPreview)}
+                  disabled={isPending}
+                  variant="destructive"
+                  className="w-full gap-2"
+                >
+                  {isPending ? (
+                    <IconLoader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <IconTrash className="h-4 w-4" />
+                  )}
+                  Delete Image
+                </Button>
               </div>
             </div>
           )}
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog
+        open={!!deleteConfirmation}
+        onOpenChange={(open) => {
+          if (!open) setDeleteConfirmation(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteConfirmation?.usage.isUsed ? (
+                <div className="space-y-3 mt-2">
+                  <p className="text-destructive font-semibold">
+                    ⚠️ This image is being used in {deleteConfirmation.usage.usedInPosts.length} post(s):
+                  </p>
+                  <ul className="space-y-2">
+                    {deleteConfirmation.usage.usedInPosts.map((post) => (
+                      <li key={post.slug} className="text-sm text-muted-foreground pl-4 border-l-2 border-destructive">
+                        <strong>{post.title}</strong> ({post.slug})
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="text-sm text-destructive mt-2">
+                    Deleting this image will break these posts. Are you sure?
+                  </p>
+                </div>
+              ) : (
+                `Are you sure you want to delete "${deleteConfirmation?.image.name}"? This action cannot be undone.`
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          <div className="flex gap-2 justify-end">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmDelete}
+              disabled={isPending}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isPending ? (
+                <>
+                  <IconLoader2 className="h-4 w-4 animate-spin mr-2" />
+                  Deleting...
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </>

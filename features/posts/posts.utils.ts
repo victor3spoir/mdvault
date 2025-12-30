@@ -10,6 +10,7 @@ export function generateFrontmatter(data: PostFrontmatter): string {
   if (data.coverImage) lines.push(`coverImage: "${data.coverImage}"`);
   if (data.createdAt) lines.push(`createdAt: "${data.createdAt}"`);
   if (data.updatedAt) lines.push(`updatedAt: "${data.updatedAt}"`);
+  if (data.publishedDate) lines.push(`publishedDate: "${data.publishedDate}"`);
   if (data.tags?.length) {
     lines.push(`tags: [${data.tags.map((t) => `"${t}"`).join(", ")}]`);
   }
@@ -75,6 +76,9 @@ export function parseFrontmatter(content: string): {
         break;
       case "updatedAt":
         frontmatter.updatedAt = value;
+        break;
+      case "publishedDate":
+        frontmatter.publishedDate = value;
         break;
       case "tags":
         // Parse array syntax: [tag1, tag2]

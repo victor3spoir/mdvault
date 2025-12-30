@@ -6,3 +6,13 @@ export interface UploadedImage {
   uploadedAt: string;
   sha?: string;
 }
+
+export type MediaFile = UploadedImage;
+
+export interface MediaUsage {
+  isUsed: boolean;
+  usedInPosts: Array<{
+    slug: string;
+    title: string;
+  }>;
+}

@@ -4,5 +4,5 @@ variable "TAG" {
 target "postscms" {
   context = "."
   dockerfile = "Dockerfile"
-  tags = [ "postscms:${TAG}" ]
+  tags = [ "ghcr.io/victor3spoir/mdvault:${TAG}" ]
 }

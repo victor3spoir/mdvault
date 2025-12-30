@@ -5,6 +5,7 @@ export interface Post {
   content: string;
   createdAt: string;
   updatedAt: string;
+  publishedDate?: string; // Date when post was published
   published: boolean;
   author?: string;
   tags?: string[];
@@ -21,6 +22,7 @@ export interface PostFrontmatter {
   coverImage?: string;
   createdAt?: string;
   updatedAt?: string;
+  publishedDate?: string; // Date when post was published
 }
 
 export interface GitHubFile {

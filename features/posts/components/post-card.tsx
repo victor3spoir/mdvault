@@ -3,6 +3,7 @@
 import {
   IconCalendar,
   IconCheck,
+  IconClock,
   IconEdit,
   IconEye,
   IconLoader2,
@@ -21,6 +22,7 @@ import {
   publishPostAction,
   unpublishPostAction,
 } from "../posts.actions";
+import { PostMetadataEditor } from "./post-metadata-editor";
 
 interface PostCardProps {
   post: Post;
@@ -31,8 +33,10 @@ interface PostCardProps {
 export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isMetadataEditorOpen, setIsMetadataEditorOpen] = useState(false);
+  const [currentPost, setCurrentPost] = useState(post);
 
-  const formattedDate = new Date(post.createdAt).toLocaleDateString("fr-FR", {
+  const formattedDate = new Date(currentPost.createdAt).toLocaleDateString("fr-FR", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -41,10 +45,11 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
   const handlePublish = async () => {
     startTransition(async () => {
       try {
-        const updatedPost = await publishPostAction(post.slug, post.sha || "");
+        const updatedPost = await publishPostAction(currentPost.slug, currentPost.sha || "");
         toast.success("Post published", {
-          description: `"${post.title}" is now live`,
+          description: `"${currentPost.title}" is now live`,
         });
+        setCurrentPost(updatedPost);
         onPublishChange?.(updatedPost);
       } catch (error) {
         toast.error("Failed to publish", {
@@ -59,12 +64,13 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
     startTransition(async () => {
       try {
         const updatedPost = await unpublishPostAction(
-          post.slug,
-          post.sha || "",
+          currentPost.slug,
+          currentPost.sha || "",
         );
         toast.success("Post unpublished", {
-          description: `"${post.title}" is now a draft`,
+          description: `"${currentPost.title}" is now a draft`,
         });
+        setCurrentPost(updatedPost);
         onPublishChange?.(updatedPost);
       } catch (error) {
         toast.error("Failed to unpublish", {
@@ -88,11 +94,11 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
 
     startTransition(async () => {
       try {
-        await deletePostAction(post.slug, post.sha || "");
+        await deletePostAction(currentPost.slug, currentPost.sha || "");
         toast.success("Post deleted", {
-          description: `"${post.title}" has been removed`,
+          description: `"${currentPost.title}" has been removed`,
         });
-        onDelete?.(post);
+        onDelete?.(currentPost);
       } catch (error) {
         setIsDeleting(false);
         toast.error("Failed to delete", {
@@ -104,122 +110,145 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md">
-      {/* Cover Image */}
-      {post.coverImage && (
-        <div className="relative aspect-video w-full overflow-hidden rounded-t-xl">
-          <Image
-            src={post.coverImage}
-            alt={post.title}
-            fill
-            priority
-            className="object-cover transition-transform group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-          <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-        </div>
-      )}
-
-      <div className="p-5">
-        {/* Status & Tags */}
-        <div className="mb-3 flex flex-wrap items-center gap-2">
-          <Badge variant={post.published ? "default" : "secondary"}>
-            {post.published ? "Published" : "Draft"}
-          </Badge>
-          {post.tags?.slice(0, 2).map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-        </div>
-
-        {/* Title & Description */}
-        <h3 className="mb-2 text-lg font-semibold leading-tight line-clamp-2">
-          {post.title}
-        </h3>
-        {post.description && (
-          <p className="mb-4 text-sm text-muted-foreground line-clamp-2">
-            {post.description}
-          </p>
+    <>
+      <div className="group relative overflow-hidden rounded-xl border bg-card transition-all hover:shadow-md">
+        {/* Cover Image */}
+        {currentPost.coverImage && (
+          <div className="relative aspect-video w-full overflow-hidden rounded-t-xl">
+            <Image
+              src={currentPost.coverImage}
+              alt={currentPost.title}
+              fill
+              priority
+              className="object-cover transition-transform group-hover:scale-105"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            />
+            <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
+          </div>
         )}
 
-        {/* Meta */}
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <IconCalendar className="size-3.5" />
-            {formattedDate}
-          </span>
-          {post.author && (
-            <span className="flex items-center gap-1">By {post.author}</span>
-          )}
-        </div>
+        <div className="p-5">
+          {/* Status & Tags */}
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <Badge variant={currentPost.published ? "default" : "secondary"} className="gap-1">
+              {currentPost.published ? (
+                <>
+                  <IconCheck className="size-3" />
+                  Published
+                </>
+              ) : (
+                "Draft"
+              )}
+            </Badge>
+            {currentPost.tags?.slice(0, 2).map((tag) => (
+              <Badge key={tag} variant="outline" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+          </div>
 
-        {/* Actions */}
-        <div className="mt-4 flex items-center gap-2 border-t pt-4">
-          <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-            <Link href={`/cms/posts/${post.slug}` as "/"} title="View post">
-              <IconEye className="size-4" />
-            </Link>
-          </Button>
-          <Button asChild variant="ghost" size="icon" className="h-8 w-8">
-            <Link
-              href={`/cms/posts/${post.slug}/edit` as "/"}
-              title="Edit post"
-            >
-              <IconEdit className="size-4" />
-            </Link>
-          </Button>
-          {post.published ? (
-            <Button
-              onClick={handleUnpublish}
-              disabled={isPending}
-              variant="outline"
-              size="icon"
-              className="h-8 w-8"
-              title="Unpublish post"
-            >
-              {isPending ? (
-                <IconLoader2 className="size-4 animate-spin" />
-              ) : (
-                <IconX className="size-4" />
-              )}
-            </Button>
-          ) : (
-            <Button
-              onClick={handlePublish}
-              disabled={isPending}
-              size="icon"
-              className="h-8 w-8"
-              title="Publish post"
-            >
-              {isPending ? (
-                <IconLoader2 className="size-4 animate-spin" />
-              ) : (
-                <IconCheck className="size-4" />
-              )}
-            </Button>
+          {/* Title & Description */}
+          <h3 className="mb-2 text-lg font-semibold leading-tight line-clamp-2">
+            {currentPost.title}
+          </h3>
+          {currentPost.description && (
+            <p className="mb-4 text-sm text-muted-foreground line-clamp-2">
+              {currentPost.description}
+            </p>
           )}
-          <Button
-            onClick={handleDelete}
-            disabled={isPending}
-            variant={isDeleting ? "destructive" : "ghost"}
-            size="icon"
-            className="h-8 w-8"
-            title={isDeleting ? "Click again to confirm" : "Delete post"}
-          >
-            {isPending ? (
-              <IconLoader2 className="size-4 animate-spin" />
-            ) : (
-              <IconTrash className="size-4" />
+
+          {/* Meta */}
+          <div className="flex items-center gap-4 text-xs text-muted-foreground">
+            <span className="flex items-center gap-1">
+              <IconCalendar className="size-3.5" />
+              {formattedDate}
+            </span>
+            {currentPost.author && (
+              <span className="flex items-center gap-1">By {currentPost.author}</span>
             )}
-          </Button>
+          </div>
+
+          {/* Actions */}
+          <div className="mt-4 flex items-center gap-2 border-t pt-4">
+            <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+              <Link href={`/cms/posts/${currentPost.slug}`} title="View post">
+                <IconEye className="size-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" size="icon" className="h-8 w-8">
+              <Link
+                href={`/cms/posts/${currentPost.slug}/edit`}
+                title="Edit post"
+              >
+                <IconEdit className="size-4" />
+              </Link>
+            </Button>
+            <Button
+              onClick={() => setIsMetadataEditorOpen(true)}
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              title="Edit metadata"
+            >
+              <IconClock className="size-4" />
+            </Button>
+            {currentPost.published ? (
+              <Button
+                onClick={handleUnpublish}
+                disabled={isPending}
+                variant="outline"
+                size="icon"
+                className="h-8 w-8"
+                title="Unpublish post"
+              >
+                {isPending ? (
+                  <IconLoader2 className="size-4 animate-spin" />
+                ) : (
+                  <IconX className="size-4" />
+                )}
+              </Button>
+            ) : (
+              <Button
+                onClick={handlePublish}
+                disabled={isPending}
+                size="icon"
+                className="h-8 w-8"
+                title="Publish post"
+              >
+                {isPending ? (
+                  <IconLoader2 className="size-4 animate-spin" />
+                ) : (
+                  <IconCheck className="size-4" />
+                )}
+              </Button>
+            )}
+            <Button
+              onClick={handleDelete}
+              disabled={isPending}
+              variant={isDeleting ? "destructive" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              title={isDeleting ? "Click again to confirm" : "Delete post"}
+            >
+              {isPending ? (
+                <IconLoader2 className="size-4 animate-spin" />
+              ) : (
+                <IconTrash className="size-4" />
+              )}
+            </Button>
+          </div>
         </div>
       </div>
-    </div>
+
+      <PostMetadataEditor
+        post={currentPost}
+        isOpen={isMetadataEditorOpen}
+        onClose={() => setIsMetadataEditorOpen(false)}
+        onUpdate={(updatedPost) => setCurrentPost(updatedPost)}
+      />
+    </>
   );
 }
-
-
 
 // Loading Skeleton
 export function PostCardSkeleton() {

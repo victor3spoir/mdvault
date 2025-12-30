@@ -16,12 +16,14 @@ interface ImageFile {
 
 interface ImageUploaderProps {
   onUploadSuccess?: (image: UploadedImage) => void;
+  onUploadComplete?: () => void;
   maxSize?: number; // in MB
 }
 
 export function ImageUploader({
   onUploadSuccess,
-  maxSize = 5,
+  onUploadComplete,
+  maxSize = 3,
 }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<ImageFile[]>([]);
@@ -47,6 +49,7 @@ export function ImageUploader({
       const newFiles: ImageFile[] = fileArray.map((file) => {
         const error = validateFile(file);
         const preview = error ? "" : URL.createObjectURL(file);
+        console.debug("preview", preview)
         return {
           file,
           preview,
@@ -98,11 +101,15 @@ export function ImageUploader({
         );
         onUploadSuccess?.(uploadedImage);
 
-        // Remove from list after 2 seconds
+        // Remove from list after 2 seconds and trigger complete callback
         setTimeout(() => {
-          setUploadedFiles((prev) =>
-            prev.filter((f) => f.file !== imageFile.file),
-          );
+          setUploadedFiles((prev) => {
+            const updated = prev.filter((f) => f.file !== imageFile.file);
+            if (updated.length === 0 && prev.length > 0) {
+              onUploadComplete?.();
+            }
+            return updated;
+          });
         }, 2000);
       } catch {
         setUploadedFiles((prev) =>
@@ -132,6 +139,15 @@ export function ImageUploader({
     setUploadedFiles((prev) => prev.filter((f) => f.file !== file));
   };
 
+  const clearAllFiles = () => {
+    uploadedFiles.forEach((item) => {
+      if (item.preview) {
+        URL.revokeObjectURL(item.preview);
+      }
+    });
+    setUploadedFiles([]);
+  };
+
   return (
     <div className="space-y-4">
       {/* Drop Zone */}
@@ -141,11 +157,10 @@ export function ImageUploader({
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative rounded-lg border-2 border-dashed transition-all cursor-pointer p-8 text-center ${
-          isDragging
-            ? "border-primary bg-primary/5"
-            : "border-muted-foreground/30 hover:border-muted-foreground/50 hover:bg-muted/30"
-        }`}
+        className={`relative rounded-lg border-2 border-dashed transition-all cursor-pointer p-8 text-center ${isDragging
+          ? "border-primary bg-primary/5"
+          : "border-muted-foreground/30 hover:border-muted-foreground/50 hover:bg-muted/30"
+          }`}
       >
         <input
           ref={fileInputRef}
@@ -187,9 +202,8 @@ export function ImageUploader({
           )}
         </div>
       </button>
-
-      {uploadedFiles.some((f) => !f.uploaded && !f.error) && (
-        <div className="flex justify-end">
+      <div className="flex gap-2 justify-end items-center">
+        {uploadedFiles.some((f) => !f.uploaded && !f.error) && (
           <Button
             onClick={() => {
               const toUpload = uploadedFiles.filter(
@@ -201,13 +215,25 @@ export function ImageUploader({
             }}
             disabled={isPending}
             size="sm"
-            className="gap-2 mb-2"
           >
             <IconUpload className="h-4 w-4" />
             Upload All
           </Button>
-        </div>
-      )}
+        )}
+
+        {/* Clear All Button */}
+        {uploadedFiles.length > 0 && (
+          <Button
+            onClick={clearAllFiles}
+            variant="outline"
+            size="sm"
+            className="text-destructive hover:text-destructive"
+          >
+            <IconX className="h-4 w-4" />
+            Clear All
+          </Button>
+        )}
+      </div>
 
       {/* Image Preview and Upload */}
       {uploadedFiles.length > 0 && (
@@ -218,7 +244,7 @@ export function ImageUploader({
               className="flex items-start gap-4 rounded-lg border bg-card p-4"
             >
               {/* Image Preview */}
-              {item.preview && !item.error && (
+              {item.preview && (
                 <div
                   className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-muted"
                   style={{
@@ -257,13 +283,12 @@ export function ImageUploader({
                 {(item.progress > 0 || isPending) && (
                   <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
                     <div
-                      className={`h-full transition-all ${
-                        item.error
-                          ? "bg-destructive"
-                          : item.progress === 100
-                            ? "bg-green-600"
-                            : "bg-primary"
-                      }`}
+                      className={`h-full transition-all ${item.error
+                        ? "bg-destructive"
+                        : item.progress === 100
+                          ? "bg-green-600"
+                          : "bg-primary"
+                        }`}
                       style={{ width: `${item.progress}%` }}
                     />
                   </div>
