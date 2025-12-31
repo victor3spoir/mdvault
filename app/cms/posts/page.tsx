@@ -225,13 +225,13 @@ export default function PostsPage() {
 
       {/* Posts Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(200px,100%),1fr))] gap-6">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-6">
           {["s1", "s2", "s3", "s4", "s5", "s6"].map((key) => (
             <PostCardSkeleton key={key} />
           ))}
         </div>
       ) : filteredPosts.length > 0 ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(200px,100%),1fr))] gap-6">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-6">
           {filteredPosts.map((post) => (
             <PostCard
               key={post.slug}
