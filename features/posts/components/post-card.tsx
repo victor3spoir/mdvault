@@ -112,7 +112,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
 
   return (
     <TooltipProvider>
-      <div className="group @container relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-primary/20">
+      <div className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-primary/20">
         {/* Cover Image */}
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
           {currentPost.coverImage ? (
@@ -185,7 +185,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
               {formattedDate}
             </span>
             {currentPost.author && (
-              <span className="flex items-center gap-1.5 border-l pl-3 truncate @max-[250px]:hidden">
+              <span className="flex items-center gap-1.5 border-l pl-3 truncate">
                 By {currentPost.author}
               </span>
             )}
@@ -196,7 +196,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
             <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary @max-[200px]:h-7 @max-[200px]:w-7">
+                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary">
                     <Link href={`/cms/posts/${currentPost.slug}`}>
                       <IconEye className="size-4" />
                     </Link>
@@ -207,7 +207,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary @max-[200px]:h-7 @max-[200px]:w-7">
+                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary">
                     <Link href={`/cms/posts/${currentPost.slug}/edit`}>
                       <IconEdit className="size-4" />
                     </Link>
@@ -222,7 +222,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                     onClick={() => setIsMetadataEditorOpen(true)}
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary @max-[200px]:h-7 @max-[200px]:w-7"
+                    className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
                     <IconSettings className="size-4" />
                   </Button>
@@ -240,7 +240,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                       disabled={isPending}
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 rounded-lg text-amber-600 hover:bg-amber-50 hover:text-amber-700 @max-[200px]:h-7 @max-[200px]:w-7"
+                      className="h-8 w-8 rounded-lg text-amber-600 hover:bg-amber-50 hover:text-amber-700"
                     >
                       {isPending ? (
                         <IconLoader2 className="size-4 animate-spin" />
@@ -254,7 +254,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                       disabled={isPending}
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 rounded-lg text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 @max-[200px]:h-7 @max-[200px]:w-7"
+                      className="h-8 w-8 rounded-lg text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
                     >
                       {isPending ? (
                         <IconLoader2 className="size-4 animate-spin" />
@@ -275,7 +275,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                     onClick={() => setIsDeleteDialogOpen(true)}
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive @max-[200px]:h-7 @max-[200px]:w-7"
+                    className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
                   >
                     <IconTrash className="size-4" />
                   </Button>

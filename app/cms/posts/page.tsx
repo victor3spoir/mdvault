@@ -125,9 +125,9 @@ export default function PostsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-6 lg:p-10 max-w-7xl mx-auto w-full @container">
+    <div className="flex flex-col gap-8 p-6 lg:p-10 max-w-7xl mx-auto w-full">
       {/* Header Section */}
-      <div className="flex flex-col gap-6 @min-[600px]:flex-row @min-[600px]:items-end @min-[600px]:justify-between">
+      <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
@@ -148,8 +148,8 @@ export default function PostsPage() {
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-col gap-4 @container">
-        <div className="flex flex-col gap-4 rounded-3xl border bg-card/50 p-4 backdrop-blur-sm @min-[600px]:flex-row @min-[600px]:items-center">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 rounded-3xl border bg-card/50 p-4 backdrop-blur-sm sm:flex-row sm:items-center">
           <div className="relative flex-1">
             <IconSearch className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <Input
