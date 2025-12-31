@@ -286,107 +286,112 @@ export function PostEditor({ post, mode }: PostEditorProps) {
       </div>
 
       <div className="flex flex-col gap-8">
-        {/* Metadata Section: Title, Description, Slug, Tags */}
-        <div className="grid gap-8 lg:grid-cols-[1fr,400px]">
-          <div className="space-y-6 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm">
-            <div className="space-y-3">
-              <Label htmlFor="title" className="text-sm font-semibold">Title</Label>
-              <Input
-                id="title"
-                placeholder="Enter a catchy title..."
-                value={title}
-                onChange={(e) => handleTitleChange(e.target.value)}
-                className="h-12 rounded-2xl border-muted bg-muted/30 px-4 text-lg font-bold focus-visible:ring-1 focus-visible:ring-primary/20"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="description" className="text-sm font-semibold">Description</Label>
-              <Textarea
-                id="description"
-                placeholder="What is this post about? (SEO friendly description)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                rows={4}
-                className="rounded-2xl border-muted bg-muted/30 px-4 py-3 focus-visible:ring-1 focus-visible:ring-primary/20"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-8">
-            {/* Cover Image */}
-            <div className="space-y-4 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <IconPhoto className="size-4 text-primary" />
-                Cover Image
-              </div>
-              <CoverImageSelector
-                selectedImageUrl={coverImage}
-                onSelectImage={(image) => setCoverImage(image.url)}
-              />
-            </div>
-
-            {/* Settings & Tags */}
-            <div className="space-y-6 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 text-sm font-semibold">
-                  <IconFileText className="size-4 text-primary" />
-                  Post Settings
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="slug" className="text-[12px] font-medium text-muted-foreground">URL Slug</Label>
-                  <Input
-                    id="slug"
-                    placeholder="post-url-slug"
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
-                    disabled={mode === "edit"}
-                    className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm focus-visible:ring-1 focus-visible:ring-primary/20"
-                  />
-                </div>
+        {/* Metadata Section: Title, Description, Cover Image, Slug, Tags */}
+        <div className="rounded-3xl border bg-card/50 p-6 backdrop-blur-sm transition-all focus-within:border-primary/20 focus-within:shadow-sm">
+          <div className="grid gap-8 lg:grid-cols-[1fr,400px]">
+            {/* Left Column: Title & Description */}
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <Label htmlFor="title" className="text-sm font-semibold">Title</Label>
+                <Input
+                  id="title"
+                  placeholder="Enter a catchy title..."
+                  value={title}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  className="h-12 rounded-2xl border-muted bg-muted/30 px-4 text-lg font-bold transition-all focus-visible:ring-1 focus-visible:ring-primary/20"
+                />
               </div>
 
+              <div className="space-y-3">
+                <Label htmlFor="description" className="text-sm font-semibold">Description</Label>
+                <Textarea
+                  id="description"
+                  placeholder="What is this post about? (SEO friendly description)"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={5}
+                  className="rounded-2xl border-muted bg-muted/30 px-4 py-3 transition-all focus-visible:ring-1 focus-visible:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            {/* Right Column: Cover Image, Slug, Tags */}
+            <div className="space-y-8">
+              {/* Cover Image */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-sm font-semibold">
-                  <IconTags className="size-4 text-primary" />
-                  Tags
+                  <IconPhoto className="size-4 text-primary" />
+                  Cover Image
                 </div>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Add tag..."
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
-                    className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm focus-visible:ring-1 focus-visible:ring-primary/20"
-                  />
-                  <Button 
-                    onClick={addTag} 
-                    size="icon" 
-                    className="h-10 w-10 shrink-0 rounded-xl"
-                    disabled={!tagInput.trim()}
-                  >
-                    <IconPlus className="size-4" />
-                  </Button>
+                <CoverImageSelector
+                  selectedImageUrl={coverImage}
+                  onSelectImage={(image) => setCoverImage(image.url)}
+                />
+              </div>
+
+              {/* Settings & Tags */}
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    <IconFileText className="size-4 text-primary" />
+                    Post Settings
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="slug" className="text-[12px] font-medium text-muted-foreground">URL Slug</Label>
+                    <Input
+                      id="slug"
+                      placeholder="post-url-slug"
+                      value={slug}
+                      onChange={(e) => setSlug(e.target.value)}
+                      disabled={mode === "edit"}
+                      className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm transition-all focus-visible:ring-1 focus-visible:ring-primary/20"
+                    />
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <Badge 
-                      key={tag} 
-                      variant="secondary" 
-                      className="h-7 gap-1 rounded-lg bg-muted/50 px-2 text-[11px] font-medium hover:bg-muted"
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    <IconTags className="size-4 text-primary" />
+                    Tags
+                  </div>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Add tag..."
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+                      className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm transition-all focus-visible:ring-1 focus-visible:ring-primary/20"
+                    />
+                    <Button 
+                      onClick={addTag} 
+                      size="icon" 
+                      className="h-10 w-10 shrink-0 rounded-xl transition-transform active:scale-95"
+                      disabled={!tagInput.trim()}
                     >
-                      {tag}
-                      <button type="button"
-                        onClick={() => removeTag(tag)}
-                        className="ml-1 rounded-full p-0.5 hover:bg-destructive hover:text-destructive-foreground"
+                      <IconPlus className="size-4" />
+                    </Button>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {tags.map((tag) => (
+                      <Badge 
+                        key={tag} 
+                        variant="secondary" 
+                        className="h-7 gap-1 rounded-lg bg-muted/50 px-2 text-[11px] font-medium transition-colors hover:bg-muted"
                       >
-                        <IconX className="size-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                  {tags.length === 0 && (
-                    <p className="text-[12px] text-muted-foreground italic">No tags added yet</p>
-                  )}
+                        {tag}
+                        <button type="button"
+                          onClick={() => removeTag(tag)}
+                          className="ml-1 rounded-full p-0.5 transition-colors hover:bg-destructive hover:text-destructive-foreground"
+                          aria-label={`Remove tag ${tag}`}
+                        >
+                          <IconX className="size-3" />
+                        </button>
+                      </Badge>
+                    ))}
+                    {tags.length === 0 && (
+                      <p className="text-[12px] text-muted-foreground italic">No tags added yet</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -394,7 +399,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
         </div>
 
         {/* Editor Section */}
-        <div className="space-y-6 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm">
+        <div className="space-y-6 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm transition-all focus-within:border-primary/20 focus-within:shadow-sm">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-semibold">Content</Label>
@@ -402,13 +407,13 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                 variant="ghost"
                 size="sm"
                 onClick={() => setImageInsertDialogOpen(true)}
-                className="h-8 rounded-lg text-xs font-medium hover:bg-primary/10 hover:text-primary"
+                className="h-8 rounded-lg text-xs font-medium transition-colors hover:bg-primary/10 hover:text-primary"
               >
                 <IconPhoto className="mr-1.5 size-3.5" />
                 Insert Image
               </Button>
             </div>
-            <div className="min-h-150 rounded-2xl border border-muted bg-muted/30 overflow-hidden">
+            <div className="min-h-150 rounded-2xl border border-muted bg-muted/30 overflow-hidden transition-all focus-within:border-primary/30">
               <ForwardRefEditor
                 ref={editorRef}
                 markdown={post?.content ?? ""}
