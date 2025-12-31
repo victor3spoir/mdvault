@@ -2,14 +2,71 @@
 
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import {
-    CreatePostSchema,
-    UpdatePostSchema,
+  CreatePostSchema,
+  UpdatePostSchema,
 } from "@/lib/validation/post.schema";
 import { cacheTag, updateTag } from "next/cache";
-import type { GitHubFile, Post } from "./posts.types";
+import type { GitHubFile, Post, PostFrontmatter } from "./posts.types";
 import { generateFrontmatter, parseFrontmatter } from "./posts.utils";
 
 const { POSTS_PATH, IMAGES_PATH } = githubRepoInfo;
+
+async function fetchLatestSha(path: string): Promise<string | undefined> {
+  try {
+    const fileData = await octokit.repos.getContent({
+      owner: githubRepoInfo.owner,
+      repo: githubRepoInfo.repo,
+      path,
+    });
+    if (!Array.isArray(fileData.data) && "sha" in fileData.data) {
+      return fileData.data.sha;
+    }
+  } catch (error) {
+    console.error("Failed to fetch latest file SHA:", error);
+  }
+  return undefined;
+}
+
+function createPostObject(
+  slug: string,
+  frontmatter: PostFrontmatter,
+  body: string,
+  sha?: string,
+): Post {
+  return {
+    slug,
+    title: frontmatter.title,
+    description: frontmatter.description,
+    content: body,
+    createdAt: frontmatter.createdAt || new Date().toISOString(),
+    updatedAt: frontmatter.updatedAt || new Date().toISOString(),
+    publishedDate: frontmatter.publishedDate,
+    published: frontmatter.published,
+    author: frontmatter.author,
+    tags: frontmatter.tags,
+    coverImage: frontmatter.coverImage,
+    sha,
+  };
+}
+
+async function updateGitHubFile(
+  path: string,
+  content: string,
+  message: string,
+  sha?: string,
+): Promise<string | undefined> {
+  const latestSha = sha ? await fetchLatestSha(path) : sha;
+  const response = await octokit.repos.createOrUpdateFileContents({
+    owner: githubRepoInfo.owner,
+    repo: githubRepoInfo.repo,
+    path,
+    message,
+    content: Buffer.from(content).toString("base64"),
+    sha: latestSha || sha,
+  });
+  updateTag("posts");
+  return response.data.content?.sha;
+}
 
 export async function listPostsAction(): Promise<Post[]> {
   "use cache";
@@ -35,21 +92,7 @@ export async function listPostsAction(): Promise<Post[]> {
         const content = await getPostContentAction(file.path);
         const { frontmatter, body } = parseFrontmatter(content);
         const slug = file.name.replace(/\.mdx?$/, "");
-
-        return {
-          slug,
-          title: frontmatter.title,
-          description: frontmatter.description,
-          content: body,
-          createdAt: frontmatter.createdAt || new Date().toISOString(),
-          updatedAt: frontmatter.updatedAt || new Date().toISOString(),
-          publishedDate: frontmatter.publishedDate,
-          published: frontmatter.published,
-          author: frontmatter.author,
-          tags: frontmatter.tags,
-          coverImage: frontmatter.coverImage,
-          sha: file.sha,
-        };
+        return createPostObject(slug, frontmatter, body, file.sha);
       }),
     );
 
@@ -103,20 +146,7 @@ export async function getPostAction(slug: string): Promise<Post | null> {
     );
     const { frontmatter, body } = parseFrontmatter(content);
 
-    return {
-      slug,
-      title: frontmatter.title,
-      description: frontmatter.description,
-      content: body,
-      createdAt: frontmatter.createdAt || new Date().toISOString(),
-      updatedAt: frontmatter.updatedAt || new Date().toISOString(),
-      publishedDate: frontmatter.publishedDate,
-      published: frontmatter.published,
-      author: frontmatter.author,
-      tags: frontmatter.tags,
-      coverImage: frontmatter.coverImage,
-      sha: response.data.sha,
-    };
+    return createPostObject(slug, frontmatter, body, response.data.sha);
   } catch (error) {
     console.error("Error getting post:", error);
     return null;
@@ -124,12 +154,8 @@ export async function getPostAction(slug: string): Promise<Post | null> {
 }
 
 export async function createPostAction(input: unknown): Promise<Post> {
-  // Validate input with Zod
   const validatedInput = CreatePostSchema.parse(input);
-
   const now = new Date().toISOString();
-
-  // Strip any existing frontmatter from the editor content
   const { body: cleanContent } = parseFrontmatter(validatedInput.content);
 
   const frontmatter = generateFrontmatter({
@@ -145,46 +171,36 @@ export async function createPostAction(input: unknown): Promise<Post> {
   const fileContent = `${frontmatter}\n\n${cleanContent}`;
   const path = `${POSTS_PATH}/${validatedInput.slug}.md`;
 
-  const response = await octokit.repos.createOrUpdateFileContents({
-    owner: githubRepoInfo.owner,
-    repo: githubRepoInfo.repo,
+  const sha = await updateGitHubFile(
     path,
-    message: `Create post: ${validatedInput.title}`,
-    content: Buffer.from(fileContent).toString("base64"),
-  });
-  updateTag("posts");
+    fileContent,
+    `Create post: ${validatedInput.title}`,
+  );
 
-  return {
-    slug: validatedInput.slug,
-    title: validatedInput.title,
-    description: validatedInput.description,
-    content: cleanContent,
-    createdAt: now,
-    updatedAt: now,
-    published: validatedInput.published ?? false,
-    tags: validatedInput.tags,
-    coverImage: validatedInput.coverImage,
-    publishedDate: undefined,
-    sha: response.data.content?.sha,
-  };
+  return createPostObject(
+    validatedInput.slug,
+    {
+      ...validatedInput,
+      published: validatedInput.published ?? false,
+      createdAt: now,
+      updatedAt: now,
+    } as PostFrontmatter,
+    cleanContent,
+    sha,
+  );
 }
 
 export async function updatePostAction(
   slug: string,
   input: unknown,
 ): Promise<Post> {
-  // Validate input with Zod
-
   const validatedInput = UpdatePostSchema.parse(input);
-
   const existingPost = await getPostAction(slug);
   if (!existingPost) {
     throw new Error("Post not found");
   }
 
   const now = new Date().toISOString();
-
-  // Strip any existing frontmatter from the editor content
   const rawContent = validatedInput.content ?? existingPost.content;
   const { body: cleanContent } = parseFrontmatter(rawContent);
 
@@ -201,32 +217,13 @@ export async function updatePostAction(
   const fileContent = `${frontmatter}\n\n${cleanContent}`;
   const path = `${POSTS_PATH}/${slug}.md`;
 
-  // Fetch the latest SHA from GitHub to avoid 409 conflicts
-  let latestSha: string | undefined;
-  try {
-    const fileData = await octokit.repos.getContent({
-      owner: githubRepoInfo.owner,
-      repo: githubRepoInfo.repo,
-      path,
-    });
-    if (!Array.isArray(fileData.data) && "sha" in fileData.data) {
-      latestSha = fileData.data.sha;
-    }
-  } catch (error) {
-    console.error("Failed to fetch latest file SHA:", error);
-    // If we can't fetch the latest SHA, use the one from validation
-    latestSha = validatedInput.slug.length > 0 ? undefined : undefined;
-  }
-
-  const response = await octokit.repos.createOrUpdateFileContents({
-    owner: githubRepoInfo.owner,
-    repo: githubRepoInfo.repo,
+  const sha = await updateGitHubFile(
     path,
-    message: `Update post: ${validatedInput.title ?? existingPost.title}`,
-    content: Buffer.from(fileContent).toString("base64"),
-    sha: latestSha || existingPost.sha,
-  });
-  updateTag("posts");
+    fileContent,
+    `Update post: ${validatedInput.title ?? existingPost.title}`,
+    existingPost.sha,
+  );
+
   return {
     ...existingPost,
     title: validatedInput.title ?? existingPost.title,
@@ -236,7 +233,7 @@ export async function updatePostAction(
     published: validatedInput.published ?? existingPost.published,
     tags: validatedInput.tags ?? existingPost.tags,
     coverImage: validatedInput.coverImage ?? existingPost.coverImage,
-    sha: response.data.content?.sha,
+    sha,
   };
 }
 
@@ -266,11 +263,10 @@ export async function unpublishPostAction(
   }
 
   const now = new Date().toISOString();
-
   const frontmatter = generateFrontmatter({
     title: existingPost.title,
     description: existingPost.description,
-    published: false, // Set to unpublished
+    published: false,
     tags: existingPost.tags,
     coverImage: existingPost.coverImage,
     createdAt: existingPost.createdAt,
@@ -280,36 +276,18 @@ export async function unpublishPostAction(
   const fileContent = `${frontmatter}\n\n${existingPost.content}`;
   const path = `${POSTS_PATH}/${slug}.md`;
 
-  // Fetch the latest SHA from GitHub to avoid 409 conflicts
-  let latestSha: string | undefined;
-  try {
-    const fileData = await octokit.repos.getContent({
-      owner: githubRepoInfo.owner,
-      repo: githubRepoInfo.repo,
-      path,
-    });
-    if (!Array.isArray(fileData.data) && "sha" in fileData.data) {
-      latestSha = fileData.data.sha;
-    }
-  } catch (error) {
-    console.error("Failed to fetch latest file SHA:", error);
-    latestSha = sha;
-  }
-
-  const response = await octokit.repos.createOrUpdateFileContents({
-    owner: githubRepoInfo.owner,
-    repo: githubRepoInfo.repo,
+  const updatedSha = await updateGitHubFile(
     path,
-    message: `Unpublish post: ${existingPost.title}`,
-    content: Buffer.from(fileContent).toString("base64"),
-    sha: latestSha || sha,
-  });
-  updateTag("posts");
+    fileContent,
+    `Unpublish post: ${existingPost.title}`,
+    sha,
+  );
+
   return {
     ...existingPost,
     published: false,
     updatedAt: now,
-    sha: response.data.content?.sha,
+    sha: updatedSha,
   };
 }
 
@@ -323,11 +301,10 @@ export async function publishPostAction(
   }
 
   const now = new Date().toISOString();
-
   const frontmatter = generateFrontmatter({
     title: existingPost.title,
     description: existingPost.description,
-    published: true, // Set to published
+    published: true,
     tags: existingPost.tags,
     coverImage: existingPost.coverImage,
     createdAt: existingPost.createdAt,
@@ -337,38 +314,18 @@ export async function publishPostAction(
   const fileContent = `${frontmatter}\n\n${existingPost.content}`;
   const path = `${POSTS_PATH}/${slug}.md`;
 
-  // Fetch the latest SHA from GitHub to avoid 409 conflicts
-  let latestSha: string | undefined;
-  try {
-    const fileData = await octokit.repos.getContent({
-      owner: githubRepoInfo.owner,
-      repo: githubRepoInfo.repo,
-      path,
-    });
-    if (!Array.isArray(fileData.data) && "sha" in fileData.data) {
-      latestSha = fileData.data.sha;
-    }
-  } catch (error) {
-    console.error("Failed to fetch latest file SHA:", error);
-    latestSha = sha;
-  }
-
-  const response = await octokit.repos.createOrUpdateFileContents({
-    owner: githubRepoInfo.owner,
-    repo: githubRepoInfo.repo,
+  const updatedSha = await updateGitHubFile(
     path,
-    message: `Publish post: ${existingPost.title}`,
-    content: Buffer.from(fileContent).toString("base64"),
-    sha: latestSha || sha,
-  });
-
-  updateTag("posts");
+    fileContent,
+    `Publish post: ${existingPost.title}`,
+    sha,
+  );
 
   return {
     ...existingPost,
     published: true,
     updatedAt: now,
-    sha: response.data.content?.sha,
+    sha: updatedSha,
   };
 }
 
@@ -385,7 +342,6 @@ export async function updatePostMetadataAction(
   }
 
   const now = new Date().toISOString();
-
   const frontmatter = generateFrontmatter({
     title: existingPost.title,
     description: existingPost.description,
@@ -400,39 +356,19 @@ export async function updatePostMetadataAction(
   const fileContent = `${frontmatter}\n\n${existingPost.content}`;
   const path = `${POSTS_PATH}/${slug}.md`;
 
-  // Fetch the latest SHA from GitHub to avoid 409 conflicts
-  let latestSha: string | undefined;
-  try {
-    const fileData = await octokit.repos.getContent({
-      owner: githubRepoInfo.owner,
-      repo: githubRepoInfo.repo,
-      path,
-    });
-    if (!Array.isArray(fileData.data) && "sha" in fileData.data) {
-      latestSha = fileData.data.sha;
-    }
-  } catch (error) {
-    console.error("Failed to fetch latest file SHA:", error);
-    latestSha = existingPost.sha;
-  }
-
-  const response = await octokit.repos.createOrUpdateFileContents({
-    owner: githubRepoInfo.owner,
-    repo: githubRepoInfo.repo,
+  const updatedSha = await updateGitHubFile(
     path,
-    message: `Update post metadata: ${existingPost.title}`,
-    content: Buffer.from(fileContent).toString("base64"),
-    sha: latestSha || existingPost.sha,
-  });
-
-  updateTag("posts");
+    fileContent,
+    `Update post metadata: ${existingPost.title}`,
+    existingPost.sha,
+  );
 
   return {
     ...existingPost,
     createdAt: metadata.createdAt ?? existingPost.createdAt,
     publishedDate: metadata.publishedDate ?? existingPost.publishedDate,
     updatedAt: now,
-    sha: response.data.content?.sha,
+    sha: updatedSha,
   };
 }
 

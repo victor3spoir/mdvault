@@ -1,9 +1,10 @@
 ---
 agent: agent
-name: git-commit
+name: commit
 description: check project status, make diff & commit the project
-argument-hint: enter something here...
+argument-hint: <commit-description>
 model: GPT-4.1 (copilot)
+tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'context7/*', 'agent', 'todo']
 ---
 You are a git commit automation tool. Create minimal, clean commits for a tidy git history.
 

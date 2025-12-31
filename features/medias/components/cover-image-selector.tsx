@@ -1,11 +1,12 @@
 "use client";
 
-import { IconEdit, IconTrash } from "@tabler/icons-react";
+import { IconEdit, IconTrash, IconPhotoPlus } from "@tabler/icons-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { UploadedImage } from "../medias.types";
 import { ImageInsertDialog } from "./image-insert-dialog";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface CoverImageSelectorProps {
   selectedImageUrl: string;
@@ -24,25 +25,25 @@ export function CoverImageSelector({
   };
 
   return (
-    <>
-      <div className="space-y-3">
+    <TooltipProvider>
+      <div className="space-y-4">
         {selectedImageUrl ? (
-          <div className="relative h-40 w-full overflow-hidden rounded-lg border border-border bg-muted">
+          <div className="group relative h-48 w-full overflow-hidden rounded-2xl border bg-muted shadow-sm transition-all hover:shadow-md">
             <Image
               src={selectedImageUrl}
               alt="Cover image preview"
               fill
-              className="object-cover"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity hover:opacity-100">
+            <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100 backdrop-blur-[2px]">
               <Button
                 type="button"
                 size="sm"
                 variant="secondary"
                 onClick={() => setIsDialogOpen(true)}
-                className="gap-2"
+                className="h-9 gap-2 rounded-xl shadow-lg"
               >
-                <IconEdit className="h-4 w-4" />
+                <IconEdit className="size-4" />
                 Change
               </Button>
               <Button
@@ -58,31 +59,44 @@ export function CoverImageSelector({
                     uploadedAt: "",
                   })
                 }
-                className="gap-2"
+                className="h-9 gap-2 rounded-xl shadow-lg"
               >
-                <IconTrash className="h-4 w-4" />
+                <IconTrash className="size-4" />
                 Remove
               </Button>
             </div>
           </div>
         ) : (
-          <div className="flex h-40 w-full items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/30">
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                No cover image selected
+          <button
+            type="button"
+            onClick={() => setIsDialogOpen(true)}
+            className="flex h-48 w-full flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-muted-foreground/20 bg-muted/5 transition-all hover:border-primary/40 hover:bg-muted/30 group"
+          >
+            <div className="rounded-2xl bg-muted p-3 group-hover:bg-primary/10 transition-colors">
+              <IconPhotoPlus className="size-6 text-muted-foreground group-hover:text-primary transition-colors" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-foreground">
+                No cover image
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Click to select an image
               </p>
             </div>
-          </div>
+          </button>
         )}
 
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => setIsDialogOpen(true)}
-        >
-          {selectedImageUrl ? "Change Cover Image" : "Select Cover Image"}
-        </Button>
+        {selectedImageUrl && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full h-9 rounded-xl text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+            onClick={() => setIsDialogOpen(true)}
+          >
+            Change Cover Image
+          </Button>
+        )}
       </div>
 
       <ImageInsertDialog
@@ -90,6 +104,6 @@ export function CoverImageSelector({
         onClose={() => setIsDialogOpen(false)}
         onSelect={handleImageSelect}
       />
-    </>
+    </TooltipProvider>
   );
 }

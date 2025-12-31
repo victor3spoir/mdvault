@@ -1,17 +1,18 @@
 "use client";
 
-import { IconCalendar, IconCheck, IconLoader2, IconX } from "@tabler/icons-react";
+import { IconCalendar, IconLoader2, IconSettings } from "@tabler/icons-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
+  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Post } from "@/features/posts/posts.types";
@@ -32,14 +33,12 @@ export function PostMetadataEditor({
 }: PostMetadataEditorProps) {
   const [isPending, startTransition] = useTransition();
   const [createdAt, setCreatedAt] = useState(post.createdAt);
-  const [publishedDate, setPublishedDate] = useState(post.publishedDate || "");
 
   const handleSave = () => {
     startTransition(async () => {
       try {
         const updatedPost = await updatePostMetadataAction(post.slug, {
           createdAt,
-          publishedDate: publishedDate || undefined,
         });
         toast.success("Metadata updated", {
           description: `"${post.title}" metadata has been updated`,
@@ -57,82 +56,62 @@ export function PostMetadataEditor({
 
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Edit Post Metadata</AlertDialogTitle>
-          <AlertDialogDescription>
-            Update the creation and publication dates for this post.
+      <AlertDialogContent className="max-w-md rounded-3xl p-8">
+        <AlertDialogHeader className="mb-6">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <IconSettings className="size-6" />
+          </div>
+          <AlertDialogTitle className="text-2xl font-bold">Post Settings</AlertDialogTitle>
+          <AlertDialogDescription className="text-base">
+            Update the metadata for &quot;{post.title}&quot;.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="created-at" className="flex items-center gap-2">
-              <IconCalendar className="size-4" />
-              Created Date
+        <div className="space-y-6 py-2">
+          <div className="space-y-3">
+            <Label htmlFor="created-at" className="text-sm font-semibold">
+              Creation Date
             </Label>
-            <Input
-              id="created-at"
-              type="datetime-local"
-              value={createdAt.slice(0, 16)}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setCreatedAt(new Date(e.target.value).toISOString());
-                }
-              }}
-              disabled={isPending}
-            />
-            <p className="text-xs text-muted-foreground">
-              {new Date(createdAt).toLocaleString()}
+            <div className="relative">
+              <IconCalendar className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                id="created-at"
+                type="datetime-local"
+                value={createdAt.slice(0, 16)}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setCreatedAt(new Date(e.target.value).toISOString());
+                  }
+                }}
+                disabled={isPending}
+                className="h-12 rounded-2xl border-muted bg-muted/30 pl-11 focus-visible:ring-1 focus-visible:ring-primary/20"
+              />
+            </div>
+            <p className="text-[12px] text-muted-foreground">
+              Current: {new Date(createdAt).toLocaleString()}
             </p>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="published-date" className="flex items-center gap-2">
-              <IconCalendar className="size-4" />
-              Published Date {post.published ? "(Optional)" : "(Publish post first)"}
-            </Label>
-            <Input
-              id="published-date"
-              type="datetime-local"
-              value={publishedDate ? publishedDate.slice(0, 16) : ""}
-              onChange={(e) => {
-                if (e.target.value) {
-                  setPublishedDate(new Date(e.target.value).toISOString());
-                } else {
-                  setPublishedDate("");
-                }
-              }}
-              disabled={isPending || !post.published}
-              placeholder={post.published ? "Set when the post was published" : "Publish the post first"}
-            />
-            {publishedDate && (
-              <p className="text-xs text-muted-foreground">
-                {new Date(publishedDate).toLocaleString()}
-              </p>
-            )}
-            {!post.published && (
-              <p className="text-xs text-amber-600">
-                This field is only available for published posts.
-              </p>
-            )}
-          </div>
         </div>
 
-        <div className="flex justify-end gap-2">
-          <AlertDialogCancel disabled={isPending}>
-            <IconX className="mr-2 size-4" />
+        <AlertDialogFooter className="mt-8 gap-3">
+          <AlertDialogCancel className="h-12 flex-1 rounded-2xl border-muted bg-muted/30 hover:bg-muted/50">
             Cancel
           </AlertDialogCancel>
-          <AlertDialogAction onClick={handleSave} disabled={isPending}>
+          <Button
+            onClick={handleSave}
+            disabled={isPending}
+            className="h-12 flex-1 rounded-2xl shadow-lg shadow-primary/20"
+          >
             {isPending ? (
-              <IconLoader2 className="mr-2 size-4 animate-spin" />
+              <>
+                <IconLoader2 className="mr-2 size-4 animate-spin" />
+                Saving...
+              </>
             ) : (
-              <IconCheck className="mr-2 size-4" />
+              "Save Changes"
             )}
-            {isPending ? "Saving..." : "Save"}
-          </AlertDialogAction>
-        </div>
+          </Button>
+        </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );

@@ -50,70 +50,91 @@ export function ImageInsertDialog({
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent
         side="right"
-        className="w-full overflow-y-auto sm:max-w-2xl flex flex-col"
+        className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl"
       >
-        <SheetHeader className="pb-6">
-          <SheetTitle className="text-2xl">Insert Image</SheetTitle>
-          <SheetDescription>
+        <SheetHeader className="border-b p-6">
+          <SheetTitle className="text-2xl font-bold tracking-tight">
+            Insert Image
+          </SheetTitle>
+          <SheetDescription className="text-base">
             Upload a new image or select from your library
           </SheetDescription>
         </SheetHeader>
 
-        <div className="flex-1 space-y-8 overflow-y-auto pr-4">
-          {/* Upload Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="rounded-lg bg-primary/10 p-2">
-                <IconUpload className="h-4 w-4 text-primary" />
+        <div className="flex-1 overflow-y-auto p-6">
+          <div className="space-y-8">
+            {/* Upload Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <IconUpload className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                    Upload New
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Drag & drop or click to select
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-semibold text-sm">Upload New Image</h3>
-                <p className="text-xs text-muted-foreground">
-                  Drag & drop or click to select
-                </p>
+              <div className="rounded-2xl border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2 transition-colors hover:bg-muted/10">
+                <ImageUploader onUploadSuccess={handleUploadSuccess} />
               </div>
             </div>
-            <div className="rounded-xl border border-muted bg-muted/30 p-4">
-              <ImageUploader onUploadSuccess={handleUploadSuccess} />
-            </div>
-          </div>
 
-          {/* Divider */}
-          <Separator className="my-6" />
-
-          {/* Gallery Section */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-2.5">
-              <div className="rounded-lg bg-secondary/50 p-2">
-                <IconPhoto className="h-4 w-4 text-foreground/70" />
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator className="w-full" />
               </div>
-              <div>
-                <h3 className="font-semibold text-sm">Select from Library</h3>
-                <p className="text-xs text-muted-foreground">
-                  Choose an image to insert
-                </p>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  Or select from library
+                </span>
               </div>
             </div>
-            <div>
-              <ImageSelector
-                selectedImageUrl={selectedImage?.url ?? ""}
-                onSelectImage={handleSelect}
-              />
+
+            {/* Gallery Section */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary/50 text-foreground/70">
+                  <IconPhoto className="size-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                    Your Library
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Choose an image to insert
+                  </p>
+                </div>
+              </div>
+              <div className="min-h-60">
+                <ImageSelector
+                  selectedImageUrl={selectedImage?.url ?? ""}
+                  onSelectImage={handleSelect}
+                />
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Actions Footer */}
-        <div className="mt-8 flex justify-end gap-3 border-t border-muted bg-muted/30 -mx-6 px-6 py-4">
-          <Button variant="outline" onClick={onClose} className="px-6">
+        <div className="flex items-center justify-end gap-3 border-t bg-muted/30 p-6">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={onClose}
+            className="h-11 rounded-xl px-6 font-semibold"
+          >
             Cancel
           </Button>
           <Button
+            type="button"
             onClick={handleInsert}
             disabled={!selectedImage}
-            className="px-6"
+            className="h-11 rounded-xl px-8 font-bold shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95 disabled:opacity-50"
           >
-            {selectedImage ? "Insert Image" : "Select an Image"}
+            Insert Image
           </Button>
         </div>
       </SheetContent>

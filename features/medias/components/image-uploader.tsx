@@ -1,10 +1,13 @@
 "use client";
 
-import { IconCheck, IconLoader2, IconUpload, IconX } from "@tabler/icons-react";
+import Image from "next/image";
+import { IconCheck, IconLoader2, IconUpload, IconX, IconFileDescription, IconAlertCircle } from "@tabler/icons-react";
 import { useCallback, useRef, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { uploadImageAction } from "../medias.actions";
 import type { UploadedImage } from "../medias.types";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ImageFile {
   file: File;
@@ -46,20 +49,38 @@ export function ImageUploader({
   const handleFiles = useCallback(
     (files: FileList) => {
       const fileArray = Array.from(files);
-      const newFiles: ImageFile[] = fileArray.map((file) => {
+      fileArray.forEach((file) => {
         const error = validateFile(file);
-        const preview = error ? "" : URL.createObjectURL(file);
-      
-        return {
-          file,
-          preview,
-          progress: 0,
-          error: error || null,
-          uploaded: false,
-        };
-      });
+        if (error) {
+          setUploadedFiles((prev) => [
+            ...prev,
+            {
+              file,
+              preview: "",
+              progress: 0,
+              error,
+              uploaded: false,
+            },
+          ]);
+          return;
+        }
 
-      setUploadedFiles((prev) => [...prev, ...newFiles]);
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const dataUrl = e.target?.result as string;
+          setUploadedFiles((prev) => [
+            ...prev,
+            {
+              file,
+              preview: dataUrl,
+              progress: 0,
+              error: null,
+              uploaded: false,
+            },
+          ]);
+        };
+        reader.readAsDataURL(file);
+      });
     },
     [validateFile],
   );
@@ -133,225 +154,224 @@ export function ImageUploader({
   };
 
   const removeFile = (file: File) => {
-    URL.revokeObjectURL(
-      uploadedFiles.find((f) => f.file === file)?.preview || "",
-    );
     setUploadedFiles((prev) => prev.filter((f) => f.file !== file));
   };
 
   const clearAllFiles = () => {
-    uploadedFiles.forEach((item) => {
-      if (item.preview) {
-        URL.revokeObjectURL(item.preview);
-      }
-    });
     setUploadedFiles([]);
   };
 
   return (
-    <div className="space-y-4">
-      {/* Drop Zone */}
-      <button
-        type="button"
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={() => fileInputRef.current?.click()}
-        className={`relative rounded-lg border-2 border-dashed transition-all cursor-pointer p-8 text-center ${isDragging
-          ? "border-primary bg-primary/5"
-          : "border-muted-foreground/30 hover:border-muted-foreground/50 hover:bg-muted/30"
-          }`}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept="image/*"
-          onChange={handleFileInput}
-          disabled={isPending}
-          className="hidden"
-        />
-
-        <div className="flex flex-col items-center gap-3">
-          {isDragging ? (
-            <>
-              <div className="rounded-full bg-primary/10 p-3">
-                <IconUpload className="h-6 w-6 text-primary animate-bounce" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">Drop images here</p>
-                <p className="text-sm text-muted-foreground">
-                  Release to add to queue
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="rounded-full bg-muted p-3">
-                <IconUpload className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="font-medium text-foreground">
-                  Drag & drop images here
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  or click to browse (Max {maxSize}MB per file)
-                </p>
-              </div>
-            </>
-          )}
-        </div>
-      </button>
-      <div className="flex gap-2 justify-end items-center">
-        {uploadedFiles.some((f) => !f.uploaded && !f.error) && (
-          <Button
-            onClick={() => {
-              const toUpload = uploadedFiles.filter(
-                (f) => !f.uploaded && !f.error,
-              );
-              toUpload.forEach((f) => {
-                handleUpload(f);
-              });
-            }}
+    <TooltipProvider>
+      <div className="space-y-6">
+        {/* Drop Zone */}
+        <button
+          type="button"
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onClick={() => fileInputRef.current?.click()}
+          className={`relative w-full rounded-2xl border-2 border-dashed transition-all cursor-pointer p-10 text-center group ${isDragging
+            ? "border-primary bg-primary/5 ring-4 ring-primary/5"
+            : "border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30"
+            }`}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleFileInput}
             disabled={isPending}
-            size="sm"
-          >
-            <IconUpload className="h-4 w-4" />
-            Upload All
-          </Button>
-        )}
+            className="hidden"
+          />
 
-        {/* Clear All Button */}
+          <div className="flex flex-col items-center gap-4">
+            <div className={`rounded-2xl p-4 transition-colors ${isDragging ? "bg-primary/20" : "bg-muted group-hover:bg-primary/10"}`}>
+              <IconUpload className={`size-8 transition-colors ${isDragging ? "text-primary animate-bounce" : "text-muted-foreground group-hover:text-primary"}`} />
+            </div>
+            <div className="space-y-1">
+              <p className="text-base font-semibold text-foreground">
+                {isDragging ? "Drop to upload" : "Click or drag images here"}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Supports JPG, PNG, GIF, SVG, WebP (Max {maxSize}MB)
+              </p>
+            </div>
+          </div>
+        </button>
+
         {uploadedFiles.length > 0 && (
-          <Button
-            onClick={clearAllFiles}
-            variant="outline"
-            size="sm"
-            className="text-destructive hover:text-destructive"
-          >
-            <IconX className="h-4 w-4" />
-            Clear All
-          </Button>
-        )}
-      </div>
-
-      {/* Image Preview and Upload */}
-      {uploadedFiles.length > 0 && (
-        <div className="space-y-3">
-          {uploadedFiles.map((item) => (
-            <div
-              key={item.file.name + item.file.lastModified}
-              className="flex items-start gap-4 rounded-lg border bg-card p-4"
-            >
-              {/* Image Preview */}
-              {item.preview && (
-                <div
-                  className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md bg-muted"
-                  style={{
-                    backgroundImage: `url(${item.preview})`,
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                />
-              )}
-
-              {/* File Info and Progress */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <p className="text-sm font-medium truncate">
-                      {item.file.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {(item.file.size / 1024 / 1024).toFixed(2)} MB
-                    </p>
-                  </div>
-                  {item.uploaded && (
-                    <div className="shrink-0 rounded-full bg-green-100 p-1 dark:bg-green-900">
-                      <IconCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
-                    </div>
-                  )}
-                </div>
-
-                {item.error && (
-                  <span className="text-xs text-destructive mt-2 block">
-                    {item.error}
-                  </span>
-                )}
-
-                {/* Progress Bar */}
-                {(item.progress > 0 || isPending) && (
-                  <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
-                    <div
-                      className={`h-full transition-all ${item.error
-                        ? "bg-destructive"
-                        : item.progress === 100
-                          ? "bg-green-600"
-                          : "bg-primary"
-                        }`}
-                      style={{ width: `${item.progress}%` }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Actions */}
-              <div className="flex flex-col gap-2 shrink-0">
-                {!item.uploaded && !item.error ? (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Upload Queue ({uploadedFiles.length})
+              </h3>
+              <div className="flex gap-2">
+                {uploadedFiles.some((f) => !f.uploaded && !f.error) && (
                   <Button
-                    onClick={() => handleUpload(item)}
+                    onClick={() => {
+                      const toUpload = uploadedFiles.filter(
+                        (f) => !f.uploaded && !f.error,
+                      );
+                      toUpload.forEach((f) => {
+                        handleUpload(f);
+                      });
+                    }}
                     disabled={isPending}
                     size="sm"
-                    className="gap-2"
+                    variant="secondary"
+                    className="h-8 gap-2 text-xs rounded-lg"
                   >
-                    {isPending ? (
-                      <>
-                        <IconLoader2 className="h-4 w-4 animate-spin" />
-                        Uploading
-                      </>
-                    ) : (
-                      <>
-                        <IconUpload className="h-4 w-4" />
-                        Upload
-                      </>
-                    )}
+                    <IconUpload className="size-3.5" />
+                    Upload All
                   </Button>
-                ) : null}
-                {item.error ? (
-                  <Button
-                    onClick={() => handleRetry(item)}
-                    disabled={isPending}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    {isPending ? (
-                      <>
-                        <IconLoader2 className="h-4 w-4 animate-spin" />
-                        Retrying
-                      </>
-                    ) : (
-                      <>
-                        <IconUpload className="h-4 w-4" />
-                        Retry
-                      </>
-                    )}
-                  </Button>
-                ) : null}
+                )}
                 <Button
-                  onClick={() => removeFile(item.file)}
+                  onClick={clearAllFiles}
                   variant="ghost"
                   size="sm"
-                  className="gap-2 text-destructive hover:text-destructive"
+                  className="h-8 gap-2 text-xs text-muted-foreground hover:text-destructive rounded-lg"
                 >
-                  <IconX className="h-4 w-4" />
-                  Remove
+                  <IconX className="size-3.5" />
+                  Clear All
                 </Button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
+
+            <div className="grid gap-3">
+              {uploadedFiles.map((item) => (
+                <div
+                  key={item.file.name + item.file.lastModified}
+                  className="group relative flex items-center gap-4 rounded-xl border bg-card p-3 shadow-sm transition-all hover:shadow-md"
+                >
+                  {/* Image Preview */}
+                  <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-muted border">
+                    {item.preview ? (
+                      <Image
+                        src={item.preview}
+                        alt={item.file.name}
+                        fill
+                        unoptimized
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <IconFileDescription className="size-6 text-muted-foreground/40" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* File Info and Progress */}
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold truncate leading-none mb-1">
+                          {item.file.name}
+                        </p>
+                        <p className="text-[10px] font-medium text-muted-foreground">
+                          {(item.file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5">
+                        {item.uploaded && (
+                          <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20 gap-1 px-1.5 py-0 h-5 text-[10px]">
+                            <IconCheck className="size-3" />
+                            Done
+                          </Badge>
+                        )}
+                        {item.error && (
+                          <Badge variant="destructive" className="gap-1 px-1.5 py-0 h-5 text-[10px]">
+                            <IconAlertCircle className="size-3" />
+                            Error
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    {(item.progress > 0 || (isPending && !item.uploaded && !item.error)) && (
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full transition-all duration-500 ${item.error
+                            ? "bg-destructive"
+                            : item.progress === 100
+                              ? "bg-green-500"
+                              : "bg-primary animate-pulse"
+                            }`}
+                          style={{ width: `${item.progress || (isPending ? 40 : 0)}%` }}
+                        />
+                      </div>
+                    )}
+                    
+                    {item.error && (
+                      <p className="text-[10px] font-medium text-destructive">
+                        {item.error}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {!item.uploaded && !item.error && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => handleUpload(item)}
+                            disabled={isPending}
+                            size="icon"
+                            variant="ghost"
+                            className="size-8 rounded-lg text-primary hover:bg-primary/10"
+                          >
+                            {isPending ? (
+                              <IconLoader2 className="size-4 animate-spin" />
+                            ) : (
+                              <IconUpload className="size-4" />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Upload</TooltipContent>
+                      </Tooltip>
+                    )}
+                    
+                    {item.error && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            onClick={() => handleRetry(item)}
+                            disabled={isPending}
+                            size="icon"
+                            variant="ghost"
+                            className="size-8 rounded-lg text-primary hover:bg-primary/10"
+                          >
+                            <IconUpload className="size-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Retry</TooltipContent>
+                      </Tooltip>
+                    )}
+
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          onClick={() => removeFile(item.file)}
+                          variant="ghost"
+                          size="icon"
+                          className="size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <IconX className="size-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Remove</TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }

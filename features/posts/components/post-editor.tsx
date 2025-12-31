@@ -9,6 +9,10 @@ import {
   IconSend,
   IconTrash,
   IconX,
+  IconPhoto,
+  IconTags,
+  IconFileText,
+  IconLoader2,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
@@ -211,215 +215,248 @@ export function PostEditor({ post, mode }: PostEditorProps) {
   };
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8 p-6 lg:p-10 max-w-7xl mx-auto w-full">
       {/* Actions Bar */}
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" onClick={() => router.back()} className="gap-2">
-          <IconArrowLeft className="size-4" />
-          Back
-        </Button>
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="ghost" 
+            onClick={() => router.back()} 
+            className="h-11 w-11 rounded-2xl bg-muted/50 hover:bg-muted"
+            size="icon"
+          >
+            <IconArrowLeft className="size-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {mode === "create" ? "Create New Post" : "Edit Post"}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              {mode === "create" ? "Draft your next masterpiece" : `Editing: ${post?.title}`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
           {mode === "edit" && post?.published && (
             <Button
               variant="outline"
               onClick={() => setUnpublishDialogOpen(true)}
               disabled={isUnpublishing}
-              className="gap-2"
+              className="h-11 rounded-2xl border-muted bg-muted/30 px-5 hover:bg-muted/50"
             >
-              <IconEyeOff className="size-4" />
-              {isUnpublishing ? "Unpublishing..." : "Unpublish"}
+              {isUnpublishing ? <IconLoader2 className="mr-2 size-4 animate-spin" /> : <IconEyeOff className="mr-2 size-4" />}
+              Unpublish
             </Button>
           )}
+          
           <Button
             variant="outline"
             onClick={handleSave}
             disabled={isSaving || !title || !slug}
-            className="gap-2"
+            className="h-11 rounded-2xl border-muted bg-muted/30 px-5 hover:bg-muted/50"
           >
-            <IconDeviceFloppy className="size-4" />
-            {isSaving ? "Saving..." : "Save Draft"}
+            {isSaving ? <IconLoader2 className="mr-2 size-4 animate-spin" /> : <IconDeviceFloppy className="mr-2 size-4" />}
+            Save Draft
           </Button>
+
           {!post?.published && (
             <Button
               onClick={handlePublish}
               disabled={isPublishing || !title || !slug}
-              className="gap-2"
+              className="h-11 rounded-2xl bg-primary px-6 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95"
             >
-              <IconSend className="size-4" />
-              {isPublishing ? "Publishing..." : "Publish"}
+              {isPublishing ? <IconLoader2 className="mr-2 size-4 animate-spin" /> : <IconSend className="mr-2 size-4" />}
+              Publish
             </Button>
           )}
+
           {mode === "edit" && (
             <Button
-              variant="destructive"
+              variant="ghost"
               onClick={() => setDeleteDialogOpen(true)}
               disabled={isDeleting}
               size="icon"
-              className="gap-2"
+              className="h-11 w-11 rounded-2xl text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
-              <IconTrash className="size-4" />
+              <IconTrash className="size-5" />
             </Button>
           )}
         </div>
       </div>
 
-      {/* Metadata Section */}
-      <div className="grid gap-6 rounded-xl border bg-card p-6 md:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor="title">Title</Label>
-          <Input
-            id="title"
-            placeholder="Enter post title..."
-            value={title}
-            onChange={(e) => handleTitleChange(e.target.value)}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="slug">Slug</Label>
-          <Input
-            id="slug"
-            placeholder="post-url-slug"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            disabled={mode === "edit"}
-          />
-        </div>
-
-        <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            placeholder="Brief description of your post..."
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={2}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Cover Image</Label>
-          <CoverImageSelector
-            selectedImageUrl={coverImage}
-            onSelectImage={(image: UploadedImage) =>
-              setCoverImage(image.url || "")
-            }
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label>Tags</Label>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Add a tag..."
-              value={tagInput}
-              onChange={(e) => setTagInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  addTag();
-                }
-              }}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={addTag}
-            >
-              <IconPlus className="size-4" />
-            </Button>
-          </div>
-          {tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 pt-2">
-              {tags.map((tag) => (
-                <Badge key={tag} variant="secondary" className="gap-1 pr-1">
-                  {tag}
-                  <button
-                    type="button"
-                    onClick={() => removeTag(tag)}
-                    className="ml-1 rounded-full p-0.5 hover:bg-muted"
-                  >
-                    <IconX className="size-3" />
-                  </button>
-                </Badge>
-              ))}
+      <div className="grid gap-8 lg:grid-cols-[1fr,350px]">
+        <div className="space-y-8">
+          {/* Main Content Section */}
+          <div className="space-y-6 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm">
+            <div className="space-y-3">
+              <Label htmlFor="title" className="text-sm font-semibold">Title</Label>
+              <Input
+                id="title"
+                placeholder="Enter a catchy title..."
+                value={title}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                className="h-12 rounded-2xl border-muted bg-muted/30 px-4 text-lg font-bold focus-visible:ring-1 focus-visible:ring-primary/20"
+              />
             </div>
-          )}
+
+            <div className="space-y-3">
+              <Label htmlFor="description" className="text-sm font-semibold">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="What is this post about? (SEO friendly description)"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={3}
+                className="rounded-2xl border-muted bg-muted/30 px-4 py-3 focus-visible:ring-1 focus-visible:ring-primary/20"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm font-semibold">Content</Label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setImageInsertDialogOpen(true)}
+                  className="h-8 rounded-lg text-xs font-medium hover:bg-primary/10 hover:text-primary"
+                >
+                  <IconPhoto className="mr-1.5 size-3.5" />
+                  Insert Image
+                </Button>
+              </div>
+              <div className="min-h-125 rounded-2xl border border-muted bg-muted/30 overflow-hidden">
+                <ForwardRefEditor
+                  ref={editorRef}
+                  markdown={post?.content ?? ""}
+                  imageUploadHandler={handleImageUpload}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar Section */}
+        <div className="space-y-8">
+          {/* Cover Image */}
+          <div className="space-y-4 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm">
+            <div className="flex items-center gap-2 text-sm font-semibold">
+              <IconPhoto className="size-4 text-primary" />
+              Cover Image
+            </div>
+            <CoverImageSelector
+              value={coverImage}
+              onChange={setCoverImage}
+            />
+          </div>
+
+          {/* Settings & Tags */}
+          <div className="space-y-6 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <IconFileText className="size-4 text-primary" />
+                Post Settings
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="slug" className="text-[12px] font-medium text-muted-foreground">URL Slug</Label>
+                <Input
+                  id="slug"
+                  placeholder="post-url-slug"
+                  value={slug}
+                  onChange={(e) => setSlug(e.target.value)}
+                  disabled={mode === "edit"}
+                  className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm focus-visible:ring-1 focus-visible:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <IconTags className="size-4 text-primary" />
+                Tags
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Add tag..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+                  className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm focus-visible:ring-1 focus-visible:ring-primary/20"
+                />
+                <Button 
+                  onClick={addTag} 
+                  size="icon" 
+                  className="h-10 w-10 shrink-0 rounded-xl"
+                  disabled={!tagInput.trim()}
+                >
+                  <IconPlus className="size-4" />
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <Badge 
+                    key={tag} 
+                    variant="secondary" 
+                    className="h-7 gap-1 rounded-lg bg-muted/50 px-2 text-[11px] font-medium hover:bg-muted"
+                  >
+                    {tag}
+                    <button type="button"
+                      onClick={() => removeTag(tag)}
+                      className="ml-1 rounded-full p-0.5 hover:bg-destructive hover:text-destructive-foreground"
+                    >
+                      <IconX className="size-3" />
+                    </button>
+                  </Badge>
+                ))}
+                {tags.length === 0 && (
+                  <p className="text-[12px] text-muted-foreground italic">No tags added yet</p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Editor Section */}
-      <div className="rounded-xl border bg-card">
-        <div className="border-b bg-muted/30 px-4 py-3">
-          <h3 className="font-medium">Content</h3>
-          <p className="text-sm text-muted-foreground">
-            Write your post content using the rich text editor below
-          </p>
-        </div>
-        <div className="min-h-125">
-          <ForwardRefEditor
-            ref={editorRef}
-            markdown={
-              post?.content ?? "# Start writing...\n\nYour content goes here."
-            }
-            onImageUpload={handleImageUpload}
-            onImageInsertClick={() => setImageInsertDialogOpen(true)}
-            contentEditableClassName="prose prose-neutral dark:prose-invert max-w-none p-6 min-h-[500px] focus:outline-none"
-          />
-        </div>
-      </div>
-
-      {/* Image Insert Dialog */}
       <ImageInsertDialog
         open={imageInsertDialogOpen}
-        onClose={() => setImageInsertDialogOpen(false)}
+        onOpenChange={setImageInsertDialogOpen}
         onSelect={handleImageInsert}
       />
 
-      {/* Delete Post Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this post? This action cannot be
-              undone.
+              This action cannot be undone. This will permanently delete the post
+              and remove it from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-3">
+            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              Delete Post
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Unpublish Post Confirmation Dialog */}
-      <AlertDialog
-        open={unpublishDialogOpen}
-        onOpenChange={setUnpublishDialogOpen}
-      >
-        <AlertDialogContent>
+      <AlertDialog open={unpublishDialogOpen} onOpenChange={setUnpublishDialogOpen}>
+        <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Unpublish Post</AlertDialogTitle>
+            <AlertDialogTitle>Unpublish Post?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to unpublish this post? It will no longer be
-              visible to readers.
+              This will move the post back to drafts. It will no longer be visible
+              on the public site.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleUnpublish}
-              disabled={isUnpublishing}
-            >
-              {isUnpublishing ? "Unpublishing..." : "Unpublish"}
+          <AlertDialogFooter className="gap-3">
+            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleUnpublish} className="rounded-2xl">
+              Unpublish
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

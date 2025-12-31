@@ -1,95 +1,168 @@
 import type { PostFrontmatter } from "./posts.types";
 
-export function generateFrontmatter(data: PostFrontmatter): string {
-  const lines = ["---"];
+const FRONTMATTER_DELIMITER = "---";
+const YAML_QUOTE_PATTERN = /[:\n"']/;
 
-  lines.push(`title: "${data.title}"`);
-  if (data.description) lines.push(`description: "${data.description}"`);
-  lines.push(`published: ${data.published}`);
-  if (data.author) lines.push(`author: "${data.author}"`);
-  if (data.coverImage) lines.push(`coverImage: "${data.coverImage}"`);
-  if (data.createdAt) lines.push(`createdAt: "${data.createdAt}"`);
-  if (data.updatedAt) lines.push(`updatedAt: "${data.updatedAt}"`);
-  if (data.publishedDate) lines.push(`publishedDate: "${data.publishedDate}"`);
-  if (data.tags?.length) {
-    lines.push(`tags: [${data.tags.map((t) => `"${t}"`).join(", ")}]`);
+const FRONTMATTER_FIELDS: Array<keyof PostFrontmatter> = [
+  "title",
+  "description",
+  "published",
+  "author",
+  "coverImage",
+  "createdAt",
+  "updatedAt",
+  "publishedDate",
+  "tags",
+];
+
+type FrontmatterValue = string | boolean | string[] | null;
+
+function escapeYamlString(value: string): string {
+  if (YAML_QUOTE_PATTERN.test(value)) {
+    return `"${value.replace(/"/g, '\\"')}"`;
+  }
+  return `"${value}"`;
+}
+
+function formatValue(value: FrontmatterValue): string {
+  if (value === undefined || value === null) {
+    throw new Error("Cannot format undefined or null value");
+  }
+  if (typeof value === "boolean") {
+    return String(value);
+  }
+  if (typeof value === "string") {
+    return escapeYamlString(value);
+  }
+  if (Array.isArray(value)) {
+    if (!value.every((item) => typeof item === "string")) {
+      throw new Error("Invalid array in frontmatter: expected string[]");
+    }
+    return `[${(value as string[]).map(escapeYamlString).join(", ")}]`;
+  }
+  throw new Error(`Invalid frontmatter value type: ${typeof value}`);
+}
+
+export function generateFrontmatter(data: PostFrontmatter): string {
+  const lines = [FRONTMATTER_DELIMITER];
+
+  for (const field of FRONTMATTER_FIELDS) {
+    const value = data[field];
+    if (value === undefined || value === null) continue;
+    if (Array.isArray(value) && value.length === 0) continue;
+
+    try {
+      lines.push(`${field}: ${formatValue(value)}`);
+    } catch (error) {
+      throw new Error(
+        `Invalid frontmatter value for field "${field}": ${error instanceof Error ? error.message : "unknown error"}`,
+      );
+    }
   }
 
-  lines.push("---");
+  lines.push(FRONTMATTER_DELIMITER);
   return lines.join("\n");
+}
+
+function removeQuotes(value: string): string {
+  if (value.length < 2) {
+    throw new Error("Invalid quoted value: too short");
+  }
+  return value.slice(1, -1);
+}
+
+function parseBoolean(value: string): boolean {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  throw new Error(`Invalid boolean value: ${value}`);
+}
+
+function parseTags(value: string): string[] | null {
+  if (!value.startsWith("[") || !value.endsWith("]")) {
+    return null;
+  }
+  const content = value.slice(1, -1).trim();
+  if (!content) return [];
+
+  return content
+    .split(",")
+    .map((t) => {
+      const trimmed = t.trim();
+      if (!trimmed) return null;
+      if ((trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+          (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+        return removeQuotes(trimmed);
+      }
+      return trimmed;
+    })
+    .filter((t): t is string => t !== null);
+}
+
+function parseStringValue(value: string): string {
+  const isQuoted = (value.startsWith('"') && value.endsWith('"')) ||
+    (value.startsWith("'") && value.endsWith("'"));
+  return isQuoted ? removeQuotes(value) : value;
+}
+
+function parseValue(key: string, value: string): FrontmatterValue {
+  try {
+    if (key === "published") return parseBoolean(value);
+    if (key === "tags") return parseTags(value);
+    return parseStringValue(value);
+  } catch (error) {
+    console.error(`Error parsing field "${key}" with value "${value}":`, error);
+    return undefined;
+  }
+}
+
+function extractFrontmatterLines(
+  content: string,
+): { lines: string[]; body: string } {
+  if (typeof content !== "string") {
+    throw new Error("Content must be a string");
+  }
+
+  const match = content.match(/^---\n([\s\S]*?)\n---\n?/);
+  if (!match) {
+    return { lines: [], body: content };
+  }
+
+  const lines = match[1].split("\n");
+  const body = content.slice(match[0].length);
+  return { lines, body };
 }
 
 export function parseFrontmatter(content: string): {
   frontmatter: PostFrontmatter;
   body: string;
 } {
-  const frontmatterRegex = /^---\n([\s\S]*?)\n---\n?/;
-  const match = content.match(frontmatterRegex);
-
-  if (!match) {
-    return {
-      frontmatter: { title: "Untitled", published: false },
-      body: content,
-    };
+  if (typeof content !== "string") {
+    throw new Error("Content must be a string");
   }
 
-  const frontmatterStr = match[1];
-  const body = content.slice(match[0].length);
-
+  const { lines, body } = extractFrontmatterLines(content);
   const frontmatter: PostFrontmatter = { title: "Untitled", published: false };
 
-  // Parse YAML-like frontmatter
-  const lines = frontmatterStr.split("\n");
   for (const line of lines) {
+    if (typeof line !== "string") continue;
+
     const colonIndex = line.indexOf(":");
     if (colonIndex === -1) continue;
 
     const key = line.slice(0, colonIndex).trim();
-    let value = line.slice(colonIndex + 1).trim();
+    const value = line.slice(colonIndex + 1).trim();
 
-    // Remove quotes if present
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
+    if (!FRONTMATTER_FIELDS.includes(key as keyof PostFrontmatter)) {
+      continue;
     }
 
-    switch (key) {
-      case "title":
-        frontmatter.title = value;
-        break;
-      case "description":
-        frontmatter.description = value;
-        break;
-      case "published":
-        frontmatter.published = value === "true";
-        break;
-      case "author":
-        frontmatter.author = value;
-        break;
-      case "coverImage":
-        frontmatter.coverImage = value;
-        break;
-      case "createdAt":
-        frontmatter.createdAt = value;
-        break;
-      case "updatedAt":
-        frontmatter.updatedAt = value;
-        break;
-      case "publishedDate":
-        frontmatter.publishedDate = value;
-        break;
-      case "tags":
-        // Parse array syntax: [tag1, tag2]
-        if (value.startsWith("[") && value.endsWith("]")) {
-          frontmatter.tags = value
-            .slice(1, -1)
-            .split(",")
-            .map((t) => t.trim().replace(/['"]/g, ""))
-            .filter(Boolean);
-        }
-        break;
+    const parsed = parseValue(key, value);
+    if (parsed !== undefined) {
+      try {
+        Object.assign(frontmatter, { [key]: parsed });
+      } catch (error) {
+        console.error(`Failed to assign field "${key}":`, error);
+      }
     }
   }
 

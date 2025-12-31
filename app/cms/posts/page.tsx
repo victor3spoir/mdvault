@@ -1,86 +1,122 @@
 "use client";
 
 import {
-  IconFileText,
   IconPlus,
   IconSearch,
+  IconFilter,
+  IconSortAscending,
+  IconSortDescending,
+  IconCalendar,
+  IconFileText,
   IconX,
-  IconCheck,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { useMemo, useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { PostCard } from "@/features/posts/components/post-card";
-import type { Post } from "@/features/posts/posts.types";
-import PageLayout from "@/features/shared/components/page-layout";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  PostCard,
+  PostCardSkeleton,
+} from "@/features/posts/components/post-card";
 import { listPostsAction } from "@/features/posts/posts.actions";
+import type { Post } from "@/features/posts/posts.types";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Badge } from "@/components/ui/badge";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 
 type StatusFilter = "all" | "published" | "draft";
 
 export default function PostsPage() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [posts, setPosts] = useState<Post[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+  const [sortBy, setSortBy] = useState<"date" | "title">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  // Load posts on mount
-  useEffect(() => {
-    const loadPosts = async () => {
-      setIsLoading(true);
-      try {
-        const fetchedPosts = await listPostsAction();
-        setPosts(fetchedPosts);
-      } catch (error) {
-        console.error("Error loading posts:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadPosts();
+  const loadPosts = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const data = await listPostsAction();
+      setPosts(data);
+    } catch (error) {
+      console.error("Failed to load posts:", error);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  // Get all unique tags for filter
+  useEffect(() => {
+    loadPosts();
+  }, [loadPosts]);
+
   const allTags = useMemo(() => {
     const tags = new Set<string>();
-    posts.forEach((post) => {
-      post.tags?.forEach((tag) => {
-        tags.add(tag);
-      });
-    });
+    for (const post of posts) {
+      if (post.tags) {
+        for (const tag of post.tags) {
+          tags.add(tag);
+        }
+      }
+    }
     return Array.from(tags).sort();
   }, [posts]);
 
-  // Filter and search posts
   const filteredPosts = useMemo(() => {
-    return posts.filter((post) => {
-      // Search filter (title, description, content)
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        !searchQuery ||
-        post.title.toLowerCase().includes(searchLower) ||
-        post.description?.toLowerCase().includes(searchLower) ||
-        post.content.toLowerCase().includes(searchLower);
+    return posts
+      .filter((post) => {
+        const matchesSearch =
+          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          post.tags?.some((tag) =>
+            tag.toLowerCase().includes(searchQuery.toLowerCase()),
+          );
 
-      // Status filter
-      let matchesStatus = true;
-      if (statusFilter === "published") {
-        matchesStatus = post.published;
-      } else if (statusFilter === "draft") {
-        matchesStatus = !post.published;
-      }
+        const matchesStatus =
+          statusFilter === "all" ||
+          (statusFilter === "published" ? post.published : !post.published);
 
-      // Tags filter
-      const matchesTags =
-        selectedTags.length === 0 ||
-        (post.tags &&
-          selectedTags.some((tag) => post.tags?.includes(tag)));
+        const matchesTags =
+          selectedTags.length === 0 ||
+          (post.tags && selectedTags.some((tag) => post.tags?.includes(tag)));
 
-      return matchesSearch && matchesStatus && matchesTags;
-    });
-  }, [posts, searchQuery, statusFilter, selectedTags]);
+        return matchesSearch && matchesStatus && matchesTags;
+      })
+      .sort((a, b) => {
+        const modifier = sortOrder === "asc" ? 1 : -1;
+        if (sortBy === "date") {
+          return (
+            (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) *
+            modifier
+          );
+        }
+        return a.title.localeCompare(b.title) * modifier;
+      });
+  }, [posts, searchQuery, statusFilter, selectedTags, sortBy, sortOrder]);
+
+  const handleDelete = (deletedPost: Post) => {
+    setPosts((prev) => prev.filter((p) => p.slug !== deletedPost.slug));
+  };
+
+  const handlePublishChange = (updatedPost: Post) => {
+    setPosts((prev) =>
+      prev.map((p) => (p.slug === updatedPost.slug ? updatedPost : p)),
+    );
+  };
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
@@ -88,144 +124,141 @@ export default function PostsPage() {
     );
   };
 
-  const resetFilters = () => {
-    setSearchQuery("");
-    setStatusFilter("all");
-    setSelectedTags([]);
-  };
-
-  const hasActiveFilters = searchQuery || statusFilter !== "all" || selectedTags.length > 0;
-
   return (
-    <PageLayout
-      title="Posts"
-      description="Manage your blog posts and articles"
-      breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Posts" }]}
-      actions={
-        <Button asChild className="gap-2">
-          <Link href="/cms/posts/new">
-            <IconPlus className="size-4" />
-            New Post
+    <div className="flex flex-col gap-8 p-6 lg:p-10 max-w-7xl mx-auto w-full">
+      {/* Header Section */}
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
+            <Badge variant="secondary" className="h-6 rounded-lg px-2 text-xs font-bold">
+              {posts.length}
+            </Badge>
+          </div>
+          <p className="text-muted-foreground">
+            Manage your content, drafts, and published articles.
+          </p>
+        </div>
+        <Button asChild size="lg" className="h-12 rounded-2xl px-6 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95">
+          <Link href="/cms/posts/new" className="gap-2">
+            <IconPlus className="size-5" />
+            Create Post
           </Link>
         </Button>
-      }
-    >
-      {/* Search Bar */}
-      <div className="relative max-w-sm">
-        <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search posts by title, description, or content..."
-          className="pl-9"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-        />
       </div>
 
-      {/* Status Filter Buttons */}
-      <div className="flex flex-wrap gap-2">
-        <Button
-          variant={statusFilter === "all" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setStatusFilter("all")}
-        >
-          All
-        </Button>
-        <Button
-          variant={statusFilter === "published" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setStatusFilter("published")}
-          className="gap-2"
-        >
-          <IconCheck className="size-4" />
-          Published
-        </Button>
-        <Button
-          variant={statusFilter === "draft" ? "default" : "outline"}
-          size="sm"
-          onClick={() => setStatusFilter("draft")}
-          className="gap-2"
-        >
-          <IconFileText className="size-4" />
-          Draft
-        </Button>
-      </div>
+      {/* Filters Bar */}
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4 rounded-3xl border bg-card/50 p-4 backdrop-blur-sm md:flex-row md:items-center">
+          <div className="relative flex-1">
+            <IconSearch className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search posts by title, tags or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-11 rounded-2xl border-none bg-muted/50 pl-11 focus-visible:ring-1 focus-visible:ring-primary/20"
+            />
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-3">
+            <Select
+              value={statusFilter}
+              onValueChange={(value: StatusFilter) => setStatusFilter(value)}
+            >
+              <SelectTrigger className="h-11 w-35 rounded-2xl border-none bg-muted/50 focus:ring-1 focus:ring-primary/20">
+                <div className="flex items-center gap-2">
+                  <IconFilter className="size-4 text-muted-foreground" />
+                  <SelectValue placeholder="Status" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="rounded-2xl border-muted">
+                <SelectItem value="all" className="rounded-xl">All Status</SelectItem>
+                <SelectItem value="published" className="rounded-xl">Published</SelectItem>
+                <SelectItem value="draft" className="rounded-xl">Drafts</SelectItem>
+              </SelectContent>
+            </Select>
 
-      {/* Tag Filter */}
-      {allTags.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm font-medium text-muted-foreground">Filter by tags:</p>
-          <div className="flex flex-wrap gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-muted/50 hover:bg-muted">
+                  {sortOrder === "asc" ? <IconSortAscending className="size-5" /> : <IconSortDescending className="size-5" />}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48 rounded-2xl border-muted">
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Sort by</div>
+                <DropdownMenuItem onClick={() => setSortBy("date")} className="rounded-xl gap-2">
+                  <IconCalendar className="size-4" /> Date
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy("title")} className="rounded-xl gap-2">
+                  <IconFileText className="size-4" /> Title
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Order</div>
+                <DropdownMenuItem onClick={() => setSortOrder("asc")} className="rounded-xl gap-2">
+                  <IconSortAscending className="size-4" /> Ascending
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortOrder("desc")} className="rounded-xl gap-2">
+                  <IconSortDescending className="size-4" /> Descending
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Tags Filter */}
+        {allTags.length > 0 && (
+          <div className="flex flex-wrap gap-2 px-2">
             {allTags.map((tag) => (
               <Badge
                 key={tag}
-                variant={selectedTags.includes(tag) ? "default" : "secondary"}
-                className="cursor-pointer"
+                variant={selectedTags.includes(tag) ? "default" : "outline"}
+                className="cursor-pointer rounded-lg px-3 py-1 transition-all hover:bg-primary/10 hover:text-primary"
                 onClick={() => toggleTag(tag)}
               >
                 {tag}
+                {selectedTags.includes(tag) && <IconX className="ml-1.5 size-3" />}
               </Badge>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* Filter Status */}
-      <div className="flex items-center justify-between">
-        <Badge variant="secondary">
-          {filteredPosts.length} of {posts.length} posts
-        </Badge>
-        {hasActiveFilters && (
-          <Button variant="ghost" size="sm" onClick={resetFilters} className="gap-2">
-            <IconX className="size-4" />
-            Clear filters
-          </Button>
         )}
       </div>
 
-      {/* Posts List */}
+      {/* Posts Grid */}
       {isLoading ? (
-        <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))]">
-          {Array.from({ length: 6 }, () => `skeleton-${Math.random()}`).map((id) => (
-            <div
-              key={id}
-              className="h-48 rounded-lg bg-muted animate-pulse"
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-6">
+          {["s1", "s2", "s3", "s4", "s5", "s6"].map((key) => (
+            <PostCardSkeleton key={key} />
+          ))}
+        </div>
+      ) : filteredPosts.length > 0 ? (
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-6">
+          {filteredPosts.map((post) => (
+            <PostCard
+              key={post.slug}
+              post={post}
+              onDelete={handleDelete}
+              onPublishChange={handlePublishChange}
             />
           ))}
         </div>
-      ) : filteredPosts.length === 0 && posts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-muted/30 px-6 py-16 text-center">
-          <div className="mb-4 rounded-full bg-muted p-4">
-            <IconFileText className="size-8 text-muted-foreground" />
-          </div>
-          <h3 className="mb-2 text-lg font-semibold">No posts yet</h3>
-          <p className="mb-6 max-w-sm text-sm text-muted-foreground">
-            Get started by creating your first post. You can write in Markdown
-            with full support for images, tables, and code blocks.
-          </p>
-          <Button asChild>
-            <Link href="/cms/posts/new">Create First Post</Link>
-          </Button>
-        </div>
-      ) : filteredPosts.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed bg-muted/30 px-6 py-16 text-center">
-          <div className="mb-4 rounded-full bg-muted p-4">
-            <IconSearch className="size-8 text-muted-foreground" />
-          </div>
-          <h3 className="mb-2 text-lg font-semibold">No posts match your filters</h3>
-          <p className="mb-6 max-w-sm text-sm text-muted-foreground">
-            Try adjusting your search query or filters to find what you're looking for.
-          </p>
-          <Button variant="outline" onClick={resetFilters}>
-            Clear filters
-          </Button>
-        </div>
       ) : (
-        <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))]">
-          {filteredPosts.map((post) => (
-            <PostCard post={post} key={post.slug} />
-          ))}
+        <div className="flex min-h-100 items-center justify-center rounded-3xl border border-dashed bg-muted/30">
+          <EmptyState
+            icon={<IconFileText className="size-6" />}
+            title={searchQuery || selectedTags.length > 0 ? "No posts found" : "No posts yet"}
+            description={
+              searchQuery || selectedTags.length > 0
+                ? "Try adjusting your filters or search query to find what you're looking for."
+                : "Start by creating your first post to share with the world."
+            }
+            action={
+              !(searchQuery || selectedTags.length > 0) 
+                ? { label: "Create Post", href: "/cms/posts/new" }
+                : undefined
+            }
+          />
         </div>
       )}
-    </PageLayout>
+    </div>
   );
 }
