@@ -314,6 +314,71 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                 />
               </div>
             </div>
+            {/* Settings & Tags */}
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <IconFileText className="size-4 text-primary" />
+                  Post Settings
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="slug" className="text-[12px] font-medium text-muted-foreground">URL Slug</Label>
+                  <Input
+                    id="slug"
+                    placeholder="post-url-slug"
+                    value={slug}
+                    onChange={(e) => setSlug(e.target.value)}
+                    disabled={mode === "edit"}
+                    className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm transition-all focus-visible:ring-1 focus-visible:ring-primary/20"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <IconTags className="size-4 text-primary" />
+                  Tags
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Add tag..."
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+                    className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm transition-all focus-visible:ring-1 focus-visible:ring-primary/20"
+                  />
+                  <Button
+                    onClick={addTag}
+                    size="icon"
+                    className="h-10 w-10 shrink-0 rounded-xl transition-transform active:scale-95"
+                    disabled={!tagInput.trim()}
+                  >
+                    <IconPlus className="size-4" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {tags.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant="secondary"
+                      className="h-7 gap-1 rounded-lg bg-muted/50 px-2 text-[11px] font-medium transition-colors hover:bg-muted"
+                    >
+                      {tag}
+                      <button type="button"
+                        onClick={() => removeTag(tag)}
+                        className="ml-1 rounded-full p-0.5 transition-colors hover:bg-destructive hover:text-destructive-foreground"
+                        aria-label={`Remove tag ${tag}`}
+                      >
+                        <IconX className="size-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                  {tags.length === 0 && (
+                    <p className="text-[12px] text-muted-foreground italic">No tags added yet</p>
+                  )}
+                </div>
+              </div>
+            </div>
 
             {/* Right Column: Cover Image, Slug, Tags */}
             <div className="space-y-8">
@@ -329,71 +394,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                 />
               </div>
 
-              {/* Settings & Tags */}
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm font-semibold">
-                    <IconFileText className="size-4 text-primary" />
-                    Post Settings
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="slug" className="text-[12px] font-medium text-muted-foreground">URL Slug</Label>
-                    <Input
-                      id="slug"
-                      placeholder="post-url-slug"
-                      value={slug}
-                      onChange={(e) => setSlug(e.target.value)}
-                      disabled={mode === "edit"}
-                      className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm transition-all focus-visible:ring-1 focus-visible:ring-primary/20"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm font-semibold">
-                    <IconTags className="size-4 text-primary" />
-                    Tags
-                  </div>
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Add tag..."
-                      value={tagInput}
-                      onChange={(e) => setTagInput(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
-                      className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm transition-all focus-visible:ring-1 focus-visible:ring-primary/20"
-                    />
-                    <Button 
-                      onClick={addTag} 
-                      size="icon" 
-                      className="h-10 w-10 shrink-0 rounded-xl transition-transform active:scale-95"
-                      disabled={!tagInput.trim()}
-                    >
-                      <IconPlus className="size-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {tags.map((tag) => (
-                      <Badge 
-                        key={tag} 
-                        variant="secondary" 
-                        className="h-7 gap-1 rounded-lg bg-muted/50 px-2 text-[11px] font-medium transition-colors hover:bg-muted"
-                      >
-                        {tag}
-                        <button type="button"
-                          onClick={() => removeTag(tag)}
-                          className="ml-1 rounded-full p-0.5 transition-colors hover:bg-destructive hover:text-destructive-foreground"
-                          aria-label={`Remove tag ${tag}`}
-                        >
-                          <IconX className="size-3" />
-                        </button>
-                      </Badge>
-                    ))}
-                    {tags.length === 0 && (
-                      <p className="text-[12px] text-muted-foreground italic">No tags added yet</p>
-                    )}
-                  </div>
-                </div>
-              </div>
+              
             </div>
           </div>
         </div>
