@@ -112,7 +112,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
 
   return (
     <TooltipProvider>
-      <div className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-primary/20">
+      <div className="group @container relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-primary/20">
         {/* Cover Image */}
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
           {currentPost.coverImage ? (
@@ -149,51 +149,56 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
           </div>
         </div>
 
+        {/* Content */}
         <div className="flex flex-1 flex-col p-5">
-          {/* Tags */}
-          {currentPost.tags && currentPost.tags.length > 0 && (
-            <div className="mb-3 flex flex-wrap gap-1.5">
-              {currentPost.tags.slice(0, 3).map((tag) => (
-                <Badge key={tag} variant="outline" className="h-5 rounded-md px-1.5 text-[10px] font-medium text-muted-foreground">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          )}
-
-          {/* Title & Description */}
-          <div className="flex-1">
-            <h3 className="mb-2 text-lg font-bold leading-tight tracking-tight line-clamp-2 group-hover:text-primary transition-colors">
-              {currentPost.title}
-            </h3>
-            {currentPost.description && (
-              <p className="mb-4 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                {currentPost.description}
-              </p>
+          <div className="mb-3 flex flex-wrap gap-2">
+            {currentPost.tags?.slice(0, 2).map((tag) => (
+              <Badge
+                key={tag}
+                variant="outline"
+                className="rounded-lg border-muted bg-muted/30 px-2 py-0 text-[10px] font-medium text-muted-foreground"
+              >
+                {tag}
+              </Badge>
+            ))}
+            {currentPost.tags && currentPost.tags.length > 2 && (
+              <Badge
+                variant="outline"
+                className="rounded-lg border-muted bg-muted/30 px-2 py-0 text-[10px] font-medium text-muted-foreground"
+              >
+                +{currentPost.tags.length - 2}
+              </Badge>
             )}
           </div>
 
-          {/* Meta */}
-          <div className="mb-4 flex items-center gap-3 text-[11px] font-medium text-muted-foreground">
-            <span className="flex items-center gap-1.5">
+          <h3 className="mb-2 line-clamp-1 text-lg font-bold tracking-tight group-hover:text-primary transition-colors">
+            {currentPost.title}
+          </h3>
+          
+          <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground">
+            {currentPost.description || "No description provided for this post."}
+          </p>
+
+          <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground">
+            <span className="flex items-center gap-1.5 shrink-0">
               <IconCalendar className="size-3.5" />
               {formattedDate}
             </span>
             {currentPost.author && (
-              <span className="flex items-center gap-1.5 border-l pl-3">
+              <span className="flex items-center gap-1.5 border-l pl-3 truncate @[max-width:250px]:hidden">
                 By {currentPost.author}
               </span>
             )}
           </div>
 
           {/* Actions */}
-          <div className="flex items-center justify-between border-t pt-4">
+          <div className="flex items-center justify-between border-t pt-4 gap-2">
             <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary">
+                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary @[max-width:200px]:h-7 @[max-width:200px]:w-7">
                     <Link href={`/cms/posts/${currentPost.slug}`}>
-                      <IconEye className="size-4.5" />
+                      <IconEye className="size-4" />
                     </Link>
                   </Button>
                 </TooltipTrigger>
@@ -202,9 +207,9 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary">
+                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary @[max-width:200px]:h-7 @[max-width:200px]:w-7">
                     <Link href={`/cms/posts/${currentPost.slug}/edit`}>
-                      <IconEdit className="size-4.5" />
+                      <IconEdit className="size-4" />
                     </Link>
                   </Button>
                 </TooltipTrigger>
@@ -217,9 +222,9 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                     onClick={() => setIsMetadataEditorOpen(true)}
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary"
+                    className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary @[max-width:200px]:h-7 @[max-width:200px]:w-7"
                   >
-                    <IconSettings className="size-4.5" />
+                    <IconSettings className="size-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Settings</TooltipContent>
@@ -235,12 +240,12 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                       disabled={isPending}
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 rounded-xl text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                      className="h-8 w-8 rounded-lg text-amber-600 hover:bg-amber-50 hover:text-amber-700 @[max-width:200px]:h-7 @[max-width:200px]:w-7"
                     >
                       {isPending ? (
-                        <IconLoader2 className="size-4.5 animate-spin" />
+                        <IconLoader2 className="size-4 animate-spin" />
                       ) : (
-                        <IconX className="size-4.5" />
+                        <IconX className="size-4" />
                       )}
                     </Button>
                   ) : (
@@ -249,12 +254,12 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                       disabled={isPending}
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 rounded-xl text-green-600 hover:bg-green-50 hover:text-green-700"
+                      className="h-8 w-8 rounded-lg text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 @[max-width:200px]:h-7 @[max-width:200px]:w-7"
                     >
                       {isPending ? (
-                        <IconLoader2 className="size-4.5 animate-spin" />
+                        <IconLoader2 className="size-4 animate-spin" />
                       ) : (
-                        <IconCheck className="size-4.5" />
+                        <IconCheck className="size-4" />
                       )}
                     </Button>
                   )}
@@ -268,16 +273,11 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                 <TooltipTrigger asChild>
                   <Button
                     onClick={() => setIsDeleteDialogOpen(true)}
-                    disabled={isPending}
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive @[max-width:200px]:h-7 @[max-width:200px]:w-7"
                   >
-                    {isPending ? (
-                      <IconLoader2 className="size-4.5 animate-spin" />
-                    ) : (
-                      <IconTrash className="size-4.5" />
-                    )}
+                    <IconTrash className="size-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Delete post</TooltipContent>
@@ -291,11 +291,14 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
         post={currentPost}
         isOpen={isMetadataEditorOpen}
         onClose={() => setIsMetadataEditorOpen(false)}
-        onUpdate={(updatedPost) => setCurrentPost(updatedPost)}
+        onUpdate={(updatedPost: Post) => {
+          setCurrentPost(updatedPost);
+          onPublishChange?.(updatedPost);
+        }}
       />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent className="rounded-2xl">
+        <AlertDialogContent className="rounded-3xl border-muted">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Post</AlertDialogTitle>
             <AlertDialogDescription>
@@ -334,13 +337,13 @@ export function PostCardSkeleton() {
         <div className="h-4 w-1/3 animate-pulse rounded-lg bg-muted" />
         <div className="flex justify-between pt-4 border-t">
           <div className="flex gap-2">
-            <div className="h-9 w-9 animate-pulse rounded-xl bg-muted" />
-            <div className="h-9 w-9 animate-pulse rounded-xl bg-muted" />
-            <div className="h-9 w-9 animate-pulse rounded-xl bg-muted" />
+            <div className="h-8 w-8 animate-pulse rounded-lg bg-muted" />
+            <div className="h-8 w-8 animate-pulse rounded-lg bg-muted" />
+            <div className="h-8 w-8 animate-pulse rounded-lg bg-muted" />
           </div>
           <div className="flex gap-2">
-            <div className="h-9 w-9 animate-pulse rounded-xl bg-muted" />
-            <div className="h-9 w-9 animate-pulse rounded-xl bg-muted" />
+            <div className="h-8 w-8 animate-pulse rounded-lg bg-muted" />
+            <div className="h-8 w-8 animate-pulse rounded-lg bg-muted" />
           </div>
         </div>
       </div>

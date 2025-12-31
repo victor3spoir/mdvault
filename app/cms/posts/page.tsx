@@ -125,9 +125,9 @@ export default function PostsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-6 lg:p-10 max-w-7xl mx-auto w-full">
+    <div className="flex flex-col gap-8 p-6 lg:p-10 max-w-7xl mx-auto w-full @container">
       {/* Header Section */}
-      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+      <div className="flex flex-col gap-6 @[600px]:flex-row @[600px]:items-end @[600px]:justify-between">
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
@@ -148,8 +148,8 @@ export default function PostsPage() {
       </div>
 
       {/* Filters Bar */}
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-4 rounded-3xl border bg-card/50 p-4 backdrop-blur-sm md:flex-row md:items-center">
+      <div className="flex flex-col gap-4 @container">
+        <div className="flex flex-col gap-4 rounded-3xl border bg-card/50 p-4 backdrop-blur-sm @[600px]:flex-row @[600px]:items-center">
           <div className="relative flex-1">
             <IconSearch className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -225,13 +225,13 @@ export default function PostsPage() {
 
       {/* Posts Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-6">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(200px,100%),1fr))] gap-6">
           {["s1", "s2", "s3", "s4", "s5", "s6"].map((key) => (
             <PostCardSkeleton key={key} />
           ))}
         </div>
       ) : filteredPosts.length > 0 ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(300px,100%),1fr))] gap-6">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(200px,100%),1fr))] gap-6">
           {filteredPosts.map((post) => (
             <PostCard
               key={post.slug}
