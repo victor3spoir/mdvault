@@ -215,7 +215,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-6 lg:p-10 max-w-7xl mx-auto w-full">
+    <div className="flex flex-col gap-8 p-6 lg:p-10  w-full">
       {/* Actions Bar */}
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
@@ -431,23 +431,13 @@ export function PostEditor({ post, mode }: PostEditorProps) {
         {/* Editor Section */}
         <div className="space-y-6 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm transition-all focus-within:border-primary/20 focus-within:shadow-sm">
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-semibold">Content</Label>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setImageInsertDialogOpen(true)}
-                className="h-8 rounded-lg text-xs font-medium transition-colors hover:bg-primary/10 hover:text-primary"
-              >
-                <IconPhoto className="mr-1.5 size-3.5" />
-                Insert Image
-              </Button>
-            </div>
-            <div className="min-h-150 rounded-2xl border border-muted bg-muted/30 overflow-hidden transition-all focus-within:border-primary/30">
+           
+            <div className="rounded-2xl border border-muted bg-muted/30 transition-all focus-within:border-primary/30">
               <ForwardRefEditor
                 ref={editorRef}
                 markdown={post?.content ?? ""}
                 onImageUpload={handleImageUpload}
+                onImageInsertClick={() => setImageInsertDialogOpen(true)}
               />
             </div>
           </div>

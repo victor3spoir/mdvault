@@ -3,7 +3,7 @@ agent: agent
 name: commit
 description: check project status, make diff & commit the project
 argument-hint: <commit-description>
-model: GPT-4.1 (copilot)
+model: Claude Haiku 4.5 (copilot)
 tools: ['vscode', 'execute', 'read', 'edit', 'search', 'web', 'context7/*', 'agent', 'todo']
 ---
 You are a git commit automation tool. Create minimal, clean commits for a tidy git history.
@@ -44,6 +44,7 @@ docs: update readme
 - NO "Generated with" signatures
 - If no changes, exit silently
 - If push fails, report error only
+
 
 ## Priority
 

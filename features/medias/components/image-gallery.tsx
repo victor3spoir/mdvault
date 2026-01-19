@@ -214,118 +214,105 @@ export function ImageGallery({
           if (!open) setSelectedImageForPreview(null);
         }}
       >
-        <AlertDialogContent className="max-w-4xl p-0 overflow-hidden border-none bg-transparent shadow-none">
+        <AlertDialogContent className="max-w-2xl p-0 overflow-hidden">
           {selectedImageForPreview && (
-            <div className="relative flex flex-col md:flex-row h-full max-h-[90vh] bg-background rounded-2xl overflow-hidden shadow-2xl border">
-              {/* Close Button */}
-              <button
-                type="button"
-                onClick={() => setSelectedImageForPreview(null)}
-                className="absolute right-4 top-4 z-10 size-8 rounded-full bg-background/80 backdrop-blur-sm flex items-center justify-center hover:bg-muted transition-colors border shadow-sm"
-              >
-                <IconX className="size-4" />
-              </button>
-
-              {/* Image Section */}
-              <div className="relative flex-1 bg-muted/30 min-h-75 md:min-h-125">
+            <div className="flex flex-col">
+              {/* Image Section - 60% height */}
+              <div className="relative bg-muted/50 h-96">
                 <Image
                   src={selectedImageForPreview.url}
                   alt={selectedImageForPreview.name}
                   fill
-                  className="object-contain p-4"
-                  sizes="(max-width: 768px) 100vw, 70vw"
+                  className="object-contain"
                   priority
+                  sizes="640px"
                 />
+                <button
+                  type="button"
+                  onClick={() => setSelectedImageForPreview(null)}
+                  className="absolute right-4 top-4 size-8 rounded-full bg-background/90 backdrop-blur flex items-center justify-center hover:bg-background transition-colors z-10"
+                >
+                  <IconX className="size-4" />
+                </button>
               </div>
 
-              {/* Info Section */}
-              <div className="w-full md:w-80 p-6 flex flex-col bg-card border-l">
-                <div className="flex-1 space-y-6">
-                  <div>
-                    <h3
-                      className="text-lg font-bold tracking-tight truncate mb-1"
-                      title={selectedImageForPreview.name}
+              {/* Content Section */}
+              <div className="p-6 space-y-4 bg-background">
+                {/* Title & Date */}
+                <div>
+                  <h3 className="font-bold text-base line-clamp-2">
+                    {selectedImageForPreview.name}
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+                    <span className="size-1.5 rounded-full bg-green-500" />
+                    {new Date(selectedImageForPreview.uploadedAt).toLocaleDateString()}
+                  </p>
+                </div>
+
+                {/* URL Copy */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+                    URL
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={selectedImageForPreview.url}
+                      readOnly
+                      className="flex-1 h-9 px-3 rounded-lg border bg-muted/50 text-xs text-muted-foreground truncate"
+                    />
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="h-9 w-9 p-0"
+                      onClick={() =>
+                        copyUrlToClipboard(
+                          selectedImageForPreview.url,
+                          selectedImageForPreview.id,
+                        )
+                      }
                     >
-                      {selectedImageForPreview.name}
-                    </h3>
-                    <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                      <span className="size-1.5 rounded-full bg-green-500" />
-                      Uploaded on{" "}
-                      {new Date(
-                        selectedImageForPreview.uploadedAt,
-                      ).toLocaleDateString(undefined, {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </p>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                      Image URL
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-9 rounded-lg border bg-muted/50 px-3 flex items-center overflow-hidden">
-                        <p className="text-xs text-muted-foreground truncate">
-                          {selectedImageForPreview.url}
-                        </p>
-                      </div>
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="size-9 shrink-0"
-                        onClick={() =>
-                          copyUrlToClipboard(
-                            selectedImageForPreview.url,
-                            selectedImageForPreview.id,
-                          )
-                        }
-                      >
-                        {copiedId === selectedImageForPreview.id ? (
-                          <IconCheck className="size-4 text-green-500" />
-                        ) : (
-                          <IconCopy className="size-4" />
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="rounded-xl border bg-muted/5 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
-                        Type
-                      </p>
-                      <p className="text-sm font-medium">
-                        {selectedImageForPreview.name
-                          .split(".")
-                          .pop()
-                          ?.toUpperCase()}
-                      </p>
-                    </div>
+                      {copiedId === selectedImageForPreview.id ? (
+                        <IconCheck className="size-4 text-green-500" />
+                      ) : (
+                        <IconCopy className="size-4" />
+                      )}
+                    </Button>
                   </div>
                 </div>
 
-                <div className="pt-6 mt-6 border-t space-y-3">
+                {/* Type */}
+                <div className="space-y-2">
+                  <p className="text-[11px] font-semibold uppercase text-muted-foreground">
+                    Type
+                  </p>
+                  <div className="text-sm font-medium">
+                    {selectedImageForPreview.name
+                      .split(".")
+                      .pop()
+                      ?.toUpperCase() || "FILE"}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 pt-2">
                   <Button
                     onClick={() => handleDeleteClick(selectedImageForPreview)}
                     disabled={isPending}
                     variant="destructive"
-                    className="w-full gap-2 h-10 rounded-xl shadow-sm"
+                    size="sm"
+                    className="flex-1"
                   >
-                    {isPending ? (
-                      <IconLoader2 className="size-4 animate-spin" />
-                    ) : (
-                      <IconTrash className="size-4" />
-                    )}
-                    Delete Permanently
+                    {isPending && <IconLoader2 className="size-3 animate-spin mr-1" />}
+                    Delete
                   </Button>
                   <Button
-                    variant="outline"
-                    className="w-full h-10 rounded-xl"
                     onClick={() => setSelectedImageForPreview(null)}
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
                   >
-                    Close Preview
+                    Close
                   </Button>
                 </div>
               </div>

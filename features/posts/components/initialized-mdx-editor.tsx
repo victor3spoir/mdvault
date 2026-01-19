@@ -109,6 +109,7 @@ export default function InitializedMDXEditor({
             bash: "Bash",
             json: "JSON",
             md: "Markdown",
+            yml: "YAML",
           },
         }),
         imagePlugin({

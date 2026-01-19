@@ -126,7 +126,7 @@ export default function PostsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-6 lg:p-10 max-w-7xl mx-auto w-full">
+    <div className="flex flex-col gap-8 p-6 lg:p-10  w-full">
       {/* Header Section */}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-1.5">

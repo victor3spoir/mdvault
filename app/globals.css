@@ -148,6 +148,8 @@
     color: var(--foreground);
     padding: 1rem;
     min-height: 300px;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   /* Force content text color */
@@ -155,15 +157,136 @@
     color: inherit;
   }
 
+  /* Heading styles in editor */
+  .mdxeditor-root-contenteditable h1 {
+    font-size: 2em;
+    font-weight: 700;
+    line-height: 1.25;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    color: var(--foreground);
+  }
+
+  .mdxeditor-root-contenteditable h2 {
+    font-size: 1.5em;
+    font-weight: 600;
+    line-height: 1.3;
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    padding-bottom: 0.25em;
+    border-bottom: 1px solid var(--border);
+    color: var(--foreground);
+  }
+
+  .mdxeditor-root-contenteditable h3 {
+    font-size: 1.25em;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: 1.25em;
+    margin-bottom: 0.5em;
+    color: var(--foreground);
+  }
+
+  .mdxeditor-root-contenteditable h4 {
+    font-size: 1.1em;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    color: var(--foreground);
+  }
+
+  /* Paragraph spacing */
+  .mdxeditor-root-contenteditable p {
+    margin-top: 0.75em;
+    margin-bottom: 0.75em;
+    line-height: 1.7;
+  }
+
+  /* Lists */
+  .mdxeditor-root-contenteditable ul {
+    list-style-type: disc;
+    padding-left: 1.5em;
+    margin: 0.75em 0;
+  }
+
+  .mdxeditor-root-contenteditable ol {
+    list-style-type: decimal;
+    padding-left: 1.5em;
+    margin: 0.75em 0;
+  }
+
+  .mdxeditor-root-contenteditable li {
+    margin: 0.25em 0;
+    line-height: 1.6;
+  }
+
+  /* Blockquote */
+  .mdxeditor-root-contenteditable blockquote {
+    border-left: 4px solid var(--primary);
+    padding-left: 1em;
+    margin: 1em 0;
+    font-style: italic;
+    color: var(--muted-foreground);
+  }
+
+  /* Images - fix overflow */
+  .mdxeditor-root-contenteditable img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1em 0;
+  }
+
+  /* Table styling */
+  .mdxeditor-root-contenteditable table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1em 0;
+  }
+
+  .mdxeditor-root-contenteditable th,
+  .mdxeditor-root-contenteditable td {
+    border: 1px solid var(--border);
+    padding: 0.5rem;
+    text-align: left;
+  }
+
+  .mdxeditor-root-contenteditable th {
+    background: var(--muted);
+    font-weight: 600;
+  }
+
   /* Preserve link colors */
   .mdxeditor-root-contenteditable a {
     color: var(--primary);
+    text-decoration: underline;
   }
 
   /* Preserve code block styling */
   .mdxeditor-root-contenteditable pre,
   .mdxeditor-root-contenteditable code {
     background: var(--muted);
+    font-size: 0.875em;
+  }
+
+  .mdxeditor-root-contenteditable pre {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1em 0;
+  }
+
+  .mdxeditor-root-contenteditable code {
+    padding: 0.2em 0.4em;
+    border-radius: 0.25rem;
+  }
+
+  /* Horizontal rule */
+  .mdxeditor-root-contenteditable hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2em 0;
   }
 
   .mdxeditor-toolbar {
@@ -288,6 +411,13 @@
   color: inherit;
 }
 
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable h1,
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable h2,
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable h3,
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable h4 {
+  color: var(--foreground);
+}
+
 .dark .mdx-editor-wrapper .mdxeditor-root-contenteditable a {
   color: var(--primary);
 }
@@ -295,6 +425,11 @@
 .dark .mdx-editor-wrapper .mdxeditor-root-contenteditable pre,
 .dark .mdx-editor-wrapper .mdxeditor-root-contenteditable code {
   background: var(--muted);
+}
+
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable blockquote {
+  color: var(--muted-foreground);
+  border-left-color: var(--primary);
 }
 
 .mdxeditor-popup-container {
@@ -490,4 +625,28 @@
 
 .dark .mdx-preview .mdxeditor-root-contenteditable * {
   color: inherit;
+}
+
+/* Task list checkbox alignment */
+article li:has(> input[type="checkbox"]) {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  list-style: none;
+}
+
+article li > input[type="checkbox"] {
+  margin: 0;
+  position: relative;
+  top: 0.15em;
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  accent-color: var(--primary);
+}
+
+article ul:has(> li > input[type="checkbox"]) {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
 }

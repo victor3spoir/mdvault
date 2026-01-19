@@ -28,7 +28,7 @@ export function CoverImageSelector({
     <TooltipProvider>
       <div className="space-y-4">
         {selectedImageUrl ? (
-          <div className="group relative h-48 w-full overflow-hidden rounded-2xl border bg-muted shadow-sm transition-all hover:shadow-md">
+          <div className="group relative h-150 w-full overflow-hidden rounded-2xl border bg-muted shadow-sm transition-all hover:shadow-md">
             <Image
               src={selectedImageUrl}
               alt="Cover image preview"
@@ -84,18 +84,6 @@ export function CoverImageSelector({
               </p>
             </div>
           </button>
-        )}
-
-        {selectedImageUrl && (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="w-full h-9 rounded-xl text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground"
-            onClick={() => setIsDialogOpen(true)}
-          >
-            Change Cover Image
-          </Button>
         )}
       </div>
 
