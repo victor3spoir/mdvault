@@ -1,13 +1,25 @@
 "use client";
 
+import {
+  IconAlertCircle,
+  IconCheck,
+  IconFileDescription,
+  IconLoader2,
+  IconUpload,
+  IconX,
+} from "@tabler/icons-react";
 import Image from "next/image";
-import { IconCheck, IconLoader2, IconUpload, IconX, IconFileDescription, IconAlertCircle } from "@tabler/icons-react";
 import { useCallback, useRef, useState, useTransition } from "react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { uploadImageAction } from "../medias.actions";
 import type { UploadedImage } from "../medias.types";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ImageFile {
   file: File;
@@ -171,10 +183,11 @@ export function ImageUploader({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onClick={() => fileInputRef.current?.click()}
-          className={`relative w-full rounded-2xl border-2 border-dashed transition-all cursor-pointer p-10 text-center group ${isDragging
-            ? "border-primary bg-primary/5 ring-4 ring-primary/5"
-            : "border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30"
-            }`}
+          className={`relative w-full rounded-2xl border-2 border-dashed transition-all cursor-pointer p-10 text-center group ${
+            isDragging
+              ? "border-primary bg-primary/5 ring-4 ring-primary/5"
+              : "border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30"
+          }`}
         >
           <input
             ref={fileInputRef}
@@ -187,8 +200,12 @@ export function ImageUploader({
           />
 
           <div className="flex flex-col items-center gap-4">
-            <div className={`rounded-2xl p-4 transition-colors ${isDragging ? "bg-primary/20" : "bg-muted group-hover:bg-primary/10"}`}>
-              <IconUpload className={`size-8 transition-colors ${isDragging ? "text-primary animate-bounce" : "text-muted-foreground group-hover:text-primary"}`} />
+            <div
+              className={`rounded-2xl p-4 transition-colors ${isDragging ? "bg-primary/20" : "bg-muted group-hover:bg-primary/10"}`}
+            >
+              <IconUpload
+                className={`size-8 transition-colors ${isDragging ? "text-primary animate-bounce" : "text-muted-foreground group-hover:text-primary"}`}
+              />
             </div>
             <div className="space-y-1">
               <p className="text-base font-semibold text-foreground">
@@ -273,16 +290,22 @@ export function ImageUploader({
                           {(item.file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
                       </div>
-                      
+
                       <div className="flex items-center gap-1.5">
                         {item.uploaded && (
-                          <Badge variant="secondary" className="bg-green-500/10 text-green-600 border-green-500/20 gap-1 px-1.5 py-0 h-5 text-[10px]">
+                          <Badge
+                            variant="secondary"
+                            className="bg-green-500/10 text-green-600 border-green-500/20 gap-1 px-1.5 py-0 h-5 text-[10px]"
+                          >
                             <IconCheck className="size-3" />
                             Done
                           </Badge>
                         )}
                         {item.error && (
-                          <Badge variant="destructive" className="gap-1 px-1.5 py-0 h-5 text-[10px]">
+                          <Badge
+                            variant="destructive"
+                            className="gap-1 px-1.5 py-0 h-5 text-[10px]"
+                          >
                             <IconAlertCircle className="size-3" />
                             Error
                           </Badge>
@@ -291,20 +314,24 @@ export function ImageUploader({
                     </div>
 
                     {/* Progress Bar */}
-                    {(item.progress > 0 || (isPending && !item.uploaded && !item.error)) && (
+                    {(item.progress > 0 ||
+                      (isPending && !item.uploaded && !item.error)) && (
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
                         <div
-                          className={`h-full transition-all duration-500 ${item.error
-                            ? "bg-destructive"
-                            : item.progress === 100
-                              ? "bg-green-500"
-                              : "bg-primary animate-pulse"
-                            }`}
-                          style={{ width: `${item.progress || (isPending ? 40 : 0)}%` }}
+                          className={`h-full transition-all duration-500 ${
+                            item.error
+                              ? "bg-destructive"
+                              : item.progress === 100
+                                ? "bg-green-500"
+                                : "bg-primary animate-pulse"
+                          }`}
+                          style={{
+                            width: `${item.progress || (isPending ? 40 : 0)}%`,
+                          }}
                         />
                       </div>
                     )}
-                    
+
                     {item.error && (
                       <p className="text-[10px] font-medium text-destructive">
                         {item.error}
@@ -334,7 +361,7 @@ export function ImageUploader({
                         <TooltipContent>Upload</TooltipContent>
                       </Tooltip>
                     )}
-                    
+
                     {item.error && (
                       <Tooltip>
                         <TooltipTrigger asChild>

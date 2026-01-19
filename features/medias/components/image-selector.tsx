@@ -1,10 +1,10 @@
 "use client";
 
-import { IconPhoto, IconSearch, IconCheck } from "@tabler/icons-react";
+import { IconCheck, IconPhoto, IconSearch } from "@tabler/icons-react";
 import Image from "next/image";
-import { useEffect, useState, useMemo } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { listImagesAction } from "../medias.actions";
 import type { UploadedImage } from "../medias.types";

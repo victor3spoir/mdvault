@@ -1,18 +1,27 @@
 "use client";
 
 import {
-  IconPlus,
-  IconSearch,
-  IconFilter,
-  IconSortAscending,
-  IconSortDescending,
   IconCalendar,
   IconFileText,
+  IconFilter,
+  IconPlus,
+  IconSearch,
+  IconSortAscending,
+  IconSortDescending,
   IconX,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -27,15 +36,6 @@ import {
 } from "@/features/posts/components/post-card";
 import { listPostsAction } from "@/features/posts/posts.actions";
 import type { Post } from "@/features/posts/posts.types";
-import { EmptyState } from "@/components/ui/empty-state";
-import { Badge } from "@/components/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/components/ui/dropdown-menu";
 
 type StatusFilter = "all" | "published" | "draft";
 
@@ -100,7 +100,8 @@ export default function PostsPage() {
         const modifier = sortOrder === "asc" ? 1 : -1;
         if (sortBy === "date") {
           return (
-            (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) *
+            (new Date(a.createdAt).getTime() -
+              new Date(b.createdAt).getTime()) *
             modifier
           );
         }
@@ -120,7 +121,7 @@ export default function PostsPage() {
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
@@ -131,7 +132,10 @@ export default function PostsPage() {
         <div className="space-y-1.5">
           <div className="flex items-center gap-2">
             <h1 className="text-3xl font-bold tracking-tight">Posts</h1>
-            <Badge variant="secondary" className="h-6 rounded-lg px-2 text-xs font-bold">
+            <Badge
+              variant="secondary"
+              className="h-6 rounded-lg px-2 text-xs font-bold"
+            >
               {posts.length}
             </Badge>
           </div>
@@ -139,7 +143,11 @@ export default function PostsPage() {
             Manage your content, drafts, and published articles.
           </p>
         </div>
-        <Button asChild size="lg" className="h-12 rounded-2xl px-6 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95">
+        <Button
+          asChild
+          size="lg"
+          className="h-12 rounded-2xl px-6 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95"
+        >
           <Link href="/cms/posts/new" className="gap-2">
             <IconPlus className="size-5" />
             Create Post
@@ -159,7 +167,7 @@ export default function PostsPage() {
               className="h-11 rounded-2xl border-none bg-muted/50 pl-11 focus-visible:ring-1 focus-visible:ring-primary/20"
             />
           </div>
-          
+
           <div className="flex flex-wrap items-center gap-3">
             <Select
               value={statusFilter}
@@ -172,32 +180,65 @@ export default function PostsPage() {
                 </div>
               </SelectTrigger>
               <SelectContent className="rounded-2xl border-muted">
-                <SelectItem value="all" className="rounded-xl">All Status</SelectItem>
-                <SelectItem value="published" className="rounded-xl">Published</SelectItem>
-                <SelectItem value="draft" className="rounded-xl">Drafts</SelectItem>
+                <SelectItem value="all" className="rounded-xl">
+                  All Status
+                </SelectItem>
+                <SelectItem value="published" className="rounded-xl">
+                  Published
+                </SelectItem>
+                <SelectItem value="draft" className="rounded-xl">
+                  Drafts
+                </SelectItem>
               </SelectContent>
             </Select>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-11 w-11 rounded-2xl bg-muted/50 hover:bg-muted">
-                  {sortOrder === "asc" ? <IconSortAscending className="size-5" /> : <IconSortDescending className="size-5" />}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-11 w-11 rounded-2xl bg-muted/50 hover:bg-muted"
+                >
+                  {sortOrder === "asc" ? (
+                    <IconSortAscending className="size-5" />
+                  ) : (
+                    <IconSortDescending className="size-5" />
+                  )}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48 rounded-2xl border-muted">
-                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Sort by</div>
-                <DropdownMenuItem onClick={() => setSortBy("date")} className="rounded-xl gap-2">
+              <DropdownMenuContent
+                align="end"
+                className="w-48 rounded-2xl border-muted"
+              >
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                  Sort by
+                </div>
+                <DropdownMenuItem
+                  onClick={() => setSortBy("date")}
+                  className="rounded-xl gap-2"
+                >
                   <IconCalendar className="size-4" /> Date
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortBy("title")} className="rounded-xl gap-2">
+                <DropdownMenuItem
+                  onClick={() => setSortBy("title")}
+                  className="rounded-xl gap-2"
+                >
                   <IconFileText className="size-4" /> Title
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">Order</div>
-                <DropdownMenuItem onClick={() => setSortOrder("asc")} className="rounded-xl gap-2">
+                <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                  Order
+                </div>
+                <DropdownMenuItem
+                  onClick={() => setSortOrder("asc")}
+                  className="rounded-xl gap-2"
+                >
                   <IconSortAscending className="size-4" /> Ascending
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setSortOrder("desc")} className="rounded-xl gap-2">
+                <DropdownMenuItem
+                  onClick={() => setSortOrder("desc")}
+                  className="rounded-xl gap-2"
+                >
                   <IconSortDescending className="size-4" /> Descending
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -216,7 +257,9 @@ export default function PostsPage() {
                 onClick={() => toggleTag(tag)}
               >
                 {tag}
-                {selectedTags.includes(tag) && <IconX className="ml-1.5 size-3" />}
+                {selectedTags.includes(tag) && (
+                  <IconX className="ml-1.5 size-3" />
+                )}
               </Badge>
             ))}
           </div>
@@ -245,14 +288,18 @@ export default function PostsPage() {
         <div className="flex min-h-100 items-center justify-center rounded-3xl border border-dashed bg-muted/30">
           <EmptyState
             icon={<IconFileText className="size-6" />}
-            title={searchQuery || selectedTags.length > 0 ? "No posts found" : "No posts yet"}
+            title={
+              searchQuery || selectedTags.length > 0
+                ? "No posts found"
+                : "No posts yet"
+            }
             description={
               searchQuery || selectedTags.length > 0
                 ? "Try adjusting your filters or search query to find what you're looking for."
                 : "Start by creating your first post to share with the world."
             }
             action={
-              !(searchQuery || selectedTags.length > 0) 
+              !(searchQuery || selectedTags.length > 0)
                 ? { label: "Create Post", href: "/cms/posts/new" }
                 : undefined
             }

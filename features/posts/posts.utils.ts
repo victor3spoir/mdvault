@@ -89,8 +89,10 @@ function parseTags(value: string): string[] | null {
     .map((t) => {
       const trimmed = t.trim();
       if (!trimmed) return null;
-      if ((trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-          (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+      if (
+        (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
+        (trimmed.startsWith("'") && trimmed.endsWith("'"))
+      ) {
         return removeQuotes(trimmed);
       }
       return trimmed;
@@ -99,7 +101,8 @@ function parseTags(value: string): string[] | null {
 }
 
 function parseStringValue(value: string): string {
-  const isQuoted = (value.startsWith('"') && value.endsWith('"')) ||
+  const isQuoted =
+    (value.startsWith('"') && value.endsWith('"')) ||
     (value.startsWith("'") && value.endsWith("'"));
   return isQuoted ? removeQuotes(value) : value;
 }
@@ -115,9 +118,10 @@ function parseValue(key: string, value: string): FrontmatterValue {
   }
 }
 
-function extractFrontmatterLines(
-  content: string,
-): { lines: string[]; body: string } {
+function extractFrontmatterLines(content: string): {
+  lines: string[];
+  body: string;
+} {
   if (typeof content !== "string") {
     throw new Error("Content must be a string");
   }

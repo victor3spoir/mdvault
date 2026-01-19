@@ -84,7 +84,7 @@
 
 .dark {
   --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
+  --foreground: oklch(0.95 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -129,63 +129,196 @@
 .mdx-editor-wrapper {
   --accentColor: var(--primary);
   --accentColorLight: var(--primary-foreground);
+  --baseText: var(--foreground);
+  --baseTextContrast: var(--foreground);
+  --baseBg: var(--background);
+  --baseBorder: var(--border);
+  color: var(--foreground);
 
   [class*="mdxeditor"] {
     font-family: inherit;
   }
 
+  .mdxeditor {
+    background: var(--background);
+    color: var(--foreground);
+  }
+
+  .mdxeditor-root-contenteditable {
+    color: var(--foreground);
+    padding: 1rem;
+    min-height: 300px;
+  }
+
+  /* Force content text color */
+  .mdxeditor-root-contenteditable * {
+    color: inherit;
+  }
+
+  /* Preserve link colors */
+  .mdxeditor-root-contenteditable a {
+    color: var(--primary);
+  }
+
+  /* Preserve code block styling */
+  .mdxeditor-root-contenteditable pre,
+  .mdxeditor-root-contenteditable code {
+    background: var(--muted);
+  }
+
   .mdxeditor-toolbar {
-    position: sticky;
-    top: 3.5rem; /* Offset for PageLayout header (h-14) */
+    position: relative;
     z-index: 20;
-    background: hsl(var(--background) / 0.8);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid hsl(var(--border));
+    background: var(--background);
+    border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
     gap: 0.25rem;
     padding: 0.5rem;
+    color: var(--foreground);
   }
 
-  .mdxeditor-toolbar button {
+  /* All toolbar buttons - comprehensive selector */
+  .mdxeditor-toolbar button,
+  .mdxeditor-toolbar-button,
+  .mdxeditor-toolbar [role="button"],
+  .mdxeditor-toolbar button[type="button"],
+  [class*="diffSourceToggle"] button,
+  [class*="viewMode"] button,
+  [class*="toggleGroup"] button {
+    border-radius: 0.375rem;
+    color: var(--foreground);
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+
+  .mdxeditor-toolbar button:hover,
+  .mdxeditor-toolbar-button:hover,
+  .mdxeditor-toolbar [role="button"]:hover,
+  [class*="diffSourceToggle"] button:hover,
+  [class*="viewMode"] button:hover,
+  [class*="toggleGroup"] button:hover {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  .mdxeditor-toolbar [data-state="on"],
+  .mdxeditor-toolbar button[data-active="true"],
+  .mdxeditor-toolbar [aria-pressed="true"],
+  [class*="diffSourceToggle"] button[data-state="on"],
+  [class*="viewMode"] button[data-state="on"],
+  [class*="toggleGroup"] button[data-state="on"] {
+    background: var(--accent);
+    color: var(--accent-foreground);
+  }
+
+  /* BlockTypeSelect and other selects */
+  .mdxeditor-toolbar select,
+  .mdxeditor-toolbar input[type="text"],
+  .mdxeditor-toolbar input[type="search"],
+  [class*="selectTrigger"],
+  [class*="blockType"] button {
+    background: var(--muted);
+    color: var(--foreground);
+    border: 1px solid var(--border);
     border-radius: 0.375rem;
   }
 
-  .mdxeditor-toolbar button:hover {
-    background: hsl(var(--accent));
+  .mdxeditor-toolbar svg {
+    color: currentColor;
   }
 
-  .mdxeditor-toolbar [data-state="on"] {
-    background: hsl(var(--accent));
-    color: hsl(var(--accent-foreground));
-  }
-
-  .mdxeditor-popup-container {
-    background: hsl(var(--popover));
-    border: 1px solid hsl(var(--border));
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    z-index: 50;
-  }
-
-  .mdxeditor-dropdown-container {
-    background: hsl(var(--popover));
-    border: 1px solid hsl(var(--border));
-    border-radius: 0.5rem;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    z-index: 50;
+  .mdxeditor-toolbar [class*="separator"] {
+    background: var(--border);
   }
 }
 
-.dark .mdx-editor-wrapper {
-  --accentColor: var(--primary);
+/* Dark mode specific overrides with high specificity */
+.dark .mdx-editor-wrapper .mdxeditor-toolbar button,
+.dark .mdx-editor-wrapper .mdxeditor-toolbar-button,
+.dark .mdx-editor-wrapper .mdxeditor-toolbar [role="button"],
+.dark .mdx-editor-wrapper [class*="diffSourceToggle"] button,
+.dark .mdx-editor-wrapper [class*="viewMode"] button,
+.dark .mdx-editor-wrapper [class*="toggleGroup"] button {
+  color: var(--foreground);
+  background: transparent;
+  border-color: var(--border);
+}
 
-  .mdxeditor-toolbar {
-    background: hsl(var(--background) / 0.8);
-  }
+.dark .mdx-editor-wrapper .mdxeditor-toolbar button:hover,
+.dark .mdx-editor-wrapper .mdxeditor-toolbar-button:hover,
+.dark .mdx-editor-wrapper .mdxeditor-toolbar [role="button"]:hover,
+.dark .mdx-editor-wrapper [class*="diffSourceToggle"] button:hover,
+.dark .mdx-editor-wrapper [class*="viewMode"] button:hover,
+.dark .mdx-editor-wrapper [class*="toggleGroup"] button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.dark .mdx-editor-wrapper .mdxeditor-toolbar [data-state="on"],
+.dark .mdx-editor-wrapper [class*="diffSourceToggle"] button[data-state="on"],
+.dark .mdx-editor-wrapper [class*="viewMode"] button[data-state="on"],
+.dark .mdx-editor-wrapper [class*="toggleGroup"] button[data-state="on"] {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.dark .mdx-editor-wrapper .mdxeditor-toolbar select,
+.dark .mdx-editor-wrapper .mdxeditor-toolbar input[type="text"],
+.dark .mdx-editor-wrapper .mdxeditor-toolbar input[type="search"],
+.dark .mdx-editor-wrapper [class*="selectTrigger"],
+.dark .mdx-editor-wrapper [class*="blockType"] button {
+  background: var(--muted);
+  color: var(--foreground);
+  border-color: var(--border);
+}
+
+/* Dark mode content text - force override MDXEditor internal styles */
+.dark .mdx-editor-wrapper {
+  color: var(--foreground);
+}
+
+.dark .mdx-editor-wrapper .mdxeditor,
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable {
+  color: var(--foreground);
+  background: var(--background);
+}
+
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable * {
+  color: inherit;
+}
+
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable a {
+  color: var(--primary);
+}
+
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable pre,
+.dark .mdx-editor-wrapper .mdxeditor-root-contenteditable code {
+  background: var(--muted);
+}
+
+.mdxeditor-popup-container {
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  z-index: 50;
+  color: var(--foreground);
+}
+
+.mdxeditor-dropdown-container {
+  background: var(--popover);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  z-index: 50;
+  color: var(--foreground);
 }
 
 /* MDXEditor Content Styles - Prose typography for headings */
 .mdx-editor-wrapper .prose {
+  color: var(--foreground);
+
   h1,
   h2,
   h3,
@@ -196,6 +329,7 @@
     line-height: 1.25;
     margin-top: 1.5em;
     margin-bottom: 0.5em;
+    color: var(--foreground);
   }
 
   h1 {
@@ -307,15 +441,15 @@
 
 /* MDXEditor styling for read-only preview mode */
 .mdx-preview {
-  --accentBase: hsl(var(--primary));
-  --accentBg: hsl(var(--accent) / 0.1);
-  --accentBgHover: hsl(var(--accent) / 0.2);
-  --accentText: hsl(var(--accent-foreground));
-  --accentSolid: hsl(var(--accent));
-  --baseBg: hsl(var(--background));
-  --baseBorder: hsl(var(--border));
-  --baseText: hsl(var(--foreground));
-  --baseTextContrast: hsl(var(--foreground));
+  --accentBase: var(--primary);
+  --accentBg: color-mix(in oklch, var(--accent) 10%, transparent);
+  --accentBgHover: color-mix(in oklch, var(--accent) 20%, transparent);
+  --accentText: var(--accent-foreground);
+  --accentSolid: var(--accent);
+  --baseBg: var(--background);
+  --baseBorder: var(--border);
+  --baseText: var(--foreground);
+  --baseTextContrast: var(--foreground);
 }
 
 .mdx-preview .mdxeditor {
@@ -323,6 +457,7 @@
   background: transparent;
   font-family: inherit;
   padding: 0;
+  color: var(--foreground);
 }
 
 .mdx-preview .mdxeditor.focused {
@@ -332,4 +467,27 @@
 
 .mdx-preview .mdxeditor .editor-root {
   padding: 0;
+}
+
+.mdx-preview .mdxeditor-root-contenteditable {
+  color: var(--foreground);
+}
+
+.mdx-preview .mdxeditor-root-contenteditable * {
+  color: inherit;
+}
+
+/* Dark mode preview */
+.dark .mdx-preview {
+  color: var(--foreground);
+}
+
+.dark .mdx-preview .mdxeditor,
+.dark .mdx-preview .mdxeditor-root-contenteditable {
+  color: var(--foreground);
+  background: transparent;
+}
+
+.dark .mdx-preview .mdxeditor-root-contenteditable * {
+  color: inherit;
 }

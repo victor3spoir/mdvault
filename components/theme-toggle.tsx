@@ -20,11 +20,7 @@ export function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    return (
-      <Button variant="ghost" size="icon" disabled aria-label="Loading theme">
-        <div className="h-4 w-4 animate-pulse rounded-full bg-muted" />
-      </Button>
-    );
+    return null;
   }
 
   return (
@@ -33,8 +29,7 @@ export function ThemeToggle() {
         <Button
           variant="ghost"
           size="icon"
-          aria-label="Toggle theme"
-          className="relative"
+          className="relative h-9 w-9 rounded-md"
         >
           <IconSun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
           <IconMoon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />

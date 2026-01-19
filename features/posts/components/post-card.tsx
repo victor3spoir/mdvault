@@ -5,24 +5,16 @@ import {
   IconCheck,
   IconEdit,
   IconEye,
+  IconFileText,
   IconLoader2,
+  IconSettings,
   IconTrash,
   IconX,
-  IconSettings,
-  IconFileText,
 } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -33,6 +25,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Post } from "@/features/posts/posts.types";
 import {
   deletePostAction,
@@ -68,7 +68,10 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
   ) {
     startTransition(async () => {
       try {
-        const updatedPost = await action(currentPost.slug, currentPost.sha || "");
+        const updatedPost = await action(
+          currentPost.slug,
+          currentPost.sha || "",
+        );
         const status = published ? "published" : "unpublished";
         const message = published
           ? `"${currentPost.title}" is now live`
@@ -85,11 +88,9 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
     });
   }
 
-  const handlePublish = () =>
-    handlePublishToggle(true, publishPostAction);
+  const handlePublish = () => handlePublishToggle(true, publishPostAction);
 
-  const handleUnpublish = () =>
-    handlePublishToggle(false, unpublishPostAction);
+  const handleUnpublish = () => handlePublishToggle(false, unpublishPostAction);
 
   const handleDelete = async () => {
     startTransition(async () => {
@@ -130,11 +131,11 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
             </div>
           )}
           <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60" />
-          
+
           {/* Status Badge on Image */}
           <div className="absolute left-3 top-3">
-            <Badge 
-              variant={currentPost.published ? "default" : "secondary"} 
+            <Badge
+              variant={currentPost.published ? "default" : "secondary"}
               className="h-6 gap-1 rounded-lg px-2 text-[10px] font-bold uppercase tracking-wider shadow-lg backdrop-blur-md"
             >
               {currentPost.published ? (
@@ -174,9 +175,10 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
           <h3 className="mb-2 line-clamp-1 text-lg font-bold tracking-tight group-hover:text-primary transition-colors">
             {currentPost.title}
           </h3>
-          
+
           <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-            {currentPost.description || "No description provided for this post."}
+            {currentPost.description ||
+              "No description provided for this post."}
           </p>
 
           <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground">
@@ -196,7 +198,12 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
             <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
+                  >
                     <Link href={`/cms/posts/${currentPost.slug}`}>
                       <IconEye className="size-4" />
                     </Link>
@@ -207,7 +214,12 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button asChild variant="ghost" size="icon" className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
+                  >
                     <Link href={`/cms/posts/${currentPost.slug}/edit`}>
                       <IconEdit className="size-4" />
                     </Link>
@@ -297,12 +309,16 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
         }}
       />
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent className="rounded-3xl border-muted">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Post</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{currentPost.title}&quot;? This action cannot be undone.
+              Are you sure you want to delete &quot;{currentPost.title}&quot;?
+              This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

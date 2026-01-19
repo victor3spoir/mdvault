@@ -83,12 +83,6 @@ export default async function PostPage({ params }: PostPageProps) {
             ))}
           </div>
 
-          <h1 className="text-4xl font-bold tracking-tight">{post.title}</h1>
-
-          {post.description && (
-            <p className="text-xl text-muted-foreground">{post.description}</p>
-          )}
-
           <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
             {post.author && (
               <span className="flex items-center gap-1.5">
@@ -107,6 +101,14 @@ export default async function PostPage({ params }: PostPageProps) {
               </span>
             )}
           </div>
+
+          <h1 className="text-4xl font-bold tracking-tight">{post.title}</h1>
+
+          {post.description && (
+            <p className="text-xl text-muted-foreground">{post.description}</p>
+          )}
+
+        
         </header>
 
         {/* Cover Image */}

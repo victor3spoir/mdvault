@@ -1,11 +1,11 @@
 "use server";
 
+import { cacheTag, updateTag } from "next/cache";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import {
   CreatePostSchema,
   UpdatePostSchema,
 } from "@/lib/validation/post.schema";
-import { cacheTag, updateTag } from "next/cache";
 import type { GitHubFile, Post, PostFrontmatter } from "./posts.types";
 import { generateFrontmatter, parseFrontmatter } from "./posts.utils";
 

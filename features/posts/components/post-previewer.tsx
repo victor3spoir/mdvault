@@ -4,7 +4,7 @@ import { IconCode, IconEye } from "@tabler/icons-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import type { Post } from "../posts.types";
-import { ForwardRefPreviewer } from "./forward-ref-previewer";
+import MDXPreview from "./mdx-preview";
 
 type ViewMode = "preview" | "code";
 
@@ -37,11 +37,8 @@ const PostPreviewer = ({ post }: { post: Post }) => {
 
       {/* Preview Content */}
       {viewMode === "preview" ? (
-        <div className="rounded-b-lg border bg-card p-8 mdx-preview">
-          <ForwardRefPreviewer
-            markdown={post.content}
-            contentEditableClassName="prose prose-neutral dark:prose-invert max-w-none"
-          />
+        <div className="rounded-b-lg border bg-card p-8">
+          <MDXPreview markdown={post.content} />
         </div>
       ) : (
         <div className="rounded-b-lg border bg-card p-8">

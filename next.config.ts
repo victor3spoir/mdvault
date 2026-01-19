@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   typedRoutes: true,
+  poweredByHeader: false,
   output: "standalone",
   compress: true,
   cacheComponents: true,
@@ -65,6 +66,10 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value: "geolocation=(), microphone=(), camera=()",
+          },
+          {
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains; preload",
           },
         ],
       },

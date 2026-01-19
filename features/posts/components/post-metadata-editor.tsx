@@ -15,8 +15,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Post } from "@/features/posts/posts.types";
 import { updatePostMetadataAction } from "@/features/posts/posts.actions";
+import type { Post } from "@/features/posts/posts.types";
 
 interface PostMetadataEditorProps {
   post: Post;
@@ -61,7 +61,9 @@ export function PostMetadataEditor({
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <IconSettings className="size-6" />
           </div>
-          <AlertDialogTitle className="text-2xl font-bold">Post Settings</AlertDialogTitle>
+          <AlertDialogTitle className="text-2xl font-bold">
+            Post Settings
+          </AlertDialogTitle>
           <AlertDialogDescription className="text-base">
             Update the metadata for &quot;{post.title}&quot;.
           </AlertDialogDescription>

@@ -58,10 +58,7 @@ export const RecentActivity = ({ activities }: RecentActivityProps) => {
             activities.map((activity) => {
               const ActivityIcon = getActivityIcon(activity.icon);
               return (
-                <div
-                  key={activity.id}
-                  className="flex items-center gap-4 p-4"
-                >
+                <div key={activity.id} className="flex items-center gap-4 p-4">
                   <div className="flex size-10 items-center justify-center rounded-full bg-muted">
                     <ActivityIcon className="size-4 text-muted-foreground" />
                   </div>

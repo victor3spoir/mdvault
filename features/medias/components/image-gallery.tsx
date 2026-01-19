@@ -1,22 +1,35 @@
 "use client";
 
-import { IconCheck, IconCopy, IconEye, IconX, IconTrash, IconLoader2, IconPhotoOff } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconCopy,
+  IconEye,
+  IconLoader2,
+  IconPhotoOff,
+  IconTrash,
+  IconX,
+} from "@tabler/icons-react";
 import dynamic from "next/dynamic";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogCancel,
-  AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import type { UploadedImage, MediaUsage } from "../medias.types";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { checkMediaUsageAction, deleteImageAction } from "../medias.actions";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import type { MediaUsage, UploadedImage } from "../medias.types";
 
 const Image = dynamic(() => import("next/image"), { ssr: false });
 
@@ -26,7 +39,11 @@ interface ImageGalleryProps {
   onImageDeleted?: (imageId: string) => void;
 }
 
-export function ImageGallery({ images, isLoading = false, onImageDeleted }: ImageGalleryProps) {
+export function ImageGallery({
+  images,
+  isLoading = false,
+  onImageDeleted,
+}: ImageGalleryProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedImageForPreview, setSelectedImageForPreview] =
     useState<UploadedImage | null>(null);
@@ -49,7 +66,8 @@ export function ImageGallery({ images, isLoading = false, onImageDeleted }: Imag
         setDeleteConfirmation({ image, usage });
       } catch (error) {
         toast.error("Failed to check image usage", {
-          description: error instanceof Error ? error.message : "Try again later",
+          description:
+            error instanceof Error ? error.message : "Try again later",
         });
       }
     });
@@ -73,7 +91,8 @@ export function ImageGallery({ images, isLoading = false, onImageDeleted }: Imag
         onImageDeleted?.(deleteConfirmation.image.id);
       } catch (error) {
         toast.error("Failed to delete image", {
-          description: error instanceof Error ? error.message : "Try again later",
+          description:
+            error instanceof Error ? error.message : "Try again later",
         });
       }
     });
@@ -113,7 +132,10 @@ export function ImageGallery({ images, isLoading = false, onImageDeleted }: Imag
       ) : (
         <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(min(150px,100%),1fr))]">
           {images.map((image) => (
-            <div key={image.id} className="group relative aspect-square overflow-hidden rounded-xl border bg-muted/10 transition-all hover:shadow-md hover:border-primary/20">
+            <div
+              key={image.id}
+              className="group relative aspect-square overflow-hidden rounded-xl border bg-muted/10 transition-all hover:shadow-md hover:border-primary/20"
+            >
               <Image
                 src={image.url}
                 alt={image.name}
@@ -121,7 +143,7 @@ export function ImageGallery({ images, isLoading = false, onImageDeleted }: Imag
                 className="object-cover transition-transform duration-300 group-hover:scale-105"
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
               />
-              
+
               {/* Overlay */}
               <div className="absolute inset-0 flex flex-col justify-between bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
                 <div className="flex justify-end p-2 gap-1.5">
@@ -220,15 +242,21 @@ export function ImageGallery({ images, isLoading = false, onImageDeleted }: Imag
               <div className="w-full md:w-80 p-6 flex flex-col bg-card border-l">
                 <div className="flex-1 space-y-6">
                   <div>
-                    <h3 className="text-lg font-bold tracking-tight truncate mb-1" title={selectedImageForPreview.name}>
+                    <h3
+                      className="text-lg font-bold tracking-tight truncate mb-1"
+                      title={selectedImageForPreview.name}
+                    >
                       {selectedImageForPreview.name}
                     </h3>
                     <p className="text-xs text-muted-foreground flex items-center gap-1.5">
                       <span className="size-1.5 rounded-full bg-green-500" />
-                      Uploaded on {new Date(selectedImageForPreview.uploadedAt).toLocaleDateString(undefined, {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
+                      Uploaded on{" "}
+                      {new Date(
+                        selectedImageForPreview.uploadedAt,
+                      ).toLocaleDateString(undefined, {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </p>
                   </div>
@@ -247,7 +275,12 @@ export function ImageGallery({ images, isLoading = false, onImageDeleted }: Imag
                         size="icon"
                         variant="secondary"
                         className="size-9 shrink-0"
-                        onClick={() => copyUrlToClipboard(selectedImageForPreview.url, selectedImageForPreview.id)}
+                        onClick={() =>
+                          copyUrlToClipboard(
+                            selectedImageForPreview.url,
+                            selectedImageForPreview.id,
+                          )
+                        }
                       >
                         {copiedId === selectedImageForPreview.id ? (
                           <IconCheck className="size-4 text-green-500" />
@@ -260,8 +293,15 @@ export function ImageGallery({ images, isLoading = false, onImageDeleted }: Imag
 
                   <div className="grid grid-cols-1 gap-3">
                     <div className="rounded-xl border bg-muted/5 p-3">
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">Type</p>
-                      <p className="text-sm font-medium">{selectedImageForPreview.name.split('.').pop()?.toUpperCase()}</p>
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
+                        Type
+                      </p>
+                      <p className="text-sm font-medium">
+                        {selectedImageForPreview.name
+                          .split(".")
+                          .pop()
+                          ?.toUpperCase()}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -308,11 +348,15 @@ export function ImageGallery({ images, isLoading = false, onImageDeleted }: Imag
               {deleteConfirmation?.usage.isUsed ? (
                 <div className="space-y-3 mt-2">
                   <p className="text-destructive font-semibold">
-                    ⚠️ This image is being used in {deleteConfirmation.usage.usedInPosts.length} post(s):
+                    ⚠️ This image is being used in{" "}
+                    {deleteConfirmation.usage.usedInPosts.length} post(s):
                   </p>
                   <ul className="space-y-2">
                     {deleteConfirmation.usage.usedInPosts.map((post) => (
-                      <li key={post.slug} className="text-sm text-muted-foreground pl-4 border-l-2 border-destructive">
+                      <li
+                        key={post.slug}
+                        className="text-sm text-muted-foreground pl-4 border-l-2 border-destructive"
+                      >
                         <strong>{post.title}</strong> ({post.slug})
                       </li>
                     ))}
@@ -322,7 +366,11 @@ export function ImageGallery({ images, isLoading = false, onImageDeleted }: Imag
                   </p>
                 </div>
               ) : (
-                <p>Are you sure you want to delete &quot;{deleteConfirmation?.image.name}&quot;? This action cannot be undone.</p>
+                <p>
+                  Are you sure you want to delete &quot;
+                  {deleteConfirmation?.image.name}&quot;? This action cannot be
+                  undone.
+                </p>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>

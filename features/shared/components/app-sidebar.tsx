@@ -13,7 +13,8 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Sidebar,
   SidebarContent,
@@ -32,7 +33,6 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 interface NavItem {
   title: string;
@@ -168,17 +168,17 @@ const AppSidebar = () => {
 
       <SidebarSeparator />
 
-      <SidebarSeparator />
-
       <SidebarFooter className="p-4">
-        <div className="flex items-center gap-2 justify-between rounded-lg bg-muted/50 p-3">
-          <div className="flex items-center gap-3">
-            <div className="flex size-8 items-center justify-center rounded-full bg-primary/10">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-3 flex-1 rounded-lg bg-muted/50 p-3 min-w-0">
+            <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
               <IconBrandGithub className="size-4 text-primary" />
             </div>
-            <div className="flex flex-col text-xs">
+            <div className="flex flex-col text-xs min-w-0">
               <span className="font-medium">Connected</span>
-              <span className="text-muted-foreground">GitHub Repository</span>
+              <span className="text-muted-foreground truncate">
+                GitHub Repository
+              </span>
             </div>
           </div>
           <ThemeToggle />

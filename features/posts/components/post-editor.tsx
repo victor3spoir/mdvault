@@ -5,14 +5,14 @@ import {
   IconArrowLeft,
   IconDeviceFloppy,
   IconEyeOff,
-  IconPlus,
-  IconSend,
-  IconTrash,
-  IconX,
-  IconPhoto,
-  IconTags,
   IconFileText,
   IconLoader2,
+  IconPhoto,
+  IconPlus,
+  IconSend,
+  IconTags,
+  IconTrash,
+  IconX,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
@@ -42,7 +42,7 @@ import {
   unpublishPostAction,
   updatePostAction,
 } from "../posts.actions";
-import type { Post, CreatePostInput } from "../posts.types";
+import type { CreatePostInput, Post } from "../posts.types";
 import { ForwardRefEditor } from "./forward-ref-editor";
 
 interface PostEditorProps {
@@ -219,9 +219,9 @@ export function PostEditor({ post, mode }: PostEditorProps) {
       {/* Actions Bar */}
       <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            onClick={() => router.back()} 
+          <Button
+            variant="ghost"
+            onClick={() => router.back()}
             className="h-11 w-11 rounded-2xl bg-muted/50 hover:bg-muted"
             size="icon"
           >
@@ -232,7 +232,9 @@ export function PostEditor({ post, mode }: PostEditorProps) {
               {mode === "create" ? "Create New Post" : "Edit Post"}
             </h1>
             <p className="text-sm text-muted-foreground">
-              {mode === "create" ? "Draft your next masterpiece" : `Editing: ${post?.title}`}
+              {mode === "create"
+                ? "Draft your next masterpiece"
+                : `Editing: ${post?.title}`}
             </p>
           </div>
         </div>
@@ -245,18 +247,26 @@ export function PostEditor({ post, mode }: PostEditorProps) {
               disabled={isUnpublishing}
               className="h-11 rounded-2xl border-muted bg-muted/30 px-5 hover:bg-muted/50"
             >
-              {isUnpublishing ? <IconLoader2 className="mr-2 size-4 animate-spin" /> : <IconEyeOff className="mr-2 size-4" />}
+              {isUnpublishing ? (
+                <IconLoader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <IconEyeOff className="mr-2 size-4" />
+              )}
               Unpublish
             </Button>
           )}
-          
+
           <Button
             variant="outline"
             onClick={handleSave}
             disabled={isSaving || !title || !slug}
             className="h-11 rounded-2xl border-muted bg-muted/30 px-5 hover:bg-muted/50"
           >
-            {isSaving ? <IconLoader2 className="mr-2 size-4 animate-spin" /> : <IconDeviceFloppy className="mr-2 size-4" />}
+            {isSaving ? (
+              <IconLoader2 className="mr-2 size-4 animate-spin" />
+            ) : (
+              <IconDeviceFloppy className="mr-2 size-4" />
+            )}
             Save Draft
           </Button>
 
@@ -266,7 +276,11 @@ export function PostEditor({ post, mode }: PostEditorProps) {
               disabled={isPublishing || !title || !slug}
               className="h-11 rounded-2xl bg-primary px-6 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95"
             >
-              {isPublishing ? <IconLoader2 className="mr-2 size-4 animate-spin" /> : <IconSend className="mr-2 size-4" />}
+              {isPublishing ? (
+                <IconLoader2 className="mr-2 size-4 animate-spin" />
+              ) : (
+                <IconSend className="mr-2 size-4" />
+              )}
               Publish
             </Button>
           )}
@@ -292,7 +306,9 @@ export function PostEditor({ post, mode }: PostEditorProps) {
             {/* Left Column: Title & Description */}
             <div className="space-y-6">
               <div className="space-y-3">
-                <Label htmlFor="title" className="text-sm font-semibold">Title</Label>
+                <Label htmlFor="title" className="text-sm font-semibold">
+                  Title
+                </Label>
                 <Input
                   id="title"
                   placeholder="Enter a catchy title..."
@@ -303,7 +319,9 @@ export function PostEditor({ post, mode }: PostEditorProps) {
               </div>
 
               <div className="space-y-3">
-                <Label htmlFor="description" className="text-sm font-semibold">Description</Label>
+                <Label htmlFor="description" className="text-sm font-semibold">
+                  Description
+                </Label>
                 <Textarea
                   id="description"
                   placeholder="What is this post about? (SEO friendly description)"
@@ -322,7 +340,12 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                   Post Settings
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="slug" className="text-[12px] font-medium text-muted-foreground">URL Slug</Label>
+                  <Label
+                    htmlFor="slug"
+                    className="text-[12px] font-medium text-muted-foreground"
+                  >
+                    URL Slug
+                  </Label>
                   <Input
                     id="slug"
                     placeholder="post-url-slug"
@@ -344,7 +367,12 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                     placeholder="Add tag..."
                     value={tagInput}
                     onChange={(e) => setTagInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addTag();
+                      }
+                    }}
                     className="h-10 rounded-xl border-muted bg-muted/30 px-3 text-sm transition-all focus-visible:ring-1 focus-visible:ring-primary/20"
                   />
                   <Button
@@ -364,7 +392,8 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                       className="h-7 gap-1 rounded-lg bg-muted/50 px-2 text-[11px] font-medium transition-colors hover:bg-muted"
                     >
                       {tag}
-                      <button type="button"
+                      <button
+                        type="button"
                         onClick={() => removeTag(tag)}
                         className="ml-1 rounded-full p-0.5 transition-colors hover:bg-destructive hover:text-destructive-foreground"
                         aria-label={`Remove tag ${tag}`}
@@ -374,7 +403,9 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                     </Badge>
                   ))}
                   {tags.length === 0 && (
-                    <p className="text-[12px] text-muted-foreground italic">No tags added yet</p>
+                    <p className="text-[12px] text-muted-foreground italic">
+                      No tags added yet
+                    </p>
                   )}
                 </div>
               </div>
@@ -393,8 +424,6 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                   onSelectImage={(image) => setCoverImage(image.url)}
                 />
               </div>
-
-              
             </div>
           </div>
         </div>
@@ -436,12 +465,14 @@ export function PostEditor({ post, mode }: PostEditorProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the post
-              and remove it from our servers.
+              This action cannot be undone. This will permanently delete the
+              post and remove it from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3">
-            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
+            <AlertDialogCancel className="rounded-2xl">
+              Cancel
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -452,18 +483,26 @@ export function PostEditor({ post, mode }: PostEditorProps) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={unpublishDialogOpen} onOpenChange={setUnpublishDialogOpen}>
+      <AlertDialog
+        open={unpublishDialogOpen}
+        onOpenChange={setUnpublishDialogOpen}
+      >
         <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Unpublish Post?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will move the post back to drafts. It will no longer be visible
-              on the public site.
+              This will move the post back to drafts. It will no longer be
+              visible on the public site.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3">
-            <AlertDialogCancel className="rounded-2xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleUnpublish} className="rounded-2xl">
+            <AlertDialogCancel className="rounded-2xl">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleUnpublish}
+              className="rounded-2xl"
+            >
               Unpublish
             </AlertDialogAction>
           </AlertDialogFooter>

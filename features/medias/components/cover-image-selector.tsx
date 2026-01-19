@@ -1,12 +1,12 @@
 "use client";
 
-import { IconEdit, IconTrash, IconPhotoPlus } from "@tabler/icons-react";
+import { IconEdit, IconPhotoPlus, IconTrash } from "@tabler/icons-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import type { UploadedImage } from "../medias.types";
 import { ImageInsertDialog } from "./image-insert-dialog";
-import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface CoverImageSelectorProps {
   selectedImageUrl: string;
@@ -33,7 +33,7 @@ export function CoverImageSelector({
               src={selectedImageUrl}
               alt="Cover image preview"
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-105 h-[40dvh]"
             />
             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100 backdrop-blur-[2px]">
               <Button

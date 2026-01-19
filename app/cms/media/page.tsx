@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { IconRefresh, IconSearch, IconX, IconPhotoPlus } from "@tabler/icons-react";
+import {
+  IconPhotoPlus,
+  IconRefresh,
+  IconSearch,
+  IconX,
+} from "@tabler/icons-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ImageGallery } from "@/features/medias/components/image-gallery";
-import { ImageUploader } from "@/features/medias/components/image-uploader";
-import type { MediaFile } from "@/features/medias/medias.types";
-import { listImagesAction } from "@/features/medias/medias.actions";
-import PageLayout from "@/features/shared/components/page-layout";
-import { cn } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -19,12 +18,25 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { ImageGallery } from "@/features/medias/components/image-gallery";
+import { ImageUploader } from "@/features/medias/components/image-uploader";
+import { listImagesAction } from "@/features/medias/medias.actions";
+import type { MediaFile } from "@/features/medias/medias.types";
+import PageLayout from "@/features/shared/components/page-layout";
+import { cn } from "@/lib/utils";
 
 export default function MediaPage() {
   const [images, setImages] = useState<MediaFile[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<"all" | "jpg" | "png" | "gif" | "svg" | "webp">("all");
+  const [filterType, setFilterType] = useState<
+    "all" | "jpg" | "png" | "gif" | "svg" | "webp"
+  >("all");
   const [isLoading, setIsLoading] = useState(true);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
 
@@ -95,8 +107,13 @@ export default function MediaPage() {
           <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold tracking-tight">Your Images</h2>
-                <Badge variant="secondary" className="h-6 rounded-lg px-2 font-mono text-[10px] font-bold uppercase tracking-wider">
+                <h2 className="text-2xl font-bold tracking-tight">
+                  Your Images
+                </h2>
+                <Badge
+                  variant="secondary"
+                  className="h-6 rounded-lg px-2 font-mono text-[10px] font-bold uppercase tracking-wider"
+                >
                   {filteredImages.length} / {images.length}
                 </Badge>
               </div>
@@ -116,7 +133,9 @@ export default function MediaPage() {
                     disabled={isLoading}
                     className="h-11 w-11 rounded-xl shadow-sm transition-all hover:bg-muted active:scale-95"
                   >
-                    <IconRefresh className={cn("size-5", isLoading && "animate-spin")} />
+                    <IconRefresh
+                      className={cn("size-5", isLoading && "animate-spin")}
+                    />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Refresh library</TooltipContent>
@@ -134,7 +153,9 @@ export default function MediaPage() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-full sm:max-w-xl">
                   <SheetHeader className="pb-8">
-                    <SheetTitle className="text-2xl font-bold">Upload Media</SheetTitle>
+                    <SheetTitle className="text-2xl font-bold">
+                      Upload Media
+                    </SheetTitle>
                     <SheetDescription className="text-base">
                       Drag and drop images to upload them to your library.
                     </SheetDescription>
@@ -181,7 +202,8 @@ export default function MediaPage() {
                 onClick={() => setFilterType("all")}
                 className={cn(
                   "h-9 rounded-lg px-4 text-xs font-bold uppercase tracking-wider",
-                  filterType === "all" && "bg-primary/10 text-primary hover:bg-primary/20"
+                  filterType === "all" &&
+                    "bg-primary/10 text-primary hover:bg-primary/20",
                 )}
               >
                 All
@@ -195,7 +217,8 @@ export default function MediaPage() {
                   onClick={() => setFilterType(type as typeof filterType)}
                   className={cn(
                     "h-9 rounded-lg px-4 text-xs font-bold uppercase tracking-wider",
-                    filterType === type && "bg-primary/10 text-primary hover:bg-primary/20"
+                    filterType === type &&
+                      "bg-primary/10 text-primary hover:bg-primary/20",
                   )}
                 >
                   {type}
