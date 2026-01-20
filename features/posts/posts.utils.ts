@@ -114,7 +114,7 @@ function parseValue(key: string, value: string): FrontmatterValue {
     return parseStringValue(value);
   } catch (error) {
     console.error(`Error parsing field "${key}" with value "${value}":`, error);
-    return undefined;
+    return "";
   }
 }
 

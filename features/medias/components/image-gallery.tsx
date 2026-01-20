@@ -37,12 +37,14 @@ interface ImageGalleryProps {
   images: UploadedImage[];
   isLoading?: boolean;
   onImageDeleted?: (imageId: string) => void;
+  onRefresh?: () => void;
 }
 
 export function ImageGallery({
   images,
   isLoading = false,
   onImageDeleted,
+  onRefresh: _onRefresh,
 }: ImageGalleryProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedImageForPreview, setSelectedImageForPreview] =
@@ -245,7 +247,9 @@ export function ImageGallery({
                   </h3>
                   <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
                     <span className="size-1.5 rounded-full bg-green-500" />
-                    {new Date(selectedImageForPreview.uploadedAt).toLocaleDateString()}
+                    {new Date(
+                      selectedImageForPreview.uploadedAt,
+                    ).toLocaleDateString()}
                   </p>
                 </div>
 
@@ -303,7 +307,9 @@ export function ImageGallery({
                     size="sm"
                     className="flex-1"
                   >
-                    {isPending && <IconLoader2 className="size-3 animate-spin mr-1" />}
+                    {isPending && (
+                      <IconLoader2 className="size-3 animate-spin mr-1" />
+                    )}
                     Delete
                   </Button>
                   <Button

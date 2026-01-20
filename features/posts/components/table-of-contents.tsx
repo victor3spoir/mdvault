@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface HeadingNode {
   id: string;
@@ -26,7 +26,7 @@ export function TableOfContents() {
     // Small delay to ensure the new content is rendered
     const timeoutId = setTimeout(() => {
       const headingElements = Array.from(
-        document.querySelectorAll("article h1, article h2, article h3")
+        document.querySelectorAll("article h1, article h2, article h3"),
       ) as HTMLElement[];
 
       const headingNodes = headingElements.map((heading) => {
@@ -55,7 +55,7 @@ export function TableOfContents() {
             }
           }
         },
-        { rootMargin: "-20% 0px -60% 0px" }
+        { rootMargin: "-20% 0px -60% 0px" },
       );
 
       for (const heading of headingElements) {

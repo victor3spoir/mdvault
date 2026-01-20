@@ -2,7 +2,6 @@
 
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import {
-  IconArrowLeft,
   IconDeviceFloppy,
   IconEyeOff,
   IconFileText,
@@ -215,91 +214,87 @@ export function PostEditor({ post, mode }: PostEditorProps) {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-6 lg:p-10  w-full">
-      {/* Actions Bar */}
-      <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            onClick={() => router.back()}
-            className="h-11 w-11 rounded-2xl bg-muted/50 hover:bg-muted"
-            size="icon"
-          >
-            <IconArrowLeft className="size-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">
-              {mode === "create" ? "Create New Post" : "Edit Post"}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {mode === "create"
-                ? "Draft your next masterpiece"
-                : `Editing: ${post?.title}`}
-            </p>
-          </div>
+    <div className="flex flex-col w-full">
+      {/* Sticky Actions Bar */}
+      <div className="sticky top-14 z-20 -mx-6 -mt-6 mb-6 flex items-center justify-between gap-4 border-b bg-background/95 px-6 py-3 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <span className="font-medium text-foreground">
+            {mode === "create" ? "New Post" : post?.title}
+          </span>
+          {post?.published && (
+            <Badge
+              variant="secondary"
+              className="h-5 rounded px-1.5 text-[10px] font-semibold uppercase"
+            >
+              Published
+            </Badge>
+          )}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {mode === "edit" && post?.published && (
             <Button
-              variant="outline"
+              variant="ghost"
+              size="sm"
               onClick={() => setUnpublishDialogOpen(true)}
               disabled={isUnpublishing}
-              className="h-11 rounded-2xl border-muted bg-muted/30 px-5 hover:bg-muted/50"
+              className="h-8 gap-1.5 rounded-lg text-muted-foreground hover:text-foreground"
             >
               {isUnpublishing ? (
-                <IconLoader2 className="mr-2 size-4 animate-spin" />
+                <IconLoader2 className="size-3.5 animate-spin" />
               ) : (
-                <IconEyeOff className="mr-2 size-4" />
+                <IconEyeOff className="size-3.5" />
               )}
-              Unpublish
+              <span className="hidden sm:inline">Unpublish</span>
             </Button>
           )}
 
           <Button
             variant="outline"
+            size="sm"
             onClick={handleSave}
             disabled={isSaving || !title || !slug}
-            className="h-11 rounded-2xl border-muted bg-muted/30 px-5 hover:bg-muted/50"
+            className="h-8 gap-1.5 rounded-lg"
           >
             {isSaving ? (
-              <IconLoader2 className="mr-2 size-4 animate-spin" />
+              <IconLoader2 className="size-3.5 animate-spin" />
             ) : (
-              <IconDeviceFloppy className="mr-2 size-4" />
+              <IconDeviceFloppy className="size-3.5" />
             )}
-            Save Draft
+            <span className="hidden sm:inline">Save Draft</span>
           </Button>
 
           {!post?.published && (
             <Button
+              size="sm"
               onClick={handlePublish}
               disabled={isPublishing || !title || !slug}
-              className="h-11 rounded-2xl bg-primary px-6 shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95"
+              className="h-8 gap-1.5 rounded-lg"
             >
               {isPublishing ? (
-                <IconLoader2 className="mr-2 size-4 animate-spin" />
+                <IconLoader2 className="size-3.5 animate-spin" />
               ) : (
-                <IconSend className="mr-2 size-4" />
+                <IconSend className="size-3.5" />
               )}
-              Publish
+              <span className="hidden sm:inline">Publish</span>
             </Button>
           )}
 
           {mode === "edit" && (
             <Button
               variant="ghost"
+              size="icon"
               onClick={() => setDeleteDialogOpen(true)}
               disabled={isDeleting}
-              size="icon"
-              className="h-11 w-11 rounded-2xl text-destructive hover:bg-destructive/10 hover:text-destructive"
+              className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
             >
-              <IconTrash className="size-5" />
+              <IconTrash className="size-3.5" />
             </Button>
           )}
         </div>
       </div>
 
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-6">
         {/* Metadata Section: Title, Description, Cover Image, Slug, Tags */}
         <div className="rounded-3xl border bg-card/50 p-6 backdrop-blur-sm transition-all focus-within:border-primary/20 focus-within:shadow-sm">
           <div className="grid gap-8 lg:grid-cols-[1fr,400px]">
@@ -429,18 +424,13 @@ export function PostEditor({ post, mode }: PostEditorProps) {
         </div>
 
         {/* Editor Section */}
-        <div className="space-y-6 rounded-3xl border bg-card/50 p-6 backdrop-blur-sm transition-all focus-within:border-primary/20 focus-within:shadow-sm">
-          <div className="space-y-3">
-           
-            <div className="rounded-2xl border border-muted bg-muted/30 transition-all focus-within:border-primary/30">
-              <ForwardRefEditor
-                ref={editorRef}
-                markdown={post?.content ?? ""}
-                onImageUpload={handleImageUpload}
-                onImageInsertClick={() => setImageInsertDialogOpen(true)}
-              />
-            </div>
-          </div>
+        <div className="rounded-2xl border border-muted bg-background overflow-hidden">
+          <ForwardRefEditor
+            ref={editorRef}
+            markdown={post?.content ?? ""}
+            onImageUpload={handleImageUpload}
+            onImageInsertClick={() => setImageInsertDialogOpen(true)}
+          />
         </div>
       </div>
 

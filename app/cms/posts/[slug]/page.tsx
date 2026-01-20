@@ -10,8 +10,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getPostAction } from "@/features/posts/posts.actions";
 import { TableOfContents } from "@/features/posts/components/table-of-contents";
+import { getPostAction } from "@/features/posts/posts.actions";
 import PageLayout from "@/features/shared/components/page-layout";
 import { MDXContent } from "@/lib/mdx";
 
@@ -107,7 +107,9 @@ export default async function PostPage({ params }: PostPageProps) {
             <h1 className="text-4xl font-bold tracking-tight">{post.title}</h1>
 
             {post.description && (
-              <p className="text-xl text-muted-foreground">{post.description}</p>
+              <p className="text-xl text-muted-foreground">
+                {post.description}
+              </p>
             )}
           </header>
 

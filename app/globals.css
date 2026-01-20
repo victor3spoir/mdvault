@@ -71,7 +71,7 @@
   --chart-3: oklch(0.546 0.245 262.881);
   --chart-4: oklch(0.488 0.243 264.376);
   --chart-5: oklch(0.424 0.199 265.638);
-  --radius: 0.625rem;
+  --radius: 0.225rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -649,4 +649,26 @@ article ul:has(> li > input[type="checkbox"]) {
   list-style: none;
   padding-left: 0;
   margin-left: 0;
+}
+
+/* Sticky MDX Editor Toolbar */
+.mdxeditor-toolbar {
+  position: sticky;
+  top: calc(3.5rem + 3.5rem); /* PageLayout header (56px) + Actions bar (56px) */
+  z-index: 15;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem;
+}
+
+.mdx-editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 400px;
+}
+
+.mdxeditor-root-contenteditable {
+  flex: 1;
+  min-height: 350px;
+  padding: 1rem 1.5rem;
 }

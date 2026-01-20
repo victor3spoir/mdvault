@@ -11,7 +11,13 @@ function InlineCode({ children }: { children?: React.ReactNode }) {
   );
 }
 
-function CustomLink({ href, children }: { href?: string; children?: React.ReactNode }) {
+function CustomLink({
+  href,
+  children,
+}: {
+  href?: string;
+  children?: React.ReactNode;
+}) {
   if (href?.startsWith("/") || href?.startsWith("#")) {
     return (
       <a href={href} className="text-primary hover:underline">
@@ -105,12 +111,19 @@ const components: Components = {
     }
     // Block code with syntax highlighting
     const lang = className.replace("language-", "") || "text";
-    const code = typeof children === "string" ? children.trim() : String(children || "").trim();
+    const code =
+      typeof children === "string"
+        ? children.trim()
+        : String(children || "").trim();
     return <CodeBlock language={lang}>{code}</CodeBlock>;
   },
-  img: ({ src, alt }) => <CustomImage src={typeof src === "string" ? src : undefined} alt={alt} />,
+  img: ({ src, alt }) => (
+    <CustomImage src={typeof src === "string" ? src : undefined} alt={alt} />
+  ),
   hr: () => <hr className="my-8 border-border" />,
-  strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+  strong: ({ children }) => (
+    <strong className="font-semibold">{children}</strong>
+  ),
   em: ({ children }) => <em className="italic">{children}</em>,
   table: ({ children }) => (
     <div className="my-6 overflow-x-auto">
