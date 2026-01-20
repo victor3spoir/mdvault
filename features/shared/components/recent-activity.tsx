@@ -1,7 +1,7 @@
 "use client";
 
 import { IconEye, IconFileText, IconPhoto } from "@tabler/icons-react";
-import type { Activity } from "@/app/cms/actions/dashboard.actions";
+import type { Activity } from "@/features/dashboard/dashboard.actions";
 
 interface RecentActivityProps {
   activities: Activity[];

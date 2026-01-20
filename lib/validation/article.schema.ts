@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 /**
- * Post validation schemas
+ * Article validation schemas
  */
-export const CreatePostSchema = z.object({
+export const CreateArticleSchema = z.object({
   title: z
     .string()
     .min(1, "Title is required")
@@ -30,7 +30,7 @@ export const CreatePostSchema = z.object({
   author: z.string().optional(),
 });
 
-export const UpdatePostSchema = CreatePostSchema.extend({
+export const UpdateArticleSchema = CreateArticleSchema.extend({
   slug: z
     .string()
     .regex(
@@ -40,5 +40,5 @@ export const UpdatePostSchema = CreatePostSchema.extend({
     .max(100, "Slug must be less than 100 characters"),
 });
 
-export type CreatePostInput = z.infer<typeof CreatePostSchema>;
-export type UpdatePostInput = z.infer<typeof UpdatePostSchema>;
+export type CreateArticleInput = z.infer<typeof CreateArticleSchema>;
+export type UpdateArticleInput = z.infer<typeof UpdateArticleSchema>;

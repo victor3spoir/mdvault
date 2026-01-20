@@ -4,7 +4,7 @@ import { cacheTag, updateTag } from "next/cache";
 import { v4 as uuidv4 } from "uuid";
 import { validateImageFile } from "@/lib/file-validation";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
-import { listPostsAction } from "../posts/posts.actions";
+import { listArticlesAction } from "../articles/articles.actions";
 import type { MediaUsage, UploadedImage } from "./medias.types";
 
 const IMAGES_PATH = githubRepoInfo.IMAGES_PATH;
@@ -119,23 +119,23 @@ export async function checkMediaUsageAction(
   imageUrl: string,
 ): Promise<MediaUsage> {
   try {
-    const posts = await listPostsAction();
+    const articles = await listArticlesAction();
 
-    const usedInPosts = posts
-      .filter((post) => {
-        // Check if image is used in coverImage or in post content
-        const isInCover = post.coverImage === imageUrl;
-        const isInContent = post.content.includes(imageUrl);
+    const usedInArticles = articles
+      .filter((article) => {
+        // Check if image is used in coverImage or in article content
+        const isInCover = article.coverImage === imageUrl;
+        const isInContent = article.content.includes(imageUrl);
         return isInCover || isInContent;
       })
-      .map((post) => ({
-        slug: post.slug,
-        title: post.title,
+      .map((article) => ({
+        slug: article.slug,
+        title: article.title,
       }));
 
     return {
-      isUsed: usedInPosts.length > 0,
-      usedInPosts,
+      isUsed: usedInArticles.length > 0,
+      usedInArticles,
     };
   } catch (error) {
     console.error("Error checking media usage:", error);

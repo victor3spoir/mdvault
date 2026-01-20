@@ -36,29 +36,29 @@ import { CoverImageSelector } from "../../medias/components/cover-image-selector
 import { ImageInsertDialog } from "../../medias/components/image-insert-dialog";
 import { uploadImageAction } from "../../medias/medias.actions";
 import {
-  createPostAction,
-  deletePostAction,
-  unpublishPostAction,
-  updatePostAction,
-} from "../posts.actions";
-import type { CreatePostInput, Post } from "../posts.types";
+  createArticleAction,
+  deleteArticleAction,
+  unpublishArticleAction,
+  updateArticleAction,
+} from "../articles.actions";
+import type { Article, CreateArticleInput } from "../articles.types";
 import { ForwardRefEditor } from "./forward-ref-editor";
 
 interface PostEditorProps {
-  post?: Post;
+  article?: Article;
   mode: "create" | "edit";
 }
 
-export function PostEditor({ post, mode }: PostEditorProps) {
+export function PostEditor({ article, mode }: PostEditorProps) {
   const router = useRouter();
   const editorRef = useRef<MDXEditorMethods>(null);
 
-  const [title, setTitle] = useState(post?.title ?? "");
-  const [slug, setSlug] = useState(post?.slug ?? "");
-  const [description, setDescription] = useState(post?.description ?? "");
-  const [tags, setTags] = useState<string[]>(post?.tags ?? []);
+  const [title, setTitle] = useState(article?.title ?? "");
+  const [slug, setSlug] = useState(article?.slug ?? "");
+  const [description, setDescription] = useState(article?.description ?? "");
+  const [tags, setTags] = useState<string[]>(article?.tags ?? []);
   const [tagInput, setTagInput] = useState("");
-  const [coverImage, setCoverImage] = useState(post?.coverImage ?? "");
+  const [coverImage, setCoverImage] = useState(article?.coverImage ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -111,7 +111,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
     setIsSaving(true);
     try {
       const content = editorRef.current?.getMarkdown() ?? "";
-      const input: CreatePostInput = {
+      const input: CreateArticleInput = {
         title,
         slug,
         content,
@@ -122,30 +122,30 @@ export function PostEditor({ post, mode }: PostEditorProps) {
       };
 
       if (mode === "create") {
-        await createPostAction(input);
-      } else if (post?.sha) {
-        await updatePostAction(slug, { ...input, sha: post.sha });
+        await createArticleAction(input);
+      } else if (article?.sha) {
+        await updateArticleAction(slug, { ...input, sha: article.sha });
       }
 
-      toast.success("Post saved as draft");
-      router.push("/cms/posts");
+      toast.success("Article saved as draft");
+      router.push("/cms/articles");
       router.refresh();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to save post";
+        error instanceof Error ? error.message : "Failed to save article";
       toast.error(message);
-      console.error("Error saving post:", error);
+      console.error("Error saving article:", error);
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Publish post
+  // Publish article
   const handlePublish = async () => {
     setIsPublishing(true);
     try {
       const content = editorRef.current?.getMarkdown() ?? "";
-      const input: CreatePostInput = {
+      const input: CreateArticleInput = {
         title,
         slug,
         content,
@@ -156,58 +156,58 @@ export function PostEditor({ post, mode }: PostEditorProps) {
       };
 
       if (mode === "create") {
-        await createPostAction(input);
-      } else if (post?.sha) {
-        await updatePostAction(slug, { ...input, sha: post.sha });
+        await createArticleAction(input);
+      } else if (article?.sha) {
+        await updateArticleAction(slug, { ...input, sha: article.sha });
       }
 
-      toast.success("Post published successfully");
-      router.push("/cms/posts");
+      toast.success("Article published successfully");
+      router.push("/cms/articles");
       router.refresh();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to publish post";
+        error instanceof Error ? error.message : "Failed to publish article";
       toast.error(message);
-      console.error("Error publishing post:", error);
+      console.error("Error publishing article:", error);
     } finally {
       setIsPublishing(false);
     }
   };
 
-  // Delete post
+  // Delete article
   const handleDelete = async () => {
-    if (!post?.sha) return;
+    if (!article?.sha) return;
     setIsDeleting(true);
     try {
-      await deletePostAction(slug, post.sha);
-      toast.success("Post deleted successfully");
-      router.push("/cms/posts");
+      await deleteArticleAction(slug, article.sha);
+      toast.success("Article deleted successfully");
+      router.push("/cms/articles");
       router.refresh();
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to delete post";
+        error instanceof Error ? error.message : "Failed to delete article";
       toast.error(message);
-      console.error("Error deleting post:", error);
+      console.error("Error deleting article:", error);
     } finally {
       setIsDeleting(false);
       setDeleteDialogOpen(false);
     }
   };
 
-  // Unpublish post
+  // Unpublish article
   const handleUnpublish = async () => {
-    if (!post?.sha) return;
+    if (!article?.sha) return;
     setIsUnpublishing(true);
     try {
-      await unpublishPostAction(slug, post.sha);
-      toast.success("Post unpublished successfully");
+      await unpublishArticleAction(slug, article.sha);
+      toast.success("Article unpublished successfully");
       router.refresh();
       setUnpublishDialogOpen(false);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Failed to unpublish post";
+        error instanceof Error ? error.message : "Failed to unpublish article";
       toast.error(message);
-      console.error("Error unpublishing post:", error);
+      console.error("Error unpublishing article:", error);
     } finally {
       setIsUnpublishing(false);
     }
@@ -219,9 +219,9 @@ export function PostEditor({ post, mode }: PostEditorProps) {
       <div className="sticky top-14 z-20 -mx-6 -mt-6 mb-6 flex items-center justify-between gap-4 border-b bg-background/95 px-6 py-3 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
           <span className="font-medium text-foreground">
-            {mode === "create" ? "New Post" : post?.title}
+            {mode === "create" ? "New Article" : article?.title}
           </span>
-          {post?.published && (
+          {article?.published && (
             <Badge
               variant="secondary"
               className="h-5 rounded px-1.5 text-[10px] font-semibold uppercase"
@@ -232,7 +232,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          {mode === "edit" && post?.published && (
+          {mode === "edit" && article?.published && (
             <Button
               variant="ghost"
               size="sm"
@@ -264,7 +264,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
             <span className="hidden sm:inline">Save Draft</span>
           </Button>
 
-          {!post?.published && (
+          {!article?.published && (
             <Button
               size="sm"
               onClick={handlePublish}
@@ -319,7 +319,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                 </Label>
                 <Textarea
                   id="description"
-                  placeholder="What is this post about? (SEO friendly description)"
+                  placeholder="What is this article about? (SEO friendly description)"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={5}
@@ -332,7 +332,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
               <div className="space-y-4">
                 <div className="flex items-center gap-2 text-sm font-semibold">
                   <IconFileText className="size-4 text-primary" />
-                  Post Settings
+                  Article Settings
                 </div>
                 <div className="space-y-2">
                   <Label
@@ -343,7 +343,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
                   </Label>
                   <Input
                     id="slug"
-                    placeholder="post-url-slug"
+                    placeholder="article-url-slug"
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     disabled={mode === "edit"}
@@ -427,7 +427,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
         <div className="rounded-2xl border border-muted bg-background overflow-hidden">
           <ForwardRefEditor
             ref={editorRef}
-            markdown={post?.content ?? ""}
+            markdown={article?.content ?? ""}
             onImageUpload={handleImageUpload}
             onImageInsertClick={() => setImageInsertDialogOpen(true)}
           />
@@ -446,7 +446,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              post and remove it from our servers.
+              article and remove it from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-3">
@@ -457,7 +457,7 @@ export function PostEditor({ post, mode }: PostEditorProps) {
               onClick={handleDelete}
               className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete Post
+              Delete Article
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -469,9 +469,9 @@ export function PostEditor({ post, mode }: PostEditorProps) {
       >
         <AlertDialogContent className="rounded-3xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Unpublish Post?</AlertDialogTitle>
+            <AlertDialogTitle>Unpublish Article?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will move the post back to drafts. It will no longer be
+              This will move the article back to drafts. It will no longer be
               visible on the public site.
             </AlertDialogDescription>
           </AlertDialogHeader>

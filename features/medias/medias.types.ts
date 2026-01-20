@@ -11,7 +11,7 @@ export type MediaFile = UploadedImage;
 
 export interface MediaUsage {
   isUsed: boolean;
-  usedInPosts: Array<{
+  usedInArticles: Array<{
     slug: string;
     title: string;
   }>;

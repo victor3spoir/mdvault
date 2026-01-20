@@ -30,18 +30,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { listArticlesAction } from "@/features/articles/articles.actions";
+import type { Article } from "@/features/articles/articles.types";
 import {
   PostCard,
   PostCardSkeleton,
-} from "@/features/posts/components/post-card";
-import { listPostsAction } from "@/features/posts/posts.actions";
-import type { Post } from "@/features/posts/posts.types";
+} from "@/features/articles/components/article-card";
 import PageLayout from "@/features/shared/components/page-layout";
 
 type StatusFilter = "all" | "published" | "draft";
 
 export default function PostsPage() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const [posts, setPosts] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -52,7 +52,7 @@ export default function PostsPage() {
   const loadPosts = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await listPostsAction();
+      const data = await listArticlesAction();
       setPosts(data);
     } catch (error) {
       console.error("Failed to load posts:", error);
@@ -67,9 +67,9 @@ export default function PostsPage() {
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
-    for (const post of posts) {
-      if (post.tags) {
-        for (const tag of post.tags) {
+    for (const article of posts) {
+      if (article.tags) {
+        for (const tag of article.tags) {
           tags.add(tag);
         }
       }
@@ -79,21 +79,26 @@ export default function PostsPage() {
 
   const filteredPosts = useMemo(() => {
     return posts
-      .filter((post) => {
+      .filter((article) => {
         const matchesSearch =
-          post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.tags?.some((tag) =>
+          article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          article.description
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          article.tags?.some((tag) =>
             tag.toLowerCase().includes(searchQuery.toLowerCase()),
           );
 
         const matchesStatus =
           statusFilter === "all" ||
-          (statusFilter === "published" ? post.published : !post.published);
+          (statusFilter === "published"
+            ? article.published
+            : !article.published);
 
         const matchesTags =
           selectedTags.length === 0 ||
-          (post.tags && selectedTags.some((tag) => post.tags?.includes(tag)));
+          (article.tags &&
+            selectedTags.some((tag) => article.tags?.includes(tag)));
 
         return matchesSearch && matchesStatus && matchesTags;
       })
@@ -110,11 +115,11 @@ export default function PostsPage() {
       });
   }, [posts, searchQuery, statusFilter, selectedTags, sortBy, sortOrder]);
 
-  const handleDelete = (deletedPost: Post) => {
+  const handleDelete = (deletedPost: Article) => {
     setPosts((prev) => prev.filter((p) => p.slug !== deletedPost.slug));
   };
 
-  const handlePublishChange = (updatedPost: Post) => {
+  const handlePublishChange = (updatedPost: Article) => {
     setPosts((prev) =>
       prev.map((p) => (p.slug === updatedPost.slug ? updatedPost : p)),
     );
@@ -144,9 +149,9 @@ export default function PostsPage() {
             size="sm"
             className="h-8 rounded-lg px-3 shadow-sm transition-all hover:shadow-md active:scale-95"
           >
-            <Link href="/cms/posts/new" className="gap-2">
+            <Link href="/cms/articles/new" className="gap-2">
               <IconPlus className="size-4" />
-              <span className="hidden sm:inline">Create Post</span>
+              <span className="hidden sm:inline">Create Article</span>
             </Link>
           </Button>
         </div>
@@ -273,10 +278,10 @@ export default function PostsPage() {
           </div>
         ) : filteredPosts.length > 0 ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-6">
-            {filteredPosts.map((post) => (
+            {filteredPosts.map((article) => (
               <PostCard
-                key={post.slug}
-                post={post}
+                key={article.slug}
+                article={article}
                 onDelete={handleDelete}
                 onPublishChange={handlePublishChange}
               />
@@ -294,11 +299,11 @@ export default function PostsPage() {
               description={
                 searchQuery || selectedTags.length > 0
                   ? "Try adjusting your filters or search query to find what you're looking for."
-                  : "Start by creating your first post to share with the world."
+                  : "Start by creating your first article to share with the world."
               }
               action={
                 !(searchQuery || selectedTags.length > 0)
-                  ? { label: "Create Post", href: "/cms/posts/new" }
+                  ? { label: "Create Article", href: "/cms/articles/new" }
                   : undefined
               }
             />

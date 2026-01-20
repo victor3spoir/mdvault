@@ -342,15 +342,15 @@ export function ImageGallery({
                 <div className="space-y-3 mt-2">
                   <p className="text-destructive font-semibold">
                     ⚠️ This image is being used in{" "}
-                    {deleteConfirmation.usage.usedInPosts.length} post(s):
+                    {deleteConfirmation.usage.usedInArticles.length} article(s):
                   </p>
                   <ul className="space-y-2">
-                    {deleteConfirmation.usage.usedInPosts.map((post) => (
+                    {deleteConfirmation.usage.usedInArticles.map((article) => (
                       <li
-                        key={post.slug}
+                        key={article.slug}
                         className="text-sm text-muted-foreground pl-4 border-l-2 border-destructive"
                       >
-                        <strong>{post.title}</strong> ({post.slug})
+                        <strong>{article.title}</strong> ({article.slug})
                       </li>
                     ))}
                   </ul>

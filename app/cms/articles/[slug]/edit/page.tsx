@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
-import { PostEditor } from "@/features/posts/components/post-editor";
-import { getPostAction } from "@/features/posts/posts.actions";
+import { getArticleAction } from "@/features/articles/articles.actions";
+import { PostEditor } from "@/features/articles/components/article-editor";
 import PageLayout from "@/features/shared/components/page-layout";
 
 interface EditPostPageProps {
@@ -9,24 +9,24 @@ interface EditPostPageProps {
 
 export default async function EditPostPage({ params }: EditPostPageProps) {
   const { slug } = await params;
-  const post = await getPostAction(slug);
+  const article = await getArticleAction(slug);
 
-  if (!post) {
+  if (!article) {
     notFound();
   }
 
   return (
     <PageLayout
-      title={`Edit: ${post.title}`}
-      description="Make changes to your post"
+      title={`Edit: ${article.title}`}
+      description="Make changes to your article"
       breadcrumbs={[
         { label: "Dashboard", href: "/cms" },
-        { label: "Posts", href: "/cms/posts" },
-        { label: post.title, href: `/cms/posts/${slug}` },
+        { label: "Posts", href: "/cms/articles" },
+        { label: article.title, href: `/cms/articles/${slug}` },
         { label: "Edit" },
       ]}
     >
-      <PostEditor post={post} mode="edit" />
+      <PostEditor article={article} mode="edit" />
     </PageLayout>
   );
 }

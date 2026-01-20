@@ -3,13 +3,13 @@
 import { cacheTag, updateTag } from "next/cache";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import {
-  CreatePostSchema,
-  UpdatePostSchema,
-} from "@/lib/validation/post.schema";
-import type { GitHubFile, Post, PostFrontmatter } from "./posts.types";
-import { generateFrontmatter, parseFrontmatter } from "./posts.utils";
+  CreateArticleSchema,
+  UpdateArticleSchema,
+} from "@/lib/validation/article.schema";
+import type { Article, ArticleFrontmatter, GitHubFile } from "./articles.types";
+import { generateFrontmatter, parseFrontmatter } from "./articles.utils";
 
-const { POSTS_PATH, IMAGES_PATH } = githubRepoInfo;
+const { ARTICLES_PATH, IMAGES_PATH } = githubRepoInfo;
 
 async function fetchLatestSha(path: string): Promise<string | undefined> {
   try {
@@ -29,10 +29,10 @@ async function fetchLatestSha(path: string): Promise<string | undefined> {
 
 function createPostObject(
   slug: string,
-  frontmatter: PostFrontmatter,
+  frontmatter: ArticleFrontmatter,
   body: string,
   sha?: string,
-): Post {
+): Article {
   return {
     slug,
     title: frontmatter.title,
@@ -64,18 +64,18 @@ async function updateGitHubFile(
     content: Buffer.from(content).toString("base64"),
     sha: latestSha || sha,
   });
-  updateTag("posts");
+  updateTag("articles");
   return response.data.content?.sha;
 }
 
-export async function listPostsAction(): Promise<Post[]> {
+export async function listArticlesAction(): Promise<Article[]> {
   "use cache";
-  cacheTag("posts");
+  cacheTag("articles");
   try {
     const response = await octokit.repos.getContent({
       owner: githubRepoInfo.owner,
       repo: githubRepoInfo.repo,
-      path: POSTS_PATH,
+      path: ARTICLES_PATH,
     });
 
     if (!Array.isArray(response.data)) {
@@ -87,9 +87,9 @@ export async function listPostsAction(): Promise<Post[]> {
       (f) => f.name.endsWith(".md") || f.name.endsWith(".mdx"),
     );
 
-    const posts: Post[] = await Promise.all(
+    const posts: Article[] = await Promise.all(
       mdFiles.map(async (file) => {
-        const content = await getPostContentAction(file.path);
+        const content = await getArticleContentAction(file.path);
         const { frontmatter, body } = parseFrontmatter(content);
         const slug = file.name.replace(/\.mdx?$/, "");
         return createPostObject(slug, frontmatter, body, file.sha);
@@ -106,7 +106,7 @@ export async function listPostsAction(): Promise<Post[]> {
   }
 }
 
-export async function getPostContentAction(path: string): Promise<string> {
+export async function getArticleContentAction(path: string): Promise<string> {
   try {
     const response = await octokit.repos.getContent({
       owner: githubRepoInfo.owner,
@@ -123,14 +123,14 @@ export async function getPostContentAction(path: string): Promise<string> {
     );
     return content;
   } catch (error) {
-    console.error("Error getting post content:", error);
+    console.error("Error getting article content:", error);
     throw error;
   }
 }
 
-export async function getPostAction(slug: string): Promise<Post | null> {
+export async function getArticleAction(slug: string): Promise<Article | null> {
   try {
-    const path = `${POSTS_PATH}/${slug}.md`;
+    const path = `${ARTICLES_PATH}/${slug}.md`;
     const response = await octokit.repos.getContent({
       owner: githubRepoInfo.owner,
       repo: githubRepoInfo.repo,
@@ -148,13 +148,13 @@ export async function getPostAction(slug: string): Promise<Post | null> {
 
     return createPostObject(slug, frontmatter, body, response.data.sha);
   } catch (error) {
-    console.error("Error getting post:", error);
+    console.error("Error getting article:", error);
     return null;
   }
 }
 
-export async function createPostAction(input: unknown): Promise<Post> {
-  const validatedInput = CreatePostSchema.parse(input);
+export async function createArticleAction(input: unknown): Promise<Article> {
+  const validatedInput = CreateArticleSchema.parse(input);
   const now = new Date().toISOString();
   const { body: cleanContent } = parseFrontmatter(validatedInput.content);
 
@@ -169,12 +169,12 @@ export async function createPostAction(input: unknown): Promise<Post> {
   });
 
   const fileContent = `${frontmatter}\n\n${cleanContent}`;
-  const path = `${POSTS_PATH}/${validatedInput.slug}.md`;
+  const path = `${ARTICLES_PATH}/${validatedInput.slug}.md`;
 
   const sha = await updateGitHubFile(
     path,
     fileContent,
-    `Create post: ${validatedInput.title}`,
+    `Create article: ${validatedInput.title}`,
   );
 
   return createPostObject(
@@ -184,20 +184,20 @@ export async function createPostAction(input: unknown): Promise<Post> {
       published: validatedInput.published ?? false,
       createdAt: now,
       updatedAt: now,
-    } as PostFrontmatter,
+    } as ArticleFrontmatter,
     cleanContent,
     sha,
   );
 }
 
-export async function updatePostAction(
+export async function updateArticleAction(
   slug: string,
   input: unknown,
-): Promise<Post> {
-  const validatedInput = UpdatePostSchema.parse(input);
-  const existingPost = await getPostAction(slug);
+): Promise<Article> {
+  const validatedInput = UpdateArticleSchema.parse(input);
+  const existingPost = await getArticleAction(slug);
   if (!existingPost) {
-    throw new Error("Post not found");
+    throw new Error("Article not found");
   }
 
   const now = new Date().toISOString();
@@ -215,12 +215,12 @@ export async function updatePostAction(
   });
 
   const fileContent = `${frontmatter}\n\n${cleanContent}`;
-  const path = `${POSTS_PATH}/${slug}.md`;
+  const path = `${ARTICLES_PATH}/${slug}.md`;
 
   const sha = await updateGitHubFile(
     path,
     fileContent,
-    `Update post: ${validatedInput.title ?? existingPost.title}`,
+    `Update article: ${validatedInput.title ?? existingPost.title}`,
     existingPost.sha,
   );
 
@@ -237,29 +237,29 @@ export async function updatePostAction(
   };
 }
 
-export async function deletePostAction(
+export async function deleteArticleAction(
   slug: string,
   sha: string,
 ): Promise<void> {
-  const path = `${POSTS_PATH}/${slug}.md`;
+  const path = `${ARTICLES_PATH}/${slug}.md`;
 
   await octokit.repos.deleteFile({
     owner: githubRepoInfo.owner,
     repo: githubRepoInfo.repo,
     path,
-    message: `Delete post: ${slug}`,
+    message: `Delete article: ${slug}`,
     sha,
   });
-  updateTag("posts");
+  updateTag("articles");
 }
 
-export async function unpublishPostAction(
+export async function unpublishArticleAction(
   slug: string,
   sha: string,
-): Promise<Post> {
-  const existingPost = await getPostAction(slug);
+): Promise<Article> {
+  const existingPost = await getArticleAction(slug);
   if (!existingPost) {
-    throw new Error("Post not found");
+    throw new Error("Article not found");
   }
 
   const now = new Date().toISOString();
@@ -274,12 +274,12 @@ export async function unpublishPostAction(
   });
 
   const fileContent = `${frontmatter}\n\n${existingPost.content}`;
-  const path = `${POSTS_PATH}/${slug}.md`;
+  const path = `${ARTICLES_PATH}/${slug}.md`;
 
   const updatedSha = await updateGitHubFile(
     path,
     fileContent,
-    `Unpublish post: ${existingPost.title}`,
+    `Unpublish article: ${existingPost.title}`,
     sha,
   );
 
@@ -291,13 +291,13 @@ export async function unpublishPostAction(
   };
 }
 
-export async function publishPostAction(
+export async function publishArticleAction(
   slug: string,
   sha: string,
-): Promise<Post> {
-  const existingPost = await getPostAction(slug);
+): Promise<Article> {
+  const existingPost = await getArticleAction(slug);
   if (!existingPost) {
-    throw new Error("Post not found");
+    throw new Error("Article not found");
   }
 
   const now = new Date().toISOString();
@@ -312,12 +312,12 @@ export async function publishPostAction(
   });
 
   const fileContent = `${frontmatter}\n\n${existingPost.content}`;
-  const path = `${POSTS_PATH}/${slug}.md`;
+  const path = `${ARTICLES_PATH}/${slug}.md`;
 
   const updatedSha = await updateGitHubFile(
     path,
     fileContent,
-    `Publish post: ${existingPost.title}`,
+    `Publish article: ${existingPost.title}`,
     sha,
   );
 
@@ -329,16 +329,16 @@ export async function publishPostAction(
   };
 }
 
-export async function updatePostMetadataAction(
+export async function updateArticleMetadataAction(
   slug: string,
   metadata: {
     createdAt?: string;
     publishedDate?: string;
   },
-): Promise<Post> {
-  const existingPost = await getPostAction(slug);
+): Promise<Article> {
+  const existingPost = await getArticleAction(slug);
   if (!existingPost) {
-    throw new Error("Post not found");
+    throw new Error("Article not found");
   }
 
   const now = new Date().toISOString();
@@ -354,12 +354,12 @@ export async function updatePostMetadataAction(
   });
 
   const fileContent = `${frontmatter}\n\n${existingPost.content}`;
-  const path = `${POSTS_PATH}/${slug}.md`;
+  const path = `${ARTICLES_PATH}/${slug}.md`;
 
   const updatedSha = await updateGitHubFile(
     path,
     fileContent,
-    `Update post metadata: ${existingPost.title}`,
+    `Update article metadata: ${existingPost.title}`,
     existingPost.sha,
   );
 

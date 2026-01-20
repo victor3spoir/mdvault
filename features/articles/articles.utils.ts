@@ -1,9 +1,9 @@
-import type { PostFrontmatter } from "./posts.types";
+import type { ArticleFrontmatter } from "./articles.types";
 
 const FRONTMATTER_DELIMITER = "---";
 const YAML_QUOTE_PATTERN = /[:\n"']/;
 
-const FRONTMATTER_FIELDS: Array<keyof PostFrontmatter> = [
+const FRONTMATTER_FIELDS: Array<keyof ArticleFrontmatter> = [
   "title",
   "description",
   "published",
@@ -43,7 +43,7 @@ function formatValue(value: FrontmatterValue): string {
   throw new Error(`Invalid frontmatter value type: ${typeof value}`);
 }
 
-export function generateFrontmatter(data: PostFrontmatter): string {
+export function generateFrontmatter(data: ArticleFrontmatter): string {
   const lines = [FRONTMATTER_DELIMITER];
 
   for (const field of FRONTMATTER_FIELDS) {
@@ -137,7 +137,7 @@ function extractFrontmatterLines(content: string): {
 }
 
 export function parseFrontmatter(content: string): {
-  frontmatter: PostFrontmatter;
+  frontmatter: ArticleFrontmatter;
   body: string;
 } {
   if (typeof content !== "string") {
@@ -145,7 +145,10 @@ export function parseFrontmatter(content: string): {
   }
 
   const { lines, body } = extractFrontmatterLines(content);
-  const frontmatter: PostFrontmatter = { title: "Untitled", published: false };
+  const frontmatter: ArticleFrontmatter = {
+    title: "Untitled",
+    published: false,
+  };
 
   for (const line of lines) {
     if (typeof line !== "string") continue;
@@ -156,7 +159,7 @@ export function parseFrontmatter(content: string): {
     const key = line.slice(0, colonIndex).trim();
     const value = line.slice(colonIndex + 1).trim();
 
-    if (!FRONTMATTER_FIELDS.includes(key as keyof PostFrontmatter)) {
+    if (!FRONTMATTER_FIELDS.includes(key as keyof ArticleFrontmatter)) {
       continue;
     }
 

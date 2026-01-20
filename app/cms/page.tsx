@@ -5,7 +5,7 @@ import { RecentActivity } from "@/features/shared/components/recent-activity";
 import {
   getDashboardStatsAction,
   getRecentActivityAction,
-} from "./actions/dashboard.actions";
+} from "../../features/dashboard/dashboard.actions";
 
 const Page = async () => {
   const stats = await getDashboardStatsAction();
@@ -47,8 +47,8 @@ const Page = async () => {
   ];
 
   const quickActions = [
-    { title: "New Post", href: "/cms/posts/new", icon: IconFileText },
-    { title: "View Posts", href: "/cms/posts", icon: IconEye },
+    { title: "New Article", href: "/cms/articles/new", icon: IconFileText },
+    { title: "View Posts", href: "/cms/articles", icon: IconEye },
     { title: "Upload Media", href: "/cms/media", icon: IconPhoto },
   ];
 

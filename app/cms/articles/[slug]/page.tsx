@@ -10,8 +10,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TableOfContents } from "@/features/posts/components/table-of-contents";
-import { getPostAction } from "@/features/posts/posts.actions";
+import { getArticleAction } from "@/features/articles/articles.actions";
+import { TableOfContents } from "@/features/articles/components/table-of-contents";
 import PageLayout from "@/features/shared/components/page-layout";
 import { MDXContent } from "@/lib/mdx";
 
@@ -21,13 +21,13 @@ interface PostPageProps {
 
 export default async function PostPage({ params }: PostPageProps) {
   const { slug } = await params;
-  const post = await getPostAction(slug);
+  const article = await getArticleAction(slug);
 
-  if (!post) {
+  if (!article) {
     notFound();
   }
 
-  const formattedCreatedAt = new Date(post.createdAt).toLocaleDateString(
+  const formattedCreatedAt = new Date(article.createdAt).toLocaleDateString(
     "fr-FR",
     {
       year: "numeric",
@@ -36,7 +36,7 @@ export default async function PostPage({ params }: PostPageProps) {
     },
   );
 
-  const formattedUpdatedAt = new Date(post.updatedAt).toLocaleDateString(
+  const formattedUpdatedAt = new Date(article.updatedAt).toLocaleDateString(
     "fr-FR",
     {
       year: "numeric",
@@ -49,21 +49,21 @@ export default async function PostPage({ params }: PostPageProps) {
     <PageLayout
       breadcrumbs={[
         { label: "Dashboard", href: "/cms" },
-        { label: "Posts", href: "/cms/posts" },
-        { label: post.title },
+        { label: "Posts", href: "/cms/articles" },
+        { label: article.title },
       ]}
       actions={
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" className="gap-2">
-            <Link href="/cms/posts">
+            <Link href="/cms/articles">
               <IconArrowLeft className="size-4" />
               Back
             </Link>
           </Button>
           <Button asChild className="gap-2">
-            <Link href={`/cms/posts/${slug}/edit` as "/"}>
+            <Link href={`/cms/articles/${slug}/edit` as "/"}>
               <IconEdit className="size-4" />
-              Edit Post
+              Edit Article
             </Link>
           </Button>
         </div>
@@ -74,10 +74,10 @@ export default async function PostPage({ params }: PostPageProps) {
           {/* Header */}
           <header className="mb-8 space-y-4">
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={post.published ? "default" : "secondary"}>
-                {post.published ? "Published" : "Draft"}
+              <Badge variant={article.published ? "default" : "secondary"}>
+                {article.published ? "Published" : "Draft"}
               </Badge>
-              {post.tags?.map((tag) => (
+              {article.tags?.map((tag) => (
                 <Badge key={tag} variant="outline">
                   <IconTag className="mr-1 size-3" />
                   {tag}
@@ -86,17 +86,17 @@ export default async function PostPage({ params }: PostPageProps) {
             </div>
 
             <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground">
-              {post.author && (
+              {article.author && (
                 <span className="flex items-center gap-1.5">
                   <IconUser className="size-4" />
-                  {post.author}
+                  {article.author}
                 </span>
               )}
               <span className="flex items-center gap-1.5">
                 <IconCalendar className="size-4" />
                 Created {formattedCreatedAt}
               </span>
-              {post.updatedAt !== post.createdAt && (
+              {article.updatedAt !== article.createdAt && (
                 <span className="flex items-center gap-1.5">
                   <IconCalendar className="size-4" />
                   Updated {formattedUpdatedAt}
@@ -104,22 +104,24 @@ export default async function PostPage({ params }: PostPageProps) {
               )}
             </div>
 
-            <h1 className="text-4xl font-bold tracking-tight">{post.title}</h1>
+            <h1 className="text-4xl font-bold tracking-tight">
+              {article.title}
+            </h1>
 
-            {post.description && (
+            {article.description && (
               <p className="text-xl text-muted-foreground">
-                {post.description}
+                {article.description}
               </p>
             )}
           </header>
 
           {/* Cover Image */}
-          {post.coverImage && (
+          {article.coverImage && (
             <div className="relative mb-8 aspect-video w-full overflow-hidden rounded-xl bg-muted">
               <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
                 <Image
-                  src={post.coverImage}
-                  alt={post.title}
+                  src={article.coverImage}
+                  alt={article.title}
                   width={200}
                   height={200}
                   className="w-full"
@@ -130,7 +132,7 @@ export default async function PostPage({ params }: PostPageProps) {
 
           {/* Content */}
           <div className="prose prose-neutral dark:prose-invert max-w-none">
-            <MDXContent source={post.content} />
+            <MDXContent source={article.content} />
           </div>
         </article>
 

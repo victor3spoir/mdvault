@@ -15,33 +15,33 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { updatePostMetadataAction } from "@/features/posts/posts.actions";
-import type { Post } from "@/features/posts/posts.types";
+import { updateArticleMetadataAction } from "@/features/articles/articles.actions";
+import type { Article } from "@/features/articles/articles.types";
 
 interface PostMetadataEditorProps {
-  post: Post;
+  article: Article;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate?: (post: Post) => void;
+  onUpdate?: (article: Article) => void;
 }
 
 export function PostMetadataEditor({
-  post,
+  article,
   isOpen,
   onClose,
   onUpdate,
 }: PostMetadataEditorProps) {
   const [isPending, startTransition] = useTransition();
-  const [createdAt, setCreatedAt] = useState(post.createdAt);
+  const [createdAt, setCreatedAt] = useState(article.createdAt);
 
   const handleSave = () => {
     startTransition(async () => {
       try {
-        const updatedPost = await updatePostMetadataAction(post.slug, {
+        const updatedPost = await updateArticleMetadataAction(article.slug, {
           createdAt,
         });
         toast.success("Metadata updated", {
-          description: `"${post.title}" metadata has been updated`,
+          description: `"${article.title}" metadata has been updated`,
         });
         onUpdate?.(updatedPost);
         onClose();
@@ -62,10 +62,10 @@ export function PostMetadataEditor({
             <IconSettings className="size-6" />
           </div>
           <AlertDialogTitle className="text-2xl font-bold">
-            Post Settings
+            Article Settings
           </AlertDialogTitle>
           <AlertDialogDescription className="text-base">
-            Update the metadata for &quot;{post.title}&quot;.
+            Update the metadata for &quot;{article.title}&quot;.
           </AlertDialogDescription>
         </AlertDialogHeader>
 

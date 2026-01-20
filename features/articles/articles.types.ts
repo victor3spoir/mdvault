@@ -1,11 +1,11 @@
-export interface Post {
+export interface Article {
   slug: string;
   title: string;
   description?: string;
   content: string;
   createdAt: string;
   updatedAt: string;
-  publishedDate?: string; // Date when post was published
+  publishedDate?: string; // Date when article was published
   published: boolean;
   author?: string;
   tags?: string[];
@@ -13,7 +13,7 @@ export interface Post {
   sha?: string; // GitHub file SHA for updates
 }
 
-export interface PostFrontmatter {
+export interface ArticleFrontmatter {
   title: string;
   description?: string;
   published: boolean;
@@ -22,7 +22,7 @@ export interface PostFrontmatter {
   coverImage?: string;
   createdAt?: string;
   updatedAt?: string;
-  publishedDate?: string; // Date when post was published
+  publishedDate?: string; // Date when article was published
 }
 
 export interface GitHubFile {
@@ -34,7 +34,7 @@ export interface GitHubFile {
   download_url: string | null;
 }
 
-export interface CreatePostInput {
+export interface CreateArticleInput {
   title: string;
   slug: string;
   content: string;
@@ -44,6 +44,6 @@ export interface CreatePostInput {
   coverImage?: string;
 }
 
-export interface UpdatePostInput extends Partial<CreatePostInput> {
+export interface UpdateArticleInput extends Partial<CreateArticleInput> {
   sha: string;
 }

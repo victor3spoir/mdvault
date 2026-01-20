@@ -333,7 +333,7 @@ GET  /api/tags                      → List all tags
 
 ### 3. Search is Non-Functional
 
-**Location:** `app/cms/posts/page.tsx`
+**Location:** `app/cms/articles/page.tsx`
 
 **Problem:**
 ```tsx

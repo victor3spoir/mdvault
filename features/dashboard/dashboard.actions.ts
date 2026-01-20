@@ -1,7 +1,7 @@
 "use server";
 
+import { listArticlesAction } from "@/features/articles/articles.actions";
 import { listImagesAction } from "@/features/medias/medias.actions";
-import { listPostsAction } from "@/features/posts/posts.actions";
 
 export interface DashboardStats {
   totalPosts: number;
@@ -22,12 +22,12 @@ export interface Activity {
 export async function getDashboardStatsAction(): Promise<DashboardStats> {
   try {
     const [posts, images] = await Promise.all([
-      listPostsAction(),
+      listArticlesAction(),
       listImagesAction(),
     ]);
 
-    const publishedCount = posts.filter((post) => post.published).length;
-    const draftCount = posts.filter((post) => !post.published).length;
+    const publishedCount = posts.filter((article) => article.published).length;
+    const draftCount = posts.filter((article) => !article.published).length;
 
     return {
       totalPosts: posts.length,
@@ -51,33 +51,33 @@ export async function getRecentActivityAction(
 ): Promise<Activity[]> {
   try {
     const [posts, images] = await Promise.all([
-      listPostsAction(),
+      listArticlesAction(),
       listImagesAction(),
     ]);
 
     const activities: Activity[] = [];
 
-    // Add post activities
-    posts.forEach((post) => {
-      // Add post published activity
-      if (post.published) {
+    // Add article activities
+    posts.forEach((article) => {
+      // Add article published activity
+      if (article.published) {
         activities.push({
-          id: `post-pub-${post.slug}`,
+          id: `article-pub-${article.slug}`,
           type: "post_published",
-          title: "Post published",
-          description: post.title,
-          timestamp: post.updatedAt,
+          title: "Article published",
+          description: article.title,
+          timestamp: article.updatedAt,
           icon: "eye",
         });
       }
 
-      // Add post created activity
+      // Add article created activity
       activities.push({
-        id: `post-create-${post.slug}`,
+        id: `article-create-${article.slug}`,
         type: "post_created",
-        title: "Post created",
-        description: post.title,
-        timestamp: post.createdAt,
+        title: "Article created",
+        description: article.title,
+        timestamp: article.createdAt,
         icon: "file",
       });
     });

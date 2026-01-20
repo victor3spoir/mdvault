@@ -51,8 +51,8 @@ const navItems: NavItem[] = [
     title: "Posts",
     icon: <IconFileText className="size-4" />,
     children: [
-      { title: "All Posts", href: "/cms/posts" },
-      { title: "New Post", href: "/cms/posts/new" },
+      { title: "All Posts", href: "/cms/articles" },
+      { title: "New Article", href: "/cms/articles/new" },
     ],
   },
   {
@@ -138,7 +138,7 @@ const AppSidebar = () => {
                               isActive={isActive(child.href)}
                             >
                               <Link href={child.href as "/"}>
-                                {child.title === "New Post" && (
+                                {child.title === "New Article" && (
                                   <IconPlus className="size-3" />
                                 )}
                                 {child.title === "All Posts" && (

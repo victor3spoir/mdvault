@@ -33,25 +33,29 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { Post } from "@/features/posts/posts.types";
+import type { Article } from "@/features/articles/articles.types";
 import {
-  deletePostAction,
-  publishPostAction,
-  unpublishPostAction,
-} from "../posts.actions";
-import { PostMetadataEditor } from "./post-metadata-editor";
+  deleteArticleAction,
+  publishArticleAction,
+  unpublishArticleAction,
+} from "../articles.actions";
+import { PostMetadataEditor } from "./article-metadata-editor";
 
 interface PostCardProps {
-  post: Post;
-  onDelete?: (post: Post) => void;
-  onPublishChange?: (post: Post) => void;
+  article: Article;
+  onDelete?: (article: Article) => void;
+  onPublishChange?: (article: Article) => void;
 }
 
-export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
+export function PostCard({
+  article,
+  onDelete,
+  onPublishChange,
+}: PostCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMetadataEditorOpen, setIsMetadataEditorOpen] = useState(false);
-  const [currentPost, setCurrentPost] = useState(post);
+  const [currentPost, setCurrentPost] = useState(article);
 
   const formattedDate = new Date(currentPost.createdAt).toLocaleDateString(
     "fr-FR",
@@ -64,7 +68,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
 
   async function handlePublishToggle(
     published: boolean,
-    action: (slug: string, sha: string) => Promise<Post>,
+    action: (slug: string, sha: string) => Promise<Article>,
   ) {
     startTransition(async () => {
       try {
@@ -76,7 +80,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
         const message = published
           ? `"${currentPost.title}" is now live`
           : `"${currentPost.title}" is now a draft`;
-        toast.success(`Post ${status}`, { description: message });
+        toast.success(`Article ${status}`, { description: message });
         setCurrentPost(updatedPost);
         onPublishChange?.(updatedPost);
       } catch (error) {
@@ -88,15 +92,16 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
     });
   }
 
-  const handlePublish = () => handlePublishToggle(true, publishPostAction);
+  const handlePublish = () => handlePublishToggle(true, publishArticleAction);
 
-  const handleUnpublish = () => handlePublishToggle(false, unpublishPostAction);
+  const handleUnpublish = () =>
+    handlePublishToggle(false, unpublishArticleAction);
 
   const handleDelete = async () => {
     startTransition(async () => {
       try {
-        await deletePostAction(currentPost.slug, currentPost.sha || "");
-        toast.success("Post deleted", {
+        await deleteArticleAction(currentPost.slug, currentPost.sha || "");
+        toast.success("Article deleted", {
           description: `"${currentPost.title}" has been removed`,
         });
         onDelete?.(currentPost);
@@ -178,7 +183,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
 
           <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground">
             {currentPost.description ||
-              "No description provided for this post."}
+              "No description provided for this article."}
           </p>
 
           <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground">
@@ -204,12 +209,12 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/posts/${currentPost.slug}`}>
+                    <Link href={`/cms/articles/${currentPost.slug}`}>
                       <IconEye className="size-4" />
                     </Link>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>View post</TooltipContent>
+                <TooltipContent>View article</TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -220,12 +225,12 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/posts/${currentPost.slug}/edit`}>
+                    <Link href={`/cms/articles/${currentPost.slug}/edit`}>
                       <IconEdit className="size-4" />
                     </Link>
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Edit post</TooltipContent>
+                <TooltipContent>Edit article</TooltipContent>
               </Tooltip>
 
               <Tooltip>
@@ -292,7 +297,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
                     <IconTrash className="size-4" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>Delete post</TooltipContent>
+                <TooltipContent>Delete article</TooltipContent>
               </Tooltip>
             </div>
           </div>
@@ -300,10 +305,10 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
       </div>
 
       <PostMetadataEditor
-        post={currentPost}
+        article={currentPost}
         isOpen={isMetadataEditorOpen}
         onClose={() => setIsMetadataEditorOpen(false)}
-        onUpdate={(updatedPost: Post) => {
+        onUpdate={(updatedPost: Article) => {
           setCurrentPost(updatedPost);
           onPublishChange?.(updatedPost);
         }}
@@ -315,7 +320,7 @@ export function PostCard({ post, onDelete, onPublishChange }: PostCardProps) {
       >
         <AlertDialogContent className="rounded-3xl border-muted">
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Post</AlertDialogTitle>
+            <AlertDialogTitle>Delete Article</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to delete &quot;{currentPost.title}&quot;?
               This action cannot be undone.

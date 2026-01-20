@@ -68,8 +68,8 @@ export default function NotFound() {
             {(
               [
                 { href: "/cms" as const, label: "Dashboard" },
-                { href: "/cms/posts" as const, label: "Posts" },
-                { href: "/cms/posts/new" as const, label: "New Post" },
+                { href: "/cms/articles" as const, label: "Posts" },
+                { href: "/cms/articles/new" as const, label: "New Article" },
               ] as const
             ).map((link) => (
               <Link

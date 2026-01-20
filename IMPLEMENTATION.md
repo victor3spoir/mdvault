@@ -7,7 +7,7 @@
 
 ### 1. ✅ Post Search & Filtering
 
-**Location:** [app/cms/posts/page.tsx](app/cms/posts/page.tsx)
+**Location:** [app/cms/articles/page.tsx](app/cms/articles/page.tsx)
 
 - **Real-time search** by title, description, and content
 - **Status filtering:**
@@ -121,7 +121,7 @@ export type MediaFile = UploadedImage;
 ## Files Modified
 
 1. **Pages:**
-   - [app/cms/posts/page.tsx](app/cms/posts/page.tsx) - Added search/filter UI and client-side logic
+   - [app/cms/articles/page.tsx](app/cms/articles/page.tsx) - Added search/filter UI and client-side logic
    - [app/cms/media/page.tsx](app/cms/media/page.tsx) - Added image search/filter and state management
 
 2. **Types:**
