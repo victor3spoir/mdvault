@@ -27,7 +27,7 @@ async function fetchLatestSha(path: string): Promise<string | undefined> {
   return undefined;
 }
 
-function createPostObject(
+function createArticleObject(
   slug: string,
   frontmatter: ArticleFrontmatter,
   body: string,
@@ -87,21 +87,21 @@ export async function listArticlesAction(): Promise<Article[]> {
       (f) => f.name.endsWith(".md") || f.name.endsWith(".mdx"),
     );
 
-    const posts: Article[] = await Promise.all(
+    const articles: Article[] = await Promise.all(
       mdFiles.map(async (file) => {
         const content = await getArticleContentAction(file.path);
         const { frontmatter, body } = parseFrontmatter(content);
         const slug = file.name.replace(/\.mdx?$/, "");
-        return createPostObject(slug, frontmatter, body, file.sha);
+        return createArticleObject(slug, frontmatter, body, file.sha);
       }),
     );
 
-    return posts.sort(
+    return articles.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   } catch (error) {
-    console.error("Error listing posts:", error);
+    console.error("Error listing articles:", error);
     return [];
   }
 }
@@ -146,7 +146,7 @@ export async function getArticleAction(slug: string): Promise<Article | null> {
     );
     const { frontmatter, body } = parseFrontmatter(content);
 
-    return createPostObject(slug, frontmatter, body, response.data.sha);
+    return createArticleObject(slug, frontmatter, body, response.data.sha);
   } catch (error) {
     console.error("Error getting article:", error);
     return null;
@@ -177,7 +177,7 @@ export async function createArticleAction(input: unknown): Promise<Article> {
     `Create article: ${validatedInput.title}`,
   );
 
-  return createPostObject(
+  return createArticleObject(
     validatedInput.slug,
     {
       ...validatedInput,
@@ -195,22 +195,22 @@ export async function updateArticleAction(
   input: unknown,
 ): Promise<Article> {
   const validatedInput = UpdateArticleSchema.parse(input);
-  const existingPost = await getArticleAction(slug);
-  if (!existingPost) {
+  const existingArticle = await getArticleAction(slug);
+  if (!existingArticle) {
     throw new Error("Article not found");
   }
 
   const now = new Date().toISOString();
-  const rawContent = validatedInput.content ?? existingPost.content;
+  const rawContent = validatedInput.content ?? existingArticle.content;
   const { body: cleanContent } = parseFrontmatter(rawContent);
 
   const frontmatter = generateFrontmatter({
-    title: validatedInput.title ?? existingPost.title,
-    description: validatedInput.description ?? existingPost.description,
-    published: validatedInput.published ?? existingPost.published,
-    tags: validatedInput.tags ?? existingPost.tags,
-    coverImage: validatedInput.coverImage ?? existingPost.coverImage,
-    createdAt: existingPost.createdAt,
+    title: validatedInput.title ?? existingArticle.title,
+    description: validatedInput.description ?? existingArticle.description,
+    published: validatedInput.published ?? existingArticle.published,
+    tags: validatedInput.tags ?? existingArticle.tags,
+    coverImage: validatedInput.coverImage ?? existingArticle.coverImage,
+    createdAt: existingArticle.createdAt,
     updatedAt: now,
   });
 
@@ -220,19 +220,19 @@ export async function updateArticleAction(
   const sha = await updateGitHubFile(
     path,
     fileContent,
-    `Update article: ${validatedInput.title ?? existingPost.title}`,
-    existingPost.sha,
+    `Update article: ${validatedInput.title ?? existingArticle.title}`,
+    existingArticle.sha,
   );
 
   return {
-    ...existingPost,
-    title: validatedInput.title ?? existingPost.title,
-    description: validatedInput.description ?? existingPost.description,
+    ...existingArticle,
+    title: validatedInput.title ?? existingArticle.title,
+    description: validatedInput.description ?? existingArticle.description,
     content: cleanContent,
     updatedAt: now,
-    published: validatedInput.published ?? existingPost.published,
-    tags: validatedInput.tags ?? existingPost.tags,
-    coverImage: validatedInput.coverImage ?? existingPost.coverImage,
+    published: validatedInput.published ?? existingArticle.published,
+    tags: validatedInput.tags ?? existingArticle.tags,
+    coverImage: validatedInput.coverImage ?? existingArticle.coverImage,
     sha,
   };
 }
@@ -257,34 +257,34 @@ export async function unpublishArticleAction(
   slug: string,
   sha: string,
 ): Promise<Article> {
-  const existingPost = await getArticleAction(slug);
-  if (!existingPost) {
+  const existingArticle = await getArticleAction(slug);
+  if (!existingArticle) {
     throw new Error("Article not found");
   }
 
   const now = new Date().toISOString();
   const frontmatter = generateFrontmatter({
-    title: existingPost.title,
-    description: existingPost.description,
+    title: existingArticle.title,
+    description: existingArticle.description,
     published: false,
-    tags: existingPost.tags,
-    coverImage: existingPost.coverImage,
-    createdAt: existingPost.createdAt,
+    tags: existingArticle.tags,
+    coverImage: existingArticle.coverImage,
+    createdAt: existingArticle.createdAt,
     updatedAt: now,
   });
 
-  const fileContent = `${frontmatter}\n\n${existingPost.content}`;
+  const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
   const path = `${ARTICLES_PATH}/${slug}.md`;
 
   const updatedSha = await updateGitHubFile(
     path,
     fileContent,
-    `Unpublish article: ${existingPost.title}`,
+    `Unpublish article: ${existingArticle.title}`,
     sha,
   );
 
   return {
-    ...existingPost,
+    ...existingArticle,
     published: false,
     updatedAt: now,
     sha: updatedSha,
@@ -295,34 +295,34 @@ export async function publishArticleAction(
   slug: string,
   sha: string,
 ): Promise<Article> {
-  const existingPost = await getArticleAction(slug);
-  if (!existingPost) {
+  const existingArticle = await getArticleAction(slug);
+  if (!existingArticle) {
     throw new Error("Article not found");
   }
 
   const now = new Date().toISOString();
   const frontmatter = generateFrontmatter({
-    title: existingPost.title,
-    description: existingPost.description,
+    title: existingArticle.title,
+    description: existingArticle.description,
     published: true,
-    tags: existingPost.tags,
-    coverImage: existingPost.coverImage,
-    createdAt: existingPost.createdAt,
+    tags: existingArticle.tags,
+    coverImage: existingArticle.coverImage,
+    createdAt: existingArticle.createdAt,
     updatedAt: now,
   });
 
-  const fileContent = `${frontmatter}\n\n${existingPost.content}`;
+  const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
   const path = `${ARTICLES_PATH}/${slug}.md`;
 
   const updatedSha = await updateGitHubFile(
     path,
     fileContent,
-    `Publish article: ${existingPost.title}`,
+    `Publish article: ${existingArticle.title}`,
     sha,
   );
 
   return {
-    ...existingPost,
+    ...existingArticle,
     published: true,
     updatedAt: now,
     sha: updatedSha,
@@ -336,37 +336,37 @@ export async function updateArticleMetadataAction(
     publishedDate?: string;
   },
 ): Promise<Article> {
-  const existingPost = await getArticleAction(slug);
-  if (!existingPost) {
+  const existingArticle = await getArticleAction(slug);
+  if (!existingArticle) {
     throw new Error("Article not found");
   }
 
   const now = new Date().toISOString();
   const frontmatter = generateFrontmatter({
-    title: existingPost.title,
-    description: existingPost.description,
-    published: existingPost.published,
-    tags: existingPost.tags,
-    coverImage: existingPost.coverImage,
-    createdAt: metadata.createdAt ?? existingPost.createdAt,
+    title: existingArticle.title,
+    description: existingArticle.description,
+    published: existingArticle.published,
+    tags: existingArticle.tags,
+    coverImage: existingArticle.coverImage,
+    createdAt: metadata.createdAt ?? existingArticle.createdAt,
     updatedAt: now,
-    publishedDate: metadata.publishedDate ?? existingPost.publishedDate,
+    publishedDate: metadata.publishedDate ?? existingArticle.publishedDate,
   });
 
-  const fileContent = `${frontmatter}\n\n${existingPost.content}`;
+  const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
   const path = `${ARTICLES_PATH}/${slug}.md`;
 
   const updatedSha = await updateGitHubFile(
     path,
     fileContent,
-    `Update article metadata: ${existingPost.title}`,
-    existingPost.sha,
+    `Update article metadata: ${existingArticle.title}`,
+    existingArticle.sha,
   );
 
   return {
-    ...existingPost,
-    createdAt: metadata.createdAt ?? existingPost.createdAt,
-    publishedDate: metadata.publishedDate ?? existingPost.publishedDate,
+    ...existingArticle,
+    createdAt: metadata.createdAt ?? existingArticle.createdAt,
+    publishedDate: metadata.publishedDate ?? existingArticle.publishedDate,
     updatedAt: now,
     sha: updatedSha,
   };
