@@ -355,7 +355,7 @@ export function ImageGallery({
                     ))}
                   </ul>
                   <p className="text-sm text-destructive mt-2">
-                    Deleting this image will break these posts. Are you sure?
+                    Deleting this image will break these articles. Are you sure?
                   </p>
                 </div>
               ) : (

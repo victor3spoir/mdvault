@@ -4,15 +4,15 @@ import { listArticlesAction } from "@/features/articles/articles.actions";
 import { listImagesAction } from "@/features/medias/medias.actions";
 
 export interface DashboardStats {
-  totalPosts: number;
-  publishedPosts: number;
-  draftPosts: number;
+  totalArticles: number;
+  publishedArticles: number;
+  draftArticles: number;
   mediaFiles: number;
 }
 
 export interface Activity {
   id: string;
-  type: "post_created" | "post_published" | "image_uploaded";
+  type: "article_created" | "article_published" | "image_uploaded";
   title: string;
   description: string;
   timestamp: string;
@@ -21,26 +21,28 @@ export interface Activity {
 
 export async function getDashboardStatsAction(): Promise<DashboardStats> {
   try {
-    const [posts, images] = await Promise.all([
+    const [articles, images] = await Promise.all([
       listArticlesAction(),
       listImagesAction(),
     ]);
 
-    const publishedCount = posts.filter((article) => article.published).length;
-    const draftCount = posts.filter((article) => !article.published).length;
+    const publishedCount = articles.filter(
+      (article) => article.published,
+    ).length;
+    const draftCount = articles.filter((article) => !article.published).length;
 
     return {
-      totalPosts: posts.length,
-      publishedPosts: publishedCount,
-      draftPosts: draftCount,
+      totalArticles: articles.length,
+      publishedArticles: publishedCount,
+      draftArticles: draftCount,
       mediaFiles: images.length,
     };
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
     return {
-      totalPosts: 0,
-      publishedPosts: 0,
-      draftPosts: 0,
+      totalArticles: 0,
+      publishedArticles: 0,
+      draftArticles: 0,
       mediaFiles: 0,
     };
   }
@@ -50,7 +52,7 @@ export async function getRecentActivityAction(
   limit: number = 8,
 ): Promise<Activity[]> {
   try {
-    const [posts, images] = await Promise.all([
+    const [articles, images] = await Promise.all([
       listArticlesAction(),
       listImagesAction(),
     ]);
@@ -58,12 +60,12 @@ export async function getRecentActivityAction(
     const activities: Activity[] = [];
 
     // Add article activities
-    posts.forEach((article) => {
+    articles.forEach((article) => {
       // Add article published activity
       if (article.published) {
         activities.push({
           id: `article-pub-${article.slug}`,
-          type: "post_published",
+          type: "article_published",
           title: "Article published",
           description: article.title,
           timestamp: article.updatedAt,
@@ -74,7 +76,7 @@ export async function getRecentActivityAction(
       // Add article created activity
       activities.push({
         id: `article-create-${article.slug}`,
-        type: "post_created",
+        type: "article_created",
         title: "Article created",
         description: article.title,
         timestamp: article.createdAt,

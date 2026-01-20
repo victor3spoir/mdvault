@@ -13,24 +13,24 @@ const Page = async () => {
 
   const statsCards = [
     {
-      title: "Total Posts",
-      value: stats.totalPosts.toString(),
+      title: "Total Articles",
+      value: stats.totalArticles.toString(),
       description: "Total articles",
       icon: IconFileText,
       color: "text-blue-500",
       bg: "bg-blue-500/10",
     },
     {
-      title: "Published Posts",
-      value: stats.publishedPosts.toString(),
+      title: "Published Articles",
+      value: stats.publishedArticles.toString(),
       description: "Published articles",
       icon: IconEye,
       color: "text-green-500",
       bg: "bg-green-500/10",
     },
     {
-      title: "Draft Posts",
-      value: stats.draftPosts.toString(),
+      title: "Draft Articles",
+      value: stats.draftArticles.toString(),
       description: "Unpublished articles",
       icon: IconFileText,
       color: "text-amber-500",

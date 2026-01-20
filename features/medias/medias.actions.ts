@@ -7,7 +7,7 @@ import octokit, { githubRepoInfo } from "@/lib/octokit";
 import { listArticlesAction } from "../articles/articles.actions";
 import type { MediaUsage, UploadedImage } from "./medias.types";
 
-const IMAGES_PATH = githubRepoInfo.IMAGES_PATH;
+const MEDIA_PATH = githubRepoInfo.MEDIA_PATH;
 
 export async function listImagesAction(): Promise<UploadedImage[]> {
   "use cache";
@@ -16,7 +16,7 @@ export async function listImagesAction(): Promise<UploadedImage[]> {
     const response = await octokit.repos.getContent({
       owner: githubRepoInfo.owner,
       repo: githubRepoInfo.repo,
-      path: IMAGES_PATH,
+      path: MEDIA_PATH,
     });
 
     if (!Array.isArray(response.data)) {
@@ -61,7 +61,7 @@ export async function uploadImageAction(file: File): Promise<UploadedImage> {
     // Generate UUID with verified extension
     const imageId = uuidv4();
     const fileName = `${imageId}.${validatedFile.format}`;
-    const filePath = `${IMAGES_PATH}/${fileName}`;
+    const filePath = `${MEDIA_PATH}/${fileName}`;
 
     // Upload to GitHub
     const base64Content = validatedFile.buffer.toString("base64");
@@ -98,7 +98,7 @@ export async function deleteImageAction(
   fileName: string,
   sha: string,
 ): Promise<void> {
-  const filePath = `${IMAGES_PATH}/${fileName}`;
+  const filePath = `${MEDIA_PATH}/${fileName}`;
 
   try {
     await octokit.repos.deleteFile({

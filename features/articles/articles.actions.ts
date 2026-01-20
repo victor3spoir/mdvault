@@ -9,7 +9,7 @@ import {
 import type { Article, ArticleFrontmatter, GitHubFile } from "./articles.types";
 import { generateFrontmatter, parseFrontmatter } from "./articles.utils";
 
-const { ARTICLES_PATH, IMAGES_PATH } = githubRepoInfo;
+const { ARTICLES_PATH, MEDIA_PATH: IMAGES_PATH } = githubRepoInfo;
 
 async function fetchLatestSha(path: string): Promise<string | undefined> {
   try {

@@ -33,15 +33,15 @@ import {
 import { listArticlesAction } from "@/features/articles/articles.actions";
 import type { Article } from "@/features/articles/articles.types";
 import {
-  PostCard,
-  PostCardSkeleton,
+  ArticleCard,
+  ArticleCardSkeleton,
 } from "@/features/articles/components/article-card";
 import PageLayout from "@/features/shared/components/page-layout";
 
 type StatusFilter = "all" | "published" | "draft";
 
-export default function PostsPage() {
-  const [posts, setPosts] = useState<Article[]>([]);
+export default function ArticlesPage() {
+  const [articles, setArticles] = useState<Article[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -49,25 +49,25 @@ export default function PostsPage() {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
-  const loadPosts = useCallback(async () => {
+  const loadArticles = useCallback(async () => {
     setIsLoading(true);
     try {
       const data = await listArticlesAction();
-      setPosts(data);
+      setArticles(data);
     } catch (error) {
-      console.error("Failed to load posts:", error);
+      console.error("Failed to load articles:", error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    loadPosts();
-  }, [loadPosts]);
+    loadArticles();
+  }, [loadArticles]);
 
   const allTags = useMemo(() => {
     const tags = new Set<string>();
-    for (const article of posts) {
+    for (const article of articles) {
       if (article.tags) {
         for (const tag of article.tags) {
           tags.add(tag);
@@ -75,10 +75,10 @@ export default function PostsPage() {
       }
     }
     return Array.from(tags).sort();
-  }, [posts]);
+  }, [articles]);
 
-  const filteredPosts = useMemo(() => {
-    return posts
+  const filteredArticles = useMemo(() => {
+    return articles
       .filter((article) => {
         const matchesSearch =
           article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -113,15 +113,15 @@ export default function PostsPage() {
         }
         return a.title.localeCompare(b.title) * modifier;
       });
-  }, [posts, searchQuery, statusFilter, selectedTags, sortBy, sortOrder]);
+  }, [articles, searchQuery, statusFilter, selectedTags, sortBy, sortOrder]);
 
-  const handleDelete = (deletedPost: Article) => {
-    setPosts((prev) => prev.filter((p) => p.slug !== deletedPost.slug));
+  const handleDelete = (deletedArticle: Article) => {
+    setArticles((prev) => prev.filter((p) => p.slug !== deletedArticle.slug));
   };
 
-  const handlePublishChange = (updatedPost: Article) => {
-    setPosts((prev) =>
-      prev.map((p) => (p.slug === updatedPost.slug ? updatedPost : p)),
+  const handlePublishChange = (updatedArticle: Article) => {
+    setArticles((prev) =>
+      prev.map((p) => (p.slug === updatedArticle.slug ? updatedArticle : p)),
     );
   };
 
@@ -133,16 +133,19 @@ export default function PostsPage() {
 
   return (
     <PageLayout
-      title="Posts"
+      title="Articles"
       description="Manage your content, drafts, and published articles."
-      breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Posts" }]}
+      breadcrumbs={[
+        { label: "Dashboard", href: "/cms" },
+        { label: "Articles" },
+      ]}
       actions={
         <div className="flex items-center gap-2">
           <Badge
             variant="secondary"
             className="hidden h-6 rounded-lg px-2 text-xs font-bold sm:flex"
           >
-            {posts.length} Posts
+            {articles.length} Articles
           </Badge>
           <Button
             asChild
@@ -164,7 +167,7 @@ export default function PostsPage() {
             <div className="relative flex-1">
               <IconSearch className="absolute left-3.5 top-1/2 size-4.5 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search posts by title, tags or description..."
+                placeholder="Search articles by title, tags or description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-11 rounded-2xl border-none bg-muted/50 pl-11 focus-visible:ring-1 focus-visible:ring-primary/20"
@@ -269,17 +272,17 @@ export default function PostsPage() {
           )}
         </div>
 
-        {/* Posts Grid */}
+        {/* Articles Grid */}
         {isLoading ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-6">
             {["s1", "s2", "s3", "s4", "s5", "s6"].map((key) => (
-              <PostCardSkeleton key={key} />
+              <ArticleCardSkeleton key={key} />
             ))}
           </div>
-        ) : filteredPosts.length > 0 ? (
+        ) : filteredArticles.length > 0 ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-6">
-            {filteredPosts.map((article) => (
-              <PostCard
+            {filteredArticles.map((article) => (
+              <ArticleCard
                 key={article.slug}
                 article={article}
                 onDelete={handleDelete}

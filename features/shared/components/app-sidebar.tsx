@@ -48,10 +48,10 @@ const navItems: NavItem[] = [
     icon: <IconHome className="size-4" />,
   },
   {
-    title: "Posts",
+    title: "Articles",
     icon: <IconFileText className="size-4" />,
     children: [
-      { title: "All Posts", href: "/cms/articles" },
+      { title: "All Articles", href: "/cms/articles" },
       { title: "New Article", href: "/cms/articles/new" },
     ],
   },
@@ -70,7 +70,7 @@ const navItems: NavItem[] = [
 const AppSidebar = () => {
   const [pathname, setPathname] = useState<string | null>(null);
   const actualPathname = usePathname();
-  const [openMenus, setOpenMenus] = useState<string[]>(["Posts"]);
+  const [openMenus, setOpenMenus] = useState<string[]>(["Articles"]);
 
   // Defer pathname access to hydration
   useEffect(() => {
@@ -141,7 +141,7 @@ const AppSidebar = () => {
                                 {child.title === "New Article" && (
                                   <IconPlus className="size-3" />
                                 )}
-                                {child.title === "All Posts" && (
+                                {child.title === "All Articles" && (
                                   <IconList className="size-3" />
                                 )}
                                 <span>{child.title}</span>

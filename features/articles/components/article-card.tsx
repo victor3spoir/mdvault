@@ -41,23 +41,23 @@ import {
 } from "../articles.actions";
 import { PostMetadataEditor } from "./article-metadata-editor";
 
-interface PostCardProps {
+interface ArticleCardProps {
   article: Article;
   onDelete?: (article: Article) => void;
   onPublishChange?: (article: Article) => void;
 }
 
-export function PostCard({
+export function ArticleCard({
   article,
   onDelete,
   onPublishChange,
-}: PostCardProps) {
+}: ArticleCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMetadataEditorOpen, setIsMetadataEditorOpen] = useState(false);
-  const [currentPost, setCurrentPost] = useState(article);
+  const [currentArticle, setCurrentArticle] = useState(article);
 
-  const formattedDate = new Date(currentPost.createdAt).toLocaleDateString(
+  const formattedDate = new Date(currentArticle.createdAt).toLocaleDateString(
     "fr-FR",
     {
       year: "numeric",
@@ -73,15 +73,15 @@ export function PostCard({
     startTransition(async () => {
       try {
         const updatedPost = await action(
-          currentPost.slug,
-          currentPost.sha || "",
+          currentArticle.slug,
+          currentArticle.sha || "",
         );
         const status = published ? "published" : "unpublished";
         const message = published
-          ? `"${currentPost.title}" is now live`
-          : `"${currentPost.title}" is now a draft`;
+          ? `"${currentArticle.title}" is now live`
+          : `"${currentArticle.title}" is now a draft`;
         toast.success(`Article ${status}`, { description: message });
-        setCurrentPost(updatedPost);
+        setCurrentArticle(updatedPost);
         onPublishChange?.(updatedPost);
       } catch (error) {
         toast.error(`Failed to ${published ? "publish" : "unpublish"}`, {
@@ -100,11 +100,14 @@ export function PostCard({
   const handleDelete = async () => {
     startTransition(async () => {
       try {
-        await deleteArticleAction(currentPost.slug, currentPost.sha || "");
+        await deleteArticleAction(
+          currentArticle.slug,
+          currentArticle.sha || "",
+        );
         toast.success("Article deleted", {
-          description: `"${currentPost.title}" has been removed`,
+          description: `"${currentArticle.title}" has been removed`,
         });
-        onDelete?.(currentPost);
+        onDelete?.(currentArticle);
       } catch (error) {
         toast.error("Failed to delete", {
           description:
@@ -121,10 +124,10 @@ export function PostCard({
       <div className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-primary/20">
         {/* Cover Image */}
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
-          {currentPost.coverImage ? (
+          {currentArticle.coverImage ? (
             <Image
-              src={currentPost.coverImage}
-              alt={currentPost.title}
+              src={currentArticle.coverImage}
+              alt={currentArticle.title}
               fill
               priority
               className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -140,10 +143,10 @@ export function PostCard({
           {/* Status Badge on Image */}
           <div className="absolute left-3 top-3">
             <Badge
-              variant={currentPost.published ? "default" : "secondary"}
+              variant={currentArticle.published ? "default" : "secondary"}
               className="h-6 gap-1 rounded-lg px-2 text-[10px] font-bold uppercase tracking-wider shadow-lg backdrop-blur-md"
             >
-              {currentPost.published ? (
+              {currentArticle.published ? (
                 <>
                   <IconCheck className="size-3" />
                   Published
@@ -158,7 +161,7 @@ export function PostCard({
         {/* Content */}
         <div className="flex flex-1 flex-col p-5">
           <div className="mb-3 flex flex-wrap gap-2">
-            {currentPost.tags?.slice(0, 2).map((tag) => (
+            {currentArticle.tags?.slice(0, 2).map((tag) => (
               <Badge
                 key={tag}
                 variant="outline"
@@ -167,22 +170,22 @@ export function PostCard({
                 {tag}
               </Badge>
             ))}
-            {currentPost.tags && currentPost.tags.length > 2 && (
+            {currentArticle.tags && currentArticle.tags.length > 2 && (
               <Badge
                 variant="outline"
                 className="rounded-lg border-muted bg-muted/30 px-2 py-0 text-[10px] font-medium text-muted-foreground"
               >
-                +{currentPost.tags.length - 2}
+                +{currentArticle.tags.length - 2}
               </Badge>
             )}
           </div>
 
           <h3 className="mb-2 line-clamp-1 text-lg font-bold tracking-tight group-hover:text-primary transition-colors">
-            {currentPost.title}
+            {currentArticle.title}
           </h3>
 
           <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-            {currentPost.description ||
+            {currentArticle.description ||
               "No description provided for this article."}
           </p>
 
@@ -191,9 +194,9 @@ export function PostCard({
               <IconCalendar className="size-3.5" />
               {formattedDate}
             </span>
-            {currentPost.author && (
+            {currentArticle.author && (
               <span className="flex items-center gap-1.5 border-l pl-3 truncate">
-                By {currentPost.author}
+                By {currentArticle.author}
               </span>
             )}
           </div>
@@ -209,7 +212,7 @@ export function PostCard({
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/articles/${currentPost.slug}`}>
+                    <Link href={`/cms/articles/${currentArticle.slug}`}>
                       <IconEye className="size-4" />
                     </Link>
                   </Button>
@@ -225,7 +228,7 @@ export function PostCard({
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/articles/${currentPost.slug}/edit`}>
+                    <Link href={`/cms/articles/${currentArticle.slug}/edit`}>
                       <IconEdit className="size-4" />
                     </Link>
                   </Button>
@@ -251,7 +254,7 @@ export function PostCard({
             <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  {currentPost.published ? (
+                  {currentArticle.published ? (
                     <Button
                       onClick={handleUnpublish}
                       disabled={isPending}
@@ -282,7 +285,7 @@ export function PostCard({
                   )}
                 </TooltipTrigger>
                 <TooltipContent>
-                  {currentPost.published ? "Unpublish" : "Publish"}
+                  {currentArticle.published ? "Unpublish" : "Publish"}
                 </TooltipContent>
               </Tooltip>
 
@@ -305,11 +308,11 @@ export function PostCard({
       </div>
 
       <PostMetadataEditor
-        article={currentPost}
+        article={currentArticle}
         isOpen={isMetadataEditorOpen}
         onClose={() => setIsMetadataEditorOpen(false)}
         onUpdate={(updatedPost: Article) => {
-          setCurrentPost(updatedPost);
+          setCurrentArticle(updatedPost);
           onPublishChange?.(updatedPost);
         }}
       />
@@ -322,8 +325,8 @@ export function PostCard({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Article</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{currentPost.title}&quot;?
-              This action cannot be undone.
+              Are you sure you want to delete &quot;{currentArticle.title}
+              &quot;? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -342,7 +345,7 @@ export function PostCard({
 }
 
 // Loading Skeleton
-export function PostCardSkeleton() {
+export function ArticleCardSkeleton() {
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border bg-card">
       <div className="aspect-video w-full animate-pulse bg-muted" />

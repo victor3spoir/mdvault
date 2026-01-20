@@ -50,7 +50,7 @@ export const RecentActivity = ({ activities }: RecentActivityProps) => {
                   No recent activity
                 </p>
                 <p className="text-xs text-muted-foreground/70">
-                  Start creating posts and uploading images
+                  Start creating articles and uploading images
                 </p>
               </div>
             </div>

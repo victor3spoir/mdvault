@@ -42,8 +42,8 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
             markdown content.
             <br />
             Create, edit, and manage your{" "}
-            <span className="font-semibold ">posts</span> with a rich editor and
-            seamless integration.
+            <span className="font-semibold ">articles</span> with a rich editor
+            and seamless integration.
           </p>
         </div>
 
