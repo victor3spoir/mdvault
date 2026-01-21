@@ -6,9 +6,7 @@ import AppSidebar from "@/features/shared/components/app-sidebar";
 const LayoutContent = ({ children }: { children: ReactNode }) => (
   <>
     <AppSidebar />
-    <SidebarInset>
-      <div>{children}</div>
-    </SidebarInset>
+    <SidebarInset className="overflow-hidden">{children}</SidebarInset>
   </>
 );
 

@@ -8,20 +8,16 @@ export default function NotFound() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-b from-background to-muted/30 px-4">
       <div className="w-full max-w-2xl space-y-8">
-        {/* 404 Display */}
         <div className="flex justify-center">
           <div className="relative">
-            {/* Background glow effect */}
             <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full" />
 
-            {/* Icon container */}
             <div className="relative rounded-full bg-primary/5 p-8 border border-primary/10">
               <IconError404 className="w-20 h-20 text-primary/60 mx-auto" />
             </div>
           </div>
         </div>
 
-        {/* Content */}
         <div className="text-center space-y-4">
           <div className="space-y-2">
             <h1 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
@@ -39,7 +35,6 @@ export default function NotFound() {
           </p>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
           <Link href="/" className="flex-shrink-0">
             <Button size="lg" className="w-full sm:w-auto gap-2">
@@ -59,7 +54,6 @@ export default function NotFound() {
           </Button>
         </div>
 
-        {/* Helpful Links */}
         <div className="pt-8 border-t border-border">
           <p className="text-xs text-muted-foreground mb-4 text-center">
             Common pages you might be looking for:

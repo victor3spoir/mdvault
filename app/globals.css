@@ -651,24 +651,50 @@ article ul:has(> li > input[type="checkbox"]) {
   margin-left: 0;
 }
 
-/* Sticky MDX Editor Toolbar */
-.mdxeditor-toolbar {
-  position: sticky;
-  top: calc(3.5rem + 3.5rem); /* PageLayout header (56px) + Actions bar (56px) */
-  z-index: 15;
-  background-color: var(--background);
-  border-bottom: 1px solid var(--border);
-  padding: 0.5rem;
-}
-
+/* MDX Editor Layout - Fixed toolbar with scrollable content */
 .mdx-editor-wrapper {
   display: flex;
   flex-direction: column;
-  min-height: 400px;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.mdx-editor-wrapper .mdxeditor {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  flex: 1 !important;
+  overflow: hidden !important;
+}
+
+.mdxeditor-toolbar {
+  position: relative;
+  z-index: 20;
+  background-color: var(--background);
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 1rem;
+  flex-shrink: 0 !important;
+}
+
+/* The editor content wrapper - this is what scrolls */
+.mdx-editor-wrapper .mdxeditor > div:not([class*="toolbar"]) {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+
+/* The wrapper around contenteditable needs to scroll */
+.mdx-editor-wrapper [data-lexical-editor="true"] {
+  outline: none;
 }
 
 .mdxeditor-root-contenteditable {
-  flex: 1;
   min-height: 350px;
-  padding: 1rem 1.5rem;
+  padding: 1.5rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
 }
