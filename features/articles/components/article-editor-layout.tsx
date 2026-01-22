@@ -10,7 +10,6 @@ import {
   IconDeviceFloppy,
   IconDots,
   IconEye,
-  IconEyeOff,
   IconFileText,
   IconHash,
   IconLoader2,
@@ -19,29 +18,17 @@ import {
   IconSend,
   IconSettings,
   IconTag,
-  IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -61,11 +48,11 @@ import { ImageInsertDialog } from "../../medias/components/image-insert-dialog";
 import { uploadImageAction } from "../../medias/medias.actions";
 import {
   createArticleAction,
-  deleteArticleAction,
-  unpublishArticleAction,
   updateArticleAction,
 } from "../articles.actions";
 import type { Article, CreateArticleInput } from "../articles.types";
+import ArticleDeleteDialog from "./article-delete-dialog";
+import { ArticleUnpublishDialog } from "./article-unpublish-dialog";
 import { ForwardRefEditor } from "./forward-ref-editor";
 
 interface ArticleEditorLayoutProps {
@@ -88,11 +75,7 @@ export function ArticleEditorLayout({
   const [coverImage, setCoverImage] = useState(article?.coverImage ?? "");
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isUnpublishing, setIsUnpublishing] = useState(false);
   const [imageInsertDialogOpen, setImageInsertDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [unpublishDialogOpen, setUnpublishDialogOpen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -206,47 +189,6 @@ export function ArticleEditorLayout({
       console.error("Error publishing article:", error);
     } finally {
       setIsPublishing(false);
-    }
-  };
-
-  // Delete article
-  const handleDelete = async () => {
-    if (!article?.sha) return;
-    setIsDeleting(true);
-    try {
-      await deleteArticleAction(slug, article.sha);
-      toast.success("Article deleted");
-      router.push("/cms/articles");
-      router.refresh();
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to delete article";
-      toast.error(message);
-      console.error("Error deleting article:", error);
-    } finally {
-      setIsDeleting(false);
-      setDeleteDialogOpen(false);
-    }
-  };
-
-  // Unpublish article
-  const handleUnpublish = async () => {
-    if (!article?.sha) return;
-    setIsUnpublishing(true);
-    try {
-      await unpublishArticleAction(slug, article.sha);
-      toast.success("Article unpublished", {
-        description: "Moved back to drafts",
-      });
-      router.refresh();
-      setUnpublishDialogOpen(false);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to unpublish article";
-      toast.error(message);
-      console.error("Error unpublishing article:", error);
-    } finally {
-      setIsUnpublishing(false);
     }
   };
 
@@ -405,42 +347,19 @@ export function ArticleEditorLayout({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-xl">
-                <DropdownMenuItem asChild>
-                  <Link
-                    href={`/cms/articles/${slug}`}
-                    className="flex items-center gap-2"
-                  >
-                    <IconEye className="size-4" />
-                    View Article
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-                  className="flex items-center gap-2"
-                >
-                  <IconSettings className="size-4" />
-                  {sidebarCollapsed ? "Show" : "Hide"} Settings
-                </DropdownMenuItem>
                 {article?.published && (
                   <>
+                    <ArticleUnpublishDialog
+                      articleSlug={slug}
+                      articleSha={article.sha}
+                    />
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={() => setUnpublishDialogOpen(true)}
-                      className="flex items-center gap-2 text-amber-600"
-                    >
-                      <IconEyeOff className="size-4" />
-                      Unpublish
-                    </DropdownMenuItem>
                   </>
                 )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onClick={() => setDeleteDialogOpen(true)}
-                  className="flex items-center gap-2 text-destructive focus:text-destructive"
-                >
-                  <IconTrash className="size-4" />
-                  Delete Article
-                </DropdownMenuItem>
+                <ArticleDeleteDialog
+                  articleSha={article?.sha}
+                  articleSlug={slug}
+                />
               </DropdownMenuContent>
             </DropdownMenu>
           )}
@@ -633,21 +552,7 @@ export function ArticleEditorLayout({
               </div>
             </div>
 
-            {/* Sidebar Footer */}
-            <div className="shrink-0 border-t bg-background/50 p-4">
-              <div className="rounded-lg border border-dashed bg-muted/30 p-3">
-                <p className="text-[11px] font-medium text-muted-foreground">
-                  💡 Pro Tip
-                </p>
-                <p className="mt-1 text-[11px] text-muted-foreground">
-                  Use{" "}
-                  <kbd className="rounded bg-muted px-1 py-0.5 font-mono text-[10px]">
-                    Cmd+S
-                  </kbd>{" "}
-                  to quickly save your changes.
-                </p>
-              </div>
-            </div>
+            
           </div>
         </aside>
       </div>
@@ -658,59 +563,6 @@ export function ArticleEditorLayout({
         onClose={() => setImageInsertDialogOpen(false)}
         onSelect={handleImageInsert}
       />
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete this article?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. The article will be permanently
-              removed.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              {isDeleting ? (
-                <IconLoader2 className="mr-2 size-4 animate-spin" />
-              ) : null}
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog
-        open={unpublishDialogOpen}
-        onOpenChange={setUnpublishDialogOpen}
-      >
-        <AlertDialogContent className="rounded-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unpublish this article?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will move the article back to drafts. It will no longer be
-              visible on the public site.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-2">
-            <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleUnpublish}
-              disabled={isUnpublishing}
-              className="rounded-lg"
-            >
-              {isUnpublishing ? (
-                <IconLoader2 className="mr-2 size-4 animate-spin" />
-              ) : null}
-              Unpublish
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }

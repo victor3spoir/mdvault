@@ -24,6 +24,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,7 +54,6 @@ export function ArticleCard({
   onPublishChange,
 }: ArticleCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isMetadataEditorOpen, setIsMetadataEditorOpen] = useState(false);
   const [currentArticle, setCurrentArticle] = useState(article);
 
@@ -97,7 +97,7 @@ export function ArticleCard({
   const handleUnpublish = () =>
     handlePublishToggle(false, unpublishArticleAction);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     startTransition(async () => {
       try {
         await deleteArticleAction(
@@ -113,8 +113,6 @@ export function ArticleCard({
           description:
             error instanceof Error ? error.message : "Try again later",
         });
-      } finally {
-        setIsDeleteDialogOpen(false);
       }
     });
   };
@@ -291,14 +289,38 @@ export function ArticleCard({
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => setIsDeleteDialogOpen(true)}
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
-                  >
-                    <IconTrash className="size-4" />
-                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
+                      >
+                        <IconTrash className="size-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="rounded-2xl">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this article?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. The article will be permanently removed.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter className="gap-2">
+                        <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleDelete}
+                          disabled={isPending}
+                          className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {isPending ? (
+                            <IconLoader2 className="mr-2 size-4 animate-spin" />
+                          ) : null}
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </TooltipTrigger>
                 <TooltipContent>Delete article</TooltipContent>
               </Tooltip>
@@ -316,30 +338,6 @@ export function ArticleCard({
           onPublishChange?.(updatedPost);
         }}
       />
-
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent className="rounded-3xl border-muted">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Article</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete &quot;{currentArticle.title}
-              &quot;? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </TooltipProvider>
   );
 }

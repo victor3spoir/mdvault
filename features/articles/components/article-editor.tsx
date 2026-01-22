@@ -3,29 +3,17 @@
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import {
   IconDeviceFloppy,
-  IconEyeOff,
   IconFileText,
   IconLoader2,
   IconPhoto,
   IconPlus,
   IconSend,
   IconTags,
-  IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,19 +25,19 @@ import { ImageInsertDialog } from "../../medias/components/image-insert-dialog";
 import { uploadImageAction } from "../../medias/medias.actions";
 import {
   createArticleAction,
-  deleteArticleAction,
-  unpublishArticleAction,
   updateArticleAction,
 } from "../articles.actions";
 import type { Article, CreateArticleInput } from "../articles.types";
+import ArticleDeleteDialog from "./article-delete-dialog";
+import { ArticleUnpublishDialog } from "./article-unpublish-dialog";
 import { ForwardRefEditor } from "./forward-ref-editor";
 
-interface PostEditorProps {
+interface ArticleEditorProps {
   article?: Article;
   mode: "create" | "edit";
 }
 
-export function PostEditor({ article, mode }: PostEditorProps) {
+export function ArticleEditor({ article, mode }: ArticleEditorProps) {
   const router = useRouter();
   const editorRef = useRef<MDXEditorMethods>(null);
 
@@ -59,13 +47,9 @@ export function PostEditor({ article, mode }: PostEditorProps) {
   const [tags, setTags] = useState<string[]>(article?.tags ?? []);
   const [tagInput, setTagInput] = useState("");
   const [coverImage, setCoverImage] = useState(article?.coverImage ?? "");
-  const [isSaving, setIsSaving] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isUnpublishing, setIsUnpublishing] = useState(false);
   const [imageInsertDialogOpen, setImageInsertDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [unpublishDialogOpen, setUnpublishDialogOpen] = useState(false);
+  const [isSavePending, startSaveTransition] = useTransition();
+  const [isPublishPending, startPublishTransition] = useTransition();
 
   // Auto-generate slug from title
   const handleTitleChange = (value: string) => {
@@ -107,110 +91,69 @@ export function PostEditor({ article, mode }: PostEditorProps) {
   };
 
   // Save as draft
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      const content = editorRef.current?.getMarkdown() ?? "";
-      const input: CreateArticleInput = {
-        title,
-        slug,
-        content,
-        description,
-        tags,
-        coverImage,
-        published: false,
-      };
+  const handleSave = () => {
+    startSaveTransition(async () => {
+      try {
+        const content = editorRef.current?.getMarkdown() ?? "";
+        const input: CreateArticleInput = {
+          title,
+          slug,
+          content,
+          description,
+          tags,
+          coverImage,
+          published: false,
+        };
 
-      if (mode === "create") {
-        await createArticleAction(input);
-      } else if (article?.sha) {
-        await updateArticleAction(slug, { ...input, sha: article.sha });
+        if (mode === "create") {
+          await createArticleAction(input);
+        } else if (article?.sha) {
+          await updateArticleAction(slug, { ...input, sha: article.sha });
+        }
+
+        toast.success("Article saved as draft");
+        router.push("/cms/articles");
+        router.refresh();
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to save article";
+        toast.error(message);
+        console.error("Error saving article:", error);
       }
-
-      toast.success("Article saved as draft");
-      router.push("/cms/articles");
-      router.refresh();
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to save article";
-      toast.error(message);
-      console.error("Error saving article:", error);
-    } finally {
-      setIsSaving(false);
-    }
+    });
   };
 
   // Publish article
-  const handlePublish = async () => {
-    setIsPublishing(true);
-    try {
-      const content = editorRef.current?.getMarkdown() ?? "";
-      const input: CreateArticleInput = {
-        title,
-        slug,
-        content,
-        description,
-        tags,
-        coverImage,
-        published: true,
-      };
+  const handlePublish = () => {
+    startPublishTransition(async () => {
+      try {
+        const content = editorRef.current?.getMarkdown() ?? "";
+        const input: CreateArticleInput = {
+          title,
+          slug,
+          content,
+          description,
+          tags,
+          coverImage,
+          published: true,
+        };
 
-      if (mode === "create") {
-        await createArticleAction(input);
-      } else if (article?.sha) {
-        await updateArticleAction(slug, { ...input, sha: article.sha });
+        if (mode === "create") {
+          await createArticleAction(input);
+        } else if (article?.sha) {
+          await updateArticleAction(slug, { ...input, sha: article.sha });
+        }
+
+        toast.success("Article published successfully");
+        router.push("/cms/articles");
+        router.refresh();
+      } catch (error) {
+        const message =
+          error instanceof Error ? error.message : "Failed to publish article";
+        toast.error(message);
+        console.error("Error publishing article:", error);
       }
-
-      toast.success("Article published successfully");
-      router.push("/cms/articles");
-      router.refresh();
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to publish article";
-      toast.error(message);
-      console.error("Error publishing article:", error);
-    } finally {
-      setIsPublishing(false);
-    }
-  };
-
-  // Delete article
-  const handleDelete = async () => {
-    if (!article?.sha) return;
-    setIsDeleting(true);
-    try {
-      await deleteArticleAction(slug, article.sha);
-      toast.success("Article deleted successfully");
-      router.push("/cms/articles");
-      router.refresh();
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to delete article";
-      toast.error(message);
-      console.error("Error deleting article:", error);
-    } finally {
-      setIsDeleting(false);
-      setDeleteDialogOpen(false);
-    }
-  };
-
-  // Unpublish article
-  const handleUnpublish = async () => {
-    if (!article?.sha) return;
-    setIsUnpublishing(true);
-    try {
-      await unpublishArticleAction(slug, article.sha);
-      toast.success("Article unpublished successfully");
-      router.refresh();
-      setUnpublishDialogOpen(false);
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Failed to unpublish article";
-      toast.error(message);
-      console.error("Error unpublishing article:", error);
-    } finally {
-      setIsUnpublishing(false);
-    }
+    });
   };
 
   return (
@@ -232,31 +175,21 @@ export function PostEditor({ article, mode }: PostEditorProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          {mode === "edit" && article?.published && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setUnpublishDialogOpen(true)}
-              disabled={isUnpublishing}
-              className="h-8 gap-1.5 rounded-lg text-muted-foreground hover:text-foreground"
-            >
-              {isUnpublishing ? (
-                <IconLoader2 className="size-3.5 animate-spin" />
-              ) : (
-                <IconEyeOff className="size-3.5" />
-              )}
-              <span className="hidden sm:inline">Unpublish</span>
-            </Button>
+          {mode === "edit" && article?.published && article?.sha && (
+            <ArticleUnpublishDialog
+              articleSlug={slug}
+              articleSha={article.sha}
+            />
           )}
 
           <Button
             variant="outline"
             size="sm"
             onClick={handleSave}
-            disabled={isSaving || !title || !slug}
+            disabled={isSavePending || !title || !slug}
             className="h-8 gap-1.5 rounded-lg"
           >
-            {isSaving ? (
+            {isSavePending ? (
               <IconLoader2 className="size-3.5 animate-spin" />
             ) : (
               <IconDeviceFloppy className="size-3.5" />
@@ -268,10 +201,10 @@ export function PostEditor({ article, mode }: PostEditorProps) {
             <Button
               size="sm"
               onClick={handlePublish}
-              disabled={isPublishing || !title || !slug}
+              disabled={isPublishPending || !title || !slug}
               className="h-8 gap-1.5 rounded-lg"
             >
-              {isPublishing ? (
+              {isPublishPending ? (
                 <IconLoader2 className="size-3.5 animate-spin" />
               ) : (
                 <IconSend className="size-3.5" />
@@ -280,16 +213,11 @@ export function PostEditor({ article, mode }: PostEditorProps) {
             </Button>
           )}
 
-          {mode === "edit" && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setDeleteDialogOpen(true)}
-              disabled={isDeleting}
-              className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
-            >
-              <IconTrash className="size-3.5" />
-            </Button>
+          {mode === "edit" && article?.sha && (
+            <ArticleDeleteDialog
+              articleSlug={slug}
+              articleSha={article.sha}
+            />
           )}
         </div>
       </div>
@@ -439,55 +367,6 @@ export function PostEditor({ article, mode }: PostEditorProps) {
         onClose={() => setImageInsertDialogOpen(false)}
         onSelect={handleImageInsert}
       />
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent className="rounded-3xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              article and remove it from our servers.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-3">
-            <AlertDialogCancel className="rounded-2xl">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="rounded-2xl bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete Article
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog
-        open={unpublishDialogOpen}
-        onOpenChange={setUnpublishDialogOpen}
-      >
-        <AlertDialogContent className="rounded-3xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unpublish Article?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will move the article back to drafts. It will no longer be
-              visible on the public site.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="gap-3">
-            <AlertDialogCancel className="rounded-2xl">
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleUnpublish}
-              className="rounded-2xl"
-            >
-              Unpublish
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 }
