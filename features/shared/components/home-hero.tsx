@@ -91,7 +91,7 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
           </div>
 
           <div className="group flex-1 flex flex-col items-center gap-2 transition-all duration-300 hover:bg-muted/30 p-2 rounded-lg">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-accent/20 to-accent/5 text-accent transition-all duration-300 group-hover:scale-110 shrink-0">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/5 text-primary transition-all duration-300 group-hover:scale-110 shrink-0">
               <IconBrandGithub className="h-5 w-5" />
             </div>
             <h3 className="text-xs font-semibold text-foreground">Git Versioning</h3>
