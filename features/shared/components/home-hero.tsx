@@ -8,7 +8,7 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
   return (
     <div
       className={cn(
-        "relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-10 text-center",
+        "relative flex h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-8 text-center",
         className,
       )}
       {...props}
@@ -21,7 +21,7 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
       <div className="absolute bottom-20 right-0 -z-10 h-80 w-80 bg-accent/10 blur-[100px] opacity-40 animate-pulse" style={{ animationDelay: "1s" }} />
       <div className="absolute top-1/3 left-0 -z-10 h-60 w-60 bg-primary/5 blur-[90px] opacity-30" />
 
-      <div className="container relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-10">
+      <div className="container relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 overflow-y-auto max-h-[calc(100vh-2rem)]">
         {/* Logo with enhanced animation */}
         <div className="animate-in fade-in slide-in-from-top-8 duration-1000">
           <div className="relative">
@@ -82,7 +82,7 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
         </div>
 
         {/* Enhanced Features Grid */}
-        <div className="w-full mt-16 animate-in fade-in duration-1000 delay-700">
+        <div className="hidden w-full sm:block mt-12 animate-in fade-in duration-1000 delay-700">
           <div className="border-t border-muted/30" />
           <div className="grid grid-cols-1 gap-8 border-l border-r border-muted/30 py-12 px-6 sm:grid-cols-3">
             {/* Feature 1 */}
