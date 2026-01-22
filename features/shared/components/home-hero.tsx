@@ -21,52 +21,52 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
       <div className="absolute bottom-20 right-0 -z-10 h-80 w-80 bg-accent/10 blur-[100px] opacity-40 animate-pulse" style={{ animationDelay: "1s" }} />
       <div className="absolute top-1/3 left-0 -z-10 h-60 w-60 bg-primary/5 blur-[90px] opacity-30" />
 
-      <div className="container relative z-10 mx-auto flex max-w-5xl flex-col items-center gap-8 overflow-y-auto max-h-[calc(100vh-2rem)]">
+      <div className="container relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-4 justify-center h-full">
         {/* Logo with enhanced animation */}
-        <div className="animate-in fade-in slide-in-from-top-8 duration-1000">
+        <div className="animate-in fade-in slide-in-from-top-8 duration-1000 shrink-0">
           <div className="relative">
             <div className="absolute inset-0 -z-10 rounded-full bg-primary/10 blur-2xl" />
-            <Logo className="scale-125" />
+            <Logo className="scale-100 sm:scale-125" />
           </div>
         </div>
 
         {/* Enhanced Badge with icon animation */}
-        <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-4 py-2 text-sm font-medium text-muted-foreground backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-1000 delay-150 hover:bg-muted/70 transition-colors">
-          <IconSparkles className="h-4 w-4 animate-spin" style={{ animationDuration: "3s" }} />
-          <span>Modern CMS for GitHub</span>
+        <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-3 py-1.5 text-xs sm:text-sm font-medium text-muted-foreground backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-1000 delay-150 hover:bg-muted/70 transition-colors shrink-0">
+          <IconSparkles className="h-3 w-3 sm:h-4 sm:w-4 animate-spin shrink-0" style={{ animationDuration: "3s" }} />
+          <span className="whitespace-nowrap">Modern CMS for GitHub</span>
         </div>
 
         {/* Enhanced Heading with better typography */}
-        <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 max-w-3xl">
-          <div className="space-y-4">
-            <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl leading-tight">
+        <div className="flex flex-col gap-3 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200 max-w-3xl shrink-0">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl leading-tight">
               Your Markdown, <br />
               <span className="bg-linear-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
                 Perfectly Vaulted
               </span>
             </h1>
           </div>
-          <p className="mx-auto max-w-2xl text-lg sm:text-xl text-muted-foreground leading-relaxed">
-            A powerful, intuitive CMS built for GitHub. Create, edit, and manage markdown content with a modern editor, real-time collaboration, and seamless Git integration—all in one place.
+          <p className="mx-auto max-w-2xl text-sm sm:text-base text-muted-foreground leading-snug">
+            A powerful, intuitive CMS built for GitHub. Create, edit, and manage markdown content with a modern editor and seamless Git integration.
           </p>
         </div>
 
         {/* Enhanced CTAs with better styling */}
-        <div className="flex flex-col items-center gap-4 sm:flex-row animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 w-full sm:w-auto">
+        <div className="flex flex-col items-center gap-3 sm:flex-row animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500 w-full sm:w-auto shrink-0">
           <Button
-            size="lg"
-            className="h-12 px-8 text-base font-semibold gap-2 group/btn relative overflow-hidden"
+            size="sm"
+            className="h-10 px-6 text-sm font-semibold gap-2 group/btn relative overflow-hidden"
             asChild
           >
             <Link href="/cms" className="flex items-center justify-center">
               <span>Get Started</span>
-              <IconRocket className="h-5 w-5 group-hover/btn:translate-y-0.5 transition-transform" />
+              <IconRocket className="h-4 w-4 group-hover/btn:translate-y-0.5 transition-transform" />
             </Link>
           </Button>
           <Button
-            size="lg"
+            size="sm"
             variant="outline"
-            className="h-12 px-8 text-base font-semibold gap-2 group/btn"
+            className="h-10 px-6 text-sm font-semibold gap-2 group/btn"
             asChild
           >
             <Link
@@ -74,49 +74,34 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
               target="_blank"
               className="flex items-center justify-center"
             >
-              <IconBrandGithub className="h-5 w-5" />
+              <IconBrandGithub className="h-4 w-4" />
               <span>Explore Source</span>
-              <IconArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
+              <IconArrowRight className="h-3 w-3 group-hover/btn:translate-x-1 transition-transform" />
             </Link>
           </Button>
         </div>
 
-        {/* Enhanced Features Grid */}
-        <div className="hidden w-full sm:block mt-12 animate-in fade-in duration-1000 delay-700">
-          <div className="border-t border-muted/30" />
-          <div className="grid grid-cols-1 gap-8 border-l border-r border-muted/30 py-12 px-6 sm:grid-cols-3">
-            {/* Feature 1 */}
-            <div className="group flex flex-col items-center gap-4 transition-all duration-300 hover:bg-muted/30 p-4 rounded-lg">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-primary/5 text-primary transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
-                <IconMarkdown className="h-7 w-7" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="font-semibold text-foreground">MDX Editor</h3>
-                <p className="text-sm text-muted-foreground">Rich markdown editing</p>
-              </div>
+        {/* Compact Features Grid */}
+        <div className="hidden w-full lg:flex gap-6 mt-6 animate-in fade-in duration-1000 delay-700 shrink-0 text-center">
+          <div className="group flex-1 flex flex-col items-center gap-2 transition-all duration-300 hover:bg-muted/30 p-2 rounded-lg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/5 text-primary transition-all duration-300 group-hover:scale-110 shrink-0">
+              <IconMarkdown className="h-5 w-5" />
             </div>
+            <h3 className="text-xs font-semibold text-foreground">MDX Editor</h3>
+          </div>
 
-            {/* Feature 2 */}
-            <div className="group flex flex-col items-center gap-4 transition-all duration-300 hover:bg-muted/30 p-4 rounded-lg">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-accent/20 to-accent/5 text-accent transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
-                <IconBrandGithub className="h-7 w-7" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="font-semibold text-foreground">Git Versioning</h3>
-                <p className="text-sm text-muted-foreground">Full version control</p>
-              </div>
+          <div className="group flex-1 flex flex-col items-center gap-2 transition-all duration-300 hover:bg-muted/30 p-2 rounded-lg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-accent/20 to-accent/5 text-accent transition-all duration-300 group-hover:scale-110 shrink-0">
+              <IconBrandGithub className="h-5 w-5" />
             </div>
+            <h3 className="text-xs font-semibold text-foreground">Git Versioning</h3>
+          </div>
 
-            {/* Feature 3 */}
-            <div className="group hidden flex-col items-center gap-4 transition-all duration-300 hover:bg-muted/30 p-4 rounded-lg sm:flex">
-              <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-linear-to-br from-primary/20 to-accent/10 text-primary transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
-                <IconRocket className="h-7 w-7" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="font-semibold text-foreground">Fast Deploy</h3>
-                <p className="text-sm text-muted-foreground">Lightning-quick updates</p>
-              </div>
+          <div className="group flex-1 flex flex-col items-center gap-2 transition-all duration-300 hover:bg-muted/30 p-2 rounded-lg">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-accent/10 text-primary transition-all duration-300 group-hover:scale-110 shrink-0">
+              <IconRocket className="h-5 w-5" />
             </div>
+            <h3 className="text-xs font-semibold text-foreground">Fast Deploy</h3>
           </div>
         </div>
       </div>
