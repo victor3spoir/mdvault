@@ -102,13 +102,10 @@ export function ImageGallery({
 
   if (isLoading) {
     return (
-      <div className="grid gap-3 grid-cols-[repeat(auto-fill,minmax(min(150px,100%),1fr))]">
-        {Array.from({ length: 6 }, () => `skeleton-${Math.random()}`).map(
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {Array.from({ length: 10 }, () => `skeleton-${Math.random()}`).map(
           (id) => (
-            <div
-              key={id}
-              className="aspect-square rounded-lg bg-muted animate-pulse"
-            />
+            <div key={id} className="aspect-square rounded-lg bg-muted/30 animate-pulse" />
           ),
         )}
       </div>
@@ -118,72 +115,72 @@ export function ImageGallery({
   return (
     <TooltipProvider>
       {images.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-muted-foreground/20 py-20 text-center bg-muted/5">
-          <div className="rounded-full bg-muted/10 p-4 mb-4">
-            <IconPhotoOff className="size-10 text-muted-foreground/40" />
+        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/30 py-24 text-center">
+          <div className="rounded-lg bg-muted/20 p-3 mb-3">
+            <IconPhotoOff className="size-8 text-muted-foreground/60" />
           </div>
-          <div className="max-w-50 space-y-1">
-            <p className="text-sm font-medium text-foreground">
-              No images found
-            </p>
+          <div className="max-w-sm space-y-1">
+            <p className="text-sm font-semibold text-foreground">No media found</p>
             <p className="text-xs text-muted-foreground">
-              Try adjusting your search or upload some new images.
+              Upload your first asset to get started
             </p>
           </div>
         </div>
       ) : (
-        <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(min(150px,100%),1fr))]">
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
           {images.map((image) => (
             <div
               key={image.id}
-              className="group relative aspect-square overflow-hidden rounded-xl border bg-muted/10 transition-all hover:shadow-md hover:border-primary/20"
+              className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/20 transition-all hover:border-primary/50 hover:shadow-lg"
             >
               <Image
                 src={image.url}
                 alt={image.name}
                 fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                className="object-cover transition-transform duration-300 group-hover:scale-110"
                 sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
               />
 
-              {/* Overlay */}
-              <div className="absolute inset-0 flex flex-col justify-between bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                <div className="flex justify-end p-2 gap-1.5">
+              {/* Overlay with actions */}
+              <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200 group-hover:opacity-100 flex flex-col items-center justify-center gap-2">
+                <div className="flex gap-2">
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         type="button"
-                        className="size-8 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                        className="size-9 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white hover:bg-white/30 transition-colors"
                         onClick={() => setSelectedImageForPreview(image)}
                       >
                         <IconEye className="size-4" />
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom">Preview</TooltipContent>
+                    <TooltipContent>Preview</TooltipContent>
                   </Tooltip>
 
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         type="button"
-                        className="size-8 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                        className="size-9 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white hover:bg-white/30 transition-colors"
                         onClick={() => copyUrlToClipboard(image.url, image.id)}
                       >
                         {copiedId === image.id ? (
-                          <IconCheck className="size-4 text-green-400" />
+                          <IconCheck className="size-4" />
                         ) : (
                           <IconCopy className="size-4" />
                         )}
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom">Copy URL</TooltipContent>
+                    <TooltipContent>
+                      {copiedId === image.id ? "Copied!" : "Copy URL"}
+                    </TooltipContent>
                   </Tooltip>
 
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <button
                         type="button"
-                        className="size-8 rounded-lg bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-destructive/80 transition-colors"
+                        className="size-9 rounded-lg bg-destructive/80 backdrop-blur flex items-center justify-center text-white hover:bg-destructive transition-colors"
                         onClick={() => handleDeleteClick(image)}
                         disabled={isPending}
                       >
@@ -194,22 +191,23 @@ export function ImageGallery({
                         )}
                       </button>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom">Delete</TooltipContent>
+                    <TooltipContent>Delete</TooltipContent>
                   </Tooltip>
                 </div>
+              </div>
 
-                <div className="p-2 bg-linear-to-t from-black/60 to-transparent">
-                  <p className="truncate text-[10px] font-medium text-white">
-                    {image.name}
-                  </p>
-                </div>
+              {/* Filename label at bottom */}
+              <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-2 translate-y-full group-hover:translate-y-0 transition-transform">
+                <p className="truncate text-xs font-medium text-white">
+                  {image.name}
+                </p>
               </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Image Preview Dialog */}
+      {/* Image Preview Modal */}
       <AlertDialog
         open={!!selectedImageForPreview}
         onOpenChange={(open) => {
@@ -218,56 +216,67 @@ export function ImageGallery({
       >
         <AlertDialogContent className="max-w-2xl p-0 overflow-hidden">
           {selectedImageForPreview && (
-            <div className="flex flex-col">
-              {/* Image Section - 60% height */}
-              <div className="relative bg-muted/50 h-96">
+            <div className="flex flex-col bg-card">
+              {/* Image */}
+              <div className="relative bg-muted/50 h-80 flex items-center justify-center">
                 <Image
                   src={selectedImageForPreview.url}
                   alt={selectedImageForPreview.name}
                   fill
-                  className="object-contain"
+                  className="object-contain p-4"
                   priority
                   sizes="640px"
                 />
                 <button
                   type="button"
                   onClick={() => setSelectedImageForPreview(null)}
-                  className="absolute right-4 top-4 size-8 rounded-full bg-background/90 backdrop-blur flex items-center justify-center hover:bg-background transition-colors z-10"
+                  className="absolute right-4 top-4 size-8 rounded-lg bg-background/90 backdrop-blur flex items-center justify-center hover:bg-background transition-colors"
                 >
                   <IconX className="size-4" />
                 </button>
               </div>
 
-              {/* Content Section */}
-              <div className="p-6 space-y-4 bg-background">
-                {/* Title & Date */}
+              {/* Details */}
+              <div className="border-t p-6 space-y-4">
                 <div>
-                  <h3 className="font-bold text-base line-clamp-2">
+                  <h3 className="font-semibold text-base line-clamp-2">
                     {selectedImageForPreview.name}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
-                    <span className="size-1.5 rounded-full bg-green-500" />
-                    {new Date(
-                      selectedImageForPreview.uploadedAt,
-                    ).toLocaleDateString()}
+                  <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
+                    <span className="size-1.5 rounded-full bg-emerald-500" />
+                    Uploaded {new Date(selectedImageForPreview.uploadedAt).toLocaleDateString()}
                   </p>
                 </div>
 
-                {/* URL Copy */}
+                <div className="grid grid-cols-2 gap-4 py-2 text-xs">
+                  <div>
+                    <p className="font-semibold text-muted-foreground uppercase tracking-wide">File Type</p>
+                    <p className="text-sm font-medium mt-1">
+                      {selectedImageForPreview.name.split(".").pop()?.toUpperCase()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-muted-foreground uppercase tracking-wide">Size</p>
+                    <p className="text-sm font-medium mt-1">
+                      {selectedImageForPreview.size
+                        ? `${(selectedImageForPreview.size / 1024).toFixed(1)} KB`
+                        : "—"}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
-                  <p className="text-[11px] font-semibold uppercase text-muted-foreground">
-                    URL
-                  </p>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">URL</span>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={selectedImageForPreview.url}
                       readOnly
-                      className="flex-1 h-9 px-3 rounded-lg border bg-muted/50 text-xs text-muted-foreground truncate"
+                      className="flex-1 h-9 px-3 rounded-lg border bg-muted/30 text-xs text-muted-foreground font-mono truncate"
                     />
                     <Button
                       size="sm"
-                      variant="secondary"
+                      variant="outline"
                       className="h-9 w-9 p-0"
                       onClick={() =>
                         copyUrlToClipboard(
@@ -277,7 +286,7 @@ export function ImageGallery({
                       }
                     >
                       {copiedId === selectedImageForPreview.id ? (
-                        <IconCheck className="size-4 text-green-500" />
+                        <IconCheck className="size-4 text-emerald-600" />
                       ) : (
                         <IconCopy className="size-4" />
                       )}
@@ -285,32 +294,17 @@ export function ImageGallery({
                   </div>
                 </div>
 
-                {/* Type */}
-                <div className="space-y-2">
-                  <p className="text-[11px] font-semibold uppercase text-muted-foreground">
-                    Type
-                  </p>
-                  <div className="text-sm font-medium">
-                    {selectedImageForPreview.name
-                      .split(".")
-                      .pop()
-                      ?.toUpperCase() || "FILE"}
-                  </div>
-                </div>
-
-                {/* Actions */}
                 <div className="flex gap-2 pt-2">
                   <Button
                     onClick={() => handleDeleteClick(selectedImageForPreview)}
                     disabled={isPending}
                     variant="destructive"
                     size="sm"
-                    className="flex-1"
                   >
                     {isPending && (
-                      <IconLoader2 className="size-3 animate-spin mr-1" />
+                      <IconLoader2 className="size-3 animate-spin mr-2" />
                     )}
-                    Delete
+                    Delete Asset
                   </Button>
                   <Button
                     onClick={() => setSelectedImageForPreview(null)}
@@ -336,39 +330,36 @@ export function ImageGallery({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Image?</AlertDialogTitle>
+            <AlertDialogTitle>Delete Asset</AlertDialogTitle>
             <AlertDialogDescription asChild>
               {deleteConfirmation?.usage.isUsed ? (
-                <div className="space-y-3 mt-2">
-                  <p className="text-destructive font-semibold">
-                    ⚠️ This image is being used in{" "}
-                    {deleteConfirmation.usage.usedInArticles.length} article(s):
+                <div className="space-y-3 mt-3">
+                  <p className="text-destructive font-semibold text-sm">
+                    ⚠️ In use by {deleteConfirmation.usage.usedInArticles.length} article(s)
                   </p>
                   <ul className="space-y-2">
                     {deleteConfirmation.usage.usedInArticles.map((article) => (
                       <li
                         key={article.slug}
-                        className="text-sm text-muted-foreground pl-4 border-l-2 border-destructive"
+                        className="text-sm text-muted-foreground pl-3 border-l-2 border-destructive/50"
                       >
-                        <strong>{article.title}</strong> ({article.slug})
+                        {article.title}
                       </li>
                     ))}
                   </ul>
-                  <p className="text-sm text-destructive mt-2">
-                    Deleting this image will break these articles. Are you sure?
+                  <p className="text-sm text-muted-foreground">
+                    Deleting will break these articles. Continue?
                   </p>
                 </div>
               ) : (
-                <p>
-                  Are you sure you want to delete &quot;
-                  {deleteConfirmation?.image.name}&quot;? This action cannot be
-                  undone.
+                <p className="text-sm">
+                  Permanently delete &quot;{deleteConfirmation?.image.name}&quot;?
                 </p>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-2 justify-end pt-4">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}

@@ -7,7 +7,6 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -99,29 +98,28 @@ export default function MediaPage() {
     <TooltipProvider>
       <PageLayout
         title="Media Library"
-        description="Upload and manage your images"
+        description="Manage your digital assets"
         breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Media" }]}
       >
-        <div className="space-y-8">
-          {/* Header Actions */}
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <h2 className="text-2xl font-bold tracking-tight">
-                  Your Images
-                </h2>
-                <Badge
-                  variant="secondary"
-                  className="h-6 rounded-lg px-2 font-mono text-[10px] font-bold uppercase tracking-wider"
-                >
-                  {filteredImages.length} / {images.length}
-                </Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                Manage and organize your media assets
-              </p>
+        <div className="space-y-6">
+          {/* Header with Stats */}
+          <div className="grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
+              <p className="text-sm font-medium text-muted-foreground">Total Assets</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">{images.length}</p>
             </div>
+            <div className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
+              <p className="text-sm font-medium text-muted-foreground">Currently Viewing</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">{filteredImages.length}</p>
+            </div>
+            <div className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
+              <p className="text-sm font-medium text-muted-foreground">File Types</p>
+              <p className="mt-2 text-3xl font-bold text-foreground">{imageTypes.length}</p>
+            </div>
+          </div>
 
+          {/* Action Bar */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
             <div className="flex items-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -131,7 +129,7 @@ export default function MediaPage() {
                     size="icon"
                     onClick={loadImages}
                     disabled={isLoading}
-                    className="h-11 w-11 rounded-xl shadow-sm transition-all hover:bg-muted active:scale-95"
+                    className="h-10 w-10 rounded-lg"
                   >
                     <IconRefresh
                       className={cn("size-5", isLoading && "animate-spin")}
@@ -145,22 +143,22 @@ export default function MediaPage() {
                 <SheetTrigger asChild>
                   <Button
                     type="button"
-                    className="h-11 gap-2 rounded-xl px-6 font-bold shadow-lg shadow-primary/20 transition-all hover:shadow-xl hover:shadow-primary/30 active:scale-95"
+                    className="h-10 gap-2 rounded-lg px-4 font-semibold"
                   >
-                    <IconPhotoPlus className="size-5" />
-                    Upload New
+                    <IconPhotoPlus className="size-4" />
+                    Upload Asset
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-full sm:max-w-xl">
                   <SheetHeader className="pb-8">
-                    <SheetTitle className="text-2xl font-bold">
-                      Upload Media
+                    <SheetTitle className="text-xl font-bold">
+                      Upload Asset
                     </SheetTitle>
-                    <SheetDescription className="text-base">
-                      Drag and drop images to upload them to your library.
+                    <SheetDescription>
+                      Add new images to your media library
                     </SheetDescription>
                   </SheetHeader>
-                  <div className="rounded-2xl border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2">
+                  <div className="rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2">
                     <ImageUploader
                       onUploadSuccess={() => {
                         loadImages();
@@ -171,40 +169,50 @@ export default function MediaPage() {
                 </SheetContent>
               </Sheet>
             </div>
+
+            {hasActiveFilters && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={resetFilters}
+                className="gap-2"
+              >
+                <IconX className="size-3.5" />
+                Clear Filters
+              </Button>
+            )}
           </div>
 
-          {/* Filters Bar */}
-          <div className="flex flex-col gap-4 rounded-2xl border bg-card/50 p-4 shadow-sm backdrop-blur-sm sm:flex-row sm:items-center">
-            <div className="relative flex-1">
-              <IconSearch className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          {/* Search and Filters */}
+          <div className="space-y-3 rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
+            <div className="relative">
+              <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="Search by filename..."
+                placeholder="Search assets by filename..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-11 rounded-xl border-none bg-muted/50 pl-10 text-sm shadow-inner transition-all focus-visible:ring-primary/20"
+                className="h-10 rounded-lg border-none bg-muted/50 pl-9 text-sm"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted"
                 >
-                  <IconX className="size-3.5" />
+                  <IconX className="size-4" />
                 </button>
               )}
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Filter:</span>
               <Button
                 type="button"
                 variant={filterType === "all" ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setFilterType("all")}
-                className={cn(
-                  "h-9 rounded-lg px-4 text-xs font-bold uppercase tracking-wider",
-                  filterType === "all" &&
-                    "bg-primary/10 text-primary hover:bg-primary/20",
-                )}
+                className="h-8 rounded-lg px-3 text-xs"
               >
                 All
               </Button>
@@ -215,33 +223,16 @@ export default function MediaPage() {
                   variant={filterType === type ? "secondary" : "ghost"}
                   size="sm"
                   onClick={() => setFilterType(type as typeof filterType)}
-                  className={cn(
-                    "h-9 rounded-lg px-4 text-xs font-bold uppercase tracking-wider",
-                    filterType === type &&
-                      "bg-primary/10 text-primary hover:bg-primary/20",
-                  )}
+                  className="h-8 rounded-lg px-3 text-xs uppercase"
                 >
                   {type}
                 </Button>
               ))}
-
-              {hasActiveFilters && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={resetFilters}
-                  className="h-9 gap-2 rounded-lg px-3 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive"
-                >
-                  <IconX className="size-3.5" />
-                  Clear
-                </Button>
-              )}
             </div>
           </div>
 
           {/* Gallery */}
-          <div className="min-h-100">
+          <div className="min-h-96">
             <ImageGallery
               images={filteredImages}
               isLoading={isLoading}
