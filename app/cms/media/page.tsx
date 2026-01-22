@@ -18,11 +18,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { ImageGallery } from "@/features/medias/components/image-gallery";
-import { ImageUploader } from "@/features/medias/components/image-uploader";
 import { listImagesAction } from "@/features/medias/medias.actions";
 import PageLayout from "@/features/shared/components/page-layout";
-import MediaFilters from "./media-filters";
-import MediaStats from "./media-stats";
+import MediaFilters from "@/app/cms/media/media-filters";
+import MediaStats from "@/app/cms/media/media-stats";
+import { MediaUploader } from "@/app/cms/media/media-uploader";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export const metadata = {
@@ -97,7 +97,7 @@ async function MediaContent() {
                 </SheetDescription>
               </SheetHeader>
               <div className="rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2">
-                <ImageUploader onUploadSuccess={() => {}} />
+                <MediaUploader />
               </div>
             </SheetContent>
           </Sheet>
