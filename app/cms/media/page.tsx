@@ -1,14 +1,8 @@
-"use client";
-
 import {
   IconPhotoPlus,
-  IconRefresh,
-  IconSearch,
-  IconX,
 } from "@tabler/icons-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
@@ -26,74 +20,140 @@ import {
 import { ImageGallery } from "@/features/medias/components/image-gallery";
 import { ImageUploader } from "@/features/medias/components/image-uploader";
 import { listImagesAction } from "@/features/medias/medias.actions";
-import type { MediaFile } from "@/features/medias/medias.types";
 import PageLayout from "@/features/shared/components/page-layout";
-import { cn } from "@/lib/utils";
+import MediaFilters from "./media-filters";
+import MediaStats from "./media-stats";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export default function MediaPage() {
-  const [images, setImages] = useState<MediaFile[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<
-    "all" | "jpg" | "png" | "gif" | "svg" | "webp"
-  >("all");
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
+export const metadata = {
+  title: "Media Library - MDVault",
+};
 
-  const loadImages = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const loadedImages = await listImagesAction();
-      setImages(loadedImages);
-    } catch (error) {
-      console.error("Error loading images:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadImages();
-  }, [loadImages]);
+async function MediaContent() {
+  const images = await listImagesAction();
 
   // Get all image types
-  const imageTypes = useMemo(() => {
-    const types = new Set<string>();
-    images.forEach((img) => {
-      const ext = img.name.split(".").pop()?.toLowerCase() || "unknown";
-      if (["jpg", "jpeg", "png", "gif", "svg", "webp"].includes(ext)) {
-        types.add(ext === "jpeg" ? "jpg" : ext);
-      }
-    });
-    return Array.from(types).sort();
-  }, [images]);
+  const imageTypes = Array.from(
+    new Set(
+      images.map((img) => {
+        const ext = img.name.split(".").pop()?.toLowerCase() || "unknown";
+        return ext === "jpeg" ? "jpg" : ext;
+      }),
+    ),
+  ).sort();
 
-  // Filter and search images
-  const filteredImages = useMemo(() => {
-    return images.filter((image) => {
-      // Search filter by filename
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        !searchQuery || image.name.toLowerCase().includes(searchLower);
+  return (
+    <div className="space-y-6">
+      {/* Header with Stats */}
+      <MediaStats
+        totalAssets={images.length}
+        fileTypes={imageTypes.length}
+      />
 
-      // Type filter
-      let matchesType = filterType === "all";
-      if (filterType !== "all") {
-        const ext = image.name.split(".").pop()?.toLowerCase() || "unknown";
-        const normalizedExt = ext === "jpeg" ? "jpg" : ext;
-        matchesType = normalizedExt === filterType;
-      }
+      {/* Action Bar */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                className="h-10 w-10 rounded-lg"
+                disabled
+                aria-label="auto-sync"
+              >
+                <svg
+                  className="size-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Media auto-syncs</TooltipContent>
+          </Tooltip>
 
-      return matchesSearch && matchesType;
-    });
-  }, [images, searchQuery, filterType]);
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                type="button"
+                className="h-10 gap-2 rounded-lg px-4 font-semibold"
+              >
+                <IconPhotoPlus className="size-4" />
+                Upload Asset
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-full sm:max-w-xl">
+              <SheetHeader className="pb-8">
+                <SheetTitle className="text-xl font-bold">
+                  Upload Asset
+                </SheetTitle>
+                <SheetDescription>
+                  Add new images to your media library
+                </SheetDescription>
+              </SheetHeader>
+              <div className="rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2">
+                <ImageUploader onUploadSuccess={() => {}} />
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
 
-  const resetFilters = () => {
-    setSearchQuery("");
-    setFilterType("all");
-  };
+      {/* Search and Filters */}
+      <MediaFilters imageTypes={imageTypes} />
 
-  const hasActiveFilters = searchQuery || filterType !== "all";
+      {/* Gallery */}
+      <div className="min-h-96">
+        <ImageGallery images={images} />
+      </div>
+    </div>
+  );
+}
 
+function MediaSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* Stats skeleton */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="rounded-xl border bg-card/50 p-4">
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-8 w-16 mt-3" />
+          </div>
+        ))}
+      </div>
+
+      {/* Action bar skeleton */}
+      <div className="rounded-xl border bg-card/50 p-4">
+        <Skeleton className="h-10 w-32" />
+      </div>
+
+      {/* Filters skeleton */}
+      <div className="rounded-xl border bg-card/50 p-4 space-y-3">
+        <Skeleton className="h-10 w-full" />
+        <div className="flex gap-2">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-8 w-20" />
+          ))}
+        </div>
+      </div>
+
+      {/* Gallery skeleton */}
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+        {Array.from({ length: 10 }, (_, i) => `skeleton-${i}`).map((key) => (
+          <Skeleton key={key} className="aspect-square rounded-lg" />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function MediaPage() {
   return (
     <TooltipProvider>
       <PageLayout
@@ -101,145 +161,9 @@ export default function MediaPage() {
         description="Manage your digital assets"
         breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Media" }]}
       >
-        <div className="space-y-6">
-          {/* Header with Stats */}
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
-              <p className="text-sm font-medium text-muted-foreground">Total Assets</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{images.length}</p>
-            </div>
-            <div className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
-              <p className="text-sm font-medium text-muted-foreground">Currently Viewing</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{filteredImages.length}</p>
-            </div>
-            <div className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
-              <p className="text-sm font-medium text-muted-foreground">File Types</p>
-              <p className="mt-2 text-3xl font-bold text-foreground">{imageTypes.length}</p>
-            </div>
-          </div>
-
-          {/* Action Bar */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
-            <div className="flex items-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={loadImages}
-                    disabled={isLoading}
-                    className="h-10 w-10 rounded-lg"
-                  >
-                    <IconRefresh
-                      className={cn("size-5", isLoading && "animate-spin")}
-                    />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Refresh library</TooltipContent>
-              </Tooltip>
-
-              <Sheet open={isUploadOpen} onOpenChange={setIsUploadOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    type="button"
-                    className="h-10 gap-2 rounded-lg px-4 font-semibold"
-                  >
-                    <IconPhotoPlus className="size-4" />
-                    Upload Asset
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="right" className="w-full sm:max-w-xl">
-                  <SheetHeader className="pb-8">
-                    <SheetTitle className="text-xl font-bold">
-                      Upload Asset
-                    </SheetTitle>
-                    <SheetDescription>
-                      Add new images to your media library
-                    </SheetDescription>
-                  </SheetHeader>
-                  <div className="rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2">
-                    <ImageUploader
-                      onUploadSuccess={() => {
-                        loadImages();
-                        setIsUploadOpen(false);
-                      }}
-                    />
-                  </div>
-                </SheetContent>
-              </Sheet>
-            </div>
-
-            {hasActiveFilters && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={resetFilters}
-                className="gap-2"
-              >
-                <IconX className="size-3.5" />
-                Clear Filters
-              </Button>
-            )}
-          </div>
-
-          {/* Search and Filters */}
-          <div className="space-y-3 rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
-            <div className="relative">
-              <IconSearch className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search assets by filename..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="h-10 rounded-lg border-none bg-muted/50 pl-9 text-sm"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted"
-                >
-                  <IconX className="size-4" />
-                </button>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Filter:</span>
-              <Button
-                type="button"
-                variant={filterType === "all" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setFilterType("all")}
-                className="h-8 rounded-lg px-3 text-xs"
-              >
-                All
-              </Button>
-              {imageTypes.map((type) => (
-                <Button
-                  key={type}
-                  type="button"
-                  variant={filterType === type ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setFilterType(type as typeof filterType)}
-                  className="h-8 rounded-lg px-3 text-xs uppercase"
-                >
-                  {type}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          {/* Gallery */}
-          <div className="min-h-96">
-            <ImageGallery
-              images={filteredImages}
-              isLoading={isLoading}
-              onRefresh={loadImages}
-            />
-          </div>
-        </div>
+        <Suspense fallback={<MediaSkeleton />}>
+          <MediaContent />
+        </Suspense>
       </PageLayout>
     </TooltipProvider>
   );

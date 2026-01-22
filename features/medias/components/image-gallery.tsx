@@ -10,7 +10,8 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useMemo, useState, useTransition } from "react";
+import { useQueryState } from "nuqs";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -35,17 +36,9 @@ const Image = dynamic(() => import("next/image"), { ssr: false });
 
 interface ImageGalleryProps {
   images: UploadedImage[];
-  isLoading?: boolean;
-  onImageDeleted?: (imageId: string) => void;
-  onRefresh?: () => void;
 }
 
-export function ImageGallery({
-  images,
-  isLoading = false,
-  onImageDeleted,
-  onRefresh: _onRefresh,
-}: ImageGalleryProps) {
+export function ImageGallery({ images }: ImageGalleryProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedImageForPreview, setSelectedImageForPreview] =
     useState<UploadedImage | null>(null);
@@ -54,6 +47,16 @@ export function ImageGallery({
     usage: MediaUsage;
   } | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const [search] = useQueryState("search", {
+    defaultValue: "",
+    parse: String,
+  });
+
+  const [filter] = useQueryState("filter", {
+    defaultValue: "all",
+    parse: String,
+  });
 
   const copyUrlToClipboard = useCallback((url: string, imageId: string) => {
     navigator.clipboard.writeText(url);
@@ -90,7 +93,6 @@ export function ImageGallery({
         });
         setDeleteConfirmation(null);
         setSelectedImageForPreview(null);
-        onImageDeleted?.(deleteConfirmation.image.id);
       } catch (error) {
         toast.error("Failed to delete image", {
           description:
@@ -100,35 +102,52 @@ export function ImageGallery({
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-        {Array.from({ length: 10 }, () => `skeleton-${Math.random()}`).map(
-          (id) => (
-            <div key={id} className="aspect-square rounded-lg bg-muted/30 animate-pulse" />
-          ),
-        )}
-      </div>
-    );
-  }
+  // Filter images based on query params
+  const filteredImages = useMemo(() => {
+    return images.filter((image) => {
+      // Search filter
+      const searchLower = search.toLowerCase();
+      const matchesSearch =
+        !search || image.name.toLowerCase().includes(searchLower);
 
-  return (
-    <TooltipProvider>
-      {images.length === 0 ? (
+      // Type filter
+      let matchesType = filter === "all";
+      if (filter !== "all") {
+        const ext = image.name.split(".").pop()?.toLowerCase() || "unknown";
+        const normalizedExt = ext === "jpeg" ? "jpg" : ext;
+        matchesType = normalizedExt === filter;
+      }
+
+      return matchesSearch && matchesType;
+    });
+  }, [images, search, filter]);
+
+  if (filteredImages.length === 0) {
+    return (
+      <TooltipProvider>
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/30 py-24 text-center">
           <div className="rounded-lg bg-muted/20 p-3 mb-3">
             <IconPhotoOff className="size-8 text-muted-foreground/60" />
           </div>
           <div className="max-w-sm space-y-1">
-            <p className="text-sm font-semibold text-foreground">No media found</p>
+            <p className="text-sm font-semibold text-foreground">
+              {images.length === 0 ? "No media found" : "No results"}
+            </p>
             <p className="text-xs text-muted-foreground">
-              Upload your first asset to get started
+              {images.length === 0
+                ? "Upload your first asset to get started"
+                : "Try adjusting your search or filters"}
             </p>
           </div>
         </div>
-      ) : (
-        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {images.map((image) => (
+      </TooltipProvider>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {filteredImages.map((image) => (
             <div
               key={image.id}
               className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/20 transition-all hover:border-primary/50 hover:shadow-lg"
@@ -204,8 +223,7 @@ export function ImageGallery({
               </div>
             </div>
           ))}
-        </div>
-      )}
+      </div>
 
       {/* Image Preview Modal */}
       <AlertDialog
@@ -244,29 +262,29 @@ export function ImageGallery({
                   </h3>
                   <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
                     <span className="size-1.5 rounded-full bg-emerald-500" />
-                    Uploaded {new Date(selectedImageForPreview.uploadedAt).toLocaleDateString()}
+                    Uploaded{" "}
+                    {new Date(selectedImageForPreview.uploadedAt).toLocaleDateString()}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 py-2 text-xs">
                   <div>
-                    <p className="font-semibold text-muted-foreground uppercase tracking-wide">File Type</p>
-                    <p className="text-sm font-medium mt-1">
-                      {selectedImageForPreview.name.split(".").pop()?.toUpperCase()}
+                    <p className="font-semibold text-muted-foreground uppercase tracking-wide">
+                      File Type
                     </p>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-muted-foreground uppercase tracking-wide">Size</p>
                     <p className="text-sm font-medium mt-1">
-                      {selectedImageForPreview.size
-                        ? `${(selectedImageForPreview.size / 1024).toFixed(1)} KB`
-                        : "—"}
+                      {selectedImageForPreview.name
+                        .split(".")
+                        .pop()
+                        ?.toUpperCase()}
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">URL</span>
+                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                    URL
+                  </span>
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -335,7 +353,8 @@ export function ImageGallery({
               {deleteConfirmation?.usage.isUsed ? (
                 <div className="space-y-3 mt-3">
                   <p className="text-destructive font-semibold text-sm">
-                    ⚠️ In use by {deleteConfirmation.usage.usedInArticles.length} article(s)
+                    ⚠️ In use by {deleteConfirmation.usage.usedInArticles.length}{" "}
+                    article(s)
                   </p>
                   <ul className="space-y-2">
                     {deleteConfirmation.usage.usedInArticles.map((article) => (
