@@ -3,12 +3,15 @@
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import {
   IconDeviceFloppy,
+  IconEye,
+  IconEyeOff,
   IconFileText,
   IconLoader2,
   IconPhoto,
   IconPlus,
   IconSend,
   IconTags,
+  IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
@@ -19,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { MediaFile  } from "@/features/medias/medias.types";
+import type { MediaFile } from "@/features/medias/medias.types";
 import { CoverImageSelector } from "../../medias/components/cover-image-selector";
 import { ImageInsertDialog } from "../../medias/components/image-insert-dialog";
 import { uploadImageAction } from "../../medias/medias.actions";
@@ -29,7 +32,7 @@ import {
 } from "../articles.actions";
 import type { Article, CreateArticleInput } from "../articles.types";
 import ArticleDeleteDialog from "./article-delete-dialog";
-import { ArticleUnpublishDialog } from "./article-unpublish-dialog";
+import { ArticlePublishDialog } from "./article-publish-dialog";
 import { ForwardRefEditor } from "./forward-ref-editor";
 
 interface ArticleEditorProps {
@@ -79,14 +82,14 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
   // Image upload handler for MDXEditor
   const handleImageUpload = useCallback(async (file: File): Promise<string> => {
     const result = await uploadImageAction(file);
-    if (result.success) {
-      return result.data.url;
+    if (!result.success) {
+      throw new Error(result.error);
     }
-    throw new Error(result.error);
+    return result.data.url;
   }, []);
 
   // Handle image insert from dialog
-  const handleImageInsert = (image: MediaFile ) => {
+  const handleImageInsert = (image: MediaFile) => {
     if (editorRef.current) {
       editorRef.current.insertMarkdown(`![image](${image.url})`);
     }
@@ -108,10 +111,19 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
           published: false,
         };
 
+        let result: Awaited<ReturnType<typeof createArticleAction>>;
         if (mode === "create") {
-          await createArticleAction(input);
+          result = await createArticleAction(input);
         } else if (article?.sha) {
-          await updateArticleAction(slug, { ...input, sha: article.sha });
+          result = await updateArticleAction(slug, { ...input, sha: article.sha });
+        } else {
+          toast.error("Failed to save article");
+          return;
+        }
+
+        if (!result.success) {
+          toast.error("Failed to save article", { description: result.error });
+          return;
         }
 
         toast.success("Article saved as draft");
@@ -141,10 +153,19 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
           published: true,
         };
 
+        let result: Awaited<ReturnType<typeof createArticleAction>>;
         if (mode === "create") {
-          await createArticleAction(input);
+          result = await createArticleAction(input);
         } else if (article?.sha) {
-          await updateArticleAction(slug, { ...input, sha: article.sha });
+          result = await updateArticleAction(slug, { ...input, sha: article.sha });
+        } else {
+          toast.error("Failed to publish article");
+          return;
+        }
+
+        if (!result.success) {
+          toast.error("Failed to publish article", { description: result.error });
+          return;
         }
 
         toast.success("Article published successfully");
@@ -178,11 +199,26 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
         </div>
 
         <div className="flex items-center gap-2">
-          {mode === "edit" && article?.published && article?.sha && (
-            <ArticleUnpublishDialog
-              articleSlug={slug}
-              articleSha={article.sha}
-            />
+          {mode === "edit" && article && (
+            <ArticlePublishDialog article={article}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                {article.published ? (
+                  <>
+                    <IconEyeOff className="size-4" />
+                    Unpublish
+                  </>
+                ) : (
+                  <>
+                    <IconEye className="size-4" />
+                    Publish
+                  </>
+                )}
+              </Button>
+            </ArticlePublishDialog>
           )}
 
           <Button
@@ -220,7 +256,14 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
             <ArticleDeleteDialog
               articleSlug={slug}
               articleSha={article.sha}
-            />
+            >
+              <Button
+                className="flex items-center gap-2 text-destructive focus:text-destructive"
+              >
+                <IconTrash className="size-4" />
+                Delete Article
+              </Button>
+            </ArticleDeleteDialog>
           )}
         </div>
       </div>

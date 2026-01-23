@@ -1,7 +1,7 @@
 "use client";
-import { IconLoader2, IconTrash } from "@tabler/icons-react";
+import { IconLoader2 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { ReactNode, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -14,15 +14,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { deleteArticleAction } from "../articles.actions";
 
 interface ArticleDeleteDialogProps {
+  children: ReactNode,
   articleSlug: string;
   articleSha?: string;
 }
 
 const ArticleDeleteDialog = ({
+  children,
   articleSlug,
   articleSha,
 }: ArticleDeleteDialogProps) => {
@@ -37,7 +38,6 @@ const ArticleDeleteDialog = ({
       try {
         await deleteArticleAction(articleSlug, articleSha);
         toast.success("Article deleted");
-        router.push("/cms/articles");
         router.refresh();
       } catch (error) {
         const message =
@@ -53,13 +53,7 @@ const ArticleDeleteDialog = ({
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <DropdownMenuItem
-          onSelect={(e) => e.preventDefault()}
-          className="flex items-center gap-2 text-destructive focus:text-destructive"
-        >
-          <IconTrash className="size-4" />
-          Delete Article
-        </DropdownMenuItem>
+        {children}
       </AlertDialogTrigger>
       <AlertDialogContent className="rounded-2xl">
         <AlertDialogHeader>
@@ -88,3 +82,4 @@ const ArticleDeleteDialog = ({
 };
 
 export default ArticleDeleteDialog;
+

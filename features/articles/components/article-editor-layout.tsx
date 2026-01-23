@@ -10,6 +10,7 @@ import {
   IconDeviceFloppy,
   IconDots,
   IconEye,
+  IconEyeOff,
   IconFileText,
   IconHash,
   IconLoader2,
@@ -18,6 +19,7 @@ import {
   IconSend,
   IconSettings,
   IconTag,
+  IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import Link from "next/link";
@@ -29,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -52,7 +55,7 @@ import {
 } from "../articles.actions";
 import type { Article, CreateArticleInput } from "../articles.types";
 import ArticleDeleteDialog from "./article-delete-dialog";
-import { ArticleUnpublishDialog } from "./article-unpublish-dialog";
+import { ArticlePublishDialog } from "./article-publish-dialog";
 import { ForwardRefEditor } from "./forward-ref-editor";
 
 interface ArticleEditorLayoutProps {
@@ -110,10 +113,10 @@ export function ArticleEditorLayout({
   // Image upload handler for MDXEditor
   const handleImageUpload = useCallback(async (file: File): Promise<string> => {
     const result = await uploadImageAction(file);
-    if (result.success) {
-      return result.data.url;
+    if (!result.success) {
+      throw new Error(result.error);
     }
-    throw new Error(result.error);
+    return result.data.url;
   }, []);
 
   // Handle image insert from dialog
@@ -139,10 +142,17 @@ export function ArticleEditorLayout({
         published: article?.published ?? false,
       };
 
+      let result: Awaited<ReturnType<typeof createArticleAction>>;
       if (mode === "create") {
-        await createArticleAction(input);
+        result = await createArticleAction(input);
       } else if (article?.sha) {
-        await updateArticleAction(slug, { ...input, sha: article.sha });
+        result = await updateArticleAction(slug, { ...input, sha: article.sha });
+      } else {
+        throw new Error("Failed to save article");
+      }
+
+      if (!result.success) {
+        throw new Error(result.error);
       }
 
       setHasUnsavedChanges(false);
@@ -350,19 +360,40 @@ export function ArticleEditorLayout({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-xl">
-                {article?.published && (
+                {article && (
                   <>
-                    <ArticleUnpublishDialog
-                      articleSlug={slug}
-                      articleSha={article.sha}
-                    />
+                    <ArticlePublishDialog article={article}>
+                      <DropdownMenuItem
+                        onSelect={(e) => e.preventDefault()}
+                        className="flex items-center gap-2"
+                      >
+                        {article.published ? (
+                          <>
+                            <IconEyeOff className="size-4 text-amber-600" />
+                            <span className="text-amber-600">Unpublish</span>
+                          </>
+                        ) : (
+                          <>
+                            <IconEye className="size-4 text-emerald-600" />
+                            <span className="text-emerald-600">Publish</span>
+                          </>
+                        )}
+                      </DropdownMenuItem>
+                    </ArticlePublishDialog>
                     <DropdownMenuSeparator />
                   </>
                 )}
                 <ArticleDeleteDialog
                   articleSha={article?.sha}
                   articleSlug={slug}
-                />
+                >
+                  <Button
+                    className="flex items-center gap-2 text-destructive focus:text-destructive"
+                  >
+                    <IconTrash className="size-4" />
+                    Delete Article
+                  </Button> 
+                </ArticleDeleteDialog>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

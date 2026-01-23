@@ -129,11 +129,11 @@ export async function checkMediaUsageAction(
   imageUrl: string,
 ): Promise<ActionResult<MediaUsage>> {
   try {
-    const articles = await listArticlesAction();
+    const result = await listArticlesAction();
+    const articles = result.success ? result.data : [];
 
     const usedInArticles = articles
       .filter((article) => {
-        // Check if image is used in coverImage or in article content
         const isInCover = article.coverImage === imageUrl;
         const isInContent = article.content.includes(imageUrl);
         return isInCover || isInContent;

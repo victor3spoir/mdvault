@@ -1,6 +1,7 @@
 "use client";
 
 import { IconCalendar, IconLoader2, IconSettings } from "@tabler/icons-react";
+import type { ReactNode } from "react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
@@ -11,6 +12,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,32 +21,36 @@ import { updateArticleMetadataAction } from "@/features/articles/articles.action
 import type { Article } from "@/features/articles/articles.types";
 
 interface PostMetadataEditorProps {
+  children: ReactNode;
   article: Article;
-  isOpen: boolean;
-  onClose: () => void;
-  onUpdate?: (article: Article) => void;
 }
 
 export function PostMetadataEditor({
+  children,
   article,
-  isOpen,
-  onClose,
-  onUpdate,
 }: PostMetadataEditorProps) {
+  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [createdAt, setCreatedAt] = useState(article.createdAt);
 
   const handleSave = () => {
     startTransition(async () => {
       try {
-        const updatedPost = await updateArticleMetadataAction(article.slug, {
+        const result = await updateArticleMetadataAction(article.slug, {
           createdAt,
         });
+        
+        if (!result.success) {
+          toast.error("Failed to update metadata", {
+            description: result.error,
+          });
+          return;
+        }
+
         toast.success("Metadata updated", {
           description: `"${article.title}" metadata has been updated`,
         });
-        onUpdate?.(updatedPost);
-        onClose();
+        setOpen(false);
       } catch (error) {
         toast.error("Failed to update metadata", {
           description:
@@ -55,7 +61,10 @@ export function PostMetadataEditor({
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={onClose}>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        {children}
+      </AlertDialogTrigger>
       <AlertDialogContent className="max-w-md rounded-3xl p-8">
         <AlertDialogHeader className="mb-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -96,7 +105,10 @@ export function PostMetadataEditor({
         </div>
 
         <AlertDialogFooter className="mt-8 gap-3">
-          <AlertDialogCancel className="h-12 flex-1 rounded-2xl border-muted bg-muted/30 hover:bg-muted/50">
+          <AlertDialogCancel 
+            disabled={isPending}
+            className="h-12 flex-1 rounded-2xl border-muted bg-muted/30 hover:bg-muted/50"
+          >
             Cancel
           </AlertDialogCancel>
           <Button

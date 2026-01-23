@@ -3,32 +3,31 @@
 import {
   IconCheck,
   IconCopy,
-  IconLoader2,
   IconX,
 } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
-import { useCallback, useState, useTransition } from "react";
+import { ReactNode, useCallback, useState } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import type { MediaFile  } from "../medias.types";
+import type { MediaFile } from "../medias.types";
 
 const Image = dynamic(() => import("next/image"), { ssr: false });
 
 interface ImagePreviewDialogProps {
-  image: MediaFile  | null;
-  onOpenChange: (open: boolean) => void;
-  onDelete: (image: MediaFile ) => void;
+  children: ReactNode
+  image: MediaFile | null;
 }
 
-export function ImagePreviewDialog({
+export function MediaPreviewDialog({
+  children,
   image,
-  onOpenChange,
-  onDelete,
 }: ImagePreviewDialogProps) {
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [open, setOpen] = useState<boolean>(false);
 
   const copyUrlToClipboard = useCallback((url: string, imageId: string) => {
     navigator.clipboard.writeText(url);
@@ -36,17 +35,15 @@ export function ImagePreviewDialog({
     setTimeout(() => setCopiedId(null), 2000);
   }, []);
 
-  const handleDeleteClick = () => {
-    if (image) {
-      onOpenChange(false);
-      onDelete(image);
-    }
-  };
+
 
   if (!image) return null;
 
   return (
-    <AlertDialog open={!!image} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        {children}
+      </AlertDialogTrigger>
       <AlertDialogContent className="max-w-2xl p-0 overflow-hidden">
         <div className="flex flex-col bg-card">
           {/* Image */}
@@ -61,7 +58,7 @@ export function ImagePreviewDialog({
             />
             <button
               type="button"
-              onClick={() => onOpenChange(false)}
+              onClick={() => setOpen(false)}
               className="absolute right-4 top-4 size-8 rounded-lg bg-background/90 backdrop-blur flex items-center justify-center hover:bg-background transition-colors"
             >
               <IconX className="size-4" />
@@ -119,15 +116,9 @@ export function ImagePreviewDialog({
             </div>
 
             <div className="flex gap-2 pt-2">
+             
               <Button
-                onClick={handleDeleteClick}
-                variant="destructive"
-                size="sm"
-              >
-                Delete Asset
-              </Button>
-              <Button
-                onClick={() => onOpenChange(false)}
+                onClick={() => setOpen(false)}
                 variant="outline"
                 size="sm"
                 className="flex-1"

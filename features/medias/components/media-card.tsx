@@ -1,44 +1,16 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { MediaUsage, MediaFile  } from "../medias.types";
+import type { MediaFile } from "../medias.types";
 import { IconEye, IconTrash } from "@tabler/icons-react";
-import { ImagePreviewDialog } from "./image-preview-dialog";
-import { useState, useTransition } from "react";
-import { checkMediaUsageAction } from "../medias.actions";
+import { MediaPreviewDialog } from "./image-preview-dialog";
 import dynamic from "next/dynamic";
-import { DeleteConfirmationDialog } from "./delete-confirmation-dialog";
-import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { MediaDeleteDialog } from "./media-delete-dialog";
 
 const Image = dynamic(() => import("next/image"), { ssr: false });
 
-const MediaCard = ({ media }: { media: MediaFile  }) => {
-  
-  const [selectedImageForPreview, setSelectedImageForPreview] =
-    useState<MediaFile  | null>(null);
-  const [isPending, startTransition] = useTransition();
-  const [deleteConfirmation, setDeleteConfirmation] = useState<{
-    image: MediaFile ;
-    usage: MediaUsage;
-  } | null>(null);
+const MediaCard = ({ media }: { media: MediaFile }) => {
 
-  const handleDeleteClick = async (image: MediaFile ) => {
-    startTransition(async () => {
-      try {
-        const result = await checkMediaUsageAction(image.url);
-        if (result.success) {
-          setDeleteConfirmation({ image, usage: result.data });
-        } else {
-          toast.error("Failed to check image usage", {
-            description: result.error,
-          });
-        }
-      } catch (error) {
-        toast.error("Failed to check image usage", {
-          description:
-            error instanceof Error ? error.message : "Try again later",
-        });
-      }
-    });
-  };
+
 
   return (
     <div
@@ -57,27 +29,23 @@ const MediaCard = ({ media }: { media: MediaFile  }) => {
         <div className="flex gap-2">
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="size-9 rounded-lg bg-white/20 backdrop-blur flex items-center justify-center text-white hover:bg-white/30 transition-colors"
-                onClick={() => setSelectedImageForPreview(media)}
-              >
-                <IconEye className="size-4" />
-              </button>
             </TooltipTrigger>
+            <MediaPreviewDialog image={media}>
+              <Button><IconEye className="size-4" /></Button>
+            </MediaPreviewDialog>
             <TooltipContent>Preview</TooltipContent>
           </Tooltip>
 
           <Tooltip>
             <TooltipTrigger asChild>
-              <button
-                type="button"
-                className="size-9 rounded-lg bg-destructive/80 backdrop-blur flex items-center justify-center text-white hover:bg-destructive transition-colors"
-                onClick={() => handleDeleteClick(media)}
-                disabled={isPending}
-              >
-                <IconTrash className="size-4" />
-              </button>
+              <MediaDeleteDialog image={media}>
+                <Button
+                  type="button"
+                  className="size-9 rounded-lg bg-destructive/80 backdrop-blur flex items-center justify-center text-white hover:bg-destructive transition-colors"
+                >
+                  <IconTrash className="size-4" />
+                </Button>
+              </MediaDeleteDialog>
             </TooltipTrigger>
             <TooltipContent>Delete</TooltipContent>
           </Tooltip>
@@ -90,26 +58,6 @@ const MediaCard = ({ media }: { media: MediaFile  }) => {
         </p>
       </div>
 
-
-
-      <ImagePreviewDialog
-        image={selectedImageForPreview}
-        onOpenChange={(open) => {
-          if (!open) setSelectedImageForPreview(null);
-        }}
-        onDelete={handleDeleteClick}
-      />
-
-      <DeleteConfirmationDialog
-        image={deleteConfirmation?.image || null}
-        usage={deleteConfirmation?.usage || null}
-        onOpenChange={(open) => {
-          if (!open) setDeleteConfirmation(null);
-        }}
-        onDeleteSuccess={() => {
-          setSelectedImageForPreview(null);
-        }}
-      />
     </div>
   )
 }

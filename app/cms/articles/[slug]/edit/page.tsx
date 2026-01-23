@@ -10,11 +10,11 @@ export default async function EditArticlePage({
   params,
 }: EditArticlePageProps) {
   const { slug } = await params;
-  const article = await getArticleAction(slug);
-
-  if (!article) {
+  const result = await getArticleAction(slug);
+  
+  if (!result.success || !result.data) {
     notFound();
   }
 
-  return <ArticleEditorLayout article={article} mode="edit" />;
+  return <ArticleEditorLayout article={result.data} mode="edit" />;
 }

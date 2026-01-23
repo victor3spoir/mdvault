@@ -13,7 +13,7 @@ import {
 } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -35,79 +35,42 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { Article } from "@/features/articles/articles.types";
-import {
-  deleteArticleAction,
-  publishArticleAction,
-  unpublishArticleAction,
-} from "../articles.actions";
+import { deleteArticleAction } from "../articles.actions";
+import { ArticlePublishDialog } from "./article-publish-dialog";
 import { PostMetadataEditor } from "./article-metadata-editor";
+import { formatDate } from "@/features/shared/shared.utils";
 
 interface ArticleCardProps {
   article: Article;
   onDelete?: (article: Article) => void;
-  onPublishChange?: (article: Article) => void;
 }
 
 export function ArticleCard({
   article,
   onDelete,
-  onPublishChange,
 }: ArticleCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [isMetadataEditorOpen, setIsMetadataEditorOpen] = useState(false);
-  const [currentArticle, setCurrentArticle] = useState(article);
 
-  const formattedDate = new Date(currentArticle.createdAt).toLocaleDateString(
-    "fr-FR",
-    {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    },
-  );
 
-  async function handlePublishToggle(
-    published: boolean,
-    action: (slug: string, sha: string) => Promise<Article>,
-  ) {
-    startTransition(async () => {
-      try {
-        const updatedPost = await action(
-          currentArticle.slug,
-          currentArticle.sha || "",
-        );
-        const status = published ? "published" : "unpublished";
-        const message = published
-          ? `"${currentArticle.title}" is now live`
-          : `"${currentArticle.title}" is now a draft`;
-        toast.success(`Article ${status}`, { description: message });
-        setCurrentArticle(updatedPost);
-        onPublishChange?.(updatedPost);
-      } catch (error) {
-        toast.error(`Failed to ${published ? "publish" : "unpublish"}`, {
-          description:
-            error instanceof Error ? error.message : "Try again later",
-        });
-      }
-    });
-  }
-
-  const handlePublish = () => handlePublishToggle(true, publishArticleAction);
-
-  const handleUnpublish = () =>
-    handlePublishToggle(false, unpublishArticleAction);
+  const formattedDate = formatDate(new Date(article.createdAt))
 
   const handleDelete = () => {
     startTransition(async () => {
       try {
-        await deleteArticleAction(
-          currentArticle.slug,
-          currentArticle.sha || "",
+        const result = await deleteArticleAction(
+          article.slug,
+          article.sha || "",
         );
+        if (!result.success) {
+          toast.error("Failed to delete", {
+            description: result.error,
+          });
+          return;
+        }
         toast.success("Article deleted", {
-          description: `"${currentArticle.title}" has been removed`,
+          description: `"${article.title}" has been removed`,
         });
-        onDelete?.(currentArticle);
+        onDelete?.(article);
       } catch (error) {
         toast.error("Failed to delete", {
           description:
@@ -122,10 +85,10 @@ export function ArticleCard({
       <div className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-primary/20">
         {/* Cover Image */}
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
-          {currentArticle.coverImage ? (
+          {article.coverImage ? (
             <Image
-              src={currentArticle.coverImage}
-              alt={currentArticle.title}
+              src={article.coverImage}
+              alt={article.title}
               fill
               priority
               className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -141,10 +104,10 @@ export function ArticleCard({
           {/* Status Badge on Image */}
           <div className="absolute left-3 top-3">
             <Badge
-              variant={currentArticle.published ? "default" : "secondary"}
+              variant={article.published ? "default" : "secondary"}
               className="h-6 gap-1 rounded-lg px-2 text-[10px] font-bold uppercase tracking-wider shadow-lg backdrop-blur-md"
             >
-              {currentArticle.published ? (
+              {article.published ? (
                 <>
                   <IconCheck className="size-3" />
                   Published
@@ -159,7 +122,7 @@ export function ArticleCard({
         {/* Content */}
         <div className="flex flex-1 flex-col p-5">
           <div className="mb-3 flex flex-wrap gap-2">
-            {currentArticle.tags?.slice(0, 2).map((tag) => (
+            {article.tags?.slice(0, 2).map((tag: string) => (
               <Badge
                 key={tag}
                 variant="outline"
@@ -168,22 +131,22 @@ export function ArticleCard({
                 {tag}
               </Badge>
             ))}
-            {currentArticle.tags && currentArticle.tags.length > 2 && (
+            {article.tags && article.tags.length > 2 && (
               <Badge
                 variant="outline"
                 className="rounded-lg border-muted bg-muted/30 px-2 py-0 text-[10px] font-medium text-muted-foreground"
               >
-                +{currentArticle.tags.length - 2}
+                +{article.tags.length - 2}
               </Badge>
             )}
           </div>
 
           <h3 className="mb-2 line-clamp-1 text-lg font-bold tracking-tight group-hover:text-primary transition-colors">
-            {currentArticle.title}
+            {article.title}
           </h3>
 
           <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-            {currentArticle.description ||
+            {article.description ||
               "No description provided for this article."}
           </p>
 
@@ -192,9 +155,9 @@ export function ArticleCard({
               <IconCalendar className="size-3.5" />
               {formattedDate}
             </span>
-            {currentArticle.author && (
+            {article.author && (
               <span className="flex items-center gap-1.5 border-l pl-3 truncate">
-                By {currentArticle.author}
+                By {article.author}
               </span>
             )}
           </div>
@@ -210,7 +173,7 @@ export function ArticleCard({
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/articles/${currentArticle.slug}`}>
+                    <Link href={`/cms/articles/${article.slug}`}>
                       <IconEye className="size-4" />
                     </Link>
                   </Button>
@@ -226,7 +189,7 @@ export function ArticleCard({
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/articles/${currentArticle.slug}/edit`}>
+                    <Link href={`/cms/articles/${article.slug}/edit`}>
                       <IconEdit className="size-4" />
                     </Link>
                   </Button>
@@ -236,14 +199,15 @@ export function ArticleCard({
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button
-                    onClick={() => setIsMetadataEditorOpen(true)}
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
-                  >
-                    <IconSettings className="size-4" />
-                  </Button>
+                  <PostMetadataEditor article={article}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
+                    >
+                      <IconSettings className="size-4" />
+                    </Button>
+                  </PostMetadataEditor>
                 </TooltipTrigger>
                 <TooltipContent>Settings</TooltipContent>
               </Tooltip>
@@ -252,38 +216,22 @@ export function ArticleCard({
             <div className="flex items-center gap-1">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  {currentArticle.published ? (
+                  <ArticlePublishDialog article={article}>
                     <Button
-                      onClick={handleUnpublish}
-                      disabled={isPending}
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 rounded-lg text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                      className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                     >
-                      {isPending ? (
-                        <IconLoader2 className="size-4 animate-spin" />
+                      {article.published ? (
+                        <IconX className="size-4 text-amber-600" />
                       ) : (
-                        <IconX className="size-4" />
+                        <IconCheck className="size-4 text-emerald-600" />
                       )}
                     </Button>
-                  ) : (
-                    <Button
-                      onClick={handlePublish}
-                      disabled={isPending}
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 rounded-lg text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
-                    >
-                      {isPending ? (
-                        <IconLoader2 className="size-4 animate-spin" />
-                      ) : (
-                        <IconCheck className="size-4" />
-                      )}
-                    </Button>
-                  )}
+                  </ArticlePublishDialog>
                 </TooltipTrigger>
                 <TooltipContent>
-                  {currentArticle.published ? "Unpublish" : "Publish"}
+                  {article.published ? "Unpublish" : "Publish"}
                 </TooltipContent>
               </Tooltip>
 
@@ -328,16 +276,6 @@ export function ArticleCard({
           </div>
         </div>
       </div>
-
-      <PostMetadataEditor
-        article={currentArticle}
-        isOpen={isMetadataEditorOpen}
-        onClose={() => setIsMetadataEditorOpen(false)}
-        onUpdate={(updatedPost: Article) => {
-          setCurrentArticle(updatedPost);
-          onPublishChange?.(updatedPost);
-        }}
-      />
     </TooltipProvider>
   );
 }

@@ -1,17 +1,19 @@
 import type { SearchParams } from "nuqs/server";
 import { listArticlesAction } from "@/features/articles/articles.actions";
-import { articlesSearchParamsCache } from "@/features/articles/articles.search-params";
+import { articlesSearchParamsCache, loadArticlesFilteringParams } from "@/features/articles/articles.search-params";
 import { ArticlesList } from "@/features/articles/components/articles-list";
 
 interface ArticlesPageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export default async function ArticlesPage({
+export default async function Page({
   searchParams,
 }: ArticlesPageProps) {
   await articlesSearchParamsCache.parse(searchParams);
-  const articles = await listArticlesAction();
+  await loadArticlesFilteringParams(searchParams)
+  const result = await listArticlesAction();
+  const articles = result.success ? result.data : [];
 
   return <ArticlesList initialArticles={articles} />;
 }

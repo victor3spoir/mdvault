@@ -1,4 +1,5 @@
 import {
+  createLoader,
   createSearchParamsCache,
   parseAsArrayOf,
   parseAsString,
@@ -23,3 +24,5 @@ export const articlesSearchParams = {
 
 export const articlesSearchParamsCache =
   createSearchParamsCache(articlesSearchParams);
+export const loadArticlesFilteringParams =
+  createLoader(articlesSearchParams);

@@ -1,11 +1,12 @@
 "use server";
 
-import { cacheTag, updateTag } from "next/cache";
+import type { ActionResult } from "@/features/shared/shared.types";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import {
   CreateArticleSchema,
   UpdateArticleSchema,
 } from "@/lib/validation/article.schema";
+import { cacheTag, updateTag } from "next/cache";
 import type { Article, ArticleFrontmatter, GitHubFile } from "./articles.types";
 import { generateFrontmatter, parseFrontmatter } from "./articles.utils";
 
@@ -68,7 +69,7 @@ async function updateGitHubFile(
   return response.data.content?.sha;
 }
 
-export async function listArticlesAction(): Promise<Article[]> {
+export async function listArticlesAction(): Promise<ActionResult<Article[]>> {
   "use cache";
   cacheTag("articles");
   try {
@@ -79,7 +80,7 @@ export async function listArticlesAction(): Promise<Article[]> {
     });
 
     if (!Array.isArray(response.data)) {
-      return [];
+      return { success: true, data: [] };
     }
 
     const files = response.data as GitHubFile[];
@@ -96,13 +97,14 @@ export async function listArticlesAction(): Promise<Article[]> {
       }),
     );
 
-    return articles.sort(
+    const sorted = articles.sort(
       (a, b) =>
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
+    return { success: true, data: sorted };
   } catch (error) {
     console.error("Error listing articles:", error);
-    return [];
+    return { success: false, error: "Failed to list articles" };
   }
 }
 
@@ -128,7 +130,9 @@ export async function getArticleContentAction(path: string): Promise<string> {
   }
 }
 
-export async function getArticleAction(slug: string): Promise<Article | null> {
+export async function getArticleAction(
+  slug: string,
+): Promise<ActionResult<Article | null>> {
   try {
     const path = `${ARTICLES_PATH}/${slug}.md`;
     const response = await octokit.repos.getContent({
@@ -138,7 +142,7 @@ export async function getArticleAction(slug: string): Promise<Article | null> {
     });
 
     if (Array.isArray(response.data) || response.data.type !== "file") {
-      return null;
+      return { success: true, data: null };
     }
 
     const content = Buffer.from(response.data.content, "base64").toString(
@@ -146,187 +150,239 @@ export async function getArticleAction(slug: string): Promise<Article | null> {
     );
     const { frontmatter, body } = parseFrontmatter(content);
 
-    return createArticleObject(slug, frontmatter, body, response.data.sha);
+    const article = createArticleObject(
+      slug,
+      frontmatter,
+      body,
+      response.data.sha,
+    );
+    return { success: true, data: article };
   } catch (error) {
     console.error("Error getting article:", error);
-    return null;
+    return { success: false, error: "Failed to get article" };
   }
 }
 
-export async function createArticleAction(input: unknown): Promise<Article> {
-  const validatedInput = CreateArticleSchema.parse(input);
-  const now = new Date().toISOString();
-  const { body: cleanContent } = parseFrontmatter(validatedInput.content);
+export async function createArticleAction(
+  input: unknown,
+): Promise<ActionResult<Article>> {
+  try {
+    const validatedInput = CreateArticleSchema.parse(input);
+    const now = new Date().toISOString();
+    const { body: cleanContent } = parseFrontmatter(validatedInput.content);
 
-  const frontmatter = generateFrontmatter({
-    title: validatedInput.title,
-    description: validatedInput.description,
-    published: validatedInput.published ?? false,
-    tags: validatedInput.tags,
-    coverImage: validatedInput.coverImage,
-    createdAt: now,
-    updatedAt: now,
-  });
-
-  const fileContent = `${frontmatter}\n\n${cleanContent}`;
-  const path = `${ARTICLES_PATH}/${validatedInput.slug}.md`;
-
-  const sha = await updateGitHubFile(
-    path,
-    fileContent,
-    `Create article: ${validatedInput.title}`,
-  );
-
-  return createArticleObject(
-    validatedInput.slug,
-    {
-      ...validatedInput,
+    const frontmatter = generateFrontmatter({
+      title: validatedInput.title,
+      description: validatedInput.description,
       published: validatedInput.published ?? false,
+      tags: validatedInput.tags,
+      coverImage: validatedInput.coverImage,
       createdAt: now,
       updatedAt: now,
-    } as ArticleFrontmatter,
-    cleanContent,
-    sha,
-  );
+    });
+
+    const fileContent = `${frontmatter}\n\n${cleanContent}`;
+    const path = `${ARTICLES_PATH}/${validatedInput.slug}.md`;
+
+    const sha = await updateGitHubFile(
+      path,
+      fileContent,
+      `Create article: ${validatedInput.title}`,
+    );
+
+    const article = createArticleObject(
+      validatedInput.slug,
+      {
+        ...validatedInput,
+        published: validatedInput.published ?? false,
+        createdAt: now,
+        updatedAt: now,
+      } as ArticleFrontmatter,
+      cleanContent,
+      sha,
+    );
+    return { success: true, data: article };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to create article";
+    return { success: false, error: message };
+  }
 }
 
 export async function updateArticleAction(
   slug: string,
   input: unknown,
-): Promise<Article> {
-  const validatedInput = UpdateArticleSchema.parse(input);
-  const existingArticle = await getArticleAction(slug);
-  if (!existingArticle) {
-    throw new Error("Article not found");
+): Promise<ActionResult<Article>> {
+  try {
+    const validatedInput = UpdateArticleSchema.parse(input);
+    const result = await getArticleAction(slug);
+
+    if (!result.success || !result.data) {
+      return { success: false, error: "Article not found" };
+    }
+
+    const existingArticle = result.data;
+
+    const now = new Date().toISOString();
+    const rawContent = validatedInput.content ?? existingArticle.content;
+    const { body: cleanContent } = parseFrontmatter(rawContent);
+
+    const frontmatter = generateFrontmatter({
+      title: validatedInput.title ?? existingArticle.title,
+      description: validatedInput.description ?? existingArticle.description,
+      published: validatedInput.published ?? existingArticle.published,
+      tags: validatedInput.tags ?? existingArticle.tags,
+      coverImage: validatedInput.coverImage ?? existingArticle.coverImage,
+      createdAt: existingArticle.createdAt,
+      updatedAt: now,
+    });
+
+    const fileContent = `${frontmatter}\n\n${cleanContent}`;
+    const path = `${ARTICLES_PATH}/${slug}.md`;
+
+    const sha = await updateGitHubFile(
+      path,
+      fileContent,
+      `Update article: ${validatedInput.title ?? existingArticle.title}`,
+      existingArticle.sha,
+    );
+
+    const updated = {
+      ...existingArticle,
+      title: validatedInput.title ?? existingArticle.title,
+      description: validatedInput.description ?? existingArticle.description,
+      content: cleanContent,
+      updatedAt: now,
+      published: validatedInput.published ?? existingArticle.published,
+      tags: validatedInput.tags ?? existingArticle.tags,
+      coverImage: validatedInput.coverImage ?? existingArticle.coverImage,
+      sha,
+    };
+    return { success: true, data: updated };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to update article";
+    return { success: false, error: message };
   }
-
-  const now = new Date().toISOString();
-  const rawContent = validatedInput.content ?? existingArticle.content;
-  const { body: cleanContent } = parseFrontmatter(rawContent);
-
-  const frontmatter = generateFrontmatter({
-    title: validatedInput.title ?? existingArticle.title,
-    description: validatedInput.description ?? existingArticle.description,
-    published: validatedInput.published ?? existingArticle.published,
-    tags: validatedInput.tags ?? existingArticle.tags,
-    coverImage: validatedInput.coverImage ?? existingArticle.coverImage,
-    createdAt: existingArticle.createdAt,
-    updatedAt: now,
-  });
-
-  const fileContent = `${frontmatter}\n\n${cleanContent}`;
-  const path = `${ARTICLES_PATH}/${slug}.md`;
-
-  const sha = await updateGitHubFile(
-    path,
-    fileContent,
-    `Update article: ${validatedInput.title ?? existingArticle.title}`,
-    existingArticle.sha,
-  );
-
-  return {
-    ...existingArticle,
-    title: validatedInput.title ?? existingArticle.title,
-    description: validatedInput.description ?? existingArticle.description,
-    content: cleanContent,
-    updatedAt: now,
-    published: validatedInput.published ?? existingArticle.published,
-    tags: validatedInput.tags ?? existingArticle.tags,
-    coverImage: validatedInput.coverImage ?? existingArticle.coverImage,
-    sha,
-  };
 }
 
 export async function deleteArticleAction(
   slug: string,
   sha: string,
-): Promise<void> {
-  const path = `${ARTICLES_PATH}/${slug}.md`;
+): Promise<ActionResult<void>> {
+  try {
+    const path = `${ARTICLES_PATH}/${slug}.md`;
 
-  await octokit.repos.deleteFile({
-    owner: githubRepoInfo.owner,
-    repo: githubRepoInfo.repo,
-    path,
-    message: `Delete article: ${slug}`,
-    sha,
-  });
-  updateTag("articles");
+    await octokit.repos.deleteFile({
+      owner: githubRepoInfo.owner,
+      repo: githubRepoInfo.repo,
+      path,
+      message: `Delete article: ${slug}`,
+      sha,
+    });
+    updateTag("articles");
+    return { success: true, data: undefined };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to delete article";
+    return { success: false, error: message };
+  }
 }
 
 export async function unpublishArticleAction(
   slug: string,
   sha: string,
-): Promise<Article> {
-  const existingArticle = await getArticleAction(slug);
-  if (!existingArticle) {
-    throw new Error("Article not found");
+): Promise<ActionResult<Article>> {
+  try {
+    const result = await getArticleAction(slug);
+
+    if (!result.success || !result.data) {
+      return { success: false, error: "Article not found" };
+    }
+
+    const existingArticle = result.data;
+
+    const now = new Date().toISOString();
+    const frontmatter = generateFrontmatter({
+      title: existingArticle.title,
+      description: existingArticle.description,
+      published: false,
+      tags: existingArticle.tags,
+      coverImage: existingArticle.coverImage,
+      createdAt: existingArticle.createdAt,
+      updatedAt: now,
+    });
+
+    const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
+    const path = `${ARTICLES_PATH}/${slug}.md`;
+
+    const updatedSha = await updateGitHubFile(
+      path,
+      fileContent,
+      `Unpublish article: ${existingArticle.title}`,
+      sha,
+    );
+
+    const updated = {
+      ...existingArticle,
+      published: false,
+      updatedAt: now,
+      sha: updatedSha,
+    };
+    return { success: true, data: updated };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to unpublish article";
+    return { success: false, error: message };
   }
-
-  const now = new Date().toISOString();
-  const frontmatter = generateFrontmatter({
-    title: existingArticle.title,
-    description: existingArticle.description,
-    published: false,
-    tags: existingArticle.tags,
-    coverImage: existingArticle.coverImage,
-    createdAt: existingArticle.createdAt,
-    updatedAt: now,
-  });
-
-  const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
-  const path = `${ARTICLES_PATH}/${slug}.md`;
-
-  const updatedSha = await updateGitHubFile(
-    path,
-    fileContent,
-    `Unpublish article: ${existingArticle.title}`,
-    sha,
-  );
-
-  return {
-    ...existingArticle,
-    published: false,
-    updatedAt: now,
-    sha: updatedSha,
-  };
 }
 
 export async function publishArticleAction(
   slug: string,
   sha: string,
-): Promise<Article> {
-  const existingArticle = await getArticleAction(slug);
-  if (!existingArticle) {
-    throw new Error("Article not found");
+): Promise<ActionResult<Article>> {
+  try {
+    const result = await getArticleAction(slug);
+
+    if (!result.success || !result.data) {
+      return { success: false, error: "Article not found" };
+    }
+
+    const existingArticle = result.data;
+
+    const now = new Date().toISOString();
+    const frontmatter = generateFrontmatter({
+      title: existingArticle.title,
+      description: existingArticle.description,
+      published: true,
+      tags: existingArticle.tags,
+      coverImage: existingArticle.coverImage,
+      createdAt: existingArticle.createdAt,
+      updatedAt: now,
+    });
+
+    const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
+    const path = `${ARTICLES_PATH}/${slug}.md`;
+
+    const updatedSha = await updateGitHubFile(
+      path,
+      fileContent,
+      `Publish article: ${existingArticle.title}`,
+      sha,
+    );
+
+    const updated = {
+      ...existingArticle,
+      published: true,
+      updatedAt: now,
+      sha: updatedSha,
+    };
+    return { success: true, data: updated };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to publish article";
+    return { success: false, error: message };
   }
-
-  const now = new Date().toISOString();
-  const frontmatter = generateFrontmatter({
-    title: existingArticle.title,
-    description: existingArticle.description,
-    published: true,
-    tags: existingArticle.tags,
-    coverImage: existingArticle.coverImage,
-    createdAt: existingArticle.createdAt,
-    updatedAt: now,
-  });
-
-  const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
-  const path = `${ARTICLES_PATH}/${slug}.md`;
-
-  const updatedSha = await updateGitHubFile(
-    path,
-    fileContent,
-    `Publish article: ${existingArticle.title}`,
-    sha,
-  );
-
-  return {
-    ...existingArticle,
-    published: true,
-    updatedAt: now,
-    sha: updatedSha,
-  };
 }
 
 export async function updateArticleMetadataAction(
@@ -335,58 +391,77 @@ export async function updateArticleMetadataAction(
     createdAt?: string;
     publishedDate?: string;
   },
-): Promise<Article> {
-  const existingArticle = await getArticleAction(slug);
-  if (!existingArticle) {
-    throw new Error("Article not found");
+): Promise<ActionResult<Article>> {
+  try {
+    const result = await getArticleAction(slug);
+
+    if (!result.success || !result.data) {
+      return { success: false, error: "Article not found" };
+    }
+
+    const existingArticle = result.data;
+
+    const now = new Date().toISOString();
+    const frontmatter = generateFrontmatter({
+      title: existingArticle.title,
+      description: existingArticle.description,
+      published: existingArticle.published,
+      tags: existingArticle.tags,
+      coverImage: existingArticle.coverImage,
+      createdAt: metadata.createdAt ?? existingArticle.createdAt,
+      updatedAt: now,
+      publishedDate: metadata.publishedDate ?? existingArticle.publishedDate,
+    });
+
+    const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
+    const path = `${ARTICLES_PATH}/${slug}.md`;
+
+    const updatedSha = await updateGitHubFile(
+      path,
+      fileContent,
+      `Update article metadata: ${existingArticle.title}`,
+      existingArticle.sha,
+    );
+
+    const updated = {
+      ...existingArticle,
+      createdAt: metadata.createdAt ?? existingArticle.createdAt,
+      publishedDate: metadata.publishedDate ?? existingArticle.publishedDate,
+      updatedAt: now,
+      sha: updatedSha,
+    };
+    return { success: true, data: updated };
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to update article metadata";
+    return { success: false, error: message };
   }
-
-  const now = new Date().toISOString();
-  const frontmatter = generateFrontmatter({
-    title: existingArticle.title,
-    description: existingArticle.description,
-    published: existingArticle.published,
-    tags: existingArticle.tags,
-    coverImage: existingArticle.coverImage,
-    createdAt: metadata.createdAt ?? existingArticle.createdAt,
-    updatedAt: now,
-    publishedDate: metadata.publishedDate ?? existingArticle.publishedDate,
-  });
-
-  const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
-  const path = `${ARTICLES_PATH}/${slug}.md`;
-
-  const updatedSha = await updateGitHubFile(
-    path,
-    fileContent,
-    `Update article metadata: ${existingArticle.title}`,
-    existingArticle.sha,
-  );
-
-  return {
-    ...existingArticle,
-    createdAt: metadata.createdAt ?? existingArticle.createdAt,
-    publishedDate: metadata.publishedDate ?? existingArticle.publishedDate,
-    updatedAt: now,
-    sha: updatedSha,
-  };
 }
 
 export async function uploadImageAction(
   file: File,
   fileName: string,
-): Promise<string> {
-  const arrayBuffer = await file.arrayBuffer();
-  const content = Buffer.from(arrayBuffer).toString("base64");
-  const path = `${IMAGES_PATH}/${fileName}`;
+): Promise<ActionResult<string>> {
+  try {
+    const arrayBuffer = await file.arrayBuffer();
+    const content = Buffer.from(arrayBuffer).toString("base64");
+    const path = `${IMAGES_PATH}/${fileName}`;
 
-  await octokit.repos.createOrUpdateFileContents({
-    owner: githubRepoInfo.owner,
-    repo: githubRepoInfo.repo,
-    path,
-    message: `Upload image: ${fileName}`,
-    content,
-  });
+    await octokit.repos.createOrUpdateFileContents({
+      owner: githubRepoInfo.owner,
+      repo: githubRepoInfo.repo,
+      path,
+      message: `Upload image: ${fileName}`,
+      content,
+    });
 
-  return `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${path}`;
+    const url = `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${path}`;
+    return { success: true, data: url };
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Failed to upload image";
+    return { success: false, error: message };
+  }
 }

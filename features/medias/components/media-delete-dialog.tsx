@@ -1,7 +1,7 @@
 "use client";
 
 import { IconLoader2 } from "@tabler/icons-react";
-import { useTransition } from "react";
+import { type ReactNode, useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -11,24 +11,58 @@ import {
   AlertDialogDescription,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deleteImageAction } from "../medias.actions";
-import type { MediaUsage, MediaFile  } from "../medias.types";
+import { deleteImageAction, checkMediaUsageAction } from "../medias.actions";
+import type { MediaUsage, MediaFile } from "../medias.types";
+
 
 interface DeleteConfirmationDialogProps {
-  image: MediaFile  | null;
-  usage: MediaUsage | null;
-  onOpenChange: (open: boolean) => void;
-  onDeleteSuccess: () => void;
+  children: ReactNode,
+  image: MediaFile | null;
 }
 
-export function DeleteConfirmationDialog({
+export function MediaDeleteDialog({
+  children,
   image,
-  usage,
-  onOpenChange,
-  onDeleteSuccess,
 }: DeleteConfirmationDialogProps) {
+  const [open, setOpen] = useState<boolean>(false)
+  const [usage, setUsage] = useState<MediaUsage | null>(null)
   const [isPending, startTransition] = useTransition();
+  const [isLoadingUsage, setIsLoadingUsage] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!open || !image?.url) {
+      setUsage(null);
+      return;
+    }
+
+    setIsLoadingUsage(true);
+    
+    const checkUsage = async () => {
+      try {
+        console.log("Checking media usage for:", image.url);
+        const result = await checkMediaUsageAction(image.url);
+        console.log("Usage check result:", result);
+        if (result.success) {
+          setUsage(result.data);
+        } else {
+          toast.error("Failed to check media usage", {
+            description: result.error,
+          });
+        }
+      } catch (error) {
+        toast.error("Failed to check media usage", {
+          description:
+            error instanceof Error ? error.message : "Try again later",
+        });
+      } finally {
+        setIsLoadingUsage(false);
+      }
+    };
+
+    checkUsage();
+  }, [open, image?.url]);
 
   const handleConfirmDelete = async () => {
     if (!image) return;
@@ -44,8 +78,6 @@ export function DeleteConfirmationDialog({
           toast.success("Image deleted", {
             description: `"${image.name}" has been removed`,
           });
-          onOpenChange(false);
-          onDeleteSuccess();
         } else {
           toast.error("Failed to delete image", {
             description: result.error,
@@ -61,12 +93,20 @@ export function DeleteConfirmationDialog({
   };
 
   return (
-    <AlertDialog open={!!image} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger>
+        {children}
+      </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Asset</AlertDialogTitle>
           <AlertDialogDescription asChild>
-            {usage?.isUsed ? (
+            {isLoadingUsage ? (
+              <div className="flex items-center gap-2 mt-3">
+                <IconLoader2 className="size-4 animate-spin" />
+                <p className="text-sm">Checking media usage...</p>
+              </div>
+            ) : usage?.isUsed ? (
               <div className="space-y-3 mt-3">
                 <p className="text-destructive font-semibold text-sm">
                   ⚠️ In use by {usage.usedInArticles.length} article(s)
@@ -114,3 +154,24 @@ export function DeleteConfirmationDialog({
     </AlertDialog>
   );
 }
+
+
+// const handleDeleteClick = async (image: MediaFile) => {
+//   startTransition(async () => {
+//     try {
+//       const result = await checkMediaUsageAction(image.url);
+//       if (result.success) {
+//         setDeleteConfirmation({ image, usage: result.data });
+//       } else {
+//         toast.error("Failed to check image usage", {
+//           description: result.error,
+//         });
+//       }
+//     } catch (error) {
+//       toast.error("Failed to check image usage", {
+//         description:
+//           error instanceof Error ? error.message : "Try again later",
+//       });
+//     }
+//   });
+// };
