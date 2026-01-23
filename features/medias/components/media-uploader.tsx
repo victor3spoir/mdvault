@@ -7,13 +7,8 @@ interface MediaUploaderProps {
   onUploadSuccess?: () => void;
 }
 
-export function MediaUploader({ onUploadSuccess }: MediaUploaderProps) {
-  const handleUploadSuccess = () => {
-    toast.success("Asset uploaded successfully");
-    onUploadSuccess?.();
-  };
-
+export function MediaUploader() {
   return (
-    <ImageUploader onUploadSuccess={handleUploadSuccess} />
+    <ImageUploader />
   );
 }

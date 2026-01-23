@@ -42,9 +42,7 @@ export function ImageInsertDialog({
     }
   };
 
-  const handleUploadSuccess = (image: UploadedImage) => {
-    setSelectedImage(image);
-  };
+
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
@@ -79,7 +77,7 @@ export function ImageInsertDialog({
                 </div>
               </div>
               <div className="rounded-2xl border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2 transition-colors hover:bg-muted/10">
-                <ImageUploader onUploadSuccess={handleUploadSuccess} />
+                <ImageUploader />
               </div>
             </div>
 
