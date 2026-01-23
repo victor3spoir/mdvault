@@ -2,7 +2,7 @@ import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescri
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconPhotoPlus } from "@tabler/icons-react";
 import { listImagesAction } from "../medias.actions";
-import { ImageGallery } from "./image-gallery";
+import { MediaGallery } from "./media-gallery";
 import MediaFilters from "./media-filters";
 import MediaStats from "./media-stats";
 import { MediaUploader } from "./media-uploader";
@@ -44,7 +44,13 @@ export function MediaSkeleton() {
 }
 
 
-export default async function MediaContent() {
+export default async function MediaContent({
+  search = "",
+  filter = "all",
+}: {
+  search?: string;
+  filter?: string;
+}) {
   const result = await listImagesAction();
 
   if (!result.success) {
@@ -101,7 +107,7 @@ export default async function MediaContent() {
       <MediaFilters imageTypes={imageTypes} />
 
       <div className="min-h-96">
-        <ImageGallery images={images} />
+        <MediaGallery media={images} search={search} filter={filter} />
       </div>
     </div>
   );

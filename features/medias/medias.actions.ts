@@ -43,7 +43,10 @@ export async function listImagesAction(): Promise<ActionResult<MediaFile[]>> {
       sha: file.sha,
     }));
 
-    return { success: true, data: images.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt)) };
+    return {
+      success: true,
+      data: images.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt)),
+    };
   } catch (error: unknown) {
     // Handle 404 gracefully - directory doesn't exist yet
     if (error instanceof Object && "status" in error && error.status === 404) {
@@ -54,7 +57,9 @@ export async function listImagesAction(): Promise<ActionResult<MediaFile[]>> {
   }
 }
 
-export async function uploadImageAction(file: File): Promise<ActionResult<MediaFile>> {
+export async function uploadImageAction(
+  file: File,
+): Promise<ActionResult<MediaFile>> {
   try {
     // Validate file (MIME type, magic bytes, size, format)
     const validatedFile = await validateImageFile(file);
@@ -88,7 +93,8 @@ export async function uploadImageAction(file: File): Promise<ActionResult<MediaF
       },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to upload image";
+    const message =
+      error instanceof Error ? error.message : "Failed to upload image";
     console.error("Error uploading image:", message);
     return { success: false, error: message };
   }
@@ -112,7 +118,8 @@ export async function deleteImageAction(
     updateTag("medias");
     return { success: true, data: undefined };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to delete image";
+    const message =
+      error instanceof Error ? error.message : "Failed to delete image";
     console.error("Error deleting image:", message);
     return { success: false, error: message };
   }
@@ -144,7 +151,8 @@ export async function checkMediaUsageAction(
       },
     };
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Failed to check media usage";
+    const message =
+      error instanceof Error ? error.message : "Failed to check media usage";
     console.error("Error checking media usage:", message);
     return { success: false, error: message };
   }

@@ -1,32 +1,25 @@
 "use client";
 
 import { IconSearch, IconX } from "@tabler/icons-react";
-import { useQueryState } from "nuqs";
+import { useQueryStates } from "nuqs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { mediaFilteringParams } from "../medias.types";
 
 interface MediaFiltersProps {
   imageTypes: string[];
 }
 
 export default function MediaFilters({ imageTypes }: MediaFiltersProps) {
-  const [search, setSearch] = useQueryState("search", {
-    defaultValue: "",
-    parse: String,
-    serialize: String,
-  });
+  const [{ search, filter }, setMediaFilters] = useQueryStates(mediaFilteringParams, {
+    shallow: false,
+  })
 
-  const [filter, setFilter] = useQueryState("filter", {
-    defaultValue: "all",
-    parse: String,
-    serialize: String,
-  });
 
   const hasActiveFilters = search || filter !== "all";
 
   const resetFilters = () => {
-    setSearch("");
-    setFilter("all");
+    setMediaFilters({ search: "", filter: "" })
   };
 
   return (
@@ -36,13 +29,13 @@ export default function MediaFilters({ imageTypes }: MediaFiltersProps) {
         <Input
           placeholder="Search assets by filename..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => setMediaFilters({ search: e.target.value })}
           className="h-10 rounded-lg border-none bg-muted/50 pl-9 text-sm"
         />
         {search && (
           <button
             type="button"
-            onClick={() => setSearch("")}
+            onClick={() => setMediaFilters({ search: "" })}
             className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:bg-muted"
           >
             <IconX className="size-4" />
@@ -58,7 +51,7 @@ export default function MediaFilters({ imageTypes }: MediaFiltersProps) {
           type="button"
           variant={filter === "all" ? "secondary" : "ghost"}
           size="sm"
-          onClick={() => setFilter("all")}
+          onClick={() => setMediaFilters({ filter: "all" })}
           className="h-8 rounded-lg px-3 text-xs"
         >
           All
@@ -69,7 +62,7 @@ export default function MediaFilters({ imageTypes }: MediaFiltersProps) {
             type="button"
             variant={filter === type ? "secondary" : "ghost"}
             size="sm"
-            onClick={() => setFilter(type)}
+            onClick={() => setMediaFilters({ filter: type })}
             className="h-8 rounded-lg px-3 text-xs uppercase"
           >
             {type}

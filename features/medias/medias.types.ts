@@ -1,4 +1,6 @@
-export interface MediaFile  {
+import { createLoader, parseAsString } from "nuqs/server";
+
+export interface MediaFile {
   id: string;
   name: string;
   path: string;
@@ -15,3 +17,12 @@ export interface MediaUsage {
   }>;
 }
 
+
+// search
+// filter
+
+export const mediaFilteringParams = {
+  search: parseAsString.withDefault(""),
+  filter: parseAsString.withDefault("all")
+}
+export const loadMediaFilteringParams = createLoader(mediaFilteringParams)
