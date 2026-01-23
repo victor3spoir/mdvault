@@ -13,14 +13,14 @@ import {
   AlertDialogContent,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import type { UploadedImage } from "../medias.types";
+import type { MediaFile  } from "../medias.types";
 
 const Image = dynamic(() => import("next/image"), { ssr: false });
 
 interface ImagePreviewDialogProps {
-  image: UploadedImage | null;
+  image: MediaFile  | null;
   onOpenChange: (open: boolean) => void;
-  onDelete: (image: UploadedImage) => void;
+  onDelete: (image: MediaFile ) => void;
 }
 
 export function ImagePreviewDialog({

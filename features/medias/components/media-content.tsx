@@ -1,6 +1,5 @@
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { IconPhotoPlus } from "@tabler/icons-react";
 import { listImagesAction } from "../medias.actions";
 import { ImageGallery } from "./image-gallery";
@@ -46,7 +45,13 @@ export function MediaSkeleton() {
 
 
 export default async function MediaContent() {
-  const images = await listImagesAction();
+  const result = await listImagesAction();
+
+  if (!result.success) {
+    return <div className="text-red-500">Error: {result.error}</div>;
+  }
+
+  const images = result.data;
 
   const imageTypes = Array.from(
     new Set(

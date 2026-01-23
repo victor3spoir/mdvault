@@ -41,7 +41,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { UploadedImage } from "@/features/medias/medias.types";
+import type { MediaFile  } from "@/features/medias/medias.types";
 import { cn } from "@/lib/utils";
 import { CoverImageSelector } from "../../medias/components/cover-image-selector";
 import { ImageInsertDialog } from "../../medias/components/image-insert-dialog";
@@ -109,12 +109,15 @@ export function ArticleEditorLayout({
 
   // Image upload handler for MDXEditor
   const handleImageUpload = useCallback(async (file: File): Promise<string> => {
-    const uploadedImage = await uploadImageAction(file);
-    return uploadedImage.url;
+    const result = await uploadImageAction(file);
+    if (result.success) {
+      return result.data.url;
+    }
+    throw new Error(result.error);
   }, []);
 
   // Handle image insert from dialog
-  const handleImageInsert = (image: UploadedImage) => {
+  const handleImageInsert = (image: MediaFile ) => {
     if (editorRef.current) {
       editorRef.current.insertMarkdown(`![image](${image.url})`);
     }

@@ -8,13 +8,13 @@ import { useQueryState } from "nuqs";
 import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import type { UploadedImage } from "../medias.types";
+import type { MediaFile  } from "../medias.types";
 import MediaCard from "./media-card";
 
 
 
 interface ImageGalleryProps {
-  images: UploadedImage[];
+  images: MediaFile [];
 }
 
 export function ImageGallery({ images }: ImageGalleryProps) {

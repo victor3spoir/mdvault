@@ -5,12 +5,12 @@ import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import type { UploadedImage } from "../medias.types";
+import type { MediaFile  } from "../medias.types";
 import { ImageInsertDialog } from "./image-insert-dialog";
 
 interface CoverImageSelectorProps {
   selectedImageUrl: string;
-  onSelectImage: (image: UploadedImage) => void;
+  onSelectImage: (image: MediaFile ) => void;
 }
 
 export function CoverImageSelector({
@@ -19,7 +19,7 @@ export function CoverImageSelector({
 }: CoverImageSelectorProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleImageSelect = (image: UploadedImage) => {
+  const handleImageSelect = (image: MediaFile ) => {
     onSelectImage(image);
     setIsDialogOpen(false);
   };

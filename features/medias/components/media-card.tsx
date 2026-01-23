@@ -1,5 +1,5 @@
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { MediaUsage, UploadedImage } from "../medias.types";
+import type { MediaUsage, MediaFile  } from "../medias.types";
 import { IconEye, IconTrash } from "@tabler/icons-react";
 import { ImagePreviewDialog } from "./image-preview-dialog";
 import { useState, useTransition } from "react";
@@ -10,21 +10,27 @@ import { toast } from "sonner";
 
 const Image = dynamic(() => import("next/image"), { ssr: false });
 
-const MediaCard = ({ media }: { media: UploadedImage }) => {
+const MediaCard = ({ media }: { media: MediaFile  }) => {
   
   const [selectedImageForPreview, setSelectedImageForPreview] =
-    useState<UploadedImage | null>(null);
+    useState<MediaFile  | null>(null);
   const [isPending, startTransition] = useTransition();
   const [deleteConfirmation, setDeleteConfirmation] = useState<{
-    image: UploadedImage;
+    image: MediaFile ;
     usage: MediaUsage;
   } | null>(null);
 
-  const handleDeleteClick = async (image: UploadedImage) => {
+  const handleDeleteClick = async (image: MediaFile ) => {
     startTransition(async () => {
       try {
-        const usage = await checkMediaUsageAction(image.url);
-        setDeleteConfirmation({ image, usage });
+        const result = await checkMediaUsageAction(image.url);
+        if (result.success) {
+          setDeleteConfirmation({ image, usage: result.data });
+        } else {
+          toast.error("Failed to check image usage", {
+            description: result.error,
+          });
+        }
       } catch (error) {
         toast.error("Failed to check image usage", {
           description:

@@ -19,7 +19,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { uploadImageAction } from "../medias.actions";
-import type { UploadedImage } from "../medias.types";
 
 interface ImageFile {
   file: File;
@@ -120,30 +119,42 @@ export function ImageUploader({
   const handleUpload = (imageFile: ImageFile) => {
     startTransition(async () => {
       try {
-        const uploadedImage = await uploadImageAction(imageFile.file);
+        const result = await uploadImageAction(imageFile.file);
+        if (result.success) {
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.file === imageFile.file
+                ? { ...f, progress: 100, uploaded: true }
+                : f,
+            ),
+          );
+
+          // Remove from list after 2 seconds and trigger complete callback
+          setTimeout(() => {
+            setUploadedFiles((prev) => {
+              const updated = prev.filter((f) => f.file !== imageFile.file);
+              return updated;
+            });
+          }, 2000);
+        } else {
+          setUploadedFiles((prev) =>
+            prev.map((f) =>
+              f.file === imageFile.file ? { ...f, error: result.error } : f,
+            ),
+          );
+        }
+      } catch (error) {
         setUploadedFiles((prev) =>
           prev.map((f) =>
             f.file === imageFile.file
-              ? { ...f, progress: 100, uploaded: true }
+              ? {
+                  ...f,
+                  error:
+                    error instanceof Error
+                      ? error.message
+                      : "Failed to upload",
+                }
               : f,
-          ),
-        );
-        // onUploadSuccess?.(uploadedImage);
-
-        // Remove from list after 2 seconds and trigger complete callback
-        setTimeout(() => {
-          setUploadedFiles((prev) => {
-            const updated = prev.filter((f) => f.file !== imageFile.file);
-            if (updated.length === 0 && prev.length > 0) {
-              // onUploadComplete?.();
-            }
-            return updated;
-          });
-        }, 2000);
-      } catch {
-        setUploadedFiles((prev) =>
-          prev.map((f) =>
-            f.file === imageFile.file ? { ...f, error: "Failed to upload" } : f,
           ),
         );
       }

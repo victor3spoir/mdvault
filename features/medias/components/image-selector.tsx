@@ -7,26 +7,30 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { listImagesAction } from "../medias.actions";
-import type { UploadedImage } from "../medias.types";
+import type { MediaFile  } from "../medias.types";
 
 interface ImageSelectorProps {
   selectedImageUrl?: string;
-  onSelectImage: (image: UploadedImage) => void;
+  onSelectImage: (image: MediaFile ) => void;
 }
 
 export function ImageSelector({
   selectedImageUrl = "",
   onSelectImage,
 }: ImageSelectorProps) {
-  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [images, setImages] = useState<MediaFile []>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const loadImages = async () => {
       try {
-        const imageList = await listImagesAction();
-        setImages(imageList);
+        const result = await listImagesAction();
+        if (result.success) {
+          setImages(result.data);
+        } else {
+          console.error("Failed to load images:", result.error);
+        }
       } catch (error) {
         console.error("Failed to load images:", error);
       } finally {

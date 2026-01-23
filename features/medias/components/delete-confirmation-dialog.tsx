@@ -13,10 +13,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { deleteImageAction } from "../medias.actions";
-import type { MediaUsage, UploadedImage } from "../medias.types";
+import type { MediaUsage, MediaFile  } from "../medias.types";
 
 interface DeleteConfirmationDialogProps {
-  image: UploadedImage | null;
+  image: MediaFile  | null;
   usage: MediaUsage | null;
   onOpenChange: (open: boolean) => void;
   onDeleteSuccess: () => void;
@@ -35,16 +35,22 @@ export function DeleteConfirmationDialog({
 
     startTransition(async () => {
       try {
-        await deleteImageAction(
+        const result = await deleteImageAction(
           image.id,
           image.name,
           image.sha || "",
         );
-        toast.success("Image deleted", {
-          description: `"${image.name}" has been removed`,
-        });
-        onOpenChange(false);
-        onDeleteSuccess();
+        if (result.success) {
+          toast.success("Image deleted", {
+            description: `"${image.name}" has been removed`,
+          });
+          onOpenChange(false);
+          onDeleteSuccess();
+        } else {
+          toast.error("Failed to delete image", {
+            description: result.error,
+          });
+        }
       } catch (error) {
         toast.error("Failed to delete image", {
           description:
@@ -68,7 +74,7 @@ export function DeleteConfirmationDialog({
                 <ul className="space-y-2">
                   {usage.usedInArticles.map((article) => (
                     <li
-                      key={article.slug}
+                      key={article.id}
                       className="text-sm text-muted-foreground pl-3 border-l-2 border-destructive/50"
                     >
                       {article.title}

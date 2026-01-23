@@ -2,6 +2,7 @@ import { Octokit } from "@octokit/rest";
 import getenv from "./env";
 
 const { GITHUB_OWNER, GITHUB_REPO, GITHUB_TOKEN } = getenv();
+
 const octokit = new Octokit({
   auth: GITHUB_TOKEN,
 });

@@ -21,10 +21,12 @@ export interface Activity {
 
 export async function getDashboardStatsAction(): Promise<DashboardStats> {
   try {
-    const [articles, images] = await Promise.all([
+    const [articles, imagesResult] = await Promise.all([
       listArticlesAction(),
       listImagesAction(),
     ]);
+
+    const images = imagesResult.success ? imagesResult.data : [];
 
     const publishedCount = articles.filter(
       (article) => article.published,
@@ -52,10 +54,12 @@ export async function getRecentActivityAction(
   limit: number = 8,
 ): Promise<Activity[]> {
   try {
-    const [articles, images] = await Promise.all([
+    const [articles, imagesResult] = await Promise.all([
       listArticlesAction(),
       listImagesAction(),
     ]);
+
+    const images = imagesResult.success ? imagesResult.data : [];
 
     const activities: Activity[] = [];
 

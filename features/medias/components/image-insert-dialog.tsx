@@ -11,14 +11,14 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import type { UploadedImage } from "../medias.types";
+import type { MediaFile  } from "../medias.types";
 import { ImageSelector } from "./image-selector";
 import { ImageUploader } from "./image-uploader";
 
 interface ImageInsertDialogProps {
   open: boolean;
   onClose: () => void;
-  onSelect: (image: UploadedImage) => void;
+  onSelect: (image: MediaFile ) => void;
 }
 
 export function ImageInsertDialog({
@@ -26,11 +26,11 @@ export function ImageInsertDialog({
   onClose,
   onSelect,
 }: ImageInsertDialogProps) {
-  const [selectedImage, setSelectedImage] = useState<UploadedImage | null>(
+  const [selectedImage, setSelectedImage] = useState<MediaFile  | null>(
     null,
   );
 
-  const handleSelect = (image: UploadedImage) => {
+  const handleSelect = (image: MediaFile ) => {
     setSelectedImage(image);
   };
 

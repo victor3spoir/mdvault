@@ -1,4 +1,4 @@
-export interface UploadedImage {
+export interface MediaFile  {
   id: string;
   name: string;
   path: string;
@@ -7,12 +7,11 @@ export interface UploadedImage {
   sha?: string;
 }
 
-export type MediaFile = UploadedImage;
-
 export interface MediaUsage {
   isUsed: boolean;
   usedInArticles: Array<{
-    slug: string;
+    id: string;
     title: string;
   }>;
 }
+
