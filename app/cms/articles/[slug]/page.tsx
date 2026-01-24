@@ -14,36 +14,24 @@ import { getArticleAction } from "@/features/articles/articles.actions";
 import { TableOfContents } from "@/features/articles/components/table-of-contents";
 import PageLayout from "@/features/shared/components/page-layout";
 import { MDXContent } from "@/lib/mdx";
+import { formatDate } from "@/features/shared/shared.utils";
 
 interface PostPageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function PostPage({ params }: PostPageProps) {
+export default async function Page({ params }: PostPageProps) {
   const { slug } = await params;
-  const article = await getArticleAction(slug);
+  const articleResults = await getArticleAction(slug);
 
-  if (!article) {
+  if (!articleResults.success) {
     notFound();
   }
+  const article = articleResults.data
 
-  const formattedCreatedAt = new Date(article.createdAt).toLocaleDateString(
-    "fr-FR",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    },
-  );
+  const formattedCreatedAt = formatDate(new Date(article.createdAt))
 
-  const formattedUpdatedAt = new Date(article.updatedAt).toLocaleDateString(
-    "fr-FR",
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    },
-  );
+  const formattedUpdatedAt = formatDate(new Date(article.updatedAt))
 
   return (
     <PageLayout

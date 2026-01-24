@@ -429,7 +429,7 @@ export function ArticleEditorLayout({
           </div>
 
           {/* MDX Editor - Full Height with sticky toolbar */}
-          <div className="flex flex-1 flex-col min-h-0">
+          <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
             <ForwardRefEditor
               ref={editorRef}
               markdown={article?.content ?? ""}

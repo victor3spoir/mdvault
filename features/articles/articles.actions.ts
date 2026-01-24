@@ -132,7 +132,7 @@ export async function getArticleContentAction(path: string): Promise<string> {
 
 export async function getArticleAction(
   slug: string,
-): Promise<ActionResult<Article | null>> {
+): Promise<ActionResult<Article>> {
   try {
     const path = `${ARTICLES_PATH}/${slug}.md`;
     const response = await octokit.repos.getContent({
@@ -142,7 +142,7 @@ export async function getArticleAction(
     });
 
     if (Array.isArray(response.data) || response.data.type !== "file") {
-      return { success: true, data: null };
+      return { success: false, error: "non trouvé" };
     }
 
     const content = Buffer.from(response.data.content, "base64").toString(
