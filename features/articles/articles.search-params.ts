@@ -15,7 +15,7 @@ export type SortBy = (typeof sortByOptions)[number];
 export type SortOrder = (typeof sortOrderOptions)[number];
 
 export const articlesSearchParams = {
-  q: parseAsString.withDefault(""),
+  searchQuery: parseAsString.withDefault(""),
   status: parseAsStringLiteral(statusFilters).withDefault("all"),
   sortBy: parseAsStringLiteral(sortByOptions).withDefault("date"),
   sortOrder: parseAsStringLiteral(sortOrderOptions).withDefault("desc"),

@@ -6,79 +6,35 @@ import {
   IconEdit,
   IconEye,
   IconFileText,
-  IconLoader2,
   IconSettings,
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTransition } from "react";
-import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { Article } from "@/features/articles/articles.types";
-import { deleteArticleAction } from "../articles.actions";
+import ArticleDeleteDialog from "./article-delete-dialog";
 import { ArticlePublishDialog } from "./article-publish-dialog";
 import { PostMetadataEditor } from "./article-metadata-editor";
 import { formatDate } from "@/features/shared/shared.utils";
 
 interface ArticleCardProps {
   article: Article;
-  onDelete?: (article: Article) => void;
 }
 
 export function ArticleCard({
   article,
-  onDelete,
 }: ArticleCardProps) {
-  const [isPending, startTransition] = useTransition();
-
 
   const formattedDate = formatDate(new Date(article.createdAt))
-
-  const handleDelete = () => {
-    startTransition(async () => {
-      try {
-        const result = await deleteArticleAction(
-          article.slug,
-          article.sha || "",
-        );
-        if (!result.success) {
-          toast.error("Failed to delete", {
-            description: result.error,
-          });
-          return;
-        }
-        toast.success("Article deleted", {
-          description: `"${article.title}" has been removed`,
-        });
-        onDelete?.(article);
-      } catch (error) {
-        toast.error("Failed to delete", {
-          description:
-            error instanceof Error ? error.message : "Try again later",
-        });
-      }
-    });
-  };
 
   return (
     <TooltipProvider>
@@ -189,7 +145,7 @@ export function ArticleCard({
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/articles/${article.slug}/edit`}>
+                    <Link href={{ href: `/cms/articles/${article.slug}/edit` }}>
                       <IconEdit className="size-4" />
                     </Link>
                   </Button>
@@ -237,38 +193,18 @@ export function ArticleCard({
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
-                      >
-                        <IconTrash className="size-4" />
-                      </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="rounded-2xl">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Delete this article?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. The article will be permanently removed.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter className="gap-2">
-                        <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={handleDelete}
-                          disabled={isPending}
-                          className="rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        >
-                          {isPending ? (
-                            <IconLoader2 className="mr-2 size-4 animate-spin" />
-                          ) : null}
-                          Delete
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
+                  <ArticleDeleteDialog
+                    articleSlug={article.slug}
+                    articleSha={article.sha}
+                  >
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    >
+                      <IconTrash className="size-4" />
+                    </Button>
+                  </ArticleDeleteDialog>
                 </TooltipTrigger>
                 <TooltipContent>Delete article</TooltipContent>
               </Tooltip>
