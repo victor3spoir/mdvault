@@ -7,18 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useQueryStates } from "nuqs";
 
-const ArticleSearchBar = ({allTags}:{allTags:string[]}) => {
+const ArticleSearchBar = ({ allTags }: { allTags: string[] }) => {
 
-  const [{tags, searchQuery, status, sortOrder}, setParams]=
+  const [{ tags, searchQuery, status, sortOrder }, setParams] =
     useQueryStates(articlesSearchParams)
-  
+
   const toggleTag = (tag: string) => {
     const newTags = tags.includes(tag)
       ? tags.filter((t) => t !== tag)
       : [...tags, tag];
     setParams({ tags: newTags });
   };
-  
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4 rounded-3xl border bg-card/50 p-4 backdrop-blur-sm sm:flex-row sm:items-center">

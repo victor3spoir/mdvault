@@ -1,7 +1,7 @@
 import type { SearchParams } from "nuqs/server";
 import { listArticlesAction } from "@/features/articles/articles.actions";
 import { loadArticlesFilteringParams } from "@/features/articles/articles.search-params";
-import { ArticlesList } from "@/features/articles/components/articles-list";
+import ArticlesList from "@/features/articles/components/articles-list";
 import PageLayout from "@/features/shared/components/page-layout";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -16,7 +16,7 @@ export default async function Page({
   searchParams,
 }: ArticlesPageProps) {
   const { searchQuery, status, sortBy, sortOrder, tags } = await loadArticlesFilteringParams(searchParams);
-  
+
   const articleResults = await listArticlesAction();
 
   if (!articleResults.success) {

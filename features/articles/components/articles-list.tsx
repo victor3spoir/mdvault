@@ -1,9 +1,6 @@
-"use client";
-
 import {
   IconFileText,
 } from "@tabler/icons-react";
-import { useMemo } from "react";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { Article } from "@/features/articles/articles.types";
 import {
@@ -16,21 +13,18 @@ interface ArticlesListProps {
   allTags: string[];
 }
 
-export function ArticlesList({ 
+export default async function ArticlesList({ 
   filteredArticles, 
   allTags,
 }: ArticlesListProps) {
-  const displayArticles = useMemo(() => {
-    return filteredArticles;
-  }, [filteredArticles]);
 
   return (
     <div className="flex w-full flex-col gap-8">
       <ArticleSearchBar allTags={allTags} />
 
-      {displayArticles.length > 0 ? (
+      {filteredArticles.length > 0 ? (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-6">
-          {displayArticles.map((article) => (
+          {filteredArticles.map((article) => (
             <ArticleCard
               key={article.slug}
               article={article}
