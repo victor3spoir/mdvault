@@ -1,6 +1,6 @@
 import type { SearchParams } from "nuqs/server";
 import { listArticlesAction } from "@/features/articles/articles.actions";
-import { articlesSearchParamsCache, loadArticlesFilteringParams } from "@/features/articles/articles.search-params";
+import { loadArticlesFilteringParams } from "@/features/articles/articles.search-params";
 import { ArticlesList } from "@/features/articles/components/articles-list";
 import PageLayout from "@/features/shared/components/page-layout";
 import { Button } from "@/components/ui/button";
@@ -15,16 +15,53 @@ interface ArticlesPageProps {
 export default async function Page({
   searchParams,
 }: ArticlesPageProps) {
-  await articlesSearchParamsCache.parse(searchParams);
-  // const results = await loadArticlesFilteringParams(searchParams)
-
-  // await loadArticlesFilteringParams(searchParams)
+  const { searchQuery, status, sortBy, sortOrder, tags } = await loadArticlesFilteringParams(searchParams);
+  
   const articleResults = await listArticlesAction();
 
   if (!articleResults.success) {
-    return <div>Not found</div>
+    return <div>Not found</div>;
   }
-  const articles = articleResults.data;
+
+  const allArticles = articleResults.data;
+
+  // Server-side filtering
+  const filteredArticles = allArticles
+    .filter((article) => {
+      const matchesSearch =
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+
+      const matchesStatus =
+        status === "all" ||
+        (status === "published" ? article.published : !article.published);
+
+      const matchesTags =
+        tags.length === 0 ||
+        (article.tags && tags.some((tag) => article.tags?.includes(tag)));
+
+      return matchesSearch && matchesStatus && matchesTags;
+    })
+    .sort((a, b) => {
+      const modifier = sortOrder === "asc" ? 1 : -1;
+      if (sortBy === "date") {
+        return (
+          (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) *
+          modifier
+        );
+      }
+      return a.title.localeCompare(b.title) * modifier;
+    });
+
+  // Get all unique tags for filter
+  const allTags = Array.from(
+    new Set(
+      allArticles
+        .flatMap((article) => article.tags || [])
+        .sort()
+    )
+  );
 
   return (
     <PageLayout
@@ -40,7 +77,7 @@ export default async function Page({
             variant="secondary"
             className="hidden h-6 rounded-lg px-2 text-xs font-bold sm:flex"
           >
-            {articles.length} Articles
+            {filteredArticles.length} Articles
           </Badge>
           <Button
             asChild
@@ -55,8 +92,7 @@ export default async function Page({
         </div>
       }
     >
-      <ArticlesList initialArticles={articles} />
-
+      <ArticlesList filteredArticles={filteredArticles} allTags={allTags} />
     </PageLayout>
-  )
+  );
 }
