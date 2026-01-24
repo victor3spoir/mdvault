@@ -10,7 +10,7 @@ import { useQueryStates } from "nuqs";
 const ArticleSearchBar = ({ allTags }: { allTags: string[] }) => {
 
   const [{ tags, searchQuery, status, sortOrder }, setParams] =
-    useQueryStates(articlesSearchParams)
+    useQueryStates(articlesSearchParams, { shallow: false })
 
   const toggleTag = (tag: string) => {
     const newTags = tags.includes(tag)

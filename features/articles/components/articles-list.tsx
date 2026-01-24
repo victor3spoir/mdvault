@@ -1,3 +1,5 @@
+"use client";
+
 import {
   IconFileText,
 } from "@tabler/icons-react";
@@ -13,11 +15,10 @@ interface ArticlesListProps {
   allTags: string[];
 }
 
-export default async function ArticlesList({ 
+export function ArticlesList({ 
   filteredArticles, 
   allTags,
 }: ArticlesListProps) {
-
   return (
     <div className="flex w-full flex-col gap-8">
       <ArticleSearchBar allTags={allTags} />
