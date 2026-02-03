@@ -1,28 +1,16 @@
-export interface Article {
-  slug: string;
-  title: string;
-  description?: string;
-  content: string;
-  createdAt: string;
-  updatedAt: string;
-  publishedDate?: string; // Date when article was published
-  published: boolean;
-  author?: string;
-  tags?: string[];
-  coverImage?: string;
-  sha?: string; // GitHub file SHA for updates
-}
 
 export interface ArticleFrontmatter {
   title: string;
   description?: string;
   published: boolean;
+  // new add
+  // lang: string
   author?: string;
   tags?: string[];
   coverImage?: string;
   createdAt?: string;
   updatedAt?: string;
-  publishedDate?: string; // Date when article was published
+  publishedDate?: string;
 }
 
 export interface GitHubFile {
@@ -34,16 +22,25 @@ export interface GitHubFile {
   download_url: string | null;
 }
 
-export interface CreateArticleInput {
-  title: string;
+export interface Article {
   slug: string;
-  content: string;
+  title: string;
   description?: string;
-  published?: boolean;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+  publishedAt?: string;
+  published: boolean;
+  author?: string;
   tags?: string[];
   coverImage?: string;
+  sha?: string;
 }
+
+
+export type CreateArticleInput = Pick<Article, "slug" | "title" | "content"
+  | "description" | "published" | "tags" | "coverImage">
 
 export interface UpdateArticleInput extends Partial<CreateArticleInput> {
   sha: string;
-}
+} 

@@ -2,22 +2,7 @@
 
 import { listArticlesAction } from "@/features/articles/articles.actions";
 import { listImagesAction } from "@/features/medias/medias.actions";
-
-export interface DashboardStats {
-  totalArticles: number;
-  publishedArticles: number;
-  draftArticles: number;
-  mediaFiles: number;
-}
-
-export interface Activity {
-  id: string;
-  type: "article_created" | "article_published" | "image_uploaded";
-  title: string;
-  description: string;
-  timestamp: string;
-  icon: "file" | "image" | "eye";
-}
+import type { Activity, DashboardStats } from "./dashboard.types";
 
 export async function getDashboardStatsAction(): Promise<DashboardStats> {
   try {

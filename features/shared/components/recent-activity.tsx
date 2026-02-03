@@ -1,27 +1,12 @@
 "use client";
 
 import { IconEye, IconFileText, IconPhoto } from "@tabler/icons-react";
-import type { Activity } from "@/features/dashboard/dashboard.actions";
+import type { Activity } from "@/features/dashboard/dashboard.types";
+import { formatTime } from "../shared.utils";
 
 interface RecentActivityProps {
   activities: Activity[];
 }
-
-const formatTime = (timestamp: string): string => {
-  const date = new Date(timestamp);
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 7) return `${diffDays}d ago`;
-
-  return new Date(timestamp).toLocaleDateString();
-};
 
 const getActivityIcon = (
   icon: string,

@@ -106,7 +106,7 @@ const Page = async () => {
       </div>
 
       {/* Recent Activity */}
-      <RecentActivity activities={activities} />
+      {/* <RecentActivity activities={activities} /> */}
     </PageLayout>
   );
 };

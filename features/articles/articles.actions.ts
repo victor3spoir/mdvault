@@ -41,7 +41,7 @@ function createArticleObject(
     content: body,
     createdAt: frontmatter.createdAt || new Date().toISOString(),
     updatedAt: frontmatter.updatedAt || new Date().toISOString(),
-    publishedDate: frontmatter.publishedDate,
+    publishedAt: frontmatter.publishedDate,
     published: frontmatter.published,
     author: frontmatter.author,
     tags: frontmatter.tags,
@@ -410,7 +410,7 @@ export async function updateArticleMetadataAction(
       coverImage: existingArticle.coverImage,
       createdAt: metadata.createdAt ?? existingArticle.createdAt,
       updatedAt: now,
-      publishedDate: metadata.publishedDate ?? existingArticle.publishedDate,
+      publishedDate: metadata.publishedDate ?? existingArticle.publishedAt,
     });
 
     const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
@@ -426,7 +426,7 @@ export async function updateArticleMetadataAction(
     const updated = {
       ...existingArticle,
       createdAt: metadata.createdAt ?? existingArticle.createdAt,
-      publishedDate: metadata.publishedDate ?? existingArticle.publishedDate,
+      publishedDate: metadata.publishedDate ?? existingArticle.publishedAt,
       updatedAt: now,
       sha: updatedSha,
     };

@@ -1,12 +1,9 @@
-import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
-import { IconPhotoPlus } from "@tabler/icons-react";
 import { listImagesAction } from "../medias.actions";
 import { MediaGallery } from "./media-gallery";
 import MediaFilters from "./media-filters";
-import MediaStats from "./media-stats";
-import { MediaUploader } from "./media-uploader";
-import { Button } from "@/components/ui/button";
+import MediaUploadSheet from "./media-upload-sheet";
+import { IconFileText } from "@tabler/icons-react";
 
 
 export function MediaSkeleton() {
@@ -68,41 +65,39 @@ export default async function MediaContent({
     ),
   ).sort();
 
+  const mediaStat = [
+    {
+      title: "Total Assets",
+      value: images.length,
+      description: "Total Assets",
+      icon: IconFileText,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+    },
+    {
+      title: "File Types",
+      value: imageTypes.length,
+      description: "File Types",
+      icon: IconFileText,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+    },
+  ]
+
   return (
     <div className="space-y-6">
-      <MediaStats
-        totalAssets={images.length}
-        fileTypes={imageTypes.length}
-      />
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
-        <div className="flex items-center gap-2">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                type="button"
-                className="h-10 gap-2 rounded-lg px-4 font-semibold"
-              >
-                <IconPhotoPlus className="size-4" />
-                Upload Asset
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-full sm:max-w-xl">
-              <SheetHeader className="pb-8">
-                <SheetTitle className="text-xl font-bold">
-                  Upload Asset
-                </SheetTitle>
-                <SheetDescription>
-                  Add new images to your media library
-                </SheetDescription>
-              </SheetHeader>
-              <div className="rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2">
-                <MediaUploader />
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+      <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
+        {mediaStat.map((stat) => (
+          <div key={stat.title} className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
+            <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+            <p className="mt-2 text-3xl font-bold text-foreground">{stat.value}</p>
+          </div>
+        ))}
       </div>
+      
+
+      <MediaUploadSheet />
+
 
       <MediaFilters imageTypes={imageTypes} />
 

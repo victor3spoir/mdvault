@@ -1,5 +1,9 @@
-import { ArticleEditorLayout } from "@/features/articles/components/article-editor-layout";
+import { ArticleEditor } from "@/features/articles/components/article-editor";
 
 export default function NewArticlePage() {
-  return <ArticleEditorLayout mode="create" />;
+  return (
+    <div className="h-screen max-h-[100%] overflow-y-hidden">
+      <ArticleEditor mode="create" />
+    </div>
+  );
 }
