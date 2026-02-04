@@ -112,9 +112,7 @@ async function getPostContentAction(path: string): Promise<string> {
     content: string;
     encoding: string;
   };
-  const content = Buffer.from(fileData.content, fileData.encoding).toString(
-    "utf-8",
-  );
+  const content = Buffer.from(fileData.content, "base64").toString("utf-8");
   return content;
 }
 
@@ -304,7 +302,7 @@ export async function deletePostAction(
       owner: githubRepoInfo.owner,
       repo: githubRepoInfo.repo,
       path,
-      message: `Delete post: ${slug}`,
+      message: `Delete post: ${id}`,
       sha: latestSha || sha,
     });
 

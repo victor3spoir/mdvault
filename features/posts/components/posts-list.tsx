@@ -13,7 +13,7 @@ export function PostsList({ posts }: PostsListProps) {
       {posts.length > 0 ? (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(min(220px,100%),1fr))] gap-6">
           {posts.map((post) => (
-            <PostCard key={post.slug} post={post} />
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
       ) : (
