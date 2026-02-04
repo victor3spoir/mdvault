@@ -136,7 +136,7 @@
   pointer-events: none;
 }
 
-.mdxeditor-popup-container>* {
+.mdxeditor-popup-container > * {
   pointer-events: auto;
 }
 
@@ -149,14 +149,12 @@
   --baseBorder: var(--border);
   color: var(--foreground);
   @apply max-h-dvh;
-display: flex !important;
-  flex-direction: column !important;
-    height: 500px;
-    overflow: hidden !important;
-    /* Or your preferred fixed height */
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  overflow: hidden;
+  /* Or your preferred fixed height */
   /* or any fixed height/max-height */
-
-
 
   [class*="mdxeditor"] {
     font-family: inherit;
@@ -194,7 +192,6 @@ display: flex !important;
     margin-top: 1em;
     margin-bottom: 0.5em;
     color: var(--foreground);
-
   }
 
   .mdxeditor-root-contenteditable h2 {
@@ -463,8 +460,6 @@ display: flex !important;
   border-left-color: var(--primary);
 }
 
-
-
 .mdxeditor-dropdown-container {
   background: var(--popover);
   border: 1px solid var(--border);
@@ -659,7 +654,7 @@ article li:has(> input[type="checkbox"]) {
   list-style: none;
 }
 
-article li>input[type="checkbox"] {
+article li > input[type="checkbox"] {
   margin: 0;
   position: relative;
   top: 0.15em;
@@ -704,7 +699,7 @@ article ul:has(> li > input[type="checkbox"]) {
 }
 
 /* The editor content wrapper - this is what scrolls */
-.mdx-editor-wrapper .mdxeditor>div:not([class*="toolbar"]) {
+.mdx-editor-wrapper .mdxeditor > div:not([class*="toolbar"]) {
   flex: 1;
   overflow-y: auto;
   min-height: 0;

@@ -1,12 +1,8 @@
 "use client";
 
-import {
-  IconCheck,
-  IconCopy,
-  IconX,
-} from "@tabler/icons-react";
+import { IconCheck, IconCopy, IconX } from "@tabler/icons-react";
 import dynamic from "next/dynamic";
-import { ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -18,7 +14,7 @@ import type { MediaFile } from "../medias.types";
 const Image = dynamic(() => import("next/image"), { ssr: false });
 
 interface ImagePreviewDialogProps {
-  children: ReactNode
+  children: ReactNode;
   image: MediaFile | null;
 }
 
@@ -35,15 +31,11 @@ export function MediaPreviewDialog({
     setTimeout(() => setCopiedId(null), 2000);
   }, []);
 
-
-
   if (!image) return null;
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        {children}
-      </AlertDialogTrigger>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent className="max-w-2xl p-0 overflow-hidden">
         <div className="flex flex-col bg-card">
           {/* Image */}
@@ -73,8 +65,7 @@ export function MediaPreviewDialog({
               </h3>
               <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
                 <span className="size-1.5 rounded-full bg-emerald-500" />
-                Uploaded{" "}
-                {new Date(image.uploadedAt).toLocaleDateString()}
+                Uploaded {new Date(image.uploadedAt).toLocaleDateString()}
               </p>
             </div>
 
@@ -116,7 +107,6 @@ export function MediaPreviewDialog({
             </div>
 
             <div className="flex gap-2 pt-2">
-             
               <Button
                 onClick={() => setOpen(false)}
                 variant="outline"

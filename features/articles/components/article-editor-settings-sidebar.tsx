@@ -2,7 +2,7 @@
 
 import {
   IconFileText,
-  IconHash,
+  IconLanguage,
   IconPhoto,
   IconPlus,
   IconTag,
@@ -12,6 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -19,14 +26,13 @@ import { CoverImageSelector } from "../../medias/components/cover-image-selector
 import { EDITOR_CONFIG } from "../articles.constants";
 
 interface ArticleSettingsSidebarProps {
-  readonly slug: string;
+  readonly lang: "fr" | "en";
   readonly description: string;
   readonly tags: string[];
   readonly tagInput: string;
   readonly coverImage: string;
-  readonly mode: "create" | "edit";
   readonly collapsed: boolean;
-  readonly onSlugChange: (slug: string) => void;
+  readonly onLangChange: (lang: "fr" | "en") => void;
   readonly onDescriptionChange: (description: string) => void;
   readonly onTagInputChange: (tagInput: string) => void;
   readonly onAddTag: () => void;
@@ -36,14 +42,13 @@ interface ArticleSettingsSidebarProps {
 }
 
 export function ArticleEditorSettingsSidebar({
-  slug,
+  lang,
   description,
   tags,
   tagInput,
   coverImage,
-  mode,
   collapsed,
-  onSlugChange,
+  onLangChange,
   onDescriptionChange,
   onTagInputChange,
   onAddTag,
@@ -75,29 +80,27 @@ export function ArticleEditorSettingsSidebar({
         {/* Sidebar Content - Scrollable */}
         <div className="flex-1 overflow-y-auto">
           <div className="space-y-6 p-4">
-            {/* URL Slug */}
+            {/* Language */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                <IconHash className="size-3.5" />
-                URL Slug
+                <IconLanguage className="size-3.5" />
+                Language
               </Label>
-              <Input
-                placeholder="article-url-slug"
-                value={slug}
-                onChange={(e) => onSlugChange(e.target.value)}
-                disabled={mode === "edit"}
-                className="h-9 rounded-lg border-muted bg-background text-sm"
-              />
-              {slug && (
-                <p className="text-[11px] text-muted-foreground">
-                  /articles/{slug}
-                </p>
-              )}
+              <Select
+                value={lang}
+                onValueChange={(value) => onLangChange(value as "fr" | "en")}
+              >
+                <SelectTrigger className="h-9 rounded-lg border-muted bg-background text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="fr">Français</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Separator />
-
-            {/* Description */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 <IconFileText className="size-3.5" />
@@ -111,7 +114,8 @@ export function ArticleEditorSettingsSidebar({
                 className="rounded-lg border-muted bg-background text-sm resize-none"
               />
               <p className="text-[11px] text-muted-foreground">
-                {description.length}/{EDITOR_CONFIG.DESCRIPTION_MAX_LENGTH} characters
+                {description.length}/{EDITOR_CONFIG.DESCRIPTION_MAX_LENGTH}{" "}
+                characters
               </p>
             </div>
 
@@ -180,7 +184,7 @@ export function ArticleEditorSettingsSidebar({
                 <IconPhoto className="size-3.5" />
                 Cover Image
               </Label>
-              <div className="h-full max-h-[100px]">
+              <div className="h-full max-h-25">
                 <CoverImageSelector
                   selectedImageUrl={coverImage}
                   onSelectImage={(image) => onCoverImageChange(image.url)}

@@ -28,6 +28,7 @@ export function parseFrontmatter(content: string): {
     title: data.title ?? "Untitled",
     description: data.description,
     published: data.published ?? false,
+    lang: (data.lang ?? "en") as "fr" | "en",
     author: data.author,
     coverImage: data.coverImage,
     createdAt: data.createdAt,
@@ -64,7 +65,7 @@ export function calculateWordCount(content: string): number {
 
 export function calculateReadTime(wordCount: number): number {
   return Math.max(1, Math.ceil(wordCount / EDITOR_CONFIG.WORDS_PER_MINUTE));
-}/**
+} /**
  * Get word count and read time from content
  */
 
@@ -76,4 +77,3 @@ export function getContentStats(content: string): {
   const readTime = calculateReadTime(wordCount);
   return { wordCount, readTime };
 }
-

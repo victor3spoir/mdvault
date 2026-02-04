@@ -1,21 +1,20 @@
+import { IconPlus } from "@tabler/icons-react";
+import Link from "next/link";
 import type { SearchParams } from "nuqs/server";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { listArticlesAction } from "@/features/articles/articles.actions";
 import { loadArticlesFilteringParams } from "@/features/articles/articles.search-params";
 import { ArticlesList } from "@/features/articles/components/articles-list";
 import PageLayout from "@/features/shared/components/page-layout";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { IconPlus } from "@tabler/icons-react";
-import { Badge } from "@/components/ui/badge";
 
 interface ArticlesPageProps {
   searchParams: Promise<SearchParams>;
 }
 
-export default async function Page({
-  searchParams,
-}: ArticlesPageProps) {
-  const { searchQuery, status, sortBy, sortOrder, tags } = await loadArticlesFilteringParams(searchParams);
+export default async function Page({ searchParams }: ArticlesPageProps) {
+  const { searchQuery, status, sortBy, sortOrder, tags, lang } =
+    await loadArticlesFilteringParams(searchParams);
 
   const articleResults = await listArticlesAction();
 
@@ -25,13 +24,16 @@ export default async function Page({
 
   const allArticles = articleResults.data;
 
-  // Server-side filtering
   const filteredArticles = allArticles
     .filter((article) => {
       const matchesSearch =
         article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.tags?.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        article.description
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        article.tags?.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
 
       const matchesStatus =
         status === "all" ||
@@ -41,7 +43,9 @@ export default async function Page({
         tags.length === 0 ||
         (article.tags && tags.some((tag) => article.tags?.includes(tag)));
 
-      return matchesSearch && matchesStatus && matchesTags;
+      const matchesLang = lang === "all" || article.lang === lang;
+
+      return matchesSearch && matchesStatus && matchesTags && matchesLang;
     })
     .sort((a, b) => {
       const modifier = sortOrder === "asc" ? 1 : -1;
@@ -56,11 +60,7 @@ export default async function Page({
 
   // Get all unique tags for filter
   const allTags = Array.from(
-    new Set(
-      allArticles
-        .flatMap((article) => article.tags || [])
-        .sort()
-    )
+    new Set(allArticles.flatMap((article) => article.tags || []).sort()),
   );
 
   return (

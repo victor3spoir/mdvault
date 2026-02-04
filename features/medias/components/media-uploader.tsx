@@ -1,6 +1,5 @@
 "use client";
 
-import { toast } from "sonner";
 import { ImageUploader } from "@/features/medias/components/image-uploader";
 
 interface MediaUploaderProps {
@@ -8,7 +7,5 @@ interface MediaUploaderProps {
 }
 
 export function MediaUploader() {
-  return (
-    <ImageUploader />
-  );
+  return <ImageUploader />;
 }

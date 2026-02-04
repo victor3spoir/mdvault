@@ -1,4 +1,3 @@
-
 export interface Activity {
   id: string;
   type: "article_created" | "article_published" | "image_uploaded";
@@ -6,10 +5,10 @@ export interface Activity {
   description: string;
   timestamp: string;
   icon: "file" | "image" | "eye";
-}export interface DashboardStats {
+}
+export interface DashboardStats {
   totalArticles: number;
   publishedArticles: number;
   draftArticles: number;
   mediaFiles: number;
 }
-

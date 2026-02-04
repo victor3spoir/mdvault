@@ -17,12 +17,11 @@ export interface MediaUsage {
   }>;
 }
 
-
 // search
 // filter
 
 export const mediaFilteringParams = {
   search: parseAsString.withDefault(""),
-  filter: parseAsString.withDefault("all")
-}
-export const loadMediaFilteringParams = createLoader(mediaFilteringParams)
+  filter: parseAsString.withDefault("all"),
+};
+export const loadMediaFilteringParams = createLoader(mediaFilteringParams);

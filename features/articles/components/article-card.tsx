@@ -6,35 +6,33 @@ import {
   IconEdit,
   IconEye,
   IconFileText,
+  IconLanguage,
   IconSettings,
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import type { Article } from "@/features/articles/articles.types";
-import ArticleDeleteDialog from "./article-delete-dialog";
-import { ArticlePublishDialog } from "./article-publish-dialog";
-import { PostMetadataEditor } from "./article-metadata-editor";
 import { formatDate } from "@/features/shared/shared.utils";
+import ArticleDeleteDialog from "./article-delete-dialog";
+import { PostMetadataEditor } from "./article-metadata-editor";
+import { ArticlePublishDialog } from "./article-publish-dialog";
 
 interface ArticleCardProps {
   article: Article;
 }
 
-export function ArticleCard({
-  article,
-}: ArticleCardProps) {
-
-  const formattedDate = formatDate(new Date(article.createdAt))
+export function ArticleCard({ article }: ArticleCardProps) {
+  const formattedDate = formatDate(new Date(article.createdAt));
 
   return (
     <TooltipProvider>
@@ -58,7 +56,7 @@ export function ArticleCard({
           <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-60" />
 
           {/* Status Badge on Image */}
-          <div className="absolute left-3 top-3">
+          <div className="absolute inset-x-3 top-3 flex gap-2">
             <Badge
               variant={article.published ? "default" : "secondary"}
               className="h-6 gap-1 rounded-lg px-2 text-[10px] font-bold uppercase tracking-wider shadow-lg backdrop-blur-md"
@@ -71,6 +69,13 @@ export function ArticleCard({
               ) : (
                 "Draft"
               )}
+            </Badge>
+            <Badge
+              variant="outline"
+              className="h-6 gap-1 rounded-lg px-2 text-[10px] font-semibold uppercase tracking-wide shadow-lg backdrop-blur-md bg-background/90 border-primary/30"
+            >
+              <IconLanguage className="size-3" />
+              {article.lang === "fr" ? "FR" : "EN"}
             </Badge>
           </div>
         </div>
@@ -102,8 +107,7 @@ export function ArticleCard({
           </h3>
 
           <p className="mb-4 line-clamp-2 flex-1 text-sm leading-relaxed text-muted-foreground">
-            {article.description ||
-              "No description provided for this article."}
+            {article.description || "No description provided for this article."}
           </p>
 
           <div className="flex items-center gap-3 text-[11px] font-medium text-muted-foreground">
@@ -129,7 +133,7 @@ export function ArticleCard({
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/articles/${article.slug}`}>
+                    <Link href={`/cms/articles/${article.id}`}>
                       <IconEye className="size-4" />
                     </Link>
                   </Button>
@@ -145,7 +149,7 @@ export function ArticleCard({
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={{ href: `/cms/articles/${article.slug}/edit` }}>
+                    <Link href={{ href: `/cms/articles/${article.id}/edit` }}>
                       <IconEdit className="size-4" />
                     </Link>
                   </Button>
@@ -194,7 +198,7 @@ export function ArticleCard({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <ArticleDeleteDialog
-                    articleSlug={article.slug}
+                    articleId={article.id}
                     articleSha={article.sha}
                   >
                     <Button

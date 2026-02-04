@@ -1,17 +1,18 @@
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import type { MediaFile } from "../medias.types";
 import { IconEye, IconTrash } from "@tabler/icons-react";
-import { MediaPreviewDialog } from "./image-preview-dialog";
 import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import type { MediaFile } from "../medias.types";
+import { MediaPreviewDialog } from "./image-preview-dialog";
 import { MediaDeleteDialog } from "./media-delete-dialog";
 
 const Image = dynamic(() => import("next/image"), { ssr: false });
 
 const MediaCard = ({ media }: { media: MediaFile }) => {
-
-
-
   return (
     <div
       key={media.id}
@@ -28,10 +29,11 @@ const MediaCard = ({ media }: { media: MediaFile }) => {
       <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200 group-hover:opacity-100 flex flex-col items-center justify-center gap-2">
         <div className="flex gap-2">
           <Tooltip>
-            <TooltipTrigger asChild>
-            </TooltipTrigger>
+            <TooltipTrigger asChild></TooltipTrigger>
             <MediaPreviewDialog image={media}>
-              <Button><IconEye className="size-4" /></Button>
+              <Button>
+                <IconEye className="size-4" />
+              </Button>
             </MediaPreviewDialog>
             <TooltipContent>Preview</TooltipContent>
           </Tooltip>
@@ -53,13 +55,10 @@ const MediaCard = ({ media }: { media: MediaFile }) => {
       </div>
 
       <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-2 translate-y-full group-hover:translate-y-0 transition-transform">
-        <p className="truncate text-xs font-medium text-white">
-          {media.name}
-        </p>
+        <p className="truncate text-xs font-medium text-white">{media.name}</p>
       </div>
-
     </div>
-  )
-}
+  );
+};
 
 export default MediaCard;

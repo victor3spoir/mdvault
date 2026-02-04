@@ -1,7 +1,6 @@
 import { IconEye, IconFileText, IconPhoto } from "@tabler/icons-react";
 import Link from "next/link";
 import PageLayout from "@/features/shared/components/page-layout";
-import { RecentActivity } from "@/features/shared/components/recent-activity";
 import {
   getDashboardStatsAction,
   getRecentActivityAction,
@@ -9,7 +8,7 @@ import {
 
 const Page = async () => {
   const stats = await getDashboardStatsAction();
-  const activities = await getRecentActivityAction();
+  const _activities = await getRecentActivityAction();
 
   const statsCards = [
     {

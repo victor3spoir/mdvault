@@ -32,32 +32,31 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { Article } from "../articles.types";
 import {
   ARTICLE_LABELS,
   ARTICLE_ROUTES,
   ARTICLE_STATUS,
 } from "../articles.constants";
+import type { Article } from "../articles.types";
 import ArticleDeleteDialog from "./article-delete-dialog";
 import { ArticlePublishDialog } from "./article-publish-dialog";
 
 interface ArticleEditorHeaderProps {
   readonly title: string;
-  readonly slug: string;
+  readonly id?: string;
   readonly mode: "create" | "edit";
   readonly article?: Article;
   readonly isSaving: boolean;
   readonly isPublishing: boolean;
   readonly hasUnsavedChanges: boolean;
   readonly sidebarCollapsed: boolean;
-  readonly onSave: () => Promise<void>;
-  readonly onPublish: () => Promise<void>;
+  readonly onSave: () => void;
+  readonly onPublish: () => void;
   readonly onToggleSidebar: () => void;
 }
 
 export function ArticleEditorHeader({
   title,
-  slug,
   mode,
   article,
   isSaving,
@@ -150,9 +149,15 @@ export function ArticleEditorHeader({
               className="h-8 gap-1.5 rounded-lg text-muted-foreground"
               asChild
             >
-              <a href={ARTICLE_ROUTES.PREVIEW(slug)} target="_blank" rel="noopener noreferrer">
+              <a
+                href={article?.id ? ARTICLE_ROUTES.PREVIEW(article.id) : "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <IconEye className="size-3.5" />
-                <span className="hidden sm:inline">{ARTICLE_LABELS.PREVIEW}</span>
+                <span className="hidden sm:inline">
+                  {ARTICLE_LABELS.PREVIEW}
+                </span>
               </a>
             </Button>
           </TooltipTrigger>
@@ -165,7 +170,7 @@ export function ArticleEditorHeader({
           variant="outline"
           size="sm"
           onClick={onSave}
-          disabled={isSaving || !title || !slug}
+          disabled={isSaving || !title}
           className="h-8 gap-1.5 rounded-lg"
         >
           {isSaving ? (
@@ -180,7 +185,7 @@ export function ArticleEditorHeader({
           <Button
             size="sm"
             onClick={onPublish}
-            disabled={isPublishing || !title || !slug}
+            disabled={isPublishing || !title}
             className="h-8 gap-1.5 rounded-lg bg-primary shadow-sm shadow-primary/20"
           >
             {isPublishing ? (
@@ -214,11 +219,7 @@ export function ArticleEditorHeader({
         {mode === "edit" && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="size-8 rounded-lg"
-              >
+              <Button variant="ghost" size="icon" className="size-8 rounded-lg">
                 <IconDots className="size-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -252,7 +253,7 @@ export function ArticleEditorHeader({
               )}
               <ArticleDeleteDialog
                 articleSha={article?.sha}
-                articleSlug={slug}
+                articleId={article?.id ?? ""}
               >
                 <Button className="flex items-center gap-2 text-destructive focus:text-destructive">
                   <IconTrash className="size-4" />

@@ -5,12 +5,12 @@ import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import type { MediaFile  } from "../medias.types";
+import type { MediaFile } from "../medias.types";
 import { ImageInsertDialog } from "./image-insert-dialog";
 
 interface CoverImageSelectorProps {
   selectedImageUrl: string;
-  onSelectImage: (image: MediaFile ) => void;
+  onSelectImage: (image: MediaFile) => void;
 }
 
 export function CoverImageSelector({
@@ -19,7 +19,7 @@ export function CoverImageSelector({
 }: CoverImageSelectorProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const handleImageSelect = (image: MediaFile ) => {
+  const handleImageSelect = (image: MediaFile) => {
     onSelectImage(image);
     setIsDialogOpen(false);
   };
@@ -28,12 +28,12 @@ export function CoverImageSelector({
     <TooltipProvider>
       <div className="space-y-4">
         {selectedImageUrl ? (
-          <div className="group relative h-150 w-full overflow-hidden rounded-2xl border bg-muted shadow-sm transition-all hover:shadow-md">
+          <div className="group relative aspect-square w-56 overflow-hidden rounded-2xl border bg-muted shadow-sm transition-all hover:shadow-md">
             <Image
               src={selectedImageUrl}
               alt="Cover image preview"
               fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105 h-[40dvh]"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
             <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity duration-200 group-hover:opacity-100 backdrop-blur-[2px]">
               <Button

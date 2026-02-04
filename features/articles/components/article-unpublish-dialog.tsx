@@ -37,15 +37,15 @@ export function ArticlePublishDialog({
     startTransition(async () => {
       try {
         const result = isPublished
-          ? await unpublishArticleAction(article.slug, article.sha || "")
-          : await publishArticleAction(article.slug, article.sha || "");
+          ? await unpublishArticleAction(article.id, article.sha || "")
+          : await publishArticleAction(article.id, article.sha || "");
 
         if (!result.success) {
           toast.error(
             isPublished ? "Failed to unpublish" : "Failed to publish",
             {
               description: result.error,
-            }
+            },
           );
           return;
         }
@@ -68,8 +68,10 @@ export function ArticlePublishDialog({
               : "Failed to publish article";
         toast.error(message);
         console.error(
-          isPublished ? "Error unpublishing article:" : "Error publishing article:",
-          error
+          isPublished
+            ? "Error unpublishing article:"
+            : "Error publishing article:",
+          error,
         );
       }
     });
@@ -90,10 +92,7 @@ export function ArticlePublishDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="gap-2">
-          <AlertDialogCancel 
-            disabled={isPending}
-            className="rounded-lg"
-          >
+          <AlertDialogCancel disabled={isPending} className="rounded-lg">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction

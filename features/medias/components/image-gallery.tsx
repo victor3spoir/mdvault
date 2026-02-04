@@ -1,29 +1,22 @@
 "use client";
 
-import {
-  IconPhotoOff,
-} from "@tabler/icons-react";
+import { IconPhotoOff } from "@tabler/icons-react";
 import { useMemo } from "react";
-import {
-  TooltipProvider,
-} from "@/components/ui/tooltip";
-import type { MediaFile  } from "../medias.types";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import type { MediaFile } from "../medias.types";
 import MediaCard from "./media-card";
 
-
-
 interface ImageGalleryProps {
-  images: MediaFile [];
+  images: MediaFile[];
   search?: string;
   filter?: string;
 }
 
-export function MediaGallery({ 
+export function MediaGallery({
   images,
   search = "",
   filter = "all",
 }: ImageGalleryProps) {
-
   const filteredImages = useMemo(() => {
     return images.filter((image) => {
       const searchLower = search.toLowerCase();
@@ -65,14 +58,11 @@ export function MediaGallery({
 
   return (
     <TooltipProvider>
-      <div
-        className="gap-4 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))]"
-      >
+      <div className="gap-4 grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))]">
         {filteredImages.map((image) => (
           <MediaCard media={image} key={image.id} />
         ))}
       </div>
-
     </TooltipProvider>
   );
 }

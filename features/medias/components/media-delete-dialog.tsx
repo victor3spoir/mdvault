@@ -13,12 +13,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { deleteImageAction, checkMediaUsageAction } from "../medias.actions";
-import type { MediaUsage, MediaFile } from "../medias.types";
-
+import { checkMediaUsageAction, deleteImageAction } from "../medias.actions";
+import type { MediaFile, MediaUsage } from "../medias.types";
 
 interface DeleteConfirmationDialogProps {
-  children: ReactNode,
+  children: ReactNode;
   image: MediaFile | null;
 }
 
@@ -26,8 +25,8 @@ export function MediaDeleteDialog({
   children,
   image,
 }: DeleteConfirmationDialogProps) {
-  const [open, setOpen] = useState<boolean>(false)
-  const [usage, setUsage] = useState<MediaUsage | null>(null)
+  const [open, setOpen] = useState<boolean>(false);
+  const [usage, setUsage] = useState<MediaUsage | null>(null);
   const [isPending, startTransition] = useTransition();
   const [isLoadingUsage, setIsLoadingUsage] = useState<boolean>(false);
 
@@ -38,7 +37,7 @@ export function MediaDeleteDialog({
     }
 
     setIsLoadingUsage(true);
-    
+
     const checkUsage = async () => {
       try {
         console.log("Checking media usage for:", image.url);
@@ -94,9 +93,7 @@ export function MediaDeleteDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger>
-        {children}
-      </AlertDialogTrigger>
+      <AlertDialogTrigger>{children}</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Asset</AlertDialogTitle>
@@ -154,7 +151,6 @@ export function MediaDeleteDialog({
     </AlertDialog>
   );
 }
-
 
 // const handleDeleteClick = async (image: MediaFile) => {
 //   startTransition(async () => {

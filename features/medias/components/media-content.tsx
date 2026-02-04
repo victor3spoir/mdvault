@@ -1,10 +1,9 @@
+import { IconFileText } from "@tabler/icons-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { listImagesAction } from "../medias.actions";
-import { MediaGallery } from "./media-gallery";
 import MediaFilters from "./media-filters";
+import { MediaGallery } from "./media-gallery";
 import MediaUploadSheet from "./media-upload-sheet";
-import { IconFileText } from "@tabler/icons-react";
-
 
 export function MediaSkeleton() {
   return (
@@ -39,7 +38,6 @@ export function MediaSkeleton() {
     </div>
   );
 }
-
 
 export default async function MediaContent({
   search = "",
@@ -82,22 +80,27 @@ export default async function MediaContent({
       color: "text-blue-500",
       bg: "bg-blue-500/10",
     },
-  ]
+  ];
 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 grid-cols-[repeat(auto-fill,minmax(200px,1fr))]">
         {mediaStat.map((stat) => (
-          <div key={stat.title} className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm">
-            <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-            <p className="mt-2 text-3xl font-bold text-foreground">{stat.value}</p>
+          <div
+            key={stat.title}
+            className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm"
+          >
+            <p className="text-sm font-medium text-muted-foreground">
+              {stat.title}
+            </p>
+            <p className="mt-2 text-3xl font-bold text-foreground">
+              {stat.value}
+            </p>
           </div>
         ))}
       </div>
-      
 
       <MediaUploadSheet />
-
 
       <MediaFilters imageTypes={imageTypes} />
 
@@ -107,5 +110,3 @@ export default async function MediaContent({
     </div>
   );
 }
-
-

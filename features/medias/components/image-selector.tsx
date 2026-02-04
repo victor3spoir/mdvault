@@ -7,18 +7,18 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { listImagesAction } from "../medias.actions";
-import type { MediaFile  } from "../medias.types";
+import type { MediaFile } from "../medias.types";
 
 interface ImageSelectorProps {
   selectedImageUrl?: string;
-  onSelectImage: (image: MediaFile ) => void;
+  onSelectImage: (image: MediaFile) => void;
 }
 
 export function ImageSelector({
   selectedImageUrl = "",
   onSelectImage,
 }: ImageSelectorProps) {
-  const [images, setImages] = useState<MediaFile []>([]);
+  const [images, setImages] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 

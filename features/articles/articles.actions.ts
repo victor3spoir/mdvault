@@ -1,12 +1,13 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+import { cacheTag, updateTag } from "next/cache";
 import type { ActionResult } from "@/features/shared/shared.types";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import {
   CreateArticleSchema,
   UpdateArticleSchema,
 } from "@/lib/validation/article.schema";
-import { cacheTag, updateTag } from "next/cache";
 import type { Article, ArticleFrontmatter, GitHubFile } from "./articles.types";
 import { generateFrontmatter, parseFrontmatter } from "./articles.utils";
 
@@ -29,16 +30,17 @@ async function fetchLatestSha(path: string): Promise<string | undefined> {
 }
 
 function createArticleObject(
-  slug: string,
+  id: string,
   frontmatter: ArticleFrontmatter,
   body: string,
   sha?: string,
 ): Article {
   return {
-    slug,
+    id,
     title: frontmatter.title,
     description: frontmatter.description,
     content: body,
+    lang: frontmatter.lang,
     createdAt: frontmatter.createdAt || new Date().toISOString(),
     updatedAt: frontmatter.updatedAt || new Date().toISOString(),
     publishedAt: frontmatter.publishedDate,
@@ -92,8 +94,8 @@ export async function listArticlesAction(): Promise<ActionResult<Article[]>> {
       mdFiles.map(async (file) => {
         const content = await getArticleContentAction(file.path);
         const { frontmatter, body } = parseFrontmatter(content);
-        const slug = file.name.replace(/\.mdx?$/, "");
-        return createArticleObject(slug, frontmatter, body, file.sha);
+        const id = file.name.replace(/\.mdx?$/, "");
+        return createArticleObject(id, frontmatter, body, file.sha);
       }),
     );
 
@@ -131,10 +133,10 @@ export async function getArticleContentAction(path: string): Promise<string> {
 }
 
 export async function getArticleAction(
-  slug: string,
+  id: string,
 ): Promise<ActionResult<Article>> {
   try {
-    const path = `${ARTICLES_PATH}/${slug}.md`;
+    const path = `${ARTICLES_PATH}/${id}.md`;
     const response = await octokit.repos.getContent({
       owner: githubRepoInfo.owner,
       repo: githubRepoInfo.repo,
@@ -151,7 +153,7 @@ export async function getArticleAction(
     const { frontmatter, body } = parseFrontmatter(content);
 
     const article = createArticleObject(
-      slug,
+      id,
       frontmatter,
       body,
       response.data.sha,
@@ -168,6 +170,7 @@ export async function createArticleAction(
 ): Promise<ActionResult<Article>> {
   try {
     const validatedInput = CreateArticleSchema.parse(input);
+    const id = randomUUID();
     const now = new Date().toISOString();
     const { body: cleanContent } = parseFrontmatter(validatedInput.content);
 
@@ -175,6 +178,7 @@ export async function createArticleAction(
       title: validatedInput.title,
       description: validatedInput.description,
       published: validatedInput.published ?? false,
+      lang: validatedInput.lang,
       tags: validatedInput.tags,
       coverImage: validatedInput.coverImage,
       createdAt: now,
@@ -182,7 +186,7 @@ export async function createArticleAction(
     });
 
     const fileContent = `${frontmatter}\n\n${cleanContent}`;
-    const path = `${ARTICLES_PATH}/${validatedInput.slug}.md`;
+    const path = `${ARTICLES_PATH}/${id}.md`;
 
     const sha = await updateGitHubFile(
       path,
@@ -191,7 +195,7 @@ export async function createArticleAction(
     );
 
     const article = createArticleObject(
-      validatedInput.slug,
+      id,
       {
         ...validatedInput,
         published: validatedInput.published ?? false,
@@ -210,12 +214,12 @@ export async function createArticleAction(
 }
 
 export async function updateArticleAction(
-  slug: string,
+  id: string,
   input: unknown,
 ): Promise<ActionResult<Article>> {
   try {
     const validatedInput = UpdateArticleSchema.parse(input);
-    const result = await getArticleAction(slug);
+    const result = await getArticleAction(id);
 
     if (!result.success || !result.data) {
       return { success: false, error: "Article not found" };
@@ -231,6 +235,7 @@ export async function updateArticleAction(
       title: validatedInput.title ?? existingArticle.title,
       description: validatedInput.description ?? existingArticle.description,
       published: validatedInput.published ?? existingArticle.published,
+      lang: validatedInput.lang ?? existingArticle.lang,
       tags: validatedInput.tags ?? existingArticle.tags,
       coverImage: validatedInput.coverImage ?? existingArticle.coverImage,
       createdAt: existingArticle.createdAt,
@@ -238,7 +243,7 @@ export async function updateArticleAction(
     });
 
     const fileContent = `${frontmatter}\n\n${cleanContent}`;
-    const path = `${ARTICLES_PATH}/${slug}.md`;
+    const path = `${ARTICLES_PATH}/${id}.md`;
 
     const sha = await updateGitHubFile(
       path,
@@ -252,6 +257,7 @@ export async function updateArticleAction(
       title: validatedInput.title ?? existingArticle.title,
       description: validatedInput.description ?? existingArticle.description,
       content: cleanContent,
+      lang: validatedInput.lang ?? existingArticle.lang,
       updatedAt: now,
       published: validatedInput.published ?? existingArticle.published,
       tags: validatedInput.tags ?? existingArticle.tags,
@@ -267,17 +273,17 @@ export async function updateArticleAction(
 }
 
 export async function deleteArticleAction(
-  slug: string,
+  id: string,
   sha: string,
 ): Promise<ActionResult<void>> {
   try {
-    const path = `${ARTICLES_PATH}/${slug}.md`;
+    const path = `${ARTICLES_PATH}/${id}.md`;
 
     await octokit.repos.deleteFile({
       owner: githubRepoInfo.owner,
       repo: githubRepoInfo.repo,
       path,
-      message: `Delete article: ${slug}`,
+      message: `Delete article: ${id}`,
       sha,
     });
     updateTag("articles");
@@ -290,11 +296,11 @@ export async function deleteArticleAction(
 }
 
 export async function unpublishArticleAction(
-  slug: string,
+  id: string,
   sha: string,
 ): Promise<ActionResult<Article>> {
   try {
-    const result = await getArticleAction(slug);
+    const result = await getArticleAction(id);
 
     if (!result.success || !result.data) {
       return { success: false, error: "Article not found" };
@@ -307,6 +313,7 @@ export async function unpublishArticleAction(
       title: existingArticle.title,
       description: existingArticle.description,
       published: false,
+      lang: existingArticle.lang,
       tags: existingArticle.tags,
       coverImage: existingArticle.coverImage,
       createdAt: existingArticle.createdAt,
@@ -314,7 +321,7 @@ export async function unpublishArticleAction(
     });
 
     const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
-    const path = `${ARTICLES_PATH}/${slug}.md`;
+    const path = `${ARTICLES_PATH}/${id}.md`;
 
     const updatedSha = await updateGitHubFile(
       path,
@@ -338,11 +345,11 @@ export async function unpublishArticleAction(
 }
 
 export async function publishArticleAction(
-  slug: string,
+  id: string,
   sha: string,
 ): Promise<ActionResult<Article>> {
   try {
-    const result = await getArticleAction(slug);
+    const result = await getArticleAction(id);
 
     if (!result.success || !result.data) {
       return { success: false, error: "Article not found" };
@@ -355,6 +362,7 @@ export async function publishArticleAction(
       title: existingArticle.title,
       description: existingArticle.description,
       published: true,
+      lang: existingArticle.lang,
       tags: existingArticle.tags,
       coverImage: existingArticle.coverImage,
       createdAt: existingArticle.createdAt,
@@ -362,7 +370,7 @@ export async function publishArticleAction(
     });
 
     const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
-    const path = `${ARTICLES_PATH}/${slug}.md`;
+    const path = `${ARTICLES_PATH}/${id}.md`;
 
     const updatedSha = await updateGitHubFile(
       path,
@@ -386,14 +394,14 @@ export async function publishArticleAction(
 }
 
 export async function updateArticleMetadataAction(
-  slug: string,
+  id: string,
   metadata: {
     createdAt?: string;
     publishedDate?: string;
   },
 ): Promise<ActionResult<Article>> {
   try {
-    const result = await getArticleAction(slug);
+    const result = await getArticleAction(id);
 
     if (!result.success || !result.data) {
       return { success: false, error: "Article not found" };
@@ -406,6 +414,7 @@ export async function updateArticleMetadataAction(
       title: existingArticle.title,
       description: existingArticle.description,
       published: existingArticle.published,
+      lang: existingArticle.lang,
       tags: existingArticle.tags,
       coverImage: existingArticle.coverImage,
       createdAt: metadata.createdAt ?? existingArticle.createdAt,
@@ -414,7 +423,7 @@ export async function updateArticleMetadataAction(
     });
 
     const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
-    const path = `${ARTICLES_PATH}/${slug}.md`;
+    const path = `${ARTICLES_PATH}/${id}.md`;
 
     const updatedSha = await updateGitHubFile(
       path,

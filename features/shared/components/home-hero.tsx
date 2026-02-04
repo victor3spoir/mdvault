@@ -1,4 +1,10 @@
-import { IconBrandGithub, IconMarkdown, IconRocket, IconArrowRight, IconSparkles } from "@tabler/icons-react";
+import {
+  IconArrowRight,
+  IconBrandGithub,
+  IconMarkdown,
+  IconRocket,
+  IconSparkles,
+} from "@tabler/icons-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -15,10 +21,13 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
     >
       {/* Enhanced Background Elements */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[44px_44px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-      
+
       {/* Animated gradient orbs */}
       <div className="absolute top-0 left-1/2 -z-10 h-100 w-150 -translate-x-1/2 bg-primary/15 blur-[120px] opacity-60 animate-pulse" />
-      <div className="absolute bottom-20 right-0 -z-10 h-80 w-80 bg-accent/10 blur-[100px] opacity-40 animate-pulse" style={{ animationDelay: "1s" }} />
+      <div
+        className="absolute bottom-20 right-0 -z-10 h-80 w-80 bg-accent/10 blur-[100px] opacity-40 animate-pulse"
+        style={{ animationDelay: "1s" }}
+      />
       <div className="absolute top-1/3 left-0 -z-10 h-60 w-60 bg-primary/5 blur-[90px] opacity-30" />
 
       <div className="container relative z-10 mx-auto flex max-w-4xl flex-col items-center gap-4 justify-center h-full">
@@ -32,7 +41,10 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
 
         {/* Enhanced Badge with icon animation */}
         <div className="inline-flex items-center gap-2 rounded-full border bg-muted/50 px-3 py-1.5 text-xs sm:text-sm font-medium text-muted-foreground backdrop-blur-sm animate-in fade-in slide-in-from-top-4 duration-1000 delay-150 hover:bg-muted/70 transition-colors shrink-0">
-          <IconSparkles className="h-3 w-3 sm:h-4 sm:w-4 animate-spin shrink-0" style={{ animationDuration: "3s" }} />
+          <IconSparkles
+            className="h-3 w-3 sm:h-4 sm:w-4 animate-spin shrink-0"
+            style={{ animationDuration: "3s" }}
+          />
           <span className="whitespace-nowrap">Modern CMS for GitHub</span>
         </div>
 
@@ -47,7 +59,8 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
             </h1>
           </div>
           <p className="mx-auto max-w-2xl text-sm sm:text-base text-muted-foreground leading-snug">
-            A powerful, intuitive CMS built for GitHub. Create, edit, and manage markdown content with a modern editor and seamless Git integration.
+            A powerful, intuitive CMS built for GitHub. Create, edit, and manage
+            markdown content with a modern editor and seamless Git integration.
           </p>
         </div>
 
@@ -87,21 +100,27 @@ const HomeHero = ({ className, ...props }: React.ComponentProps<"div">) => {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/5 text-primary transition-all duration-300 group-hover:scale-110 shrink-0">
               <IconMarkdown className="h-5 w-5" />
             </div>
-            <h3 className="text-xs font-semibold text-foreground">MDX Editor</h3>
+            <h3 className="text-xs font-semibold text-foreground">
+              MDX Editor
+            </h3>
           </div>
 
           <div className="group flex-1 flex flex-col items-center gap-2 transition-all duration-300 hover:bg-muted/30 p-2 rounded-lg">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-primary/5 text-primary transition-all duration-300 group-hover:scale-110 shrink-0">
               <IconBrandGithub className="h-5 w-5" />
             </div>
-            <h3 className="text-xs font-semibold text-foreground">Git Versioning</h3>
+            <h3 className="text-xs font-semibold text-foreground">
+              Git Versioning
+            </h3>
           </div>
 
           <div className="group flex-1 flex flex-col items-center gap-2 transition-all duration-300 hover:bg-muted/30 p-2 rounded-lg">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-accent/10 text-primary transition-all duration-300 group-hover:scale-110 shrink-0">
               <IconRocket className="h-5 w-5" />
             </div>
-            <h3 className="text-xs font-semibold text-foreground">Fast Deploy</h3>
+            <h3 className="text-xs font-semibold text-foreground">
+              Fast Deploy
+            </h3>
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
 // Route constants
 export const ARTICLE_ROUTES = {
   LIST: "/cms/articles",
-  PREVIEW: (slug: string) => `/cms/articles/${slug}`,
-  EDIT: (slug: string) => `/cms/articles/${slug}/edit`,
+  PREVIEW: (id: string) => `/cms/articles/${id}`,
+  EDIT: (id: string) => `/cms/articles/${id}/edit`,
   NEW: "/cms/articles/new",
 } as const;
 

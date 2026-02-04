@@ -1,7 +1,7 @@
 "use client";
 import { IconLoader2 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { ReactNode, useState, useTransition } from "react";
+import { type ReactNode, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -17,14 +17,14 @@ import {
 import { deleteArticleAction } from "../articles.actions";
 
 interface ArticleDeleteDialogProps {
-  children: ReactNode,
-  articleSlug: string;
+  children: ReactNode;
+  articleId: string;
   articleSha?: string;
 }
 
 const ArticleDeleteDialog = ({
   children,
-  articleSlug,
+  articleId,
   articleSha,
 }: ArticleDeleteDialogProps) => {
   const router = useRouter();
@@ -36,7 +36,7 @@ const ArticleDeleteDialog = ({
 
     startTransition(async () => {
       try {
-        await deleteArticleAction(articleSlug, articleSha);
+        await deleteArticleAction(articleId, articleSha);
         toast.success("Article deleted");
         router.refresh();
       } catch (error) {
@@ -52,9 +52,7 @@ const ArticleDeleteDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        {children}
-      </AlertDialogTrigger>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent className="rounded-2xl">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this article?</AlertDialogTitle>
@@ -82,4 +80,3 @@ const ArticleDeleteDialog = ({
 };
 
 export default ArticleDeleteDialog;
-

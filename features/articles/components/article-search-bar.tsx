@@ -1,16 +1,43 @@
-import { Badge } from "@/components/ui/badge";
-import { DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenu } from "@/components/ui/dropdown-menu";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { IconSearch, IconFilter, IconSortAscending, IconSortDescending, IconCalendar, IconFileText, IconX } from "@tabler/icons-react";
-import { StatusFilter, SortBy, SortOrder, articlesSearchParams } from "../articles.search-params";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+"use client";
+import {
+  IconCalendar,
+  IconFileText,
+  IconFilter,
+  IconLanguage,
+  IconSearch,
+  IconSortAscending,
+  IconSortDescending,
+  IconX,
+} from "@tabler/icons-react";
 import { useQueryStates } from "nuqs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  articlesSearchParams,
+  type LangFilter,
+  type SortBy,
+  type SortOrder,
+  type StatusFilter,
+} from "../articles.search-params";
 
 const ArticleSearchBar = ({ allTags }: { allTags: string[] }) => {
-
-  const [{ tags, searchQuery, status, sortOrder }, setParams] =
-    useQueryStates(articlesSearchParams, { shallow: false })
+  const [{ tags, searchQuery, status, sortOrder, lang }, setParams] =
+    useQueryStates(articlesSearchParams, { shallow: false });
 
   const toggleTag = (tag: string) => {
     const newTags = tags.includes(tag)
@@ -54,6 +81,29 @@ const ArticleSearchBar = ({ allTags }: { allTags: string[] }) => {
               </SelectItem>
               <SelectItem value="draft" className="rounded-xl">
                 Drafts
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={lang}
+            onValueChange={(value: LangFilter) => setParams({ lang: value })}
+          >
+            <SelectTrigger className="h-11 w-35 rounded-2xl border-none bg-muted/50 focus:ring-1 focus:ring-primary/20">
+              <div className="flex items-center gap-2">
+                <IconLanguage className="size-4 text-muted-foreground" />
+                <SelectValue placeholder="Language" />
+              </div>
+            </SelectTrigger>
+            <SelectContent className="rounded-2xl border-muted">
+              <SelectItem value="all" className="rounded-xl">
+                All Languages
+              </SelectItem>
+              <SelectItem value="en" className="rounded-xl">
+                English
+              </SelectItem>
+              <SelectItem value="fr" className="rounded-xl">
+                Français
               </SelectItem>
             </SelectContent>
           </Select>
@@ -102,9 +152,7 @@ const ArticleSearchBar = ({ allTags }: { allTags: string[] }) => {
                 <IconSortAscending className="size-4" /> Ascending
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() =>
-                  setParams({ sortOrder: "desc" as SortOrder })
-                }
+                onClick={() => setParams({ sortOrder: "desc" as SortOrder })}
                 className="gap-2 rounded-xl"
               >
                 <IconSortDescending className="size-4" /> Descending
@@ -124,15 +172,13 @@ const ArticleSearchBar = ({ allTags }: { allTags: string[] }) => {
               onClick={() => toggleTag(tag)}
             >
               {tag}
-              {tags.includes(tag) && (
-                <IconX className="ml-1.5 size-3" />
-              )}
+              {tags.includes(tag) && <IconX className="ml-1.5 size-3" />}
             </Badge>
           ))}
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 export default ArticleSearchBar;

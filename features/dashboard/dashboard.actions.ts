@@ -55,7 +55,7 @@ export async function getRecentActivityAction(
       // Add article published activity
       if (article.published) {
         activities.push({
-          id: `article-pub-${article.slug}`,
+          id: `article-pub-${article.id}`,
           type: "article_published",
           title: "Article published",
           description: article.title,
@@ -66,7 +66,7 @@ export async function getRecentActivityAction(
 
       // Add article created activity
       activities.push({
-        id: `article-create-${article.slug}`,
+        id: `article-create-${article.id}`,
         type: "article_created",
         title: "Article created",
         description: article.title,

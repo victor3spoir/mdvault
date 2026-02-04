@@ -32,9 +32,7 @@ interface ImageUploaderProps {
   maxSize?: number; // in MB
 }
 
-export function ImageUploader({
-  maxSize = 3,
-}: ImageUploaderProps) {
+export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<ImageFile[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -150,9 +148,7 @@ export function ImageUploader({
               ? {
                   ...f,
                   error:
-                    error instanceof Error
-                      ? error.message
-                      : "Failed to upload",
+                    error instanceof Error ? error.message : "Failed to upload",
                 }
               : f,
           ),
@@ -190,10 +186,11 @@ export function ImageUploader({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           onClick={() => fileInputRef.current?.click()}
-          className={`relative w-full rounded-2xl border-2 border-dashed transition-all cursor-pointer p-10 text-center group ${isDragging
-            ? "border-primary bg-primary/5 ring-4 ring-primary/5"
-            : "border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30"
-            }`}
+          className={`relative w-full rounded-2xl border-2 border-dashed transition-all cursor-pointer p-10 text-center group ${
+            isDragging
+              ? "border-primary bg-primary/5 ring-4 ring-primary/5"
+              : "border-muted-foreground/20 hover:border-primary/40 hover:bg-muted/30"
+          }`}
         >
           <input
             ref={fileInputRef}
@@ -322,20 +319,21 @@ export function ImageUploader({
                     {/* Progress Bar */}
                     {(item.progress > 0 ||
                       (isPending && !item.uploaded && !item.error)) && (
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                          <div
-                            className={`h-full transition-all duration-500 ${item.error
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                        <div
+                          className={`h-full transition-all duration-500 ${
+                            item.error
                               ? "bg-destructive"
                               : item.progress === 100
                                 ? "bg-green-500"
                                 : "bg-primary animate-pulse"
-                              }`}
-                            style={{
-                              width: `${item.progress || (isPending ? 40 : 0)}%`,
-                            }}
-                          />
-                        </div>
-                      )}
+                          }`}
+                          style={{
+                            width: `${item.progress || (isPending ? 40 : 0)}%`,
+                          }}
+                        />
+                      </div>
+                    )}
 
                     {item.error && (
                       <p className="text-[10px] font-medium text-destructive">

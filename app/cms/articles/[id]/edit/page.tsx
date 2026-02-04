@@ -6,7 +6,9 @@ interface EditArticlePageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditArticlePage({ params }: Readonly<EditArticlePageProps>) {
+export default async function EditArticlePage({
+  params,
+}: Readonly<EditArticlePageProps>) {
   const { id } = await params;
   const result = await getArticleAction(id);
 
@@ -18,5 +20,5 @@ export default async function EditArticlePage({ params }: Readonly<EditArticlePa
     <div className="max-h-full overflow-y-hidden">
       <ArticleEditor mode="edit" article={result.data} />
     </div>
-  )
+  );
 }

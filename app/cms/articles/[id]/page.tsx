@@ -1,12 +1,12 @@
-import { notFound } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
 import { IconArrowLeft, IconEdit } from "@tabler/icons-react";
-import { getArticleAction } from "@/features/articles/articles.actions";
-import { MDXContent } from "@/lib/mdx";
-import PageLayout from "@/features/shared/components/page-layout";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { getArticleAction } from "@/features/articles/articles.actions";
+import PageLayout from "@/features/shared/components/page-layout";
+import { MDXContent } from "@/lib/mdx";
 
 interface ArticlePageProps {
   params: Promise<{ id: string }>;
@@ -91,7 +91,6 @@ export default async function Page({ params }: Readonly<ArticlePageProps>) {
           </div>
         )}
 
-        
         <article className="prose dark:prose-invert max-w-none">
           <MDXContent source={article.content} />
         </article>

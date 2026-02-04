@@ -1,10 +1,8 @@
-
 export interface ArticleFrontmatter {
   title: string;
   description?: string;
   published: boolean;
-  // new add
-  // lang: string
+  lang: "fr" | "en";
   author?: string;
   tags?: string[];
   coverImage?: string;
@@ -23,10 +21,11 @@ export interface GitHubFile {
 }
 
 export interface Article {
-  slug: string;
+  id: string;
   title: string;
   description?: string;
   content: string;
+  lang: "fr" | "en";
   createdAt: string;
   updatedAt: string;
   publishedAt?: string;
@@ -37,10 +36,17 @@ export interface Article {
   sha?: string;
 }
 
-
-export type CreateArticleInput = Pick<Article, "slug" | "title" | "content"
-  | "description" | "published" | "tags" | "coverImage">
+export type CreateArticleInput = Pick<
+  Article,
+  | "title"
+  | "content"
+  | "description"
+  | "published"
+  | "tags"
+  | "coverImage"
+  | "lang"
+>;
 
 export interface UpdateArticleInput extends Partial<CreateArticleInput> {
   sha: string;
-} 
+}

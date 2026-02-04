@@ -11,15 +11,17 @@ interface MediaFiltersProps {
 }
 
 export default function MediaFilters({ imageTypes }: MediaFiltersProps) {
-  const [{ search, filter }, setMediaFilters] = useQueryStates(mediaFilteringParams, {
-    shallow: false,
-  })
-
+  const [{ search, filter }, setMediaFilters] = useQueryStates(
+    mediaFilteringParams,
+    {
+      shallow: false,
+    },
+  );
 
   const hasActiveFilters = search || filter !== "all";
 
   const resetFilters = () => {
-    setMediaFilters({ search: "", filter: "" })
+    setMediaFilters({ search: "", filter: "" });
   };
 
   return (
@@ -85,4 +87,3 @@ export default function MediaFilters({ imageTypes }: MediaFiltersProps) {
     </div>
   );
 }
-

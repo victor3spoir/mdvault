@@ -48,7 +48,7 @@ function CustomImage({ src, alt }: { src?: string; alt?: string }) {
       <Image
         src={src}
         alt={alt || ""}
-        width={800}
+        width={600}
         height={450}
         className="rounded-lg my-6 w-full h-auto"
         unoptimized

@@ -36,10 +36,10 @@ export function PostMetadataEditor({
   const handleSave = () => {
     startTransition(async () => {
       try {
-        const result = await updateArticleMetadataAction(article.slug, {
+        const result = await updateArticleMetadataAction(article.id, {
           createdAt,
         });
-        
+
         if (!result.success) {
           toast.error("Failed to update metadata", {
             description: result.error,
@@ -62,9 +62,7 @@ export function PostMetadataEditor({
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        {children}
-      </AlertDialogTrigger>
+      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
       <AlertDialogContent className="max-w-md rounded-3xl p-8">
         <AlertDialogHeader className="mb-6">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
@@ -105,7 +103,7 @@ export function PostMetadataEditor({
         </div>
 
         <AlertDialogFooter className="mt-8 gap-3">
-          <AlertDialogCancel 
+          <AlertDialogCancel
             disabled={isPending}
             className="h-12 flex-1 rounded-2xl border-muted bg-muted/30 hover:bg-muted/50"
           >

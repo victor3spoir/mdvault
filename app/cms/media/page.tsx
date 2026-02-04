@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import {
-  TooltipProvider,
-} from "@/components/ui/tooltip";
-import PageLayout from "@/features/shared/components/page-layout";
-import MediaContent, { MediaSkeleton } from "@/features/medias/components/media-content";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import MediaContent, {
+  MediaSkeleton,
+} from "@/features/medias/components/media-content";
 import { loadMediaFilteringParams } from "@/features/medias/medias.types";
+import PageLayout from "@/features/shared/components/page-layout";
 
 export const metadata = {
   title: "Media Library - MDVault",

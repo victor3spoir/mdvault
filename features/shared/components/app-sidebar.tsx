@@ -56,6 +56,14 @@ const navItems: NavItem[] = [
     ],
   },
   {
+    title: "Posts",
+    icon: <IconFileText className="size-4" />,
+    children: [
+      { title: "All Posts", href: "/cms/posts" },
+      { title: "New Post", href: "/cms/posts/new" },
+    ],
+  },
+  {
     title: "Media",
     href: "/cms/media",
     icon: <IconPhoto className="size-4" />,
