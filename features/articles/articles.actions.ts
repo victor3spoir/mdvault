@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { cacheTag, updateTag } from "next/cache";
 import type { ActionResult } from "@/features/shared/shared.types";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
+import { getCurrentUser } from "@/lib/user";
 import {
   CreateArticleSchema,
   UpdateArticleSchema,
@@ -173,6 +174,7 @@ export async function createArticleAction(
     const id = randomUUID();
     const now = new Date().toISOString();
     const { body: cleanContent } = parseFrontmatter(validatedInput.content);
+    const currentUser = getCurrentUser();
 
     const frontmatter = generateFrontmatter({
       title: validatedInput.title,
@@ -181,6 +183,7 @@ export async function createArticleAction(
       lang: validatedInput.lang,
       tags: validatedInput.tags,
       coverImage: validatedInput.coverImage,
+      author: validatedInput.author || currentUser,
       createdAt: now,
       updatedAt: now,
     });
@@ -199,6 +202,7 @@ export async function createArticleAction(
       {
         ...validatedInput,
         published: validatedInput.published ?? false,
+        author: validatedInput.author || currentUser,
         createdAt: now,
         updatedAt: now,
       } as ArticleFrontmatter,
@@ -238,6 +242,7 @@ export async function updateArticleAction(
       lang: validatedInput.lang ?? existingArticle.lang,
       tags: validatedInput.tags ?? existingArticle.tags,
       coverImage: validatedInput.coverImage ?? existingArticle.coverImage,
+      author: validatedInput.author ?? existingArticle.author,
       createdAt: existingArticle.createdAt,
       updatedAt: now,
     });
@@ -258,6 +263,7 @@ export async function updateArticleAction(
       description: validatedInput.description ?? existingArticle.description,
       content: cleanContent,
       lang: validatedInput.lang ?? existingArticle.lang,
+      author: validatedInput.author ?? existingArticle.author,
       updatedAt: now,
       published: validatedInput.published ?? existingArticle.published,
       tags: validatedInput.tags ?? existingArticle.tags,

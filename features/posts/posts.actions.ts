@@ -3,6 +3,7 @@
 import { cacheTag, updateTag } from "next/cache";
 import type { ActionResult } from "@/features/shared/shared.types";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
+import { getCurrentUser } from "@/lib/user";
 import type { GitHubFile, Post, PostFrontmatter } from "./posts.types";
 
 const POSTS_PATH = "posts";
@@ -216,11 +217,12 @@ export async function createPostAction(
 ): Promise<ActionResult<Post>> {
   try {
     const now = new Date().toISOString();
+    const currentUser = getCurrentUser();
     const frontmatter: PostFrontmatter = {
       title: input.title,
       content: input.content,
       published: input.published,
-      author: input.author,
+      author: input.author || currentUser,
       link: input.link,
       coverImage: input.coverImage,
       createdAt: now,
@@ -262,11 +264,12 @@ export async function updatePostAction(
 ): Promise<ActionResult<Post>> {
   try {
     const now = new Date().toISOString();
+    const currentUser = getCurrentUser();
     const frontmatter: PostFrontmatter = {
       title: input.title,
       content: input.content,
       published: input.published,
-      author: input.author,
+      author: input.author || currentUser,
       link: input.link,
       coverImage: input.coverImage,
       createdAt: input.createdAt,

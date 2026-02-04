@@ -1,5 +1,3 @@
-"use client";
-
 import { IconFileText } from "@tabler/icons-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PostCard } from "@/features/posts/components/post-card";
@@ -13,7 +11,7 @@ export function PostsList({ posts }: PostsListProps) {
   return (
     <div className="flex w-full flex-col gap-8">
       {posts.length > 0 ? (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))] gap-6">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(220px,100%),1fr))] gap-6">
           {posts.map((post) => (
             <PostCard key={post.slug} post={post} />
           ))}
