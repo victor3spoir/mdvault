@@ -678,6 +678,7 @@ article ul:has(> li > input[type="checkbox"]) {
   min-height: 0;
   flex: 1;
   overflow: hidden;
+  overflow-y: scroll;
 }
 
 .mdx-editor-wrapper .mdxeditor {

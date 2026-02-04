@@ -21,8 +21,8 @@ import {
 } from "@/components/ui/tooltip";
 import type { Post } from "@/features/posts/posts.types";
 import { formatDate } from "@/features/shared/shared.utils";
-import PostDeleteDialog from "./post-delete-dialog";
 import { PostPublishDialog } from "./post-publish-dialog";
+import PostDeleteDialog from "./post-delete-dialog";
 
 interface PostCardProps {
   post: Post;

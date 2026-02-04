@@ -79,7 +79,7 @@ export default function InitializedMDXEditor({
   return (
     <MDXEditor
       plugins={[
-        headingsPlugin(),
+        headingsPlugin({ allowedHeadingLevels: [2, 3, 4, 5, 6] }),
         listsPlugin(),
         quotePlugin(),
         thematicBreakPlugin(),
