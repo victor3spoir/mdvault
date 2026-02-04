@@ -28,8 +28,8 @@ export function PostPublishDialog({ children, post }: PostPublishDialogProps) {
   const handlePublish = async () => {
     setIsLoading(true);
     const result = post.published
-      ? await unpublishPostAction(post.slug, post.sha!, post.createdAt)
-      : await publishPostAction(post.slug, post.sha!, post.createdAt);
+      ? await unpublishPostAction(post.id, post.sha!, post.createdAt)
+      : await publishPostAction(post.id, post.sha!, post.createdAt);
     setIsLoading(false);
 
     if (result.success) {

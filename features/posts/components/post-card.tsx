@@ -117,7 +117,7 @@ export function PostCard({ post }: PostCardProps) {
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/posts/${post.slug}`}>
+                    <Link href={`/cms/posts/${post.id}`}>
                       <IconEye className="size-4" />
                     </Link>
                   </Button>
@@ -133,7 +133,7 @@ export function PostCard({ post }: PostCardProps) {
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={`/cms/posts/${post.slug}/edit`}>
+                    <Link href={`/cms/posts/${post.id}/edit`}>
                       <IconEdit className="size-4" />
                     </Link>
                   </Button>
@@ -166,7 +166,7 @@ export function PostCard({ post }: PostCardProps) {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <PostDeleteDialog postSlug={post.slug} postSha={post.sha!}>
+                  <PostDeleteDialog postId={post.id} postSha={post.sha!}>
                     <Button
                       variant="ghost"
                       size="icon"

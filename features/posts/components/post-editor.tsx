@@ -18,10 +18,9 @@ import type { Post } from "@/features/posts/posts.types";
 
 interface PostEditorProps {
   post?: Post;
-  slug?: string;
 }
 
-export function PostEditor({ post, slug }: PostEditorProps) {
+export function PostEditor({ post }: PostEditorProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -38,7 +37,6 @@ export function PostEditor({ post, slug }: PostEditorProps) {
     }
 
     startTransition(async () => {
-      const postSlug = slug || title.toLowerCase().replace(/\s+/g, "-");
       const input = {
         title,
         content,
@@ -49,12 +47,12 @@ export function PostEditor({ post, slug }: PostEditorProps) {
       };
 
       const result = post
-        ? await updatePostAction(postSlug, {
+        ? await updatePostAction(post.id, {
             ...input,
             sha: post.sha!,
             createdAt: post.createdAt,
           })
-        : await createPostAction(postSlug, input);
+        : await createPostAction(input);
 
       if (result.success) {
         toast.success(post ? "Post updated" : "Post created");

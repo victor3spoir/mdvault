@@ -3,12 +3,12 @@ import { getPostAction } from "@/features/posts/posts.actions";
 import PageLayout from "@/features/shared/components/page-layout";
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export default async function Page({ params }: PageProps) {
-  const { slug } = await params;
-  const postResult = await getPostAction(slug);
+  const { id } = await params;
+  const postResult = await getPostAction(id);
 
   if (!postResult.success) {
     return <div>Post not found</div>;
@@ -27,7 +27,7 @@ export default async function Page({ params }: PageProps) {
       ]}
     >
       <div className="max-w-2xl">
-        <PostEditor post={post} slug={slug} />
+        <PostEditor post={post} />
       </div>
     </PageLayout>
   );

@@ -14,7 +14,7 @@ export function generateFrontmatter(data: ArticleFrontmatter): string {
   return matter.stringify("", cleanData).trim();
 }
 
-export function parseFrontmatter(content: string): {
+export function parseArticleFrontmatter(content: string): {
   frontmatter: ArticleFrontmatter;
   body: string;
 } {
@@ -44,7 +44,7 @@ export function updateFrontmatter(
   content: string,
   updates: Partial<ArticleFrontmatter>,
 ): string {
-  const { frontmatter, body } = parseFrontmatter(content);
+  const { frontmatter, body } = parseArticleFrontmatter(content);
   const updatedFrontmatter = { ...frontmatter, ...updates };
   const frontmatterString = generateFrontmatter(updatedFrontmatter);
 

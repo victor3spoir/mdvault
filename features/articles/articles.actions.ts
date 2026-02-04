@@ -10,7 +10,7 @@ import {
   UpdateArticleSchema,
 } from "@/lib/validation/article.schema";
 import type { Article, ArticleFrontmatter, GitHubFile } from "./articles.types";
-import { generateFrontmatter, parseFrontmatter } from "./articles.utils";
+import { generateFrontmatter, parseArticleFrontmatter } from "./articles.utils";
 
 const { ARTICLES_PATH, MEDIA_PATH: IMAGES_PATH } = githubRepoInfo;
 
@@ -94,7 +94,7 @@ export async function listArticlesAction(): Promise<ActionResult<Article[]>> {
     const articles: Article[] = await Promise.all(
       mdFiles.map(async (file) => {
         const content = await getArticleContentAction(file.path);
-        const { frontmatter, body } = parseFrontmatter(content);
+        const { frontmatter, body } = parseArticleFrontmatter(content);
         const id = file.name.replace(/\.mdx?$/, "");
         return createArticleObject(id, frontmatter, body, file.sha);
       }),
@@ -151,7 +151,7 @@ export async function getArticleAction(
     const content = Buffer.from(response.data.content, "base64").toString(
       "utf-8",
     );
-    const { frontmatter, body } = parseFrontmatter(content);
+    const { frontmatter, body } = parseArticleFrontmatter(content);
 
     const article = createArticleObject(
       id,
@@ -173,7 +173,9 @@ export async function createArticleAction(
     const validatedInput = CreateArticleSchema.parse(input);
     const id = randomUUID();
     const now = new Date().toISOString();
-    const { body: cleanContent } = parseFrontmatter(validatedInput.content);
+    const { body: cleanContent } = parseArticleFrontmatter(
+      validatedInput.content,
+    );
     const currentUser = getCurrentUser();
 
     const frontmatter = generateFrontmatter({
@@ -221,7 +223,7 @@ export async function updateArticleAction(
 
     const now = new Date().toISOString();
     const rawContent = validatedInput.content ?? existingArticle.content;
-    const { body: cleanContent } = parseFrontmatter(rawContent);
+    const { body: cleanContent } = parseArticleFrontmatter(rawContent);
 
     const frontmatter = generateFrontmatter({
       title: validatedInput.title ?? existingArticle.title,

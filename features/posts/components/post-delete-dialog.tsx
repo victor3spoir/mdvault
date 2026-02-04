@@ -15,13 +15,13 @@ import { deletePostAction } from "@/features/posts/posts.actions";
 
 interface PostDeleteDialogProps {
   children: React.ReactNode;
-  postSlug: string;
+  postId: string;
   postSha: string;
 }
 
 export default function PostDeleteDialog({
   children,
-  postSlug,
+  postId,
   postSha,
 }: PostDeleteDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +29,7 @@ export default function PostDeleteDialog({
 
   const handleDelete = async () => {
     setIsDeleting(true);
-    const result = await deletePostAction(postSlug, postSha);
+    const result = await deletePostAction(postId, postSha);
     setIsDeleting(false);
 
     if (result.success) {

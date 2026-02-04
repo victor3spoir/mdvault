@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { cacheTag, updateTag } from "next/cache";
 import type { ActionResult } from "@/features/shared/shared.types";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
@@ -25,12 +26,12 @@ async function fetchLatestSha(path: string): Promise<string | undefined> {
 }
 
 function createPostObject(
-  slug: string,
+  id: string,
   frontmatter: PostFrontmatter,
   sha?: string,
 ): Post {
   return {
-    slug,
+    id,
     title: frontmatter.title,
     content: frontmatter.content,
     createdAt: frontmatter.createdAt || new Date().toISOString(),
@@ -84,8 +85,8 @@ export async function listPostsAction(): Promise<ActionResult<Post[]>> {
       mdFiles.map(async (file) => {
         const content = await getPostContentAction(file.path);
         const frontmatter = parseFrontmatterToPost(content);
-        const slug = file.name.replace(".md", "");
-        return createPostObject(slug, frontmatter, file.sha);
+        const id = file.name.replace(".md", "");
+        return createPostObject(id, frontmatter, file.sha);
       }),
     );
 
@@ -187,16 +188,16 @@ function generateFrontmatterText(data: PostFrontmatter): string {
   return frontmatter;
 }
 
-export async function getPostAction(slug: string): Promise<ActionResult<Post>> {
+export async function getPostAction(id: string): Promise<ActionResult<Post>> {
   try {
-    const path = `${POSTS_PATH}/${slug}.md`;
+    const path = `${POSTS_PATH}/${id}.md`;
     const content = await getPostContentAction(path);
     const frontmatter = parseFrontmatterToPost(content);
     const sha = await fetchLatestSha(path);
 
     return {
       success: true,
-      data: createPostObject(slug, frontmatter, sha),
+      data: createPostObject(id, frontmatter, sha),
     };
   } catch (error) {
     console.error("Failed to get post:", error);
@@ -204,18 +205,16 @@ export async function getPostAction(slug: string): Promise<ActionResult<Post>> {
   }
 }
 
-export async function createPostAction(
-  slug: string,
-  input: {
-    title: string;
-    content: string;
-    published: boolean;
-    coverImage?: string;
-    link?: string;
-    author?: string;
-  },
-): Promise<ActionResult<boolean>> {
+export async function createPostAction(input: {
+  title: string;
+  content: string;
+  published: boolean;
+  coverImage?: string;
+  link?: string;
+  author?: string;
+}): Promise<ActionResult<boolean>> {
   try {
+    const id = randomUUID();
     const now = new Date().toISOString();
     const currentUser = getCurrentUser();
     const frontmatter: PostFrontmatter = {
@@ -232,7 +231,7 @@ export async function createPostAction(
     const frontmatterText = generateFrontmatterText(frontmatter);
     const fileContent = `${frontmatterText}${input.content}\n`;
 
-    const path = `${POSTS_PATH}/${slug}.md`;
+    const path = `${POSTS_PATH}/${id}.md`;
     await updateGitHubFile(path, fileContent, `Create post: ${input.title}`);
 
     return {
@@ -246,7 +245,7 @@ export async function createPostAction(
 }
 
 export async function updatePostAction(
-  slug: string,
+  id: string,
   input: {
     title: string;
     content: string;
@@ -275,7 +274,7 @@ export async function updatePostAction(
     const frontmatterText = generateFrontmatterText(frontmatter);
     const fileContent = `${frontmatterText}${input.content}\n`;
 
-    const path = `${POSTS_PATH}/${slug}.md`;
+    const path = `${POSTS_PATH}/${id}.md`;
     await updateGitHubFile(
       path,
       fileContent,
@@ -294,11 +293,11 @@ export async function updatePostAction(
 }
 
 export async function deletePostAction(
-  slug: string,
+  id: string,
   sha: string,
 ): Promise<ActionResult<boolean>> {
   try {
-    const path = `${POSTS_PATH}/${slug}.md`;
+    const path = `${POSTS_PATH}/${id}.md`;
     const latestSha = await fetchLatestSha(path);
 
     await octokit.repos.deleteFile({
@@ -318,12 +317,12 @@ export async function deletePostAction(
 }
 
 export async function publishPostAction(
-  slug: string,
+  id: string,
   sha: string,
   createdAt: string,
 ): Promise<ActionResult<boolean>> {
   try {
-    const path = `${POSTS_PATH}/${slug}.md`;
+    const path = `${POSTS_PATH}/${id}.md`;
     const content = await getPostContentAction(path);
     const frontmatter = parseFrontmatterToPost(content);
 
@@ -353,12 +352,12 @@ export async function publishPostAction(
 }
 
 export async function unpublishPostAction(
-  slug: string,
+  id: string,
   sha: string,
   createdAt: string,
 ): Promise<ActionResult<boolean>> {
   try {
-    const path = `${POSTS_PATH}/${slug}.md`;
+    const path = `${POSTS_PATH}/${id}.md`;
     const content = await getPostContentAction(path);
     const frontmatter = parseFrontmatterToPost(content);
 

@@ -20,7 +20,7 @@ export interface GitHubFile {
 }
 
 export interface Post {
-  slug: string;
+  id: string;
   title: string;
   content: string;
   createdAt: string;

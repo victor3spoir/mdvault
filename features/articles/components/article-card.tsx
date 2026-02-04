@@ -149,7 +149,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
                     size="icon"
                     className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary"
                   >
-                    <Link href={{ href: `/cms/articles/${article.id}/edit` }}>
+                    <Link href={`/cms/articles/${article.id}/edit`}>
                       <IconEdit className="size-4" />
                     </Link>
                   </Button>
