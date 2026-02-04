@@ -101,7 +101,7 @@ export default async function Page({ params }: Readonly<ArticlePageProps>) {
 
         {/* Sidebar with table of contents */}
         <div className="lg:col-span-1">
-          <div className="sticky top-20 rounded-lg border bg-card p-4">
+          <div className="sticky top-0 max-h-screen overflow-y-auto rounded-lg border bg-card p-4">
             <TableOfContents />
           </div>
         </div>

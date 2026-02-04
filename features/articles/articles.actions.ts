@@ -168,7 +168,7 @@ export async function getArticleAction(
 
 export async function createArticleAction(
   input: unknown,
-): Promise<ActionResult<Article>> {
+): Promise<ActionResult<boolean>> {
   try {
     const validatedInput = CreateArticleSchema.parse(input);
     const id = randomUUID();
@@ -191,25 +191,13 @@ export async function createArticleAction(
     const fileContent = `${frontmatter}\n\n${cleanContent}`;
     const path = `${ARTICLES_PATH}/${id}.md`;
 
-    const sha = await updateGitHubFile(
+    await updateGitHubFile(
       path,
       fileContent,
       `Create article: ${validatedInput.title}`,
     );
 
-    const article = createArticleObject(
-      id,
-      {
-        ...validatedInput,
-        published: validatedInput.published ?? false,
-        author: validatedInput.author || currentUser,
-        createdAt: now,
-        updatedAt: now,
-      } as ArticleFrontmatter,
-      cleanContent,
-      sha,
-    );
-    return { success: true, data: article };
+    return { success: true, data: true };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to create article";
@@ -220,7 +208,7 @@ export async function createArticleAction(
 export async function updateArticleAction(
   id: string,
   input: unknown,
-): Promise<ActionResult<Article>> {
+): Promise<ActionResult<boolean>> {
   try {
     const validatedInput = UpdateArticleSchema.parse(input);
     const result = await getArticleAction(id);
@@ -250,27 +238,14 @@ export async function updateArticleAction(
     const fileContent = `${frontmatter}\n\n${cleanContent}`;
     const path = `${ARTICLES_PATH}/${id}.md`;
 
-    const sha = await updateGitHubFile(
+    await updateGitHubFile(
       path,
       fileContent,
       `Update article: ${validatedInput.title ?? existingArticle.title}`,
       existingArticle.sha,
     );
 
-    const updated = {
-      ...existingArticle,
-      title: validatedInput.title ?? existingArticle.title,
-      description: validatedInput.description ?? existingArticle.description,
-      content: cleanContent,
-      lang: validatedInput.lang ?? existingArticle.lang,
-      author: validatedInput.author ?? existingArticle.author,
-      updatedAt: now,
-      published: validatedInput.published ?? existingArticle.published,
-      tags: validatedInput.tags ?? existingArticle.tags,
-      coverImage: validatedInput.coverImage ?? existingArticle.coverImage,
-      sha,
-    };
-    return { success: true, data: updated };
+    return { success: true, data: true };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to update article";
@@ -281,7 +256,7 @@ export async function updateArticleAction(
 export async function deleteArticleAction(
   id: string,
   sha: string,
-): Promise<ActionResult<void>> {
+): Promise<ActionResult<boolean>> {
   try {
     const path = `${ARTICLES_PATH}/${id}.md`;
 
@@ -293,7 +268,7 @@ export async function deleteArticleAction(
       sha,
     });
     updateTag("articles");
-    return { success: true, data: undefined };
+    return { success: true, data: true };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to delete article";
@@ -304,7 +279,7 @@ export async function deleteArticleAction(
 export async function unpublishArticleAction(
   id: string,
   sha: string,
-): Promise<ActionResult<Article>> {
+): Promise<ActionResult<boolean>> {
   try {
     const result = await getArticleAction(id);
 
@@ -329,20 +304,14 @@ export async function unpublishArticleAction(
     const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
     const path = `${ARTICLES_PATH}/${id}.md`;
 
-    const updatedSha = await updateGitHubFile(
+    await updateGitHubFile(
       path,
       fileContent,
       `Unpublish article: ${existingArticle.title}`,
       sha,
     );
 
-    const updated = {
-      ...existingArticle,
-      published: false,
-      updatedAt: now,
-      sha: updatedSha,
-    };
-    return { success: true, data: updated };
+    return { success: true, data: true };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to unpublish article";
@@ -353,7 +322,7 @@ export async function unpublishArticleAction(
 export async function publishArticleAction(
   id: string,
   sha: string,
-): Promise<ActionResult<Article>> {
+): Promise<ActionResult<boolean>> {
   try {
     const result = await getArticleAction(id);
 
@@ -378,20 +347,14 @@ export async function publishArticleAction(
     const fileContent = `${frontmatter}\n\n${existingArticle.content}`;
     const path = `${ARTICLES_PATH}/${id}.md`;
 
-    const updatedSha = await updateGitHubFile(
+    await updateGitHubFile(
       path,
       fileContent,
       `Publish article: ${existingArticle.title}`,
       sha,
     );
 
-    const updated = {
-      ...existingArticle,
-      published: true,
-      updatedAt: now,
-      sha: updatedSha,
-    };
-    return { success: true, data: updated };
+    return { success: true, data: true };
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to publish article";

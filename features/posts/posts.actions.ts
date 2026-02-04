@@ -214,7 +214,7 @@ export async function createPostAction(
     link?: string;
     author?: string;
   },
-): Promise<ActionResult<Post>> {
+): Promise<ActionResult<boolean>> {
   try {
     const now = new Date().toISOString();
     const currentUser = getCurrentUser();
@@ -233,15 +233,11 @@ export async function createPostAction(
     const fileContent = `${frontmatterText}${input.content}\n`;
 
     const path = `${POSTS_PATH}/${slug}.md`;
-    const sha = await updateGitHubFile(
-      path,
-      fileContent,
-      `Create post: ${input.title}`,
-    );
+    await updateGitHubFile(path, fileContent, `Create post: ${input.title}`);
 
     return {
       success: true,
-      data: createPostObject(slug, frontmatter, sha),
+      data: true,
     };
   } catch (error) {
     console.error("Failed to create post:", error);
@@ -261,7 +257,7 @@ export async function updatePostAction(
     sha: string;
     createdAt: string;
   },
-): Promise<ActionResult<Post>> {
+): Promise<ActionResult<boolean>> {
   try {
     const now = new Date().toISOString();
     const currentUser = getCurrentUser();
@@ -280,7 +276,7 @@ export async function updatePostAction(
     const fileContent = `${frontmatterText}${input.content}\n`;
 
     const path = `${POSTS_PATH}/${slug}.md`;
-    const sha = await updateGitHubFile(
+    await updateGitHubFile(
       path,
       fileContent,
       `Update post: ${input.title}`,
@@ -289,7 +285,7 @@ export async function updatePostAction(
 
     return {
       success: true,
-      data: createPostObject(slug, frontmatter, sha),
+      data: true,
     };
   } catch (error) {
     console.error("Failed to update post:", error);
@@ -300,7 +296,7 @@ export async function updatePostAction(
 export async function deletePostAction(
   slug: string,
   sha: string,
-): Promise<ActionResult<{ success: boolean }>> {
+): Promise<ActionResult<boolean>> {
   try {
     const path = `${POSTS_PATH}/${slug}.md`;
     const latestSha = await fetchLatestSha(path);
@@ -314,7 +310,7 @@ export async function deletePostAction(
     });
 
     updateTag("posts");
-    return { success: true, data: { success: true } };
+    return { success: true, data: true };
   } catch (error) {
     console.error("Failed to delete post:", error);
     return { success: false, error: "Failed to delete post" };
@@ -325,7 +321,7 @@ export async function publishPostAction(
   slug: string,
   sha: string,
   createdAt: string,
-): Promise<ActionResult<Post>> {
+): Promise<ActionResult<boolean>> {
   try {
     const path = `${POSTS_PATH}/${slug}.md`;
     const content = await getPostContentAction(path);
@@ -339,7 +335,7 @@ export async function publishPostAction(
     const frontmatterText = generateFrontmatterText(frontmatter);
     const fileContent = `${frontmatterText}${frontmatter.content}\n`;
 
-    const newSha = await updateGitHubFile(
+    await updateGitHubFile(
       path,
       fileContent,
       `Publish post: ${frontmatter.title}`,
@@ -348,7 +344,7 @@ export async function publishPostAction(
 
     return {
       success: true,
-      data: createPostObject(slug, frontmatter, newSha),
+      data: true,
     };
   } catch (error) {
     console.error("Failed to publish post:", error);
@@ -360,7 +356,7 @@ export async function unpublishPostAction(
   slug: string,
   sha: string,
   createdAt: string,
-): Promise<ActionResult<Post>> {
+): Promise<ActionResult<boolean>> {
   try {
     const path = `${POSTS_PATH}/${slug}.md`;
     const content = await getPostContentAction(path);
@@ -372,7 +368,7 @@ export async function unpublishPostAction(
     const frontmatterText = generateFrontmatterText(frontmatter);
     const fileContent = `${frontmatterText}${frontmatter.content}\n`;
 
-    const newSha = await updateGitHubFile(
+    await updateGitHubFile(
       path,
       fileContent,
       `Unpublish post: ${frontmatter.title}`,
@@ -381,7 +377,7 @@ export async function unpublishPostAction(
 
     return {
       success: true,
-      data: createPostObject(slug, frontmatter, newSha),
+      data: true,
     };
   } catch (error) {
     console.error("Failed to unpublish post:", error);
