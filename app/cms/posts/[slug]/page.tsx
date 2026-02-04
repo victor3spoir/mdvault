@@ -8,12 +8,12 @@ import PageLayout from "@/features/shared/components/page-layout";
 import { formatDate } from "@/features/shared/shared.utils";
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
 export default async function Page({ params }: PageProps) {
-  const { id } = await params;
-  const postResult = await getPostAction(id);
+  const { slug } = await params;
+  const postResult = await getPostAction(slug);
 
   if (!postResult.success) {
     return <div>Post not found</div>;
