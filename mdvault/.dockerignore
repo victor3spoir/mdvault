@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next
+out
+
+# Version control
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files (should be injected at runtime)
+.env
+.env.*
+!.env.example
+**/*/env
+
+# Misc
+*.md
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Test/coverage
+coverage
+.nyc_output
+
+# Docker
+Dockerfile
+docker-bake.hcl
+.dockerignore
