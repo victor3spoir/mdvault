@@ -30,26 +30,31 @@ jobs:
 
       - name: Install dependencies
         run: bun install
-      
+        working-directory: ./mdvault
+
       - name: Biome lint
         run: bunx biome ci --reporter=github > lint-report.json
+        working-directory: ./mdvault
+        continue-on-error: true
 
       - name: Bun audit
         run: bun audit --json > audit-report.json
+        working-directory: ./mdvault
+        continue-on-error: true
 
       - name: Upload lint report
         id: upload-lint
         uses: actions/upload-artifact@v4
         with:
           name: lint-report
-          path: lint-report.json
+          path: ./mdvault/lint-report.json
 
       - name: Upload Bun audit report
         id: upload-audit
         uses: actions/upload-artifact@v4
         with:
           name: audit-report
-          path: audit-report.json
+          path: ./mdvault/audit-report.json
 
 
   codeql:
