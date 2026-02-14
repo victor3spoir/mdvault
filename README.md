@@ -28,6 +28,34 @@ MDVault is a lightweight, developer-friendly CMS designed for managing Markdown-
 - **Modern UI**: Clean, responsive interface that works on desktop and tablet
 - **Centralization**: All your assets are centralized in your repos for free.
 
+## Screenshots
+
+### Dashboard
+
+Get an overview of all your content with the intuitive dashboard.
+![Dashboard](./images/dashboard.png)
+
+### Articles Management
+
+Manage your articles with full control over metadata and content.
+![Articles](./images/articles.png)
+
+### Rich Markdown Editor
+
+Write and edit content with the powerful MDX editor featuring live preview.
+![Editor](./images/edit.png)
+
+### Posts Management
+
+Create and manage LinkedIn-style posts with ease.
+![Posts](./images/posts.png)
+
+### Media Gallery
+
+Upload, organize, and manage all your images in one place.
+![Media](./images/media.png)
+
+
 ## Getting Started
 
 ### Prerequisites
@@ -127,6 +155,7 @@ docker run -d \
 3. **Edit Online**: Use MDVault's web interface to create, edit, and organize content
 4. **Version Control**: Every change is automatically committed to GitHub
 5. **Deploy**: Push to production whenever your content is ready
+
 
 ## Architecture
 
