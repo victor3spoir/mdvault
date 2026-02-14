@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  logging:{
+    fetches:{
+      fullUrl:true,
+    },
+    incomingRequests:{}
+  },
+  
   reactCompiler: true,
   typedRoutes: true,
   poweredByHeader: false,

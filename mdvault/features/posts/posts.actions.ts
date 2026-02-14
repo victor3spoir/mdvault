@@ -5,7 +5,10 @@ import { cacheTag, refresh, updateTag } from "next/cache";
 import type { ActionResult } from "@/features/shared/shared.types";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import { getCurrentUser } from "@/lib/user";
+import { logger, createSafeErrorMessage } from "@/lib/logger";
+import { sanitizeMarkdown, sanitizeText } from "@/lib/sanitize";
 import type { GitHubFile, Post, PostFrontmatter } from "./posts.types";
+import { CreatePostSchema, UpdatePostSchema } from "@/lib/validation/post.schema";
 
 const POSTS_PATH = "posts";
 
@@ -20,7 +23,7 @@ async function fetchLatestSha(path: string): Promise<string | undefined> {
       return fileData.data.sha;
     }
   } catch (error) {
-    console.error("Failed to fetch latest file SHA:", error);
+    logger.error("Failed to fetch latest file SHA", error, { path });
   }
   return undefined;
 }
@@ -92,8 +95,8 @@ export async function listPostsAction(): Promise<ActionResult<Post[]>> {
 
     return { success: true, data: posts };
   } catch (error) {
-    console.error("Failed to list posts:", error);
-    return { success: false, error: "Failed to list posts" };
+    logger.error("Failed to list posts", error);
+    return { success: false, error: createSafeErrorMessage(error) };
   }
 }
 
@@ -206,8 +209,8 @@ export async function getPostAction(id: string): Promise<ActionResult<Post>> {
       data: createPostObject(id, frontmatter, sha),
     };
   } catch (error) {
-    console.error("Failed to get post:", error);
-    return { success: false, error: "Failed to get post" };
+    logger.error("Failed to get post", error, { postId: id });
+    return { success: false, error: createSafeErrorMessage(error) };
   }
 }
 
@@ -221,34 +224,40 @@ export async function createPostAction(input: {
   author?: string;
 }): Promise<ActionResult<boolean>> {
   try {
+    // Validate using Zod schema
+    const validatedData = CreatePostSchema.parse(input);
+    
     const id = randomUUID();
     const now = new Date().toISOString();
     const currentUser = getCurrentUser();
     const frontmatter: PostFrontmatter = {
-      title: input.title,
-      content: input.content,
-      published: input.published,
-      lang: input.lang,
-      author: input.author || currentUser,
-      article: input.article,
-      coverImage: input.coverImage,
+      title: validatedData.title,
+      content: sanitizeMarkdown(validatedData.content),
+      published: validatedData.published,
+      lang: validatedData.lang,
+      author: validatedData.author || currentUser,
+      article: validatedData.article,
+      coverImage: validatedData.coverImage,
       createdAt: now,
       updatedAt: now,
     };
 
     const frontmatterText = generateFrontmatterText(frontmatter);
-    const fileContent = `${frontmatterText}${input.content}\n`;
+    const fileContent = `${frontmatterText}${frontmatter.content}\n`;
 
     const path = `${POSTS_PATH}/${id}.md`;
-    await updateGitHubFile(path, fileContent, `Create post: ${input.title}`);
+    await updateGitHubFile(path, fileContent, `Create post: ${validatedData.title}`);
+    logger.info("Post created", { postId: id, title: validatedData.title });
+    updateTag("posts");
+    refresh();
 
     return {
       success: true,
       data: true,
     };
   } catch (error) {
-    console.error("Failed to create post:", error);
-    return { success: false, error: "Failed to create post" };
+    logger.error("Failed to create post", error);
+    return { success: false, error: createSafeErrorMessage(error) };
   }
 }
 
@@ -267,38 +276,44 @@ export async function updatePostAction(
   },
 ): Promise<ActionResult<boolean>> {
   try {
+    // Validate using Zod schema
+    const validatedData = UpdatePostSchema.parse(input);
+    
     const now = new Date().toISOString();
     const currentUser = getCurrentUser();
     const frontmatter: PostFrontmatter = {
-      title: input.title,
-      content: input.content,
-      published: input.published,
-      lang: input.lang,
-      author: input.author || currentUser,
-      article: input.article,
-      coverImage: input.coverImage,
+      title: validatedData.title,
+      content: sanitizeMarkdown(validatedData.content),
+      published: validatedData.published,
+      lang: validatedData.lang,
+      author: validatedData.author || currentUser,
+      article: validatedData.article,
+      coverImage: validatedData.coverImage,
       createdAt: input.createdAt,
       updatedAt: now,
     };
 
     const frontmatterText = generateFrontmatterText(frontmatter);
-    const fileContent = `${frontmatterText}${input.content}\n`;
+    const fileContent = `${frontmatterText}${frontmatter.content}\n`;
 
     const path = `${POSTS_PATH}/${id}.md`;
     await updateGitHubFile(
       path,
       fileContent,
-      `Update post: ${input.title}`,
+      `Update post: ${validatedData.title}`,
       input.sha,
     );
+    logger.info("Post updated", { postId: id });
+    updateTag("posts");
+    refresh();
 
     return {
       success: true,
       data: true,
     };
   } catch (error) {
-    console.error("Failed to update post:", error);
-    return { success: false, error: "Failed to update post" };
+    logger.error("Failed to update post", error, { postId: id });
+    return { success: false, error: createSafeErrorMessage(error) };
   }
 }
 
@@ -318,11 +333,13 @@ export async function deletePostAction(
       sha: latestSha || sha,
     });
 
+    logger.info("Post deleted", { postId: id });
     updateTag("posts");
+    refresh();
     return { success: true, data: true };
   } catch (error) {
-    console.error("Failed to delete post:", error);
-    return { success: false, error: "Failed to delete post" };
+    logger.error("Failed to delete post", error, { postId: id });
+    return { success: false, error: createSafeErrorMessage(error) };
   }
 }
 
@@ -350,6 +367,7 @@ export async function publishPostAction(
       `Publish post: ${frontmatter.title}`,
       sha,
     );
+    logger.info("Post published", { postId: id });
     updateTag("posts");
     refresh();
 
@@ -358,8 +376,8 @@ export async function publishPostAction(
       data: true,
     };
   } catch (error) {
-    console.error("Failed to publish post:", error);
-    return { success: false, error: "Failed to publish post" };
+    logger.error("Failed to publish post", error, { postId: id });
+    return { success: false, error: createSafeErrorMessage(error) };
   }
 }
 
@@ -385,6 +403,7 @@ export async function unpublishPostAction(
       `Unpublish post: ${frontmatter.title}`,
       sha,
     );
+    logger.info("Post unpublished", { postId: id });
     refresh();
     updateTag("posts");
 
@@ -393,7 +412,7 @@ export async function unpublishPostAction(
       data: true,
     };
   } catch (error) {
-    console.error("Failed to unpublish post:", error);
-    return { success: false, error: "Failed to unpublish post" };
+    logger.error("Failed to unpublish post", error, { postId: id });
+    return { success: false, error: createSafeErrorMessage(error) };
   }
 }

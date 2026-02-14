@@ -3,6 +3,8 @@
 import type { ActionResult } from "@/features/shared/shared.types";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import { getCurrentUser } from "@/lib/user";
+import { logger, createSafeErrorMessage } from "@/lib/logger";
+import { sanitizeMarkdown } from "@/lib/sanitize";
 import {
   CreateArticleSchema,
   UpdateArticleSchema,
@@ -25,7 +27,7 @@ async function fetchLatestSha(path: string): Promise<string | undefined> {
 			return fileData.data.sha;
 		}
 	} catch (error) {
-		console.error("Failed to fetch latest file SHA:", error);
+		logger.error("Failed to fetch latest file SHA", error, { path });
 	}
 	return undefined;
 }
@@ -106,8 +108,8 @@ export async function listArticlesAction(): Promise<ActionResult<Article[]>> {
 		);
 		return { success: true, data: sorted };
 	} catch (error) {
-		console.error("Error listing articles:", error);
-		return { success: false, error: "Failed to list articles" };
+		logger.error("Failed to list articles", error);
+		return { success: false, error: createSafeErrorMessage(error) };
 	}
 }
 
@@ -120,7 +122,7 @@ export async function getArticleContentAction(path: string): Promise<string> {
 		});
 
 		if (Array.isArray(response.data) || response.data.type !== "file") {
-			throw new Error("Not a file");
+			throw new Error("Invalid file type");
 		}
 
 		const content = Buffer.from(response.data.content, "base64").toString(
@@ -128,7 +130,7 @@ export async function getArticleContentAction(path: string): Promise<string> {
 		);
 		return content;
 	} catch (error) {
-		console.error("Error getting article content:", error);
+		logger.error("Failed to get article content", error, { path });
 		throw error;
 	}
 }
@@ -147,7 +149,7 @@ export async function getArticleAction(
 		});
 
 		if (Array.isArray(response.data) || response.data.type !== "file") {
-			return { success: false, error: "non trouvé" };
+			return { success: false, error: "Article not found" };
 		}
 
 		const content = Buffer.from(response.data.content, "base64").toString(
@@ -163,8 +165,8 @@ export async function getArticleAction(
 		);
 		return { success: true, data: article };
 	} catch (error) {
-		console.error("Error getting article:", error);
-		return { success: false, error: "Failed to get article" };
+		logger.error("Failed to get article", error, { articleId: id });
+		return { success: false, error: createSafeErrorMessage(error) };
 	}
 }
 
@@ -176,7 +178,7 @@ export async function createArticleAction(
 		const id = randomUUID();
 		const now = new Date().toISOString();
 		const { body: cleanContent } = parseArticleFrontmatter(
-			validatedInput.content,
+			sanitizeMarkdown(validatedInput.content),
 		);
 		const currentUser = getCurrentUser();
 
@@ -202,11 +204,15 @@ export async function createArticleAction(
 		);
 		updateTag("articles");
 		refresh();
+		logger.info("Article created", { articleId: id, title: validatedInput.title });
 		return { success: true, data: id };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Failed to create article";
-		return { success: false, error: message };
+		if (error instanceof Error && "code" in error && error.code === "ERR_BAD_REQUEST") {
+			logger.warn("Invalid article data provided", { error: error.message });
+			return { success: false, error: "Invalid article data. Please check your input." };
+		}
+		logger.error("Failed to create article", error);
+		return { success: false, error: createSafeErrorMessage(error) };
 	}
 }
 
@@ -226,7 +232,8 @@ export async function updateArticleAction(
 
 		const now = new Date().toISOString();
 		const rawContent = validatedInput.content ?? existingArticle.content;
-		const { body: cleanContent } = parseArticleFrontmatter(rawContent);
+		const sanitized = sanitizeMarkdown(rawContent);
+		const { body: cleanContent } = parseArticleFrontmatter(sanitized);
 
 		const frontmatter = generateFrontmatter({
 			title: validatedInput.title ?? existingArticle.title,
@@ -251,11 +258,11 @@ export async function updateArticleAction(
 		);
 		updateTag("articles");
 		refresh();
+		logger.info("Article updated", { articleId: id });
 		return { success: true, data: true };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Failed to update article";
-		return { success: false, error: message };
+		logger.error("Failed to update article", error, { articleId: id });
+		return { success: false, error: createSafeErrorMessage(error) };
 	}
 }
 
@@ -275,11 +282,11 @@ export async function deleteArticleAction(
 		});
 		updateTag("articles");
 		refresh();
+		logger.info("Article deleted", { articleId: id });
 		return { success: true, data: true };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Failed to delete article";
-		return { success: false, error: message };
+		logger.error("Failed to delete article", error, { articleId: id });
+		return { success: false, error: createSafeErrorMessage(error) };
 	}
 }
 
@@ -318,11 +325,11 @@ export async function unpublishArticleAction(
 			sha,
 		);
 		refresh();
+		logger.info("Article unpublished", { articleId: id });
 		return { success: true, data: true };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Failed to unpublish article";
-		return { success: false, error: message };
+		logger.error("Failed to unpublish article", error, { articleId: id });
+		return { success: false, error: createSafeErrorMessage(error) };
 	}
 }
 
@@ -360,12 +367,11 @@ export async function publishArticleAction(
 			`Publish article: ${existingArticle.title}`,
 			sha,
 		);
-
+		logger.info("Article published", { articleId: id });
 		return { success: true, data: true };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Failed to publish article";
-		return { success: false, error: message };
+		logger.error("Failed to publish article", error, { articleId: id });
+		return { success: false, error: createSafeErrorMessage(error) };
 	}
 }
 
@@ -415,13 +421,11 @@ export async function updateArticleMetadataAction(
 			updatedAt: now,
 			sha: updatedSha,
 		};
+		logger.info("Article metadata updated", { articleId: id });
 		return { success: true, data: updated };
 	} catch (error) {
-		const message =
-			error instanceof Error
-				? error.message
-				: "Failed to update article metadata";
-		return { success: false, error: message };
+		logger.error("Failed to update article metadata", error, { articleId: id });
+		return { success: false, error: createSafeErrorMessage(error) };
 	}
 }
 
@@ -443,10 +447,10 @@ export async function uploadImageAction(
 		});
 
 		const url = `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${path}`;
+		logger.info("Image uploaded", { fileName, fileSize: file.size });
 		return { success: true, data: url };
 	} catch (error) {
-		const message =
-			error instanceof Error ? error.message : "Failed to upload image";
-		return { success: false, error: message };
+		logger.error("Failed to upload image", error, { fileName });
+		return { success: false, error: createSafeErrorMessage(error) };
 	}
 }

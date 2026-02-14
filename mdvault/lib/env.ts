@@ -29,11 +29,13 @@ export default function getenv(): EnvVars {
   const owner = GITHUB_OWNER as string;
   const repo = GITHUB_REPO as string;
 
-  // Validation: Check token format
-  if (!token.startsWith("ghp_") && !token.startsWith("github_pat_")) {
-    console.warn(
-      "Warning: GITHUB_TOKEN does not appear to be a valid GitHub token. " +
-        "Expected format: ghp_* or github_pat_*",
+  // Validation: Check token format (NEVER log the actual token)
+  const validTokenPrefixes = ["ghp_", "github_pat_", "ghs_", "ghu_"];
+  const isValidToken = validTokenPrefixes.some((prefix) => token.startsWith(prefix));
+
+  if (!isValidToken) {
+    throw new Error(
+      "Invalid GITHUB_TOKEN format. Expected token to start with: ghp_, github_pat_, ghs_, or ghu_",
     );
   }
 
@@ -44,6 +46,19 @@ export default function getenv(): EnvVars {
 
   if (repo.trim().length === 0) {
     throw new Error("GITHUB_REPO cannot be empty");
+  }
+
+  // Validation: Check owner/repo don't contain invalid characters
+  if (!/^[a-zA-Z0-9_-]+$/.test(owner)) {
+    throw new Error(
+      "GITHUB_OWNER contains invalid characters. Only alphanumeric, hyphens, and underscores are allowed.",
+    );
+  }
+
+  if (!/^[a-zA-Z0-9._-]+$/.test(repo)) {
+    throw new Error(
+      "GITHUB_REPO contains invalid characters. Only alphanumeric, dots, hyphens, and underscores are allowed.",
+    );
   }
 
   return {
