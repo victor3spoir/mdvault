@@ -1,10 +1,10 @@
 "use server";
 
 import type { ActionResult } from "@/features/shared/shared.types";
+import { createSafeErrorMessage, logger } from "@/lib/logger";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
-import { getCurrentUser } from "@/lib/user";
-import { logger, createSafeErrorMessage } from "@/lib/logger";
 import { sanitizeMarkdown } from "@/lib/sanitize";
+import { getCurrentUser } from "@/lib/user";
 import {
   CreateArticleSchema,
   UpdateArticleSchema,
@@ -204,12 +204,22 @@ export async function createArticleAction(
 		);
 		updateTag("articles");
 		refresh();
-		logger.info("Article created", { articleId: id, title: validatedInput.title });
+		logger.info("Article created", {
+			articleId: id,
+			title: validatedInput.title,
+		});
 		return { success: true, data: id };
 	} catch (error) {
-		if (error instanceof Error && "code" in error && error.code === "ERR_BAD_REQUEST") {
+		if (
+			error instanceof Error &&
+			"code" in error &&
+			error.code === "ERR_BAD_REQUEST"
+		) {
 			logger.warn("Invalid article data provided", { error: error.message });
-			return { success: false, error: "Invalid article data. Please check your input." };
+			return {
+				success: false,
+				error: "Invalid article data. Please check your input.",
+			};
 		}
 		logger.error("Failed to create article", error);
 		return { success: false, error: createSafeErrorMessage(error) };
@@ -219,7 +229,7 @@ export async function createArticleAction(
 export async function updateArticleAction(
 	id: string,
 	input: unknown,
-): Promise<ActionResult<boolean>> {
+): Promise<ActionResult<string>> {
 	try {
 		const validatedInput = UpdateArticleSchema.parse(input);
 		const result = await getArticleAction(id);
@@ -259,7 +269,7 @@ export async function updateArticleAction(
 		updateTag("articles");
 		refresh();
 		logger.info("Article updated", { articleId: id });
-		return { success: true, data: true };
+		return { success: true, data: id };
 	} catch (error) {
 		logger.error("Failed to update article", error, { articleId: id });
 		return { success: false, error: createSafeErrorMessage(error) };

@@ -11,9 +11,10 @@ import {
   IconPlus,
   IconSettings,
 } from "@tabler/icons-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import {
   Sidebar,
@@ -34,6 +35,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
+import { getGitHubUserAction } from "@/features/settings/settings.actions";
 import { Logo } from "./logo";
 
 interface NavItem {
@@ -76,6 +78,94 @@ const navItems: NavItem[] = [
     icon: <IconSettings className="size-4" />,
   },
 ];
+
+function UserProfileFooter() {
+  const [user, setUser] = useState<{
+    login: string;
+    name: string | null;
+    avatar_url: string;
+  } | null>(null);
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+
+  useEffect(() => {
+    getGitHubUserAction().then((result) => {
+      if (result.success) {
+        setUser({
+          login: result.data.login,
+          name: result.data.name,
+          avatar_url: result.data.avatar_url,
+        });
+      }
+    });
+  }, []);
+
+  if (!user) {
+    return (
+      <div
+        className={cn(
+          "flex gap-2",
+          isCollapsed
+            ? "flex-col items-center"
+            : "items-center justify-between",
+        )}
+      >
+        <div
+          className={cn(
+            "flex items-center rounded-lg bg-muted/50 animate-pulse",
+            isCollapsed ? "p-2 justify-center" : "gap-3 flex-1 p-3 min-w-0",
+          )}
+        >
+          <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
+            <IconBrandGithub className="size-4 text-primary" />
+          </div>
+          {!isCollapsed && (
+            <div className="flex flex-col text-xs min-w-0">
+              <span className="font-medium">Loading...</span>
+            </div>
+          )}
+        </div>
+        <ThemeToggle />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex gap-2",
+        isCollapsed ? "flex-col items-center" : "items-center justify-between",
+      )}
+    >
+      <Link
+        href="/cms/settings"
+        className={cn(
+          "flex items-center rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors cursor-pointer",
+          isCollapsed ? "p-2 justify-center" : "gap-3 flex-1 p-3 min-w-0",
+        )}
+      >
+        <div className="relative shrink-0">
+          <Image
+            src={user.avatar_url}
+            alt={user.login}
+            width={32}
+            height={32}
+            className="rounded-full size-8"
+          />
+        </div>
+        {!isCollapsed && (
+          <div className="flex flex-col text-xs min-w-0">
+            <span className="font-medium truncate">
+              {user.name || user.login}
+            </span>
+            <span className="text-muted-foreground truncate">@{user.login}</span>
+          </div>
+        )}
+      </Link>
+      <ThemeToggle />
+    </div>
+  );
+}
 
 const AppSidebar = () => {
   const [pathname, setPathname] = useState<string | null>(null);
@@ -191,34 +281,22 @@ const AppSidebar = () => {
       <SidebarSeparator />
 
       <SidebarFooter className="p-4">
-        <div
-          className={cn(
-            "flex gap-2",
-            isCollapsed
-              ? "flex-col items-center"
-              : "items-center justify-between",
-          )}
-        >
-          <div
-            className={cn(
-              "flex items-center rounded-lg bg-muted/50",
-              isCollapsed ? "p-2 justify-center" : "gap-3 flex-1 p-3 min-w-0",
-            )}
-          >
-            <div className="flex size-8 items-center justify-center rounded-full bg-primary/10 shrink-0">
-              <IconBrandGithub className="size-4 text-primary" />
-            </div>
-            {!isCollapsed && (
-              <div className="flex flex-col text-xs min-w-0">
-                <span className="font-medium">Connected</span>
-                <span className="text-muted-foreground truncate">
-                  GitHub Repository
-                </span>
+        <Suspense
+          fallback={
+            <div className="flex gap-2 items-center justify-between">
+              <div className="flex items-center rounded-lg bg-muted/50 gap-3 flex-1 p-3 min-w-0 animate-pulse">
+                <div className="size-8 rounded-full bg-muted shrink-0" />
+                <div className="flex flex-col gap-1 min-w-0">
+                  <div className="h-3 bg-muted rounded w-16" />
+                  <div className="h-2 bg-muted rounded w-12" />
+                </div>
               </div>
-            )}
-          </div>
-          <ThemeToggle />
-        </div>
+              <ThemeToggle />
+            </div>
+          }
+        >
+          <UserProfileFooter />
+        </Suspense>
       </SidebarFooter>
     </Sidebar>
   );

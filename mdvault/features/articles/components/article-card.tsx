@@ -6,6 +6,7 @@ import {
   IconEdit,
   IconEye,
   IconFileText,
+  IconHourglass,
   IconLanguage,
   IconSettings,
   IconTrash,
@@ -15,12 +16,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { getReadingTime } from "../articles.utils";
 import type { Article } from "@/features/articles/articles.types";
 import { formatDate } from "@/features/shared/shared.utils";
 import ArticleDeleteDialog from "./article-delete-dialog";
@@ -33,10 +36,16 @@ interface ArticleCardProps {
 
 export function ArticleCard({ article }: ArticleCardProps) {
   const formattedDate = formatDate(new Date(article.createdAt));
+  const readingTime = getReadingTime(article.content);
 
   return (
     <TooltipProvider>
-      <div className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:shadow-lg hover:border-primary/20">
+      <div
+        className={cn(
+          "group relative flex flex-col overflow-hidden rounded-2xl border transition-all hover:shadow-lg hover:border-primary/20",
+          article.published ? "bg-card" : "bg-card/50 border-dashed border-muted-foreground/30 shadow-xs"
+        )}
+      >
         {/* Cover Image */}
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
           {article.coverImage ? (
@@ -114,6 +123,10 @@ export function ArticleCard({ article }: ArticleCardProps) {
             <span className="flex items-center gap-1.5 shrink-0">
               <IconCalendar className="size-3.5" />
               {formattedDate}
+            </span>
+            <span className="flex items-center gap-1.5 shrink-0 border-l pl-3">
+              <IconHourglass className="size-3.5" />
+              {readingTime} min read
             </span>
             {article.author && (
               <span className="flex items-center gap-1.5 border-l pl-3 truncate">

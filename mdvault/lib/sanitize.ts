@@ -125,7 +125,7 @@ export function sanitizeTags(tags: unknown[]): string[] {
   }
 
   return tags
-    .filter((tag) => typeof tag === "string" && tag.length > 0)
+    .filter((tag): tag is string => typeof tag === "string" && tag.length > 0)
     .map(sanitizeTag)
     .filter((tag) => tag.length > 0);
 }

@@ -1,15 +1,32 @@
-import { IconFileText } from "@tabler/icons-react";
+import { IconFileText, IconSearchOff } from "@tabler/icons-react";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { Article } from "@/features/articles/articles.types";
 import { ArticleCard } from "@/features/articles/components/article-card";
 import ArticleSearchBar from "./article-search-bar";
+import { articlesSearchParamsCache } from "../articles.search-params";
+import type { SearchParams } from "nuqs/server";
 
 interface ArticlesListProps {
   filteredArticles: Article[];
   allTags: string[];
+  searchParams: SearchParams;
 }
 
-export function ArticlesList({ filteredArticles, allTags }: ArticlesListProps) {
+export function ArticlesList({
+  filteredArticles,
+  allTags,
+  searchParams,
+}: ArticlesListProps) {
+  const { searchQuery, status, tags, lang } =
+    articlesSearchParamsCache.parse(searchParams);
+
+  const isFiltered = !!(
+    searchQuery ||
+    (status && status !== "all") ||
+    (tags && tags.length > 0) ||
+    (lang && lang !== "all")
+  );
+
   return (
     <div className="flex w-full flex-col gap-8">
       <ArticleSearchBar allTags={allTags} />
@@ -21,12 +38,28 @@ export function ArticlesList({ filteredArticles, allTags }: ArticlesListProps) {
           ))}
         </div>
       ) : (
-        <div className="flex min-h-100 items-center justify-center rounded-3xl border border-dashed bg-muted/30">
-          <EmptyState
-            icon={<IconFileText className="size-6" />}
-            title="No articles found"
-            description="Try adjusting your filters or search query to find what you're looking for."
-          />
+        <div className="flex min-h-100 items-center justify-center rounded-3xl border border-dashed bg-muted/30 p-12">
+          {isFiltered ? (
+            <EmptyState
+              icon={<IconSearchOff className="size-8" />}
+              title="No results found"
+              description="We couldn't find any articles matching your current filters. Try clearing them or using different terms."
+              action={{
+                label: "Clear Search",
+                href: "/cms/articles",
+              }}
+            />
+          ) : (
+            <EmptyState
+              icon={<IconFileText className="size-8" />}
+              title="Start writing articles"
+              description="Your vault is currently empty. Create your first article to see it appear here."
+              action={{
+                label: "Create Article",
+                href: "/cms/articles/new",
+              }}
+            />
+          )}
         </div>
       )}
     </div>

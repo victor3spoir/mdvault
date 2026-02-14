@@ -15,5 +15,4 @@ services:
       GITHUB_TOKEN: ""
       GITHUB_OWNER: ""
       GITHUB_REPO: ""
-    # env_file:
-    #   - ./mdvault/.env
+

@@ -7,9 +7,7 @@ interface EditArticlePageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function EditArticlePage({
-  params,
-}: Readonly<EditArticlePageProps>) {
+async function ArticleEditorWrapper({ params }: EditArticlePageProps) {
   const { id } = await params;
   const result = await getArticleAction(id);
 
@@ -17,10 +15,16 @@ export default async function EditArticlePage({
     notFound();
   }
 
+  return <ArticleEditor mode="edit" article={result.data} />;
+}
+
+export default function EditArticlePage({
+  params,
+}: Readonly<EditArticlePageProps>) {
   return (
     <div className="max-h-full overflow-y-hidden">
       <Suspense fallback={<div className="p-8">Loading article...</div>}>
-        <ArticleEditor mode="edit" article={result.data} />
+        <ArticleEditorWrapper params={params} />
       </Suspense>
     </div>
   );

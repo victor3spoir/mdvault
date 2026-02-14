@@ -6,17 +6,12 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
 COPY . .
 ENV NODE_OPTIONS='--max-old-space-size=4096'
-# Dummy env vars for build-time (Next.js prerendering)
-# ENV GITHUB_TOKEN=placeholder \
-#     GITHUB_OWNER=placeholder \
-#     GITHUB_REPO=placeholder
-RUN --mount=type=secret,id=github_token \
-  --mount=type=secret,id=github_owner \
-  --mount=type=secret,id=github_repo \
-  export GITHUB_TOKEN="$(cat /run/secrets/github_token)" \
-  export GITHUB_OWNER="$(cat /run/secrets/github_owner)" \
-  export GITHUB_REPO="$(cat /run/secrets/github_repo)" \
-  bun run build
+
+ENV GITHUB_TOKEN=ghp_000000000 \
+  GITHUB_OWNER=fake-username \
+  GITHUB_REPO=fake-repo 
+
+RUN bun run build
 
 
 FROM base AS prod

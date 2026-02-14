@@ -63,10 +63,12 @@ export function MediaPreviewDialog({
               <h3 className="font-semibold text-base line-clamp-2">
                 {image.name}
               </h3>
-              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
-                <span className="size-1.5 rounded-full bg-emerald-500" />
-                Uploaded {new Date(image.uploadedAt).toLocaleDateString()}
-              </p>
+              {image.uploadedAt && (
+                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
+                  <span className="size-1.5 rounded-full bg-emerald-500" />
+                  Uploaded {new Date(image.uploadedAt).toLocaleDateString()}
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-4 py-2 text-xs">

@@ -135,7 +135,12 @@ function log(level: LogLevel, message: string, error?: unknown, context?: Record
     return;
   }
 
-  const timestamp = new Date().toISOString();
+  // During build/prerender, avoid using the current time before dynamic access
+  // to prevent Next.js 16 build errors.
+  const timestamp = process.env.NEXT_PHASE === "phase-production-build" 
+    ? "BUILD_TIME" 
+    : new Date().toISOString();
+    
   const logContext: LogContext = {
     timestamp,
     level,
@@ -162,7 +167,7 @@ function log(level: LogLevel, message: string, error?: unknown, context?: Record
         console.debug(formattedMessage);
       }
       break;
-    case "info":
+    // case "info":
     default:
       console.log(formattedMessage);
   }

@@ -81,6 +81,45 @@ bun run build
 npm run start
 ```
 
+### Running with Docker
+
+MDVault is available as a containerized application. You can pull the image directly from GitHub Container Registry.
+
+#### Using Docker Compose (Recommended)
+
+1. Ensure you have a `compose.yml` file (or use the one provided in the repo):
+
+```yaml
+services:
+  mdvault:
+    image: ghcr.io/victor3spoir/mdvault:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GITHUB_TOKEN: "your_personal_access_token"
+      GITHUB_OWNER: "your_github_username"
+      GITHUB_REPO: "your_content_repository"
+    restart: unless-stopped
+```
+
+2. Start the container:
+```bash
+docker compose up -d
+```
+
+#### Using Docker CLI
+
+```bash
+docker pull ghcr.io/victor3spoir/mdvault:latest
+
+docker run -d \
+  -p 3000:3000 \
+  -e GITHUB_TOKEN=your_token \
+  -e GITHUB_OWNER=your_username \
+  -e GITHUB_REPO=your_repo \
+  ghcr.io/victor3spoir/mdvault:latest
+```
+
 ## How It Works
 
 1. **Connect GitHub**: MDVault connects to your GitHub repository using a personal access token

@@ -1,14 +1,17 @@
 import { IconEye, IconFileText, IconPhoto } from "@tabler/icons-react";
 import Link from "next/link";
+import { headers } from "next/headers";
 import PageLayout from "@/features/shared/components/page-layout";
 import {
   getDashboardStatsAction,
   getRecentActivityAction,
 } from "../../features/dashboard/dashboard.actions";
+import { RecentActivity } from "@/features/dashboard/components/recent-activity";
 
 const Page = async () => {
+  await headers();
   const stats = await getDashboardStatsAction();
-  const _activities = await getRecentActivityAction();
+  const activities = await getRecentActivityAction();
 
   const statsCards = [
     {
@@ -105,7 +108,7 @@ const Page = async () => {
       </div>
 
       {/* Recent Activity */}
-      {/* <RecentActivity activities={activities} /> */}
+      <RecentActivity activities={activities} />
     </PageLayout>
   );
 };

@@ -32,6 +32,27 @@ interface ImageUploaderProps {
   maxSize?: number; // in MB
 }
 
+// Abbreviate long filenames: max 12 characters total
+// "very_long_filename.png" -> "very...png"
+function abbreviateFilename(name: string): string {
+  const maxLength = 12;
+  if (name.length <= maxLength) return name;
+  
+  const lastDot = name.lastIndexOf(".");
+  const extension = lastDot > 0 ? name.slice(lastDot) : "";
+  
+  // Calculate how many chars we can use from the name part
+  const availableForName = maxLength - extension.length - 3; // 3 for "..."
+  
+  if (availableForName <= 0) {
+    // If extension is too long, just truncate everything
+    return name.slice(0, maxLength);
+  }
+  
+  const nameWithoutExt = lastDot > 0 ? name.slice(0, lastDot) : name;
+  return nameWithoutExt.slice(0, availableForName) + "..." + extension;
+}
+
 export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<ImageFile[]>([]);
@@ -204,7 +225,7 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
 
           <div className="flex flex-col items-center gap-4">
             <div
-              className={`rounded-2xl p-4 transition-colors ${isDragging ? "bg-primary/20" : "bg-muted group-hover:bg-primary/10"}`}
+              className={`rounded-2xl p-4 transition-colors ${isDragging ? "bg-primary/20" : "bg-muted/60 group-hover:bg-primary/15"}`}
             >
               <IconUpload
                 className={`size-8 transition-colors ${isDragging ? "text-primary animate-bounce" : "text-muted-foreground group-hover:text-primary"}`}
@@ -222,7 +243,7 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
         </button>
 
         {uploadedFiles.length > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-4 max-w-full">
             <div className="flex items-center justify-between px-1">
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Upload Queue ({uploadedFiles.length})
@@ -259,13 +280,13 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
               </div>
             </div>
 
-            <div className="grid gap-3">
+            <div className="max-h-96 overflow-y-auto pr-2 pb-4 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-muted/30 [&::-webkit-scrollbar-thumb]:bg-muted-foreground/30 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/50">
+              <div className="grid gap-3">
               {uploadedFiles.map((item) => (
                 <div
                   key={item.file.name + item.file.lastModified}
-                  className="group relative flex items-center gap-4 rounded-xl border bg-card p-3 shadow-sm transition-all hover:shadow-md"
+                  className="group relative flex items-center gap-3 rounded-xl border bg-card p-3 shadow-sm transition-all hover:shadow-md"
                 >
-                  {/* Image Preview */}
                   <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-muted border">
                     {item.preview ? (
                       <Image
@@ -282,41 +303,37 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
                     )}
                   </div>
 
-                  {/* File Info and Progress */}
-                  <div className="flex-1 min-w-0 space-y-1.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-sm font-bold truncate leading-none mb-1">
-                          {item.file.name}
-                        </p>
-                        <p className="text-[10px] font-medium text-muted-foreground">
-                          {(item.file.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </div>
+                  <div className="flex-1 min-w-0 space-y-1.5 overflow-hidden">
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold truncate leading-none mb-1" title={item.file.name}>
+                        {abbreviateFilename(item.file.name)}
+                      </p>
+                      <p className="text-[10px] font-medium text-muted-foreground">
+                        {(item.file.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </div>
 
-                      <div className="flex items-center gap-1.5">
-                        {item.uploaded && (
-                          <Badge
-                            variant="secondary"
-                            className="bg-green-500/10 text-green-600 border-green-500/20 gap-1 px-1.5 py-0 h-5 text-[10px]"
-                          >
-                            <IconCheck className="size-3" />
-                            Done
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {item.uploaded && (
+                        <Badge
+                          variant="secondary"
+                          className="bg-green-500/10 text-green-600 border-green-500/20 gap-1 px-1.5 py-0 h-5 text-[10px] whitespace-nowrap"
+                        >
+                          <IconCheck className="size-3" />
+                          Done
                           </Badge>
                         )}
                         {item.error && (
                           <Badge
                             variant="destructive"
-                            className="gap-1 px-1.5 py-0 h-5 text-[10px]"
+                            className="gap-1 px-1.5 py-0 h-5 text-[10px] whitespace-nowrap"
                           >
                             <IconAlertCircle className="size-3" />
                             Error
                           </Badge>
                         )}
-                      </div>
                     </div>
 
-                    {/* Progress Bar */}
                     {(item.progress > 0 ||
                       (isPending && !item.uploaded && !item.error)) && (
                       <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
@@ -342,8 +359,7 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
                     )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-1 shrink-0">
+                  <div className="flex items-center gap-1 shrink-0 ml-auto">
                     {!item.uploaded && !item.error && (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -352,7 +368,7 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
                             disabled={isPending}
                             size="icon"
                             variant="ghost"
-                            className="size-8 rounded-lg text-primary hover:bg-primary/10"
+                            className="size-8 rounded-lg text-primary hover:bg-primary/10 shrink-0"
                           >
                             {isPending ? (
                               <IconLoader2 className="size-4 animate-spin" />
@@ -373,7 +389,7 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
                             disabled={isPending}
                             size="icon"
                             variant="ghost"
-                            className="size-8 rounded-lg text-primary hover:bg-primary/10"
+                            className="size-8 rounded-lg text-primary hover:bg-primary/10 shrink-0"
                           >
                             <IconUpload className="size-4" />
                           </Button>
@@ -388,7 +404,7 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
                           onClick={() => removeFile(item.file)}
                           variant="ghost"
                           size="icon"
-                          className="size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                          className="size-8 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
                         >
                           <IconX className="size-4" />
                         </Button>
@@ -398,6 +414,7 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
                   </div>
                 </div>
               ))}
+              </div>
             </div>
           </div>
         )}

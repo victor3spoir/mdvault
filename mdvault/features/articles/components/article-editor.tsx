@@ -14,6 +14,7 @@ import { getContentStats } from "../articles.utils";
 import { ArticleEditorHeader } from "./article-editor-header";
 import { ArticleEditorSettingsSidebar } from "./article-editor-settings-sidebar";
 import { ForwardRefEditor } from "./forward-ref-editor";
+import { Route } from "next";
 
 interface ArticleEditorLayoutProps {
   article?: Article;
@@ -124,7 +125,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorLayoutProps) {
 
         // Redirect to edit page if new article was created
         if (mode === "create") {
-          router.push(ARTICLE_ROUTES.EDIT(result.data));
+          router.push(ARTICLE_ROUTES.EDIT(result.data) as Route);
           router.refresh();
         }
       } catch (error) {

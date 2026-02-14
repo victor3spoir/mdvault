@@ -1,8 +1,10 @@
 import { IconArrowLeft, IconFileText } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getArticleAction } from "@/features/articles/articles.actions";
 import { getPostAction } from "@/features/posts/posts.actions";
 import PageLayout from "@/features/shared/components/page-layout";
@@ -12,12 +14,16 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export default async function Page({ params }: PageProps) {
+async function PostContent({ params }: PageProps) {
   const { slug } = await params;
   const postResult = await getPostAction(slug);
 
   if (!postResult.success) {
-    return <div>Post not found</div>;
+    return (
+      <PageLayout title="Not Found">
+        <div>Post not found</div>
+      </PageLayout>
+    );
   }
 
   const post = postResult.data;
@@ -101,5 +107,31 @@ export default async function Page({ params }: PageProps) {
         </div>
       </div>
     </PageLayout>
+  );
+}
+
+function PostLoading() {
+  return (
+    <PageLayout
+      title="Loading..."
+      breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Posts", href: "/cms/posts" }, { label: "..." }]}
+    >
+      <div className="max-w-2xl space-y-6">
+        <Skeleton className="h-8 w-1/2" />
+        <Skeleton className="h-[300px] w-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+      </div>
+    </PageLayout>
+  );
+}
+
+export default function Page({ params }: PageProps) {
+  return (
+    <Suspense fallback={<PostLoading />}>
+      <PostContent params={params} />
+    </Suspense>
   );
 }

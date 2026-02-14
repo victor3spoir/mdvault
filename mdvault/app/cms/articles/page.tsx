@@ -92,7 +92,11 @@ export default async function Page({ searchParams }: ArticlesPageProps) {
         </div>
       }
     >
-      <ArticlesList filteredArticles={filteredArticles} allTags={allTags} />
+      <ArticlesList
+        filteredArticles={filteredArticles}
+        allTags={allTags}
+        searchParams={await searchParams}
+      />
     </PageLayout>
   );
 }

@@ -1,12 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  logging:{
-    fetches:{
-      fullUrl:true,
-    },
-    incomingRequests:{}
-  },
   
   reactCompiler: true,
   typedRoutes: true,
@@ -25,6 +19,11 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "raw.githubusercontent.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
         pathname: "/**",
       },
       {

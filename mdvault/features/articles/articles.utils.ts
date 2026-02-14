@@ -77,3 +77,14 @@ export function getContentStats(content: string): {
   const readTime = calculateReadTime(wordCount);
   return { wordCount, readTime };
 }
+/**
+ * Calculate estimated reading time for markdown content
+ * Assuming 200 words per minute
+ */
+export function getReadingTime(content: string): number {
+  const wordsPerMinute = 200;
+  const noHtml = content.replace(/<[^>]*>?/gm, "");
+  const wordCount = noHtml.split(/\s+/).length;
+  const minutes = Math.ceil(wordCount / wordsPerMinute);
+  return minutes;
+}

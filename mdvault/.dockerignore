@@ -19,6 +19,7 @@ out
 .env
 .env.*
 !.env.example
+**/*/env
 
 # Misc
 *.md

@@ -2,8 +2,10 @@ import { IconArrowLeft, IconEdit } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getArticleAction } from "@/features/articles/articles.actions";
 import PageLayout from "@/features/shared/components/page-layout";
 import { MDXContent } from "@/lib/mdx-content";
@@ -12,7 +14,7 @@ interface ArticlePageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function Page({ params }: Readonly<ArticlePageProps>) {
+async function ArticleContent({ params }: ArticlePageProps) {
   const { id } = await params;
   const result = await getArticleAction(id);
 
@@ -99,5 +101,32 @@ export default async function Page({ params }: Readonly<ArticlePageProps>) {
         </div>
       </div>
     </PageLayout>
+  );
+}
+
+function ArticleLoading() {
+  return (
+    <PageLayout
+      title="Loading..."
+      breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Articles", href: "/cms/articles" }, { label: "..." }]}
+    >
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-1/2" />
+        <Skeleton className="h-[200px] w-full" />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-3/4" />
+        </div>
+      </div>
+    </PageLayout>
+  );
+}
+
+export default function Page({ params }: Readonly<ArticlePageProps>) {
+  return (
+    <Suspense fallback={<ArticleLoading />}>
+      <ArticleContent params={params} />
+    </Suspense>
   );
 }

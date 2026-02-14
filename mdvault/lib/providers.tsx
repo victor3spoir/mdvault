@@ -4,6 +4,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { type ReactNode, ViewTransition } from "react";
 
 import { Toaster } from "sonner";
+import { Suspense } from "react";
 
 const Providers = ({ children }: { children: ReactNode }) => {
   return (
@@ -13,9 +14,12 @@ const Providers = ({ children }: { children: ReactNode }) => {
       enableSystem
       disableTransitionOnChange
     >
-      <ViewTransition>
-        <NuqsAdapter>{children}</NuqsAdapter>
-        <Toaster
+      <Suspense fallback={null}>
+        <NuqsAdapter>
+          <ViewTransition>{children}</ViewTransition>
+        </NuqsAdapter>
+      </Suspense>
+      <Toaster
           position="top-right"
           richColors
           closeButton
@@ -31,7 +35,6 @@ const Providers = ({ children }: { children: ReactNode }) => {
           //   className: "text-sm",
           // }}
         />
-      </ViewTransition>
     </ThemeProvider>
   );
 };

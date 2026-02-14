@@ -1,10 +1,11 @@
 export interface Activity {
   id: string;
-  type: "article_created" | "article_published" | "image_uploaded";
+  type: "article_created" | "article_published" | "article_updated" | "image_uploaded";
   title: string;
   description: string;
   timestamp: string;
-  icon: "file" | "image" | "eye";
+  icon: "file" | "image" | "eye" | "edit";
+  link?: string;
 }
 export interface DashboardStats {
   totalArticles: number;
