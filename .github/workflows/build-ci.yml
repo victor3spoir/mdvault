@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload Bun audit report
         id: upload-audit
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: audit-report
           path: audit-report.json
