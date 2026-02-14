@@ -1,1 +1,0 @@
-FROM oven/bun:latest AS base

@@ -1,8 +1,10 @@
 variable "TAG" {
   default = "dev"
 }
-target "postscms" {
-  context = "."
+
+target "mdvault" {
+  context = "./mdvault"
   dockerfile = "Dockerfile"
-  tags = [ "postscms:${TAG}" ]
+  tags = [ "ghcr.io/victor3spoir/mdvault:${TAG}" ]
+
 }

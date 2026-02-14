@@ -1,10 +1,13 @@
-# MDVault
+<div align="middle">
+<img src="./images/logo.png" alt="logo" height="75" width="75">
+<h1>MDVault</h1>
 
 GitHub-powered Markdown content management system. Create, edit, and manage your posts with a modern, intuitive interface.
+</div>
 
 ## What is MDVault?
 
-MDVault is a lightweight, developer-friendly CMS designed for managing Markdown-based content stored directly in GitHub repositories. It provides a clean web interface for writing, editing, and organizing posts without the complexity of traditional CMS platforms.
+MDVault is a lightweight, developer-friendly CMS designed for managing Markdown-based content stored directly in GitHub repositories. It provides a clean web interface for writing, editing, and organizing posts & manage media without the complexity of traditional CMS platforms.
 
 ## Key Features
 
@@ -23,6 +26,7 @@ MDVault is a lightweight, developer-friendly CMS designed for managing Markdown-
 - **Privacy First**: Your content stays in your own GitHub repository
 - **Simple Setup**: Minimal configuration required to get started
 - **Modern UI**: Clean, responsive interface that works on desktop and tablet
+- **Centralization**: All your assets are centralized in your repos for free.
 
 ## Getting Started
 
@@ -75,6 +79,45 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the a
 ```bash
 bun run build
 npm run start
+```
+
+### Running with Docker
+
+MDVault is available as a containerized application. You can pull the image directly from GitHub Container Registry.
+
+#### Using Docker Compose (Recommended)
+
+1. Ensure you have a `compose.yml` file (or use the one provided in the repo):
+
+```yaml
+services:
+  mdvault:
+    image: ghcr.io/victor3spoir/mdvault:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GITHUB_TOKEN: "your_personal_access_token"
+      GITHUB_OWNER: "your_github_username"
+      GITHUB_REPO: "your_content_repository"
+    restart: unless-stopped
+```
+
+2. Start the container:
+```bash
+docker compose up -d
+```
+
+#### Using Docker CLI
+
+```bash
+docker pull ghcr.io/victor3spoir/mdvault:latest
+
+docker run -d \
+  -p 3000:3000 \
+  -e GITHUB_TOKEN=your_token \
+  -e GITHUB_OWNER=your_username \
+  -e GITHUB_REPO=your_repo \
+  ghcr.io/victor3spoir/mdvault:latest
 ```
 
 ## How It Works
