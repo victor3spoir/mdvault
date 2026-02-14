@@ -1,0 +1,19 @@
+name: mdvault
+
+services:
+  mdvault:
+    image: ghcr.io/victor3spoir/mdvault:dev
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "600MiB"
+    ports:
+      - "127.0.0.1:33000:3000"
+    environment:
+      GITHUB_TOKEN: ""
+      GITHUB_OWNER: ""
+      GITHUB_REPO: ""
+    # env_file:
+    #   - ./mdvault/.env

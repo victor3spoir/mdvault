@@ -1,10 +1,13 @@
-# MDVault
+<div align="middle">
+<img src="./images/logo.png" alt="logo" height="75" width="75">
+<h1>MDVault</h1>
 
 GitHub-powered Markdown content management system. Create, edit, and manage your posts with a modern, intuitive interface.
+</div>
 
 ## What is MDVault?
 
-MDVault is a lightweight, developer-friendly CMS designed for managing Markdown-based content stored directly in GitHub repositories. It provides a clean web interface for writing, editing, and organizing posts without the complexity of traditional CMS platforms.
+MDVault is a lightweight, developer-friendly CMS designed for managing Markdown-based content stored directly in GitHub repositories. It provides a clean web interface for writing, editing, and organizing posts & manage media without the complexity of traditional CMS platforms.
 
 ## Key Features
 
@@ -23,6 +26,7 @@ MDVault is a lightweight, developer-friendly CMS designed for managing Markdown-
 - **Privacy First**: Your content stays in your own GitHub repository
 - **Simple Setup**: Minimal configuration required to get started
 - **Modern UI**: Clean, responsive interface that works on desktop and tablet
+- **Centralization**: All your assets are centralized in your repos for free.
 
 ## Getting Started
 
