@@ -33,13 +33,13 @@ jobs:
         working-directory: ./mdvault
 
       - name: Biome lint
-        run: bunx biome ci --reporter=github > lint-report.json
+        run: bunx @biomejs/biome ci --reporter=github > lint-report.json
         working-directory: ./mdvault
         continue-on-error: true
 
       - name: Bun audit
-        run: bun audit --json > audit-report.json
         working-directory: ./mdvault
+        run: bun audit --json > audit-report.json
         continue-on-error: true
 
       - name: Upload lint report
