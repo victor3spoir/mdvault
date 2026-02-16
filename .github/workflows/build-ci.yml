@@ -121,20 +121,14 @@ jobs:
       - name: Build and push Docker image
         uses: docker/bake-action@v5
         with:
-          # files: docker-bake.hcl
-          files: |
-            ./docker-bake.hcl
-            ${{ steps.meta.outputs.bake-file-tags }}
+          files: docker-bake.hcl
           push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main') }}
           targets: mdvault
-          set: |
-            mdvault.tags=${{ steps.meta.outputs.tags }}
-            *.cache-to=type=gha
-            *.cache-from=type=gha
         env:
           GITHUB_TOKEN: ghp_000000000
           GITHUB_OWNER: fake-username
           GITHUB_REPO: fake-repo
+          TAG: ${{ github.ref_name }}
 
   docker-scan:
     runs-on: ubuntu-latest
@@ -144,7 +138,7 @@ jobs:
       - name: Scan Docker image with Trivy
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.docker-build.outputs.tag }}
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
           format: table
           output: trivy-report.json
           exit-code: 1
