@@ -109,6 +109,29 @@ GITHUB_OWNER=victor3spoir
 GITHUB_REPO=my-content-repo
 ```
 
+#### GitHub Token Permissions
+
+When creating your personal access token, you need to grant the following permissions:
+
+**For Fine-grained Personal Access tokens (Recommended):**
+- Select your repository/ies as the resource owner
+- Grant the following **Repository permissions**:
+  - `contents`: **Read and write** - allows creating, updating, and deleting files
+  - `metadata`: **Read-only** - grants read-only access to repository metadata
+
+**For Classic Personal Access tokens:**
+- Grant the **`repo`** scope - provides full control of private repositories
+- This includes all permissions needed to read, write, and delete files
+
+**Minimum Required Capabilities:**
+- Create files (for saving new articles and media)
+- Update files (for editing existing content)
+- Delete files (for removing articles)
+- Read repository contents
+- Commit to the repository
+
+For security best practices, use **fine-grained tokens** with specific repository access rather than classic tokens with broad permissions.
+
 ### Running the Development Server
 
 ```bash
