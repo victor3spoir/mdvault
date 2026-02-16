@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { sanitizeText, sanitizeEmail, isValidUrl, sanitizeTags } from "@/lib/sanitize";
+import { isValidUrl, sanitizeText } from "@/lib/sanitize";
 
 /**
  * Strict validation schemas for posts
@@ -13,7 +13,7 @@ const titleValidator = z
   .max(200, "Title must be less than 200 characters")
   .refine(
     (val) => !/^[123456789.]*$/.test(val),
-    "Title cannot be only numbers and dots"
+    "Title cannot be only numbers and dots",
   )
   .transform((val) => sanitizeText(val));
 
@@ -23,7 +23,7 @@ const contentValidator = z
   .max(500000, "Content is too large (max 500KB)")
   .refine(
     (val) => val.trim().length > 0,
-    "Content cannot be empty or only whitespace"
+    "Content cannot be empty or only whitespace",
   );
 
 const coverImageValidator = z
@@ -31,7 +31,7 @@ const coverImageValidator = z
   .url("Cover image must be a valid URL")
   .refine(
     (val) => isValidUrl(val),
-    "Cover image URL is not secure (must be https)"
+    "Cover image URL is not secure (must be https)",
   )
   .optional();
 

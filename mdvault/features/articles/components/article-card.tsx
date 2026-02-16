@@ -16,16 +16,16 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { getReadingTime } from "../articles.utils";
 import type { Article } from "@/features/articles/articles.types";
 import { formatDate } from "@/features/shared/shared.utils";
+import { cn } from "@/lib/utils";
+import { getReadingTime } from "../articles.utils";
 import ArticleDeleteDialog from "./article-delete-dialog";
 import { PostMetadataEditor } from "./article-metadata-editor";
 import { ArticlePublishDialog } from "./article-publish-dialog";
@@ -43,7 +43,9 @@ export function ArticleCard({ article }: ArticleCardProps) {
       <div
         className={cn(
           "group relative flex flex-col overflow-hidden rounded-2xl border transition-all hover:shadow-lg hover:border-primary/20",
-          article.published ? "bg-card" : "bg-card/50 border-dashed border-muted-foreground/30 shadow-xs"
+          article.published
+            ? "bg-card"
+            : "bg-card/50 border-dashed border-muted-foreground/30 shadow-xs",
         )}
       >
         {/* Cover Image */}

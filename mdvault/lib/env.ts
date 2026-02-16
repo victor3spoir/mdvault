@@ -31,7 +31,9 @@ export default function getenv(): EnvVars {
 
   // Validation: Check token format (NEVER log the actual token)
   const validTokenPrefixes = ["ghp_", "github_pat_", "ghs_", "ghu_"];
-  const isValidToken = validTokenPrefixes.some((prefix) => token.startsWith(prefix));
+  const isValidToken = validTokenPrefixes.some((prefix) =>
+    token.startsWith(prefix),
+  );
 
   if (!isValidToken) {
     throw new Error(

@@ -86,10 +86,7 @@ export function PostPublishDialog({ children, post }: PostPublishDialogProps) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleTogglePublish}
-            disabled={isPending}
-          >
+          <AlertDialogAction onClick={handleTogglePublish} disabled={isPending}>
             {isPending ? (
               <IconLoader2 className="mr-2 size-4 animate-spin" />
             ) : isPublished ? (
@@ -97,11 +94,7 @@ export function PostPublishDialog({ children, post }: PostPublishDialogProps) {
             ) : (
               <IconEye className="mr-2 size-4" />
             )}
-            {isPending
-              ? "Loading..."
-              : isPublished
-                ? "Unpublish"
-                : "Publish"}
+            {isPending ? "Loading..." : isPublished ? "Unpublish" : "Publish"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

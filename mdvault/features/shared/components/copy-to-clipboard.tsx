@@ -1,17 +1,20 @@
 "use client";
 
-import { useState } from "react";
 import { IconCheck, IconCopy } from "@tabler/icons-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
 
 interface CopyToClipboardProps {
   value: string;
   className?: string;
 }
 
-export function CopyToClipboard({ value, className }: Readonly<CopyToClipboardProps>) {
+export function CopyToClipboard({
+  value,
+  className,
+}: Readonly<CopyToClipboardProps>) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -29,7 +32,10 @@ export function CopyToClipboard({ value, className }: Readonly<CopyToClipboardPr
     <Button
       variant="ghost"
       size="icon"
-      className={cn("size-8 h-8 w-8 hover:bg-primary/10 hover:text-primary", className)}
+      className={cn(
+        "size-8 h-8 w-8 hover:bg-primary/10 hover:text-primary",
+        className,
+      )}
       onClick={handleCopy}
       title="Copy to clipboard"
     >
