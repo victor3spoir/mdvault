@@ -92,6 +92,23 @@ cp .env.example .env.local
    - Add your GitHub token to `.env.local`
    - Specify your repository name for storing content
 
+### Environment Variables
+
+MDVault requires three environment variables to connect to your GitHub repository. Here's what each one means:
+
+| Variable | Description | Example |
+|----------|-------------|----------|
+| `GITHUB_TOKEN` | A personal access token from GitHub for API authentication. [Create one here](https://github.com/settings/tokens). Must have `repo` scope to read/write content. | `ghp_16C7e42F292c6912E7...` |
+| `GITHUB_OWNER` | Your GitHub username or organization name. Just the name, not a URL. | `victor3spoir` |
+| `GITHUB_REPO` | The repository name where your content will be stored. Just the name, not a URL or full path. | `my-content-repo` |
+
+**Example `.env.local`:**
+```dotenv
+GITHUB_TOKEN=ghp_16C7e42F292c6912E7...
+GITHUB_OWNER=victor3spoir
+GITHUB_REPO=my-content-repo
+```
+
 ### Running the Development Server
 
 ```bash
