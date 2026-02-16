@@ -121,7 +121,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/bake-action@v5
         with:
-          files: docker-bake.hcl
+          # files: docker-bake.hcl
+          files: |
+            ./docker-bake.hcl
+            ${{ steps.meta.outputs.bake-file-tags }}
           push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main') }}
           targets: mdvault
           set: |
@@ -143,5 +146,6 @@ jobs:
         with:
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.docker-build.outputs.tag }}
           format: table
+          output: trivy-report.json
           exit-code: 1
           ignore-unfixed: true
