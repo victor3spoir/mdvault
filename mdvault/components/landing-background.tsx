@@ -1,33 +1,30 @@
 "use client";
 
-import Image from "next/image";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-
 export function LandingBackground() {
-  const [mounted, setMounted] = useState(false);
-  const { theme, systemTheme } = useTheme();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return null;
-
-  const currentTheme = theme === "system" ? systemTheme : theme;
-  const bgImage =
-    currentTheme === "dark" ? "/landing-bg-dark.svg" : "/landing-bg.svg";
-
   return (
-    <div className="absolute inset-0 -z-10 w-full h-full">
-      <Image
-        src={bgImage}
-        alt="background"
-        fill
-        priority
-        className="object-cover"
-        sizes="100vw"
-      />
-    </div>
+    <>
+      <style>{`
+        .landing-bg-light {
+          background-image: url('/landing-bg.svg');
+        }
+        
+        html.dark .landing-bg-light {
+          display: none;
+        }
+        
+        .landing-bg-dark {
+          background-image: url('/landing-bg-dark.svg');
+          display: none;
+        }
+        
+        html.dark .landing-bg-dark {
+          display: block;
+        }
+      `}</style>
+      {/* Light mode background */}
+      <div className="landing-bg-light absolute inset-0 -z-10 w-full h-full bg-cover bg-center bg-no-repeat" />
+      {/* Dark mode background */}
+      <div className="landing-bg-dark absolute inset-0 -z-10 w-full h-full bg-cover bg-center bg-no-repeat" />
+    </>
   );
 }
