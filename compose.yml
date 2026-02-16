@@ -12,7 +12,12 @@ services:
     ports:
       - "127.0.0.1:33000:3000"
     environment:
+      # GitHub personal access token (create at https://github.com/settings/tokens)
+      # Must have 'repo' scope permissions
       GITHUB_TOKEN: ""
+      # Your GitHub username or organization name (just the name, not a URL)
       GITHUB_OWNER: ""
+      # Repository name for storing content (just the name, not a full URL)
+      # Example: 'my-content' NOT 'github.com/user/my-content'
       GITHUB_REPO: ""
 

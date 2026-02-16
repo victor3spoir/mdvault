@@ -28,6 +28,34 @@ MDVault is a lightweight, developer-friendly CMS designed for managing Markdown-
 - **Modern UI**: Clean, responsive interface that works on desktop and tablet
 - **Centralization**: All your assets are centralized in your repos for free.
 
+## Screenshots
+
+### Dashboard
+
+Get an overview of all your content with the intuitive dashboard.
+![Dashboard](./images/dashboard.png)
+
+### Articles Management
+
+Manage your articles with full control over metadata and content.
+![Articles](./images/articles.png)
+
+### Rich Markdown Editor
+
+Write and edit content with the powerful MDX editor featuring live preview.
+![Editor](./images/edit.png)
+
+### Posts Management
+
+Create and manage LinkedIn-style posts with ease.
+![Posts](./images/posts.png)
+
+### Media Gallery
+
+Upload, organize, and manage all your images in one place.
+![Media](./images/media.png)
+
+
 ## Getting Started
 
 ### Prerequisites
@@ -63,6 +91,23 @@ cp .env.example .env.local
 1. Configure your GitHub repository:
    - Add your GitHub token to `.env.local`
    - Specify your repository name for storing content
+
+### Environment Variables
+
+MDVault requires three environment variables to connect to your GitHub repository. Here's what each one means:
+
+| Variable | Description | Example |
+|----------|-------------|----------|
+| `GITHUB_TOKEN` | A personal access token from GitHub for API authentication. [Create one here](https://github.com/settings/tokens). Must have `repo` scope to read/write content. | `ghp_16C7e42F292c6912E7...` |
+| `GITHUB_OWNER` | Your GitHub username or organization name. Just the name, not a URL. | `victor3spoir` |
+| `GITHUB_REPO` | The repository name where your content will be stored. Just the name, not a URL or full path. | `my-content-repo` |
+
+**Example `.env.local`:**
+```dotenv
+GITHUB_TOKEN=ghp_16C7e42F292c6912E7...
+GITHUB_OWNER=victor3spoir
+GITHUB_REPO=my-content-repo
+```
 
 ### Running the Development Server
 
@@ -127,6 +172,7 @@ docker run -d \
 3. **Edit Online**: Use MDVault's web interface to create, edit, and organize content
 4. **Version Control**: Every change is automatically committed to GitHub
 5. **Deploy**: Push to production whenever your content is ready
+
 
 ## Architecture
 
