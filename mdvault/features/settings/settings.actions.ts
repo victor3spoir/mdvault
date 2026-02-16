@@ -4,7 +4,6 @@ import type { ActionResult } from "@/features/shared/shared.types";
 import octokit from "@/lib/octokit";
 import type { GitHubUser } from "./settings.types";
 
-
 export async function getGitHubUserAction(): Promise<ActionResult<GitHubUser>> {
   try {
     const response = await octokit.rest.users.getAuthenticated();

@@ -1,19 +1,17 @@
-import { Suspense } from "react";
 import {
   IconBrandGithub,
   IconCircleCheck,
   IconKey,
   IconWorld,
 } from "@tabler/icons-react";
+import { Suspense } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import PageLayout from "@/features/shared/components/page-layout";
-import { CopyToClipboard } from "@/features/shared/components/copy-to-clipboard";
-import getenv from "@/lib/env";
 import UserProfileCard from "@/features/settings/components/user-profile-card";
-
-
+import { CopyToClipboard } from "@/features/shared/components/copy-to-clipboard";
+import PageLayout from "@/features/shared/components/page-layout";
+import getenv from "@/lib/env";
 
 export default async function SettingsPage() {
   const env = getenv();
@@ -67,7 +65,10 @@ export default async function SettingsPage() {
                   </dt>
                   <dd className="text-sm font-mono text-foreground flex items-center justify-between group">
                     <span>{env.GITHUB_OWNER}</span>
-                    <CopyToClipboard value={env.GITHUB_OWNER} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <CopyToClipboard
+                      value={env.GITHUB_OWNER}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
                   </dd>
                 </div>
                 <div>
@@ -76,7 +77,10 @@ export default async function SettingsPage() {
                   </dt>
                   <dd className="text-sm font-mono text-foreground flex items-center justify-between group">
                     <span>{env.GITHUB_REPO}</span>
-                    <CopyToClipboard value={env.GITHUB_REPO} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <CopyToClipboard
+                      value={env.GITHUB_REPO}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
                   </dd>
                 </div>
                 <div>
@@ -85,7 +89,10 @@ export default async function SettingsPage() {
                   </dt>
                   <dd className="text-sm font-mono text-foreground flex items-center justify-between group">
                     <span>main</span>
-                    <CopyToClipboard value="main" className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <CopyToClipboard
+                      value="main"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    />
                   </dd>
                 </div>
               </dl>
@@ -153,11 +160,7 @@ export default async function SettingsPage() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="siteUrl">Site URL</Label>
-              <Input
-                id="siteUrl"
-                placeholder="https://example.com"
-                disabled
-              />
+              <Input id="siteUrl" placeholder="https://example.com" disabled />
             </div>
           </div>
         </div>

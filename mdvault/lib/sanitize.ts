@@ -71,7 +71,10 @@ export function sanitizeMarkdown(content: string): string {
   sanitized = sanitized.replace(/<iframe[^>]*>.*?<\/iframe>/gi, "");
 
   // Remove style tags with expressions
-  sanitized = sanitized.replace(/style\s*=\s*["'][^"']*javascript[^"']*["']/gi, "");
+  sanitized = sanitized.replace(
+    /style\s*=\s*["'][^"']*javascript[^"']*["']/gi,
+    "",
+  );
 
   return sanitized;
 }

@@ -1,10 +1,10 @@
 import { IconFileText, IconSearchOff } from "@tabler/icons-react";
+import type { SearchParams } from "nuqs/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { Article } from "@/features/articles/articles.types";
 import { ArticleCard } from "@/features/articles/components/article-card";
-import ArticleSearchBar from "./article-search-bar";
 import { articlesSearchParamsCache } from "../articles.search-params";
-import type { SearchParams } from "nuqs/server";
+import ArticleSearchBar from "./article-search-bar";
 
 interface ArticlesListProps {
   filteredArticles: Article[];

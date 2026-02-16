@@ -1,16 +1,16 @@
 "use client";
 
-import type { Activity } from "../dashboard.types";
 import {
+  IconClock,
+  IconEdit,
+  IconEye,
   IconFileText,
   IconPhoto,
-  IconEye,
-  IconEdit,
-  IconClock,
 } from "@tabler/icons-react";
-import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
+import type { Activity } from "../dashboard.types";
 
 const iconMap = {
   file: IconFileText,
@@ -47,20 +47,31 @@ export function RecentActivity({ activities }: Readonly<RecentActivityProps>) {
       <div className="rounded-xl border bg-card">
         <div className="divide-y">
           {activities.map((activity) => {
-            const Icon = iconMap[activity.icon as keyof typeof iconMap] || IconFileText;
-            const colorClass = colorMap[activity.type as keyof typeof colorMap] || "text-gray-500 bg-gray-500/10";
+            const Icon =
+              iconMap[activity.icon as keyof typeof iconMap] || IconFileText;
+            const colorClass =
+              colorMap[activity.type as keyof typeof colorMap] ||
+              "text-gray-500 bg-gray-500/10";
 
             return (
               <div
                 key={activity.id}
                 className="flex items-center gap-4 p-4 transition-colors hover:bg-muted/50"
               >
-                <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-full", colorClass)}>
+                <div
+                  className={cn(
+                    "flex size-10 shrink-0 items-center justify-center rounded-full",
+                    colorClass,
+                  )}
+                >
                   <Icon className="size-5" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-sm sm:text-base truncate">
-                    {activity.title}: <span className="font-normal text-muted-foreground">{activity.description}</span>
+                    {activity.title}:{" "}
+                    <span className="font-normal text-muted-foreground">
+                      {activity.description}
+                    </span>
                   </p>
                   <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
                     <IconClock className="size-3.5" />

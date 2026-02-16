@@ -14,8 +14,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ARTICLE_ROUTES } from "../articles.constants";
 import { deleteArticleAction } from "../articles.actions";
+import { ARTICLE_ROUTES } from "../articles.constants";
 
 interface ArticleDeleteDialogProps {
   children: ReactNode;

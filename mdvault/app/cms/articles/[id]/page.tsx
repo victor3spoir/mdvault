@@ -108,7 +108,11 @@ function ArticleLoading() {
   return (
     <PageLayout
       title="Loading..."
-      breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Articles", href: "/cms/articles" }, { label: "..." }]}
+      breadcrumbs={[
+        { label: "Dashboard", href: "/cms" },
+        { label: "Articles", href: "/cms/articles" },
+        { label: "..." },
+      ]}
     >
       <div className="space-y-6">
         <Skeleton className="h-8 w-1/2" />

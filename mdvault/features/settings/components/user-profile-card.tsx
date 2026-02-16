@@ -1,8 +1,8 @@
-import { connection } from "next/server";
-import { getGitHubUserAction } from "../settings.actions";
-import Image from "next/image"
 import { IconCircleCheck, IconExternalLink } from "@tabler/icons-react";
+import Image from "next/image";
+import { connection } from "next/server";
 import { Button } from "@/components/ui/button";
+import { getGitHubUserAction } from "../settings.actions";
 
 const UserProfileCard = async () => {
   await connection();
@@ -78,13 +78,12 @@ const UserProfileCard = async () => {
                   <span>{user.company}</span>
                 </div>
               )}
-
             </div>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default UserProfileCard;

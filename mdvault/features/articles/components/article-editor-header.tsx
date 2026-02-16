@@ -186,8 +186,6 @@ export function ArticleEditorHeader({
           <span className="hidden sm:inline">{ARTICLE_LABELS.SAVE}</span>
         </Button>
 
-        
-
         {mode === "edit" && article && (
           <>
             <ArticlePublishDialog article={article}>
@@ -224,7 +222,9 @@ export function ArticleEditorHeader({
                 className="h-8 gap-1.5 rounded-lg text-destructive hover:text-destructive"
               >
                 <IconTrash className="size-3.5" />
-                <span className="hidden sm:inline">{ARTICLE_LABELS.DELETE}</span>
+                <span className="hidden sm:inline">
+                  {ARTICLE_LABELS.DELETE}
+                </span>
               </Button>
             </ArticleDeleteDialog>
           </>

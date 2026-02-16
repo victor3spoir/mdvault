@@ -3,9 +3,8 @@ import getenv from "./env";
 
 const { GITHUB_OWNER, GITHUB_REPO, GITHUB_TOKEN } = getenv();
 
-
 const octokit = new Octokit({
-  auth: GITHUB_TOKEN??"placeholder",
+  auth: GITHUB_TOKEN ?? "placeholder",
 });
 
 export const githubRepoInfo = {

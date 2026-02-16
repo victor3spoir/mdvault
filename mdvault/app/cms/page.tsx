@@ -1,12 +1,12 @@
 import { IconEye, IconFileText, IconPhoto } from "@tabler/icons-react";
-import Link from "next/link";
 import { headers } from "next/headers";
+import Link from "next/link";
+import { RecentActivity } from "@/features/dashboard/components/recent-activity";
 import PageLayout from "@/features/shared/components/page-layout";
 import {
   getDashboardStatsAction,
   getRecentActivityAction,
 } from "../../features/dashboard/dashboard.actions";
-import { RecentActivity } from "@/features/dashboard/components/recent-activity";
 
 const Page = async () => {
   await headers();
