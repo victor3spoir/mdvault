@@ -1,30 +1,32 @@
 "use client";
 
+import Image from "next/image";
+
 export function LandingBackground() {
   return (
     <>
-      <style>{`
-        .landing-bg-light {
-          background-image: url('/landing-bg.svg');
-        }
-        
-        html.dark .landing-bg-light {
-          display: none;
-        }
-        
-        .landing-bg-dark {
-          background-image: url('/landing-bg-dark.svg');
-          display: none;
-        }
-        
-        html.dark .landing-bg-dark {
-          display: block;
-        }
-      `}</style>
       {/* Light mode background */}
-      <div className="landing-bg-light absolute inset-0 -z-10 w-full h-full bg-cover bg-center bg-no-repeat" />
+      <div className="absolute inset-0 -z-10 w-full h-full overflow-hidden">
+        <Image
+          src="/landing-bg.svg"
+          alt="background"
+          fill
+          priority
+          className="object-cover dark:hidden"
+          sizes="100vw"
+        />
+      </div>
       {/* Dark mode background */}
-      <div className="landing-bg-dark absolute inset-0 -z-10 w-full h-full bg-cover bg-center bg-no-repeat" />
+      <div className="absolute inset-0 -z-10 w-full h-full overflow-hidden">
+        <Image
+          src="/landing-bg-dark.svg"
+          alt="background dark"
+          fill
+          priority
+          className="hidden object-cover dark:block"
+          sizes="100vw"
+        />
+      </div>
     </>
   );
 }
