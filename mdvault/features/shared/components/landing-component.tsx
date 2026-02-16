@@ -6,9 +6,9 @@ import {
   IconRocket,
   IconSparkles,
 } from "@tabler/icons-react";
-import Image from "next/image";
 import Link from "next/link";
 import type { ForwardRefExoticComponent, RefAttributes } from "react";
+import { LandingBackground } from "@/components/landing-background";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -52,15 +52,7 @@ const LandingComponent = ({
       {/* Enhanced Background Elements */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[44px_44px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
-      <div className="absolute w-full -z-10 inset-0">
-        <Image
-          src={"/landing-bg.svg"}
-          alt="bg"
-          width={100}
-          height={100}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <LandingBackground />
 
       {/* Animated gradient orbs */}
       <div className="absolute top-0 left-1/2 -z-10 h-100 w-150 -translate-x-1/2 bg-primary/15 blur-[120px] opacity-60 animate-pulse" />
