@@ -16,6 +16,7 @@ RUN bun run build
 
 FROM base AS prod
 WORKDIR /usr/app
+RUN apk update && apk upgrade --no-cache
 
 COPY --from=builder /usr/app/public ./public
 COPY --from=builder --chown=bun:bun /usr/app/.next/standalone ./
