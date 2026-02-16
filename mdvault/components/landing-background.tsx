@@ -12,6 +12,7 @@ export function LandingBackground() {
           alt="background"
           fill
           priority
+          unoptimized
           className="object-cover dark:hidden"
           sizes="100vw"
         />
@@ -23,6 +24,7 @@ export function LandingBackground() {
           alt="background dark"
           fill
           priority
+          unoptimized
           className="hidden object-cover dark:block"
           sizes="100vw"
         />
