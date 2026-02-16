@@ -52,13 +52,13 @@ const LandingComponent = ({
       {/* Enhanced Background Elements */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[44px_44px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
-      <div className="absolute w-full">
+      <div className="absolute w-full -z-10 inset-0">
         <Image
           src={"/landing-bg.svg"}
           alt="bg"
           width={100}
           height={100}
-          className="w-full h-f"
+          className="w-full h-full object-cover"
         />
       </div>
 
