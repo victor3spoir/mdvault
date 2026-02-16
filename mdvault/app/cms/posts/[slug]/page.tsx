@@ -114,7 +114,11 @@ function PostLoading() {
   return (
     <PageLayout
       title="Loading..."
-      breadcrumbs={[{ label: "Dashboard", href: "/cms" }, { label: "Posts", href: "/cms/posts" }, { label: "..." }]}
+      breadcrumbs={[
+        { label: "Dashboard", href: "/cms" },
+        { label: "Posts", href: "/cms/posts" },
+        { label: "..." },
+      ]}
     >
       <div className="max-w-2xl space-y-6">
         <Skeleton className="h-8 w-1/2" />

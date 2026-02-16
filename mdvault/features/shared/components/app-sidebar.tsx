@@ -34,8 +34,8 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
 import { getGitHubUserAction } from "@/features/settings/settings.actions";
+import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
 
 interface NavItem {
@@ -158,7 +158,9 @@ function UserProfileFooter() {
             <span className="font-medium truncate">
               {user.name || user.login}
             </span>
-            <span className="text-muted-foreground truncate">@{user.login}</span>
+            <span className="text-muted-foreground truncate">
+              @{user.login}
+            </span>
           </div>
         )}
       </Link>

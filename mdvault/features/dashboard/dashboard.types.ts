@@ -1,6 +1,10 @@
 export interface Activity {
   id: string;
-  type: "article_created" | "article_published" | "article_updated" | "image_uploaded";
+  type:
+    | "article_created"
+    | "article_published"
+    | "article_updated"
+    | "image_uploaded";
   title: string;
   description: string;
   timestamp: string;

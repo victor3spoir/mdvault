@@ -68,7 +68,10 @@ function cleanError(error: unknown): Record<string, unknown> {
   if (typeof error === "object" && error !== null) {
     const cleaned: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(error)) {
-      if (key.toLowerCase().includes("token") || key.toLowerCase().includes("secret")) {
+      if (
+        key.toLowerCase().includes("token") ||
+        key.toLowerCase().includes("secret")
+      ) {
         cleaned[key] = "***REDACTED***";
       } else if (typeof value === "string") {
         cleaned[key] = maskSensitiveData(value);
@@ -85,7 +88,9 @@ function cleanError(error: unknown): Record<string, unknown> {
 /**
  * Clean context object - mask sensitive data
  */
-function cleanContext(context: Record<string, unknown>): Record<string, unknown> {
+function cleanContext(
+  context: Record<string, unknown>,
+): Record<string, unknown> {
   const cleaned: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(context)) {
@@ -122,14 +127,21 @@ function cleanContext(context: Record<string, unknown>): Record<string, unknown>
  */
 function formatLogMessage(logContext: LogContext): string {
   const prefix = `[${logContext.timestamp}] [${logContext.level.toUpperCase()}]`;
-  const contextStr = logContext.context ? ` ${JSON.stringify(logContext.context)}` : "";
+  const contextStr = logContext.context
+    ? ` ${JSON.stringify(logContext.context)}`
+    : "";
   return `${prefix} ${logContext.message}${contextStr}`;
 }
 
 /**
  * Internal logging function
  */
-function log(level: LogLevel, message: string, error?: unknown, context?: Record<string, unknown>) {
+function log(
+  level: LogLevel,
+  message: string,
+  error?: unknown,
+  context?: Record<string, unknown>,
+) {
   // Never log in non-server environments
   if (typeof window !== "undefined") {
     return;
@@ -137,10 +149,11 @@ function log(level: LogLevel, message: string, error?: unknown, context?: Record
 
   // During build/prerender, avoid using the current time before dynamic access
   // to prevent Next.js 16 build errors.
-  const timestamp = process.env.NEXT_PHASE === "phase-production-build" 
-    ? "BUILD_TIME" 
-    : new Date().toISOString();
-    
+  const timestamp =
+    process.env.NEXT_PHASE === "phase-production-build"
+      ? "BUILD_TIME"
+      : new Date().toISOString();
+
   const logContext: LogContext = {
     timestamp,
     level,
@@ -182,7 +195,11 @@ export const logger = {
    * @example
    * logger.error("Failed to fetch article", error, { articleId: "123" })
    */
-  error: (message: string, error?: unknown, context?: Record<string, unknown>) => {
+  error: (
+    message: string,
+    error?: unknown,
+    context?: Record<string, unknown>,
+  ) => {
     log("error", message, error, context);
   },
 

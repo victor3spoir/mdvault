@@ -7,34 +7,34 @@ import {
   IconSparkles,
 } from "@tabler/icons-react";
 import Link from "next/link";
+import type { ForwardRefExoticComponent, RefAttributes } from "react";
+import { LandingBackground } from "@/components/landing-background";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Logo } from "./logo";
-import Image from "next/image";
-import type { ForwardRefExoticComponent, RefAttributes } from "react";
 
 const LandingComponent = ({
   className,
   ...props
 }: React.ComponentProps<"div">) => {
-
   const features: {
-    icon: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>,
-    text: string
+    icon: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
+    text: string;
   }[] = [
-      {
-        icon: IconMarkdown,
-        text: "MDX Editor"
-      },
-      {
-        icon: IconBrandGithub,
-        text: "Git Versioning"
-      },
-      {
-        icon: IconRocket,
-        text: "Fast Deploy"
-      },
-    ]
+    {
+      icon: IconMarkdown,
+      text: "MDX Editor",
+    },
+    {
+      icon: IconBrandGithub,
+      text: "Git Versioning",
+    },
+    {
+      icon: IconRocket,
+      text: "Fast Deploy",
+    },
+  ];
 
   return (
     <div
@@ -44,13 +44,15 @@ const LandingComponent = ({
       )}
       {...props}
     >
+      {/* Theme Toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <ThemeToggle />
+      </div>
+
       {/* Enhanced Background Elements */}
       <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[44px_44px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
-      <div className="absolute w-full">
-        <Image src={"/landing-bg.svg"} alt="bg"
-          width={100} height={100} className="w-full h-f" />
-      </div>
+      {/* <LandingBackground /> */}
 
       {/* Animated gradient orbs */}
       <div className="absolute top-0 left-1/2 -z-10 h-100 w-150 -translate-x-1/2 bg-primary/15 blur-[120px] opacity-60 animate-pulse" />
@@ -83,7 +85,7 @@ const LandingComponent = ({
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl leading-tight">
               Your Markdown, <br />
-              <span className="bg-linear-to-r from-primary via-primary/80 to-accent bg-clip-text text-gray-500">
+              <span className="bg-linear-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
                 Perfectly Vaulted
               </span>
             </h1>
@@ -126,9 +128,11 @@ const LandingComponent = ({
 
         {/* Compact Features Grid */}
         <div className="hidden w-full lg:flex gap-6 mt-6 animate-in fade-in duration-1000 delay-700 shrink-0 text-center">
-
-          {features.map(feature => (
-            <div key={feature.text} className="group flex-1 flex flex-col items-center gap-2 transition-all duration-300 hover:bg-muted/20 p-2 rounded-lg">
+          {features.map((feature) => (
+            <div
+              key={feature.text}
+              className="group flex-1 flex flex-col items-center gap-2 transition-all duration-300 hover:bg-muted/20 p-2 rounded-lg"
+            >
               <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-linear-to-br from-primary/20 to-accent/10 text-primary transition-all duration-300 group-hover:scale-110 shrink-0">
                 <feature.icon className="h-10 w-10" />
               </div>
@@ -136,7 +140,6 @@ const LandingComponent = ({
                 {feature.text}
               </h3>
             </div>
-
           ))}
         </div>
       </div>

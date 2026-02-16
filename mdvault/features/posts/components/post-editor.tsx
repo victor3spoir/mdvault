@@ -120,7 +120,10 @@ export function PostEditor({ post }: PostEditorProps) {
           <IconLanguage className="size-4" />
           Language
         </Label>
-        <Select value={lang} onValueChange={(value) => setLang(value as "fr" | "en")}>
+        <Select
+          value={lang}
+          onValueChange={(value) => setLang(value as "fr" | "en")}
+        >
           <SelectTrigger id="lang" className="mt-2">
             <SelectValue />
           </SelectTrigger>

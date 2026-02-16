@@ -1,6 +1,7 @@
 "use client";
 
 import type { MDXEditorMethods } from "@mdxeditor/editor";
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -14,7 +15,6 @@ import { getContentStats } from "../articles.utils";
 import { ArticleEditorHeader } from "./article-editor-header";
 import { ArticleEditorSettingsSidebar } from "./article-editor-settings-sidebar";
 import { ForwardRefEditor } from "./forward-ref-editor";
-import { Route } from "next";
 
 interface ArticleEditorLayoutProps {
   article?: Article;
@@ -135,7 +135,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorLayoutProps) {
         console.error("Error saving article:", error);
       }
     });
-  };;
+  };
 
   // Content stats - computed on each render (refs don't trigger re-renders)
   const content = editorRef.current?.getMarkdown() ?? "";
