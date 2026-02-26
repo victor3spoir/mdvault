@@ -1,5 +1,4 @@
 import { IconArrowLeft, IconEdit } from "@tabler/icons-react";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -7,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getArticleAction } from "@/features/articles/articles.actions";
+import { PrivateImage } from "@/features/medias/components/private-image";
 import PageLayout from "@/features/shared/components/page-layout";
 import { MDXContent } from "@/lib/mdx-content";
 
@@ -86,7 +86,7 @@ async function ArticleContent({ params }: ArticlePageProps) {
           {/* Cover image */}
           {article.coverImage && (
             <div className="relative aspect-video overflow-hidden rounded-lg">
-              <Image
+              <PrivateImage
                 src={article.coverImage}
                 alt={article.title}
                 fill
@@ -116,7 +116,7 @@ function ArticleLoading() {
     >
       <div className="space-y-6">
         <Skeleton className="h-8 w-1/2" />
-        <Skeleton className="h-[200px] w-full" />
+        <Skeleton className="h-50 w-full" />
         <div className="space-y-2">
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-full" />

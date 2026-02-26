@@ -30,6 +30,7 @@ interface ImageFile {
 
 interface ImageUploaderProps {
   maxSize?: number; // in MB
+  onUploadSuccess?: (image: import("../medias.types").MediaFile) => void;
 }
 
 // Abbreviate long filenames: max 12 characters total
@@ -53,7 +54,7 @@ function abbreviateFilename(name: string): string {
   return `${nameWithoutExt.slice(0, availableForName)}...${extension}`;
 }
 
-export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
+export function ImageUploader({ maxSize = 5, onUploadSuccess }: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<ImageFile[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -147,6 +148,7 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
                 : f,
             ),
           );
+          onUploadSuccess?.(result.data);
 
           // Remove from list after 2 seconds and trigger complete callback
           setTimeout(() => {

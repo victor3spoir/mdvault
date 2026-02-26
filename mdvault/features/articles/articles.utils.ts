@@ -30,7 +30,7 @@ export function parseArticleFrontmatter(content: string): {
     published: data.published ?? false,
     lang: (data.lang ?? "en") as "fr" | "en",
     author: data.author,
-    coverImage: data.coverImage,
+    coverImage: typeof data.coverImage === "string" ? data.coverImage.trim() : data.coverImage,
     createdAt: data.createdAt,
     updatedAt: data.updatedAt,
     publishedDate: data.publishedDate,

@@ -27,8 +27,16 @@ export function ImageInsertDialog({
   onSelect,
 }: ImageInsertDialogProps) {
   const [selectedImage, setSelectedImage] = useState<MediaFile | null>(null);
+  const [galleryKey, setGalleryKey] = useState(0);
 
   const handleSelect = (image: MediaFile) => {
+    setSelectedImage(image);
+  };
+
+  const handleUploadSuccess = (image: MediaFile) => {
+    // Force gallery to re-fetch so the newly uploaded image appears
+    setGalleryKey((k) => k + 1);
+    // Auto-select the just-uploaded image
     setSelectedImage(image);
   };
 
@@ -73,7 +81,7 @@ export function ImageInsertDialog({
                 </div>
               </div>
               <div className="rounded-2xl border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2 transition-colors hover:bg-muted/10">
-                <ImageUploader />
+                <ImageUploader onUploadSuccess={handleUploadSuccess} />
               </div>
             </div>
 
@@ -105,6 +113,7 @@ export function ImageInsertDialog({
               </div>
               <div className="min-h-60">
                 <ImageSelector
+                  key={galleryKey}
                   selectedImageUrl={selectedImage?.url ?? ""}
                   onSelectImage={handleSelect}
                 />

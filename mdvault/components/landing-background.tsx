@@ -1,26 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import darkBg from "@/public/landing-bg-dark.svg"
+import lightBg from "@/public/landing-bg.svg"
+import Image from "next/image"
+
 
 export function LandingBackground() {
-  const [mounted, setMounted] = useState(false);
   const { theme, systemTheme } = useTheme();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+
 
   const currentTheme = theme === "system" ? systemTheme : theme;
-  const backgroundImage = currentTheme === "dark" ? "/landing-bg-dark.svg" : "/landing-bg.svg";
+  const backgroundImage = currentTheme === "dark" ? darkBg : lightBg;
 
   return (
-    <img
+    <Image
       key={backgroundImage}
       src={backgroundImage}
+      height={100}
+      width={100}
+
       alt="background"
       className="absolute inset-0 -z-10 w-full h-full object-cover"
-      style={{ pointerEvents: "none" }}
+      // style={{ pointerEvents: "none" }}
       suppressHydrationWarning
     />
   );

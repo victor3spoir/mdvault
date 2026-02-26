@@ -1,17 +1,17 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
-import matter from "gray-matter";
-import { cacheTag, refresh, updateTag } from "next/cache";
 import type { ActionResult } from "@/features/shared/shared.types";
 import { createSafeErrorMessage, logger } from "@/lib/logger";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
 import { sanitizeMarkdown } from "@/lib/sanitize";
 import { getCurrentUser } from "@/lib/user";
 import {
-  CreatePostSchema,
-  UpdatePostSchema,
+    CreatePostSchema,
+    UpdatePostSchema,
 } from "@/lib/validation/post.schema";
+import matter from "gray-matter";
+import { cacheTag, refresh, updateTag } from "next/cache";
+import { randomUUID } from "node:crypto";
 import type { GitHubFile, Post, PostFrontmatter } from "./posts.types";
 
 const POSTS_PATH = githubRepoInfo.POSTS_PATH;
@@ -139,7 +139,7 @@ function parseFrontmatterToPost(content: string): PostFrontmatter {
 
   if (data.author) frontmatter.author = data.author as string;
   if (data.article) frontmatter.article = data.article as string;
-  if (data.coverImage) frontmatter.coverImage = data.coverImage as string;
+  if (data.coverImage) frontmatter.coverImage = (data.coverImage as string).trim();
   if (data.createdAt) frontmatter.createdAt = data.createdAt as string;
   if (data.updatedAt) frontmatter.updatedAt = data.updatedAt as string;
   if (data.publishedDate)

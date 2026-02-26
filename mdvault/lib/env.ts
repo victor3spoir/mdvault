@@ -3,6 +3,9 @@ export interface EnvVars {
   GITHUB_TOKEN: string;
   GITHUB_OWNER: string;
   GITHUB_REPO: string;
+  ARTICLES_PATH: string;
+  POSTS_PATH: string;
+  MEDIA_PATH: string;
 }
 
 export default function getenv(): EnvVars {
@@ -10,6 +13,9 @@ export default function getenv(): EnvVars {
   const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
   const GITHUB_OWNER = process.env.GITHUB_OWNER;
   const GITHUB_REPO = process.env.GITHUB_REPO;
+  const ARTICLES_PATH = process.env.ARTICLES_PATH ?? "articles";
+  const POSTS_PATH = process.env.POSTS_PATH ?? "posts";
+  const MEDIA_PATH = process.env.MEDIA_PATH ?? "media";
 
   // Validation: Check required env vars
   const required = { GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO };
@@ -20,7 +26,7 @@ export default function getenv(): EnvVars {
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(", ")}. ` +
-        `Please set them in your .env.local or environment.`,
+      `Please set them in your .env.local or environment.`,
     );
   }
 
@@ -37,7 +43,7 @@ export default function getenv(): EnvVars {
 
   if (!isValidToken) {
     throw new Error(
-      "Invalid GITHUB_TOKEN format. Expected token to start with: ghp_, github_pat_, ghs_, or ghu_",
+      "Invalid GITHUB_TOKEN format. E sexpected token to start with: ghp_, github_pat_, ghs_, or ghu_",
     );
   }
 
@@ -68,5 +74,8 @@ export default function getenv(): EnvVars {
     GITHUB_TOKEN: token,
     GITHUB_OWNER: owner,
     GITHUB_REPO: repo,
+    ARTICLES_PATH: ARTICLES_PATH,
+    POSTS_PATH: POSTS_PATH,
+    MEDIA_PATH: MEDIA_PATH
   };
 }

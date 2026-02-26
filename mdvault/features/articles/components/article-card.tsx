@@ -12,7 +12,6 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
-import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { Article } from "@/features/articles/articles.types";
+import { PrivateImage } from "@/features/medias/components/private-image";
 import { formatDate } from "@/features/shared/shared.utils";
 import { cn } from "@/lib/utils";
 import { getReadingTime } from "../articles.utils";
@@ -51,11 +51,10 @@ export function ArticleCard({ article }: ArticleCardProps) {
         {/* Cover Image */}
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
           {article.coverImage ? (
-            <Image
+            <PrivateImage
               src={article.coverImage}
               alt={article.title}
               fill
-              priority
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />

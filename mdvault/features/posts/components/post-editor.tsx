@@ -45,6 +45,7 @@ export function PostEditor({ post }: PostEditorProps) {
   const [content, setContent] = useState(post?.content || "");
   const [lang, setLang] = useState<"fr" | "en">(post?.lang || "fr");
   const [article, setArticle] = useState(post?.article || "");
+  const [articleInputValue, setArticleInputValue] = useState("");
   const [coverImage, setCoverImage] = useState(post?.coverImage || "");
   const [author, setAuthor] = useState(post?.author || "");
   const [articles, setArticles] = useState<Article[]>([]);
@@ -53,9 +54,11 @@ export function PostEditor({ post }: PostEditorProps) {
     listArticlesAction().then((result) => {
       if (result.success) {
         setArticles(result.data);
+        const matched = result.data.find((a) => a.id === post?.article);
+        if (matched) setArticleInputValue(matched.title);
       }
     });
-  }, []);
+  }, [post?.article]);
 
   const handleSave = () => {
     if (!title.trim() || !content.trim()) {
@@ -77,7 +80,7 @@ export function PostEditor({ post }: PostEditorProps) {
       const result = post
         ? await updatePostAction(post.id, {
             ...input,
-            sha: post.sha!,
+            sha: post.sha ?? "",
             createdAt: post.createdAt,
           })
         : await createPostAction(input);
@@ -150,7 +153,14 @@ export function PostEditor({ post }: PostEditorProps) {
         <div className="mt-2">
           <Combobox
             value={article}
-            onValueChange={(value) => setArticle(value as string)}
+            inputValue={articleInputValue}
+            onInputValueChange={(val) => setArticleInputValue(val)}
+            onValueChange={(value) => {
+              const id = value as string;
+              setArticle(id);
+              const matched = articles.find((a) => a.id === id);
+              setArticleInputValue(matched?.title ?? "");
+            }}
           >
             <ComboboxInput
               placeholder="Select an article..."
@@ -160,7 +170,7 @@ export function PostEditor({ post }: PostEditorProps) {
               <ComboboxList>
                 <ComboboxEmpty>No articles found</ComboboxEmpty>
                 {articles.map((a) => (
-                  <ComboboxItem key={a.id} value={a.id}>
+                  <ComboboxItem key={a.id} value={a.id} >
                     {a.title}
                   </ComboboxItem>
                 ))}

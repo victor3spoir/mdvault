@@ -55,101 +55,15 @@ Create and manage LinkedIn-style posts with ease.
 Upload, organize, and manage all your images in one place.
 ![Media](./images/media.png)
 
-
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- Bun or npm installed
+- Docker and Docker Compose installed (for Docker deployment)
 - A GitHub repository for storing content
 - GitHub Personal Access Token (for API authentication)
 
-### Installation
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/victor3spoir/mdvault.git
-cd mdvault
-```
-
-1. Install dependencies:
-
-```bash
-bun install
-# or
-npm install
-```
-
-1. Set up environment variables:
-
-```bash
-cp .env.example .env.local
-```
-
-1. Configure your GitHub repository:
-   - Add your GitHub token to `.env.local`
-   - Specify your repository name for storing content
-
-### Environment Variables
-
-MDVault requires three environment variables to connect to your GitHub repository. Here's what each one means:
-
-| Variable | Description | Example |
-|----------|-------------|----------|
-| `GITHUB_TOKEN` | A personal access token from GitHub for API authentication. [Create one here](https://github.com/settings/tokens). Must have `repo` scope to read/write content. | `ghp_16C7e42F292c6912E7...` |
-| `GITHUB_OWNER` | Your GitHub username or organization name. Just the name, not a URL. | `victor3spoir` |
-| `GITHUB_REPO` | The repository name where your content will be stored. Just the name, not a URL or full path. | `my-content-repo` |
-
-**Example `.env.local`:**
-```dotenv
-GITHUB_TOKEN=ghp_16C7e42F292c6912E7...
-GITHUB_OWNER=victor3spoir
-GITHUB_REPO=my-content-repo
-```
-
-#### GitHub Token Permissions
-
-When creating your personal access token, you need to grant the following permissions:
-
-**For Fine-grained Personal Access tokens (Recommended):**
-- Select your repository/ies as the resource owner
-- Grant the following **Repository permissions**:
-  - `contents`: **Read and write** - allows creating, updating, and deleting files
-  - `metadata`: **Read-only** - grants read-only access to repository metadata
-
-**For Classic Personal Access tokens:**
-- Grant the **`repo`** scope - provides full control of private repositories
-- This includes all permissions needed to read, write, and delete files
-
-**Minimum Required Capabilities:**
-- Create files (for saving new articles and media)
-- Update files (for editing existing content)
-- Delete files (for removing articles)
-- Read repository contents
-- Commit to the repository
-
-For security best practices, use **fine-grained tokens** with specific repository access rather than classic tokens with broad permissions.
-
-### Running the Development Server
-
-```bash
-bun dev
-# or
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
-
-### Building for Production
-
-```bash
-bun run build
-npm run start
-```
-
-### Running with Docker
+### Quick Start with Docker
 
 MDVault is available as a containerized application. You can pull the image directly from GitHub Container Registry.
 
@@ -171,6 +85,7 @@ services:
 ```
 
 2. Start the container:
+
 ```bash
 docker compose up -d
 ```
@@ -188,14 +103,152 @@ docker run -d \
   ghcr.io/victor3spoir/mdvault:latest
 ```
 
-## How It Works
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-1. **Connect GitHub**: MDVault connects to your GitHub repository using a personal access token
-2. **Store Content**: All posts are stored as Markdown files in your repository
-3. **Edit Online**: Use MDVault's web interface to create, edit, and organize content
-4. **Version Control**: Every change is automatically committed to GitHub
-5. **Deploy**: Push to production whenever your content is ready
+### Installation
 
+1. Set up environment variables:
+
+```bash
+cp .env.example .env.local
+```
+
+2. Configure your GitHub repository:
+   - Add your GitHub token to `.env.local`
+   - Specify your repository name for storing content
+
+### Environment Variables
+
+#### Required Variables
+
+MDVault requires three environment variables to connect to your GitHub repository. Here's what each one means:
+
+| Variable | Description | Example |
+|----------|-------------|----------|
+| `GITHUB_TOKEN` | A personal access token from GitHub for API authentication. [Create one here](https://github.com/settings/tokens). Must have `repo` scope to read/write content. | `ghp_16C7e42F292c6912E7...` |
+| `GITHUB_OWNER` | Your GitHub username or organization name. Just the name, not a URL. | `victor3spoir` |
+| `GITHUB_REPO` | The repository name where your content will be stored. Just the name, not a URL or full path. | `my-content-repo` |
+
+#### Optional Variables (Experienced Users Only)
+
+> ⚠️ **Note**: The following variables have sensible defaults and should **only be modified by experienced users**. Normal users should omit these and use the default values.
+
+| Variable | Description | Default | Example |
+|----------|-------------|---------|---------|
+| `ARTICLES_PATH` | Directory path in the repository where articles are stored. | `articles` | `content/articles` |
+| `POSTS_PATH` | Directory path in the repository where posts are stored. | `posts` | `content/posts` |
+| `MEDIA_PATH` | Directory path in the repository where media/images are stored. | `media` | `assets/media` |
+
+**Example `.env.local` (Minimal - Recommended for most users):**
+
+```dotenv
+GITHUB_TOKEN=ghp_16C7e42F292c6912E7...
+GITHUB_OWNER=victor3spoir
+GITHUB_REPO=my-content-repo
+```
+
+**Example `.env.local` (Advanced - Custom paths):**
+
+```dotenv
+GITHUB_TOKEN=ghp_16C7e42F292c6912E7...
+GITHUB_OWNER=victor3spoir
+GITHUB_REPO=my-content-repo
+ARTICLES_PATH=content/articles
+POSTS_PATH=content/posts
+MEDIA_PATH=assets/images
+```
+
+#### GitHub Token Permissions
+
+When creating your personal access token, you need to grant the following permissions:
+
+**For Fine-grained Personal Access tokens (Recommended):**
+
+- Select your repository/ies as the resource owner
+- Grant the following **Repository permissions**:
+  - `contents`: **Read and write** - allows creating, updating, and deleting files
+  - `metadata`: **Read-only** - grants read-only access to repository metadata
+
+**For Classic Personal Access tokens:**
+
+- Grant the **`repo`** scope - provides full control of private repositories
+- This includes all permissions needed to read, write, and delete files
+
+**Minimum Required Capabilities:**
+
+- Create files (for saving new articles and media)
+- Update files (for editing existing content)
+- Delete files (for removing articles)
+- Read repository contents
+- Commit to the repository
+
+For security best practices, use **fine-grained tokens** with specific repository access rather than classic tokens with broad permissions.
+
+## Development & Contributing
+
+### Prerequisites for Development
+
+- Node.js 18+
+- Bun or npm installed
+- A GitHub repository for storing content
+- GitHub Personal Access Token (for API authentication)
+
+### Setting Up for Development
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/victor3spoir/mdvault.git
+cd mdvault
+```
+
+2. Install dependencies:
+
+```bash
+bun install
+# or
+npm install
+```
+
+3. Set up your `.env.local` file with your GitHub credentials (see [Environment Variables](#environment-variables) section above)
+
+### Running the Development Server
+
+```bash
+bun dev
+# or
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the application. The dev server supports hot reload for instant feedback.
+
+### Building for Production
+
+```bash
+bun run build
+npm run start
+```
+
+### Code Quality
+
+```bash
+bun run lint    # Run Biome linter and formatter checks
+bun run format  # Format code with Biome
+```
+
+### Contributing
+
+Contributions are welcome! Here's how you can help:
+
+1. Fork the repository
+2. Create a feature branch (`git switch -c feature/amazing-feature`)
+3. Make your changes and ensure tests pass
+4. Run linting and formatting (`bun run lint` and `bun run format`)
+5. Commit your changes (`git commit -m 'Add amazing feature'`)
+6. Push to the branch (`git push origin feature/amazing-feature`)
+7. Open a Pull Request
+
+Please make sure your code follows the project's style guidelines and passes all checks.
 
 ## Architecture
 
@@ -204,10 +257,6 @@ docker run -d \
 - **Backend**: GitHub API (Octokit) for content storage
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Icons**: Tabler Icons for consistent iconography
-
-## Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests to help improve MDVault.
 
 ## License
 

@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { isValidUrl, sanitizeTags, sanitizeText } from "@/lib/sanitize";
+import { z } from "zod";
 
 /**
  * Strict validation schemas for articles
@@ -34,12 +34,19 @@ const contentValidator = z
     "Content cannot be empty or only whitespace",
   );
 
+// Cover image accepts either:
+// - a repo-relative path (e.g. "media/abc123.jpg") for private/public repo-stored images
+// - a legacy full https:// URL (old content migrated before the repo-storage model)
 const coverImageValidator = z
   .string()
-  .url("Cover image must be a valid URL")
   .refine(
-    (val) => isValidUrl(val),
-    "Cover image URL is not secure (must be https)",
+    (val) => {
+      // Repo-relative path: must not start with http/data/javascript and must contain a dot (extension)
+      const isRepoPath = !val.startsWith("http") && !val.startsWith("data:") && val.includes(".");
+      const isHttpsUrl = isValidUrl(val);
+      return isRepoPath || isHttpsUrl;
+    },
+    "Cover image must be a repo-relative path (e.g. media/image.jpg) or a valid https URL",
   )
   .optional();
 

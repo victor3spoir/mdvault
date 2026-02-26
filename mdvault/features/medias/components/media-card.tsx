@@ -1,5 +1,4 @@
 import { IconEye, IconTrash } from "@tabler/icons-react";
-import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -9,8 +8,7 @@ import {
 import type { MediaFile } from "../medias.types";
 import { MediaPreviewDialog } from "./image-preview-dialog";
 import { MediaDeleteDialog } from "./media-delete-dialog";
-
-const Image = dynamic(() => import("next/image"), { ssr: false });
+import { PrivateImage } from "./private-image";
 
 const MediaCard = ({ media }: { media: MediaFile }) => {
   return (
@@ -18,12 +16,11 @@ const MediaCard = ({ media }: { media: MediaFile }) => {
       key={media.id}
       className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/20 transition-all hover:border-primary/50 hover:shadow-lg"
     >
-      <Image
+      <PrivateImage
         src={media.url}
         alt={media.name}
         fill
         className="object-cover transition-transform duration-300 group-hover:scale-110"
-        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
       />
 
       <div className="absolute inset-0 bg-black/50 opacity-0 transition-opacity duration-200 group-hover:opacity-100 flex flex-col items-center justify-center gap-2">
