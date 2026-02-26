@@ -13,19 +13,19 @@ interface PrivateImageProps {
 }
 
 /**
- * Resolves a repo-relative path (e.g. "media/abc.jpg") to a base64 data URL
- * using the hybrid media cache (bulk server fetch + client-side Map).
- * Also handles legacy https:// and data: URLs directly.
+ * Resolves a repo-relative path (e.g. "media/abc.jpg") to a Blob URL
+ * using the hybrid media cache (bulk server fetch → base64 → Blob → Blob URL).
+ * Also handles legacy https:// URLs directly.
  */
 export function PrivateImage({ src, alt, fill, className }: PrivateImageProps) {
   const { resolve, isLoading } = useMediaCache();
-  const dataUrl = resolve(src);
+  const blobUrl = resolve(src);
 
   const fillStyles: React.CSSProperties = fill
     ? { position: "absolute", inset: 0, width: "100%", height: "100%" }
     : {};
 
-  if (isLoading || !dataUrl) {
+  if (isLoading || !blobUrl) {
     return (
       <div
         className={cn("animate-pulse bg-muted", className)}
@@ -36,9 +36,9 @@ export function PrivateImage({ src, alt, fill, className }: PrivateImageProps) {
   }
 
   return (
-    // biome-ignore lint/performance/noImgElement: data URL — next/image requires a remotely-hosted URL
+    // biome-ignore lint/performance/noImgElement: Blob URL — next/image only accepts remote URLs with configured hostname patterns
     <img
-      src={dataUrl}
+      src={blobUrl}
       alt={alt}
       className={className}
       style={fillStyles}

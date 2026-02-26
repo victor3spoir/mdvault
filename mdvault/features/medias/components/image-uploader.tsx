@@ -92,21 +92,19 @@ export function ImageUploader({ maxSize = 5, onUploadSuccess }: ImageUploaderPro
           return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const dataUrl = e.target?.result as string;
-          setUploadedFiles((prev) => [
-            ...prev,
-            {
-              file,
-              preview: dataUrl,
-              progress: 0,
-              error: null,
-              uploaded: false,
-            },
-          ]);
-        };
-        reader.readAsDataURL(file);
+        // URL.createObjectURL is synchronous, returns immediately, and keeps
+        // binary data outside the V8 heap — much lighter than readAsDataURL.
+        const blobUrl = URL.createObjectURL(file);
+        setUploadedFiles((prev) => [
+          ...prev,
+          {
+            file,
+            preview: blobUrl,
+            progress: 0,
+            error: null,
+            uploaded: false,
+          },
+        ]);
       });
     },
     [validateFile],
@@ -150,11 +148,12 @@ export function ImageUploader({ maxSize = 5, onUploadSuccess }: ImageUploaderPro
           );
           onUploadSuccess?.(result.data);
 
-          // Remove from list after 2 seconds and trigger complete callback
+          // Remove from list after 2 seconds and revoke the preview Blob URL.
           setTimeout(() => {
             setUploadedFiles((prev) => {
-              const updated = prev.filter((f) => f.file !== imageFile.file);
-              return updated;
+              const entry = prev.find((f) => f.file === imageFile.file);
+              if (entry?.preview.startsWith("blob:")) URL.revokeObjectURL(entry.preview);
+              return prev.filter((f) => f.file !== imageFile.file);
             });
           }, 2000);
         } else {
@@ -192,11 +191,20 @@ export function ImageUploader({ maxSize = 5, onUploadSuccess }: ImageUploaderPro
   };
 
   const removeFile = (file: File) => {
-    setUploadedFiles((prev) => prev.filter((f) => f.file !== file));
+    setUploadedFiles((prev) => {
+      const entry = prev.find((f) => f.file === file);
+      if (entry?.preview.startsWith("blob:")) URL.revokeObjectURL(entry.preview);
+      return prev.filter((f) => f.file !== file);
+    });
   };
 
   const clearAllFiles = () => {
-    setUploadedFiles([]);
+    setUploadedFiles((prev) => {
+      for (const f of prev) {
+        if (f.preview.startsWith("blob:")) URL.revokeObjectURL(f.preview);
+      }
+      return [];
+    });
   };
 
   return (
