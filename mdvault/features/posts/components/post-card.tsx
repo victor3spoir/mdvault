@@ -17,8 +17,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { Post } from "@/features/posts/posts.types";
 import { PrivateImage } from "@/features/medias/components/private-image";
+import type { Post } from "@/features/posts/posts.types";
 import { formatDate } from "@/features/shared/shared.utils";
 import PostDeleteDialog from "./post-delete-dialog";
 import { PostPublishDialog } from "./post-publish-dialog";

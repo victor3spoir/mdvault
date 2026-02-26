@@ -26,7 +26,7 @@ export default function getenv(): EnvVars {
   if (missing.length > 0) {
     throw new Error(
       `Missing required environment variables: ${missing.join(", ")}. ` +
-      `Please set them in your .env.local or environment.`,
+        `Please set them in your .env.local or environment.`,
     );
   }
 
@@ -76,6 +76,6 @@ export default function getenv(): EnvVars {
     GITHUB_REPO: repo,
     ARTICLES_PATH: ARTICLES_PATH,
     POSTS_PATH: POSTS_PATH,
-    MEDIA_PATH: MEDIA_PATH
+    MEDIA_PATH: MEDIA_PATH,
   };
 }

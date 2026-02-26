@@ -1,10 +1,14 @@
 import { Octokit } from "@octokit/rest";
 import getenv from "./env";
 
-const { GITHUB_OWNER, GITHUB_REPO, GITHUB_TOKEN,
+const {
+  GITHUB_OWNER,
+  GITHUB_REPO,
+  GITHUB_TOKEN,
   ARTICLES_PATH,
   POSTS_PATH,
-  MEDIA_PATH, } = getenv();
+  MEDIA_PATH,
+} = getenv();
 
 const octokit = new Octokit({
   auth: GITHUB_TOKEN,

@@ -1,5 +1,5 @@
-import { isValidUrl, sanitizeText } from "@/lib/sanitize";
 import { z } from "zod";
+import { isValidUrl, sanitizeText } from "@/lib/sanitize";
 
 /**
  * Strict validation schemas for posts
@@ -31,14 +31,12 @@ const contentValidator = z
 // - a legacy full https:// URL (old content migrated before the repo-storage model)
 const coverImageValidator = z
   .string()
-  .refine(
-    (val) => {
-      const isRepoPath = !val.startsWith("http") && !val.startsWith("data:") && val.includes(".");
-      const isHttpsUrl = isValidUrl(val);
-      return isRepoPath || isHttpsUrl;
-    },
-    "Cover image must be a repo-relative path (e.g. media/image.jpg) or a valid https URL",
-  )
+  .refine((val) => {
+    const isRepoPath =
+      !val.startsWith("http") && !val.startsWith("data:") && val.includes(".");
+    const isHttpsUrl = isValidUrl(val);
+    return isRepoPath || isHttpsUrl;
+  }, "Cover image must be a repo-relative path (e.g. media/image.jpg) or a valid https URL")
   .optional();
 
 const authorValidator = z

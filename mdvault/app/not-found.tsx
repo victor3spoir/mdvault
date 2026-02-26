@@ -2,12 +2,12 @@
 
 import { IconArrowLeft, IconError404, IconHome } from "@tabler/icons-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
-  const router = useRouter()
-  
+  const router = useRouter();
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-b from-background to-muted/30 px-4">
       <div className="w-full max-w-2xl space-y-8">

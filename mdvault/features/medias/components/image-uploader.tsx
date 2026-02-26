@@ -54,7 +54,10 @@ function abbreviateFilename(name: string): string {
   return `${nameWithoutExt.slice(0, availableForName)}...${extension}`;
 }
 
-export function ImageUploader({ maxSize = 5, onUploadSuccess }: ImageUploaderProps) {
+export function ImageUploader({
+  maxSize = 5,
+  onUploadSuccess,
+}: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<ImageFile[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -152,7 +155,8 @@ export function ImageUploader({ maxSize = 5, onUploadSuccess }: ImageUploaderPro
           setTimeout(() => {
             setUploadedFiles((prev) => {
               const entry = prev.find((f) => f.file === imageFile.file);
-              if (entry?.preview.startsWith("blob:")) URL.revokeObjectURL(entry.preview);
+              if (entry?.preview.startsWith("blob:"))
+                URL.revokeObjectURL(entry.preview);
               return prev.filter((f) => f.file !== imageFile.file);
             });
           }, 2000);
@@ -193,7 +197,8 @@ export function ImageUploader({ maxSize = 5, onUploadSuccess }: ImageUploaderPro
   const removeFile = (file: File) => {
     setUploadedFiles((prev) => {
       const entry = prev.find((f) => f.file === file);
-      if (entry?.preview.startsWith("blob:")) URL.revokeObjectURL(entry.preview);
+      if (entry?.preview.startsWith("blob:"))
+        URL.revokeObjectURL(entry.preview);
       return prev.filter((f) => f.file !== file);
     });
   };

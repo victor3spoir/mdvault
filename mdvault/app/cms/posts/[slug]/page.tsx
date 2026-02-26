@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getArticleAction } from "@/features/articles/articles.actions";
-import { getPostAction } from "@/features/posts/posts.actions";
 import { PrivateImage } from "@/features/medias/components/private-image";
+import { getPostAction } from "@/features/posts/posts.actions";
 import PageLayout from "@/features/shared/components/page-layout";
 import { formatDate } from "@/features/shared/shared.utils";
 

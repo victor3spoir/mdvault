@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import {
   IconArrowRight,
   IconBrandGithub,
@@ -7,18 +7,17 @@ import {
   IconRocket,
   IconSparkles,
 } from "@tabler/icons-react";
+import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import type { ForwardRefExoticComponent, RefAttributes } from "react";
 // import { LandingBackground } from "@/components/landing-background";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import lightBg from "@/public/landing-bg.svg";
+import darkBg from "@/public/landing-bg-dark.svg";
 import { Logo } from "./logo";
-
-import { useTheme } from "next-themes";
-import darkBg from "@/public/landing-bg-dark.svg"
-import lightBg from "@/public/landing-bg.svg"
-import Image from "next/image"
 
 const LandingComponent = ({
   className,
@@ -28,25 +27,24 @@ const LandingComponent = ({
     icon: ForwardRefExoticComponent<IconProps & RefAttributes<SVGSVGElement>>;
     text: string;
   }[] = [
-      {
-        icon: IconMarkdown,
-        text: "MDX Editor",
-      },
-      {
-        icon: IconBrandGithub,
-        text: "Git Versioning",
-      },
-      {
-        icon: IconRocket,
-        text: "Fast Deploy",
-      },
-    ];
+    {
+      icon: IconMarkdown,
+      text: "MDX Editor",
+    },
+    {
+      icon: IconBrandGithub,
+      text: "Git Versioning",
+    },
+    {
+      icon: IconRocket,
+      text: "Fast Deploy",
+    },
+  ];
 
   const { theme, systemTheme } = useTheme();
 
   const currentTheme = theme === "system" ? systemTheme : theme;
   const backgroundImage = currentTheme === "dark" ? darkBg : lightBg;
-
 
   return (
     <div
@@ -70,7 +68,6 @@ const LandingComponent = ({
         src={backgroundImage}
         height={100}
         width={100}
-
         alt="background"
         className="absolute inset-0 w-full h-full object-cover"
         // style={{ pointerEvents: "none" }}
