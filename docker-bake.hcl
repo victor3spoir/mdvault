@@ -2,7 +2,7 @@ variable "TAG" {
   default = "dev"
 }
 
-variable "REGISTRY" {
+variable "IMAGE_REPO" {
   default = "ghcr.io/victor3spoir/mdvault"
 }
 
@@ -10,9 +10,9 @@ target "mdvault" {
   context    = "./mdvault"
   dockerfile = "Dockerfile"
   tags = TAG == "main" ? [
-    "${REGISTRY}:main",
-    "${REGISTRY}:latest",
+    "${IMAGE_REPO}:main",
+    "${IMAGE_REPO}:latest",
   ] : [
-    "${REGISTRY}:${TAG}",
+    "${IMAGE_REPO}:${TAG}",
   ]
 }
