@@ -1,24 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAllMediaDataUrlsAction } from "../medias.actions";
+import { getMediaDataUrlAction } from "../medias.actions";
 
 interface MediaCacheState {
   cache: Record<string, string>;
-  isLoading: boolean;
+  isLoading: Record<string, boolean>;
 }
 
 // Module-level singleton — shared across ALL component instances on the page.
-// This ensures only ONE bulk API call is made regardless of how many
-// PrivateImage / useMediaCache() consumers are mounted simultaneously.
-//
-// The cache stores Blob URLs (blob:http://...) instead of data:URLs.
-// Blob URLs are short strings; the binary data lives outside the V8 heap in
-// the browser's dedicated Blob store, dramatically reducing JS memory pressure
-// when handling large image sets.
-let moduleCache: Record<string, string> | null = null;
-let inflightPromise: Promise<Record<string, string>> | null = null;
-const subscribers = new Set<(cache: Record<string, string>) => void>();
+// This map stores individual file fetch promises to deduplicate requests.
+const inflightFetches = new Map<string, Promise<Record<string, string>>>();
 
 /**
  * Converts a base64 data URL like `data:image/png;base64,...` into a Blob URL.
@@ -29,6 +21,11 @@ function dataUrlToBlobUrl(dataUrl: string): string {
   if (!dataUrl.startsWith("data:")) return dataUrl;
   try {
     const [header, base64] = dataUrl.split(",");
+    if (!base64) {
+      console.warn("Media cache: data URL missing comma separator");
+      return dataUrl;
+    }
+    
     const mimeType =
       header.match(/data:([^;]+)/)?.[1] ?? "application/octet-stream";
     const binary = atob(base64);
@@ -38,79 +35,60 @@ function dataUrlToBlobUrl(dataUrl: string): string {
     }
     const blob = new Blob([bytes], { type: mimeType });
     return URL.createObjectURL(blob);
-  } catch {
+  } catch (error) {
     // If conversion fails for any reason, fall back to the original data URL.
+    console.error("Media cache: Blob URL conversion failed:", error instanceof Error ? error.message : String(error));
     return dataUrl;
   }
 }
 
-/** Revokes all blob: URLs stored in a cache map to prevent memory leaks. */
-function revokeBlobUrls(cache: Record<string, string>): void {
-  for (const url of Object.values(cache)) {
-    if (url.startsWith("blob:")) {
-      URL.revokeObjectURL(url);
-    }
+/** Revokes a single blob: URL to prevent memory leaks. */
+function revokeBlobUrl(url: string): void {
+  if (url.startsWith("blob:")) {
+    URL.revokeObjectURL(url);
   }
 }
 
-function fetchModuleCache(): Promise<Record<string, string>> {
-  if (inflightPromise) return inflightPromise;
+/**
+ * Fetch a single media file's data URL and convert to Blob URL.
+ * Deduplicates concurrent requests for the same file.
+ */
+function fetchMediaFile(filePath: string): Promise<{ blobUrl: string } | null> {
+  // Check if already in flight for this specific file
+  const inFlightKey = `single-${filePath}`;
+  if (inflightFetches.has(inFlightKey)) {
+    return (inflightFetches.get(inFlightKey) as Promise<Record<string, string>>).then(() => ({ blobUrl: null }));
+  }
 
-  inflightPromise = getAllMediaDataUrlsAction().then((result) => {
-    const dataUrls = result.success ? result.data : {};
-
-    // Convert every data:URL received from the server into a Blob URL.
-    // This keeps the JS cache lean (short blob: strings) while the binary
-    // data is managed efficiently by the browser outside the V8 heap.
-    const blobUrlMap: Record<string, string> = {};
-    for (const [path, dataUrl] of Object.entries(dataUrls)) {
-      blobUrlMap[path] = dataUrlToBlobUrl(dataUrl);
+  const promise = getMediaDataUrlAction(filePath).then((result) => {
+    inflightFetches.delete(inFlightKey);
+    if (!result.success) {
+      console.error(`Media cache: Failed to fetch ${filePath}:`, result.error);
+      return {};
     }
-
-    moduleCache = blobUrlMap;
-    inflightPromise = null;
-    for (const notify of subscribers) notify(blobUrlMap);
-    return blobUrlMap;
+    
+    const blobUrl = dataUrlToBlobUrl(result.data);
+    return { [filePath]: blobUrl };
+  }).catch((error) => {
+    inflightFetches.delete(inFlightKey);
+    console.error(`Media cache: Exception fetching ${filePath}:`, error);
+    return {};
   });
 
-  return inflightPromise;
+  inflightFetches.set(inFlightKey, promise as any);
+  return promise.then(() => ({ blobUrl: null }));
 }
 
 /**
- * Hybrid media cache hook.
- * Fetches all media from the server in one bulk call, converts each result
- * to a Blob URL, and stores those in a module-level singleton shared by every
- * component instance on the page.
- *
- * Server-side: cached via `cacheTag("medias")`, invalidated on upload/delete.
- * Client-side: module-level singleton persists across component mount/unmount.
- * Blob URLs are revoked when the cache is invalidated to prevent memory leaks.
+ * On-demand media cache hook.
+ * Fetches media individually as requested, converting each to a Blob URL.
+ * Deduplicates concurrent requests for shared files.
  */
 export function useMediaCache() {
-  const [state, setState] = useState<MediaCacheState>({
-    cache: moduleCache ?? {},
-    isLoading: moduleCache === null,
-  });
+  const [cache, setCache] = useState<Record<string, string>>({});
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    // Already populated — sync state immediately, no fetch needed.
-    if (moduleCache !== null) {
-      setState({ cache: moduleCache, isLoading: false });
-      return;
-    }
-
-    const notify = (cache: Record<string, string>) => {
-      setState({ cache, isLoading: false });
-    };
-    subscribers.add(notify);
-    fetchModuleCache();
-
-    return () => {
-      subscribers.delete(notify);
-    };
-  }, []);
-
-  /** Look up a Blob URL. Trims whitespace before lookup to handle dirty stored paths. */
+  /** Look up a Blob URL or fetch it if not cached.  */
   const resolve = (src: string): string | null => {
     const trimmed = src?.trim();
     if (!trimmed) return null;
@@ -121,20 +99,50 @@ export function useMediaCache() {
       trimmed.startsWith("data:")
     )
       return trimmed;
-    return state.cache[trimmed] ?? null;
+    
+    // Check if already cached
+    if (trimmed in cache) {
+      return cache[trimmed];
+    }
+
+    // Not cached and not currently loading - start fetch
+    if (!(trimmed in loadingStates)) {
+      setLoadingStates(prev => ({ ...prev, [trimmed]: true }));
+      
+      getMediaDataUrlAction(trimmed).then((result) => {
+        if (result.success) {
+          const blobUrl = dataUrlToBlobUrl(result.data);
+          setCache(prev => ({ ...prev, [trimmed]: blobUrl }));
+        }
+        setLoadingStates(prev => {
+          const next = { ...prev };
+          delete next[trimmed];
+          return next;
+        });
+      }).catch((error) => {
+        console.error(`Media cache: Failed to fetch ${trimmed}:`, error);
+        setLoadingStates(prev => {
+          const next = { ...prev };
+          delete next[trimmed];
+          return next;
+        });
+      });
+    }
+
+    return null;
   };
 
-  /** Invalidates module cache, revokes all Blob URLs, and re-fetches. */
+  /** Invalidate cache and revoke Blob URLs. */
   const invalidate = () => {
-    // Revoke existing Blob URLs before discarding them to free browser memory.
-    if (moduleCache) revokeBlobUrls(moduleCache);
-    moduleCache = null;
-    inflightPromise = null;
-    setState({ cache: {}, isLoading: true });
-    fetchModuleCache().then((data) => {
-      setState({ cache: data, isLoading: false });
-    });
+    for (const url of Object.values(cache)) {
+      revokeBlobUrl(url);
+    }
+    setCache({});
+    setLoadingStates({});
+    inflightFetches.clear();
   };
 
-  return { ...state, resolve, invalidate };
+  const isLoading = Object.keys(loadingStates).length > 0;
+
+  return { cache, isLoading, resolve, invalidate };
 }
