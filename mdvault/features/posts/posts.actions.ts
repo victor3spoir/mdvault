@@ -139,7 +139,8 @@ function parseFrontmatterToPost(content: string): PostFrontmatter {
 
   if (data.author) frontmatter.author = data.author as string;
   if (data.article) frontmatter.article = data.article as string;
-  if (data.coverImage) frontmatter.coverImage = data.coverImage as string;
+  if (data.coverImage)
+    frontmatter.coverImage = (data.coverImage as string).trim();
   if (data.createdAt) frontmatter.createdAt = data.createdAt as string;
   if (data.updatedAt) frontmatter.updatedAt = data.updatedAt as string;
   if (data.publishedDate)

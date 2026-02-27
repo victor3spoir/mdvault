@@ -8,7 +8,6 @@ import {
   IconTrash,
   IconX,
 } from "@tabler/icons-react";
-import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { PrivateImage } from "@/features/medias/components/private-image";
 import type { Post } from "@/features/posts/posts.types";
 import { formatDate } from "@/features/shared/shared.utils";
 import PostDeleteDialog from "./post-delete-dialog";
@@ -36,11 +36,10 @@ export function PostCard({ post }: PostCardProps) {
         {/* Cover Image */}
         <div className="relative aspect-video w-full overflow-hidden bg-muted">
           {post.coverImage ? (
-            <Image
+            <PrivateImage
               src={post.coverImage}
               alt={post.title}
               fill
-              priority
               className="object-cover transition-transform duration-500 group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
@@ -170,7 +169,7 @@ export function PostCard({ post }: PostCardProps) {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <PostDeleteDialog postId={post.id} postSha={post.sha!}>
+                  <PostDeleteDialog postId={post.id} postSha={post.sha ?? ""}>
                     <Button
                       variant="ghost"
                       size="icon"

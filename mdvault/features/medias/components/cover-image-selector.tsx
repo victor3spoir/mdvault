@@ -1,12 +1,12 @@
 "use client";
 
 import { IconEdit, IconPhotoPlus, IconTrash } from "@tabler/icons-react";
-import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { MediaFile } from "../medias.types";
 import { ImageInsertDialog } from "./image-insert-dialog";
+import { PrivateImage } from "./private-image";
 
 interface CoverImageSelectorProps {
   selectedImageUrl: string;
@@ -29,7 +29,7 @@ export function CoverImageSelector({
       <div className="space-y-4">
         {selectedImageUrl ? (
           <div className="group relative aspect-square w-56 overflow-hidden rounded-2xl border bg-muted shadow-sm transition-all hover:shadow-md">
-            <Image
+            <PrivateImage
               src={selectedImageUrl}
               alt="Cover image preview"
               fill

@@ -1,13 +1,13 @@
 "use client";
 
 import { IconCheck, IconPhoto, IconSearch } from "@tabler/icons-react";
-import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { listImagesAction } from "../medias.actions";
 import type { MediaFile } from "../medias.types";
+import { PrivateImage } from "./private-image";
 
 interface ImageSelectorProps {
   selectedImageUrl?: string;
@@ -110,7 +110,7 @@ export function ImageSelector({
                   : "border-transparent bg-muted/50 hover:border-primary/40 hover:shadow-md",
               )}
             >
-              <Image
+              <PrivateImage
                 src={image.url}
                 alt={image.name}
                 fill
@@ -118,7 +118,6 @@ export function ImageSelector({
                   "h-full w-full object-cover transition-transform duration-500 group-hover:scale-110",
                   selectedImageUrl === image.url && "scale-105",
                 )}
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               />
 
               {/* Selection Overlay */}

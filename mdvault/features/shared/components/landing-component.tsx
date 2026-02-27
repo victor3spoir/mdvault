@@ -1,3 +1,4 @@
+"use client";
 import {
   IconArrowRight,
   IconBrandGithub,
@@ -6,12 +7,16 @@ import {
   IconRocket,
   IconSparkles,
 } from "@tabler/icons-react";
+import Image from "next/image";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import type { ForwardRefExoticComponent, RefAttributes } from "react";
-import { LandingBackground } from "@/components/landing-background";
+// import { LandingBackground } from "@/components/landing-background";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import lightBg from "@/public/landing-bg.svg";
+import darkBg from "@/public/landing-bg-dark.svg";
 import { Logo } from "./logo";
 
 const LandingComponent = ({
@@ -36,6 +41,11 @@ const LandingComponent = ({
     },
   ];
 
+  const { theme, systemTheme } = useTheme();
+
+  const currentTheme = theme === "system" ? systemTheme : theme;
+  const backgroundImage = currentTheme === "dark" ? darkBg : lightBg;
+
   return (
     <div
       className={cn(
@@ -53,6 +63,16 @@ const LandingComponent = ({
       <div className="absolute inset-0 -z-10 h-full w-full bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[44px_44px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 
       {/* <LandingBackground /> */}
+      <Image
+        key={backgroundImage}
+        src={backgroundImage}
+        height={100}
+        width={100}
+        alt="background"
+        className="absolute inset-0 w-full h-full object-cover"
+        // style={{ pointerEvents: "none" }}
+        suppressHydrationWarning
+      />
 
       {/* Animated gradient orbs */}
       <div className="absolute top-0 left-1/2 -z-10 h-100 w-150 -translate-x-1/2 bg-primary/15 blur-[120px] opacity-60 animate-pulse" />

@@ -38,8 +38,8 @@ export async function listImagesAction(): Promise<ActionResult<MediaFile[]>> {
       id: file.name.split(".")[0],
       name: file.name,
       path: file.path,
-      url: `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${file.path}`,
-      uploadedAt: "", // Date not available from getContent API
+      url: file.path, // repo-relative path, e.g. "media/abc123.jpg"
+      uploadedAt: "",
       sha: file.sha,
     }));
 
@@ -79,7 +79,7 @@ export async function uploadImageAction(
       content: base64Content,
     });
 
-    const imageUrl = `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${filePath}`;
+    const imageUrl = filePath; // repo-relative path, e.g. "media/abc123.jpg"
     updateTag("medias");
     return {
       success: true,
@@ -121,6 +121,93 @@ export async function deleteImageAction(
     const message =
       error instanceof Error ? error.message : "Failed to delete image";
     console.error("Error deleting image:", message);
+    return { success: false, error: message };
+  }
+}
+
+const MIME_TYPES: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  gif: "image/gif",
+  webp: "image/webp",
+  svg: "image/svg+xml",
+  avif: "image/avif",
+};
+
+export async function getMediaDataUrlAction(
+  rawFilePath: string,
+): Promise<ActionResult<string>> {
+  "use cache";
+  cacheTag("medias");
+  const filePath = rawFilePath.trim();
+  try {
+    const response = await octokit.repos.getContent({
+      owner: githubRepoInfo.owner,
+      repo: githubRepoInfo.repo,
+      path: filePath,
+    });
+
+    if (Array.isArray(response.data) || response.data.type !== "file") {
+      return { success: false, error: "Not a file" };
+    }
+
+    const ext = filePath.split(".").pop()?.toLowerCase() ?? "";
+    const mimeType = MIME_TYPES[ext] ?? "application/octet-stream";
+
+    // GitHub's getContent API returns an empty `content` string for files >1MB.
+    // Fall back to the Git Blob API (supports up to 100MB) using the file's SHA.
+    let base64: string;
+    if (!response.data.content.trim()) {
+      const blobResponse = await octokit.git.getBlob({
+        owner: githubRepoInfo.owner,
+        repo: githubRepoInfo.repo,
+        file_sha: response.data.sha,
+      });
+      base64 = blobResponse.data.content.replace(/\n/g, "");
+    } else {
+      base64 = response.data.content.replace(/\n/g, "");
+    }
+
+    const dataUrl = `data:${mimeType};base64,${base64}`;
+    return { success: true, data: dataUrl };
+  } catch (error: unknown) {
+    const message =
+      error instanceof Error ? error.message : "Failed to fetch media";
+    return { success: false, error: message };
+  }
+}
+
+export async function getAllMediaDataUrlsAction(): Promise<
+  ActionResult<Record<string, string>>
+> {
+  "use cache";
+  cacheTag("medias");
+  try {
+    const listResult = await listImagesAction();
+    if (!listResult.success) {
+      return { success: false, error: listResult.error };
+    }
+
+    const entries = await Promise.all(
+      listResult.data.map(async (file) => {
+        const result = await getMediaDataUrlAction(file.path);
+        if (result.success) return [file.path, result.data] as const;
+        return null;
+      }),
+    );
+
+    const map: Record<string, string> = {};
+    for (const entry of entries) {
+      if (entry) map[entry[0]] = entry[1];
+    }
+
+    return { success: true, data: map };
+  } catch (error) {
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch all media data URLs";
     return { success: false, error: message };
   }
 }

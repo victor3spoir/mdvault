@@ -41,6 +41,7 @@ export interface InitializedMDXEditorProps extends MDXEditorProps {
   editorRef: ForwardedRef<MDXEditorMethods> | null;
   onImageUpload?: (file: File) => Promise<string>;
   onImageInsertClick?: () => void;
+  imagePreviewHandler?: (imageSource: string) => Promise<string>;
 }
 
 // Custom InsertImage button that opens the image selector dialog
@@ -66,13 +67,13 @@ export default function InitializedMDXEditor({
   editorRef,
   onImageUpload,
   onImageInsertClick,
+  imagePreviewHandler,
   ...props
 }: InitializedMDXEditorProps) {
   const imageUploadHandler = async (image: File): Promise<string> => {
     if (onImageUpload) {
       return onImageUpload(image);
     }
-    // Default: return a placeholder URL
     return URL.createObjectURL(image);
   };
 
@@ -114,6 +115,7 @@ export default function InitializedMDXEditor({
         }),
         imagePlugin({
           imageUploadHandler,
+          imagePreviewHandler,
           imageAutocompleteSuggestions: [],
         }),
         diffSourcePlugin({

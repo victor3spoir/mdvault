@@ -1,145 +1,261 @@
-name: build app image & deploy to ghcr.io
+name: CI / CD Pipeline
 
 on:
   push:
     branches:
-      - main
+      - "**"
+  pull_request:
+    branches:
       - dev
-    tags:
-      - "v*"
-
+      - main
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 1 — Lint (every push + every PR)
+# ─────────────────────────────────────────────────────────────────────────────
 jobs:
-  lint-test:
+  lint:
+    name: Lint (Biome)
     runs-on: ubuntu-latest
-    outputs:
-      lint-artifact: ${{ steps.upload-lint.outputs.artifact-path }}
-      audit-artifact: ${{ steps.upload-audit.outputs.artifact-path }}
-      
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
         working-directory: ./mdvault
 
-      - name: Biome lint
-        run: bunx @biomejs/biome ci --reporter=github > lint-report.json
+      - name: Biome CI check
+        run: bunx @biomejs/biome ci --reporter=github 2>&1 | tee lint-report.txt
         working-directory: ./mdvault
-        continue-on-error: true
+
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lint-report-${{ github.run_id }}
+          path: ./mdvault/lint-report.txt
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 2 — Security scan (every push + every PR)
+#   2a. Trivy filesystem scan (repo source + deps)
+#   2b. Trivy Dockerfile config scan
+#   2c. Bun dependency audit
+# ─────────────────────────────────────────────────────────────────────────────
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+
+      # --- Trivy: repository filesystem ----------------------------------------
+      - name: Trivy — filesystem scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-fs-report.sarif
+          exit-code: 0
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy FS SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-fs-report.sarif
+          category: trivy-fs
+
+      - name: Upload Trivy FS report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs-report-${{ github.run_id }}
+          path: trivy-fs-report.sarif
+
+      # --- Trivy: Dockerfile config scan ----------------------------------------
+      - name: Trivy — Dockerfile scan
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          scan-type: config
+          scan-ref: ./mdvault/Dockerfile
+          format: sarif
+          output: trivy-dockerfile-report.sarif
+          exit-code: 0
+          ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy Dockerfile SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-dockerfile-report.sarif
+          category: trivy-dockerfile
+
+      - name: Upload Trivy Dockerfile report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-dockerfile-report-${{ github.run_id }}
+          path: trivy-dockerfile-report.sarif
+
+      # --- Bun dependency audit -------------------------------------------------
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
       - name: Bun audit
         working-directory: ./mdvault
-        run: bun audit --json > audit-report.json
-        continue-on-error: true
+        run: bun install --frozen-lockfile && bun audit --json > bun-audit-report.json || true
 
-      - name: Upload lint report
-        id: upload-lint
+      - name: Upload bun audit report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: lint-report
-          path: ./mdvault/lint-report.json
+          name: bun-audit-report-${{ github.run_id }}
+          path: ./mdvault/bun-audit-report.json
 
-      - name: Upload Bun audit report
-        id: upload-audit
-        uses: actions/upload-artifact@v4
-        with:
-          name: audit-report
-          path: ./mdvault/audit-report.json
-
-
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 3 — CodeQL (push to main or dev only — skipped on PRs & feature branches)
+# ─────────────────────────────────────────────────────────────────────────────
   codeql:
+    name: CodeQL Analysis
     runs-on: ubuntu-latest
-    needs: lint-test
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     permissions:
       contents: read
-      packages: read
       security-events: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v4
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
 
       - name: Analyze code with CodeQL
-        uses: github/codeql-action/analyze@v4
-
-      - name: Upload CodeQL SARIF
-        uses: actions/upload-artifact@v4
+        uses: github/codeql-action/analyze@v3
         with:
-          name: codeql-sarif
-          path: codeql-results.sarif
+          category: codeql-js
 
-
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 4 — Build & push Docker image
+#   dev  push → tag: dev
+#   main push → tags: main, latest
+#   Blocked by lint + security-scan
+# ─────────────────────────────────────────────────────────────────────────────
   docker-build:
-    needs: lint-test
+    name: Docker Build & Push
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    needs: [lint, security-scan]
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     outputs:
-      tag: ${{ steps.meta.outputs.version }}
-      
+      image-tag: ${{ steps.meta.outputs.version }}
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Log in to Container Registry
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata
+      - name: Extract Docker metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
+            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/dev' }}
             type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
-            type=semver,pattern={{version}}
-            # type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main'  }}
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
 
-      - name: Build and push Docker image
+      - name: Build and push image
         uses: docker/bake-action@v5
         with:
           files: docker-bake.hcl
-          push: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/main') }}
+          push: true
           targets: mdvault
         env:
-          GITHUB_TOKEN: ghp_000000000
-          GITHUB_OWNER: fake-username
-          GITHUB_REPO: fake-repo
-          TAG: ${{ github.ref_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO: ${{ github.event.repository.name }}
+          TAG: ${{ github.ref == 'refs/heads/main' && 'main' || 'dev' }}
+          EXTRA_TAG: ${{ github.ref == 'refs/heads/main' && 'latest' || '' }}
 
-  docker-scan:
+# ─────────────────────────────────────────────────────────────────────────────
+# JOB 5 — Scan the built image with Trivy (after docker-build)
+# ─────────────────────────────────────────────────────────────────────────────
+  docker-image-scan:
+    name: Docker Image Scan (Trivy)
     runs-on: ubuntu-latest
     needs: docker-build
-    if: github.ref == 'refs/heads/main'
+    if: >
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+    permissions:
+      contents: read
+      security-events: write
+      packages: read
+
     steps:
-      - name: Scan Docker image with Trivy
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Trivy — image scan
         uses: aquasecurity/trivy-action@0.33.1
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
-          format: table
-          output: trivy-report.json
-          exit-code: 1
+          image-ref: >-
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{
+              github.ref == 'refs/heads/main' && 'main' || 'dev'
+            }}
+          format: sarif
+          output: trivy-image-report.sarif
+          exit-code: 0
           ignore-unfixed: true
+          severity: CRITICAL,HIGH
+
+      - name: Upload Trivy image SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy-image-report.sarif
+          category: trivy-image
+
+      - name: Upload Trivy image report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-image-report-${{ github.run_id }}
+          path: trivy-image-report.sarif

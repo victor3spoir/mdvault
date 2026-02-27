@@ -30,6 +30,7 @@ interface ImageFile {
 
 interface ImageUploaderProps {
   maxSize?: number; // in MB
+  onUploadSuccess?: (image: import("../medias.types").MediaFile) => void;
 }
 
 // Abbreviate long filenames: max 12 characters total
@@ -53,7 +54,10 @@ function abbreviateFilename(name: string): string {
   return `${nameWithoutExt.slice(0, availableForName)}...${extension}`;
 }
 
-export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
+export function ImageUploader({
+  maxSize = 5,
+  onUploadSuccess,
+}: ImageUploaderProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState<ImageFile[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -91,21 +95,19 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
           return;
         }
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const dataUrl = e.target?.result as string;
-          setUploadedFiles((prev) => [
-            ...prev,
-            {
-              file,
-              preview: dataUrl,
-              progress: 0,
-              error: null,
-              uploaded: false,
-            },
-          ]);
-        };
-        reader.readAsDataURL(file);
+        // URL.createObjectURL is synchronous, returns immediately, and keeps
+        // binary data outside the V8 heap — much lighter than readAsDataURL.
+        const blobUrl = URL.createObjectURL(file);
+        setUploadedFiles((prev) => [
+          ...prev,
+          {
+            file,
+            preview: blobUrl,
+            progress: 0,
+            error: null,
+            uploaded: false,
+          },
+        ]);
       });
     },
     [validateFile],
@@ -147,12 +149,15 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
                 : f,
             ),
           );
+          onUploadSuccess?.(result.data);
 
-          // Remove from list after 2 seconds and trigger complete callback
+          // Remove from list after 2 seconds and revoke the preview Blob URL.
           setTimeout(() => {
             setUploadedFiles((prev) => {
-              const updated = prev.filter((f) => f.file !== imageFile.file);
-              return updated;
+              const entry = prev.find((f) => f.file === imageFile.file);
+              if (entry?.preview.startsWith("blob:"))
+                URL.revokeObjectURL(entry.preview);
+              return prev.filter((f) => f.file !== imageFile.file);
             });
           }, 2000);
         } else {
@@ -190,11 +195,21 @@ export function ImageUploader({ maxSize = 3 }: ImageUploaderProps) {
   };
 
   const removeFile = (file: File) => {
-    setUploadedFiles((prev) => prev.filter((f) => f.file !== file));
+    setUploadedFiles((prev) => {
+      const entry = prev.find((f) => f.file === file);
+      if (entry?.preview.startsWith("blob:"))
+        URL.revokeObjectURL(entry.preview);
+      return prev.filter((f) => f.file !== file);
+    });
   };
 
   const clearAllFiles = () => {
-    setUploadedFiles([]);
+    setUploadedFiles((prev) => {
+      for (const f of prev) {
+        if (f.preview.startsWith("blob:")) URL.revokeObjectURL(f.preview);
+      }
+      return [];
+    });
   };
 
   return (

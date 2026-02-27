@@ -47,13 +47,12 @@ export function PostEditor({ post }: PostEditorProps) {
   const [article, setArticle] = useState(post?.article || "");
   const [coverImage, setCoverImage] = useState(post?.coverImage || "");
   const [author, setAuthor] = useState(post?.author || "");
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<Article[] | null>(null);
 
   useEffect(() => {
     listArticlesAction().then((result) => {
-      if (result.success) {
-        setArticles(result.data);
-      }
+      if (result.success) setArticles(result.data);
+      else setArticles([]);
     });
   }, []);
 
@@ -77,7 +76,7 @@ export function PostEditor({ post }: PostEditorProps) {
       const result = post
         ? await updatePostAction(post.id, {
             ...input,
-            sha: post.sha!,
+            sha: post.sha ?? "",
             createdAt: post.createdAt,
           })
         : await createPostAction(input);
@@ -148,25 +147,32 @@ export function PostEditor({ post }: PostEditorProps) {
       <div>
         <Label htmlFor="article">Related Article (Optional)</Label>
         <div className="mt-2">
-          <Combobox
-            value={article}
-            onValueChange={(value) => setArticle(value as string)}
-          >
-            <ComboboxInput
-              placeholder="Select an article..."
-              showClear={!!article}
-            />
-            <ComboboxContent>
-              <ComboboxList>
-                <ComboboxEmpty>No articles found</ComboboxEmpty>
-                {articles.map((a) => (
-                  <ComboboxItem key={a.id} value={a.id}>
-                    {a.title}
-                  </ComboboxItem>
-                ))}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+          {articles === null ? (
+            <div className="h-9 animate-pulse rounded-md bg-muted" />
+          ) : (
+            <Combobox
+              value={article}
+              itemToStringLabel={(id) =>
+                articles.find((a) => a.id === id)?.title ?? ""
+              }
+              onValueChange={(value) => setArticle(value as string)}
+            >
+              <ComboboxInput
+                placeholder="Select an article..."
+                showClear={!!article}
+              />
+              <ComboboxContent>
+                <ComboboxList>
+                  <ComboboxEmpty>No articles found</ComboboxEmpty>
+                  {articles.map((a) => (
+                    <ComboboxItem key={a.id} value={a.id}>
+                      {a.title}
+                    </ComboboxItem>
+                  ))}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
+          )}
         </div>
       </div>
 

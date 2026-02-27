@@ -456,7 +456,7 @@ export async function uploadImageAction(
       content,
     });
 
-    const url = `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/main/${path}`;
+    const url = `https://raw.githubusercontent.com/${githubRepoInfo.owner}/${githubRepoInfo.repo}/mainai/${path}`;
     logger.info("Image uploaded", { fileName, fileSize: file.size });
     return { success: true, data: url };
   } catch (error) {

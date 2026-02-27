@@ -1,11 +1,11 @@
 import { IconArrowLeft, IconFileText } from "@tabler/icons-react";
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getArticleAction } from "@/features/articles/articles.actions";
+import { PrivateImage } from "@/features/medias/components/private-image";
 import { getPostAction } from "@/features/posts/posts.actions";
 import PageLayout from "@/features/shared/components/page-layout";
 import { formatDate } from "@/features/shared/shared.utils";
@@ -57,7 +57,7 @@ async function PostContent({ params }: PageProps) {
 
         {post.coverImage && (
           <div className="relative aspect-video w-full overflow-hidden rounded-2xl mb-6 bg-muted">
-            <Image
+            <PrivateImage
               src={post.coverImage}
               alt={post.title}
               fill
@@ -122,7 +122,7 @@ function PostLoading() {
     >
       <div className="max-w-2xl space-y-6">
         <Skeleton className="h-8 w-1/2" />
-        <Skeleton className="h-[300px] w-full" />
+        <Skeleton className="h-75 w-full" />
         <div className="space-y-2">
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-full" />

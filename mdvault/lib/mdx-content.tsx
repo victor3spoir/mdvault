@@ -2,6 +2,7 @@ import Image from "next/image";
 import Markdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "@/components/ui/code-block";
+import { PrivateImage } from "@/features/medias/components/private-image";
 
 function InlineCode({ children }: { children?: React.ReactNode }) {
   return (
@@ -77,12 +78,11 @@ function CustomImage({
         className="relative w-full rounded-lg overflow-hidden bg-muted"
         style={{ aspectRatio: "16/9" }}
       >
-        <Image
+        <PrivateImage
           src={src}
           alt={alt || ""}
           fill
           className="object-contain p-4"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 85vw"
         />
       </div>
       {title && (

@@ -1,7 +1,6 @@
 "use client";
 
 import { IconCheck, IconCopy, IconX } from "@tabler/icons-react";
-import dynamic from "next/dynamic";
 import { type ReactNode, useCallback, useState } from "react";
 import {
   AlertDialog,
@@ -10,8 +9,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import type { MediaFile } from "../medias.types";
-
-const Image = dynamic(() => import("next/image"), { ssr: false });
+import { PrivateImage } from "./private-image";
 
 interface ImagePreviewDialogProps {
   children: ReactNode;
@@ -40,13 +38,11 @@ export function MediaPreviewDialog({
         <div className="flex flex-col bg-card">
           {/* Image */}
           <div className="relative bg-muted/50 h-80 flex items-center justify-center">
-            <Image
+            <PrivateImage
               src={image.url}
               alt={image.name}
               fill
               className="object-contain p-4"
-              priority
-              sizes="640px"
             />
             <button
               type="button"

@@ -61,7 +61,7 @@ const Page = async () => {
       breadcrumbs={[{ label: "Dashboard" }]}
     >
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(min(250px,100%),1fr))] gap-4">
         {statsCards.map((stat) => (
           <div
             key={stat.title}
@@ -88,7 +88,7 @@ const Page = async () => {
       {/* Quick Actions */}
       <div>
         <h2 className="mb-4 text-lg font-semibold">Quick Actions</h2>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(min(250px,100%),1fr))] gap-4">
           {quickActions.map((action) => (
             <Link
               key={action.title}

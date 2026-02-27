@@ -2,9 +2,12 @@
 
 import { IconArrowLeft, IconError404, IconHome } from "@tabler/icons-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-b from-background to-muted/30 px-4">
       <div className="w-full max-w-2xl space-y-8">
@@ -36,7 +39,7 @@ export default function NotFound() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
-          <Link href="/" className="flex-shrink-0">
+          <Link href="/cms" className="flex-shrink-0">
             <Button size="lg" className="w-full sm:w-auto gap-2">
               <IconHome className="w-4 h-4" />
               Go to Homepage
@@ -46,7 +49,7 @@ export default function NotFound() {
           <Button
             variant="outline"
             size="lg"
-            onClick={() => window.history.back()}
+            onClick={() => router.back()}
             className="w-full sm:w-auto gap-2"
           >
             <IconArrowLeft className="w-4 h-4" />

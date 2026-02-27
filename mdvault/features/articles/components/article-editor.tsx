@@ -7,6 +7,7 @@ import { useCallback, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import type { MediaFile } from "@/features/medias/medias.types";
 import { ImageInsertDialog } from "../../medias/components/image-insert-dialog";
+import { useMediaCache } from "../../medias/hooks/use-media-cache";
 import { uploadImageAction } from "../../medias/medias.actions";
 import { createArticleAction, updateArticleAction } from "../articles.actions";
 import { ARTICLE_MESSAGES, ARTICLE_ROUTES } from "../articles.constants";
@@ -31,6 +32,8 @@ export function ArticleEditor({ article, mode }: ArticleEditorLayoutProps) {
   const router = useRouter();
   const editorRef = useRef<MDXEditorMethods>(null);
   const [isPending, startTransition] = useTransition();
+  const { resolve: resolveMedia, invalidate: invalidateMediaCache } =
+    useMediaCache();
 
   const [title, setTitle] = useState(article?.title ?? "");
   const [lang, setLang] = useState<"fr" | "en">(article?.lang ?? "en");
@@ -64,14 +67,27 @@ export function ArticleEditor({ article, mode }: ArticleEditorLayoutProps) {
     setUiState((prev) => ({ ...prev, hasUnsavedChanges: true }));
   };
 
-  // Image upload handler for MDXEditor
-  const handleImageUpload = useCallback(async (file: File): Promise<string> => {
-    const result = await uploadImageAction(file);
-    if (!result.success) {
-      throw new Error(result.error);
-    }
-    return result.data.url;
-  }, []);
+  // Image upload handler for MDXEditor — returns the repo path (e.g. "media/abc.jpg")
+  // which MDXEditor stores in markdown and resolves via imagePreviewHandler at render time
+  const handleImageUpload = useCallback(
+    async (file: File): Promise<string> => {
+      const result = await uploadImageAction(file);
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+      invalidateMediaCache();
+      return result.data.url; // "media/abc123.jpg"
+    },
+    [invalidateMediaCache],
+  );
+
+  // Resolves repo-relative paths via the hybrid media cache (instant lookup).
+  const imagePreviewHandler = useCallback(
+    async (src: string): Promise<string> => {
+      return resolveMedia(src) ?? src;
+    },
+    [resolveMedia],
+  );
 
   const handleImageInsert = (image: MediaFile) => {
     if (editorRef.current) {
@@ -195,6 +211,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorLayoutProps) {
               ref={editorRef}
               markdown={article?.content ?? ""}
               onImageUpload={handleImageUpload}
+              imagePreviewHandler={imagePreviewHandler}
               onImageInsertClick={() =>
                 setUiState((prev) => ({ ...prev, imageInsertDialogOpen: true }))
               }
