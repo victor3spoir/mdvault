@@ -1,9 +1,9 @@
 "use server";
 
-import { cacheTag, updateTag } from "next/cache";
-import { v4 as uuidv4 } from "uuid";
 import { validateImageFile } from "@/lib/file-validation";
 import octokit, { githubRepoInfo } from "@/lib/octokit";
+import { cacheTag, updateTag } from "next/cache";
+import { v4 as uuidv4 } from "uuid";
 import { listArticlesAction } from "../articles/articles.actions";
 import type { ActionResult } from "../shared/shared.types";
 import type { MediaFile, MediaUsage } from "./medias.types";
@@ -120,7 +120,6 @@ export async function deleteImageAction(
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Failed to delete image";
-    console.error("Error deleting image:", message);
     return { success: false, error: message };
   }
 }
@@ -138,8 +137,8 @@ const MIME_TYPES: Record<string, string> = {
 export async function getMediaDataUrlAction(
   rawFilePath: string,
 ): Promise<ActionResult<string>> {
-  "use cache";
-  cacheTag("medias");
+  // Don't use "use cache" here - caching happens at getAllMediaDataUrlsAction level
+  // Using cache on each file independently with Promise.all causes serialization issues
   const filePath = rawFilePath.trim();
   try {
     const response = await octokit.repos.getContent({
@@ -174,6 +173,7 @@ export async function getMediaDataUrlAction(
   } catch (error: unknown) {
     const message =
       error instanceof Error ? error.message : "Failed to fetch media";
+    console.log("Server: Error for", filePath, ":", message);
     return { success: false, error: message };
   }
 }
@@ -183,12 +183,15 @@ export async function getAllMediaDataUrlsAction(): Promise<
 > {
   "use cache";
   cacheTag("medias");
+  console.log("Server: getAllMediaDataUrlsAction started");
   try {
     const listResult = await listImagesAction();
+    console.log("Server: listImagesAction returned", listResult.success ? listResult.data.length + " files" : "error: " + listResult.error);
     if (!listResult.success) {
       return { success: false, error: listResult.error };
     }
 
+    console.log("Server: Starting Promise.all for", listResult.data.length, "files");
     const entries = await Promise.all(
       listResult.data.map(async (file) => {
         const result = await getMediaDataUrlAction(file.path);
@@ -196,18 +199,21 @@ export async function getAllMediaDataUrlsAction(): Promise<
         return null;
       }),
     );
+    console.log("Server: Promise.all completed, got", entries.length, "results");
 
     const map: Record<string, string> = {};
     for (const entry of entries) {
       if (entry) map[entry[0]] = entry[1];
     }
 
+    console.log("Server: Returning success with", Object.keys(map).length, "files");
     return { success: true, data: map };
   } catch (error) {
     const message =
       error instanceof Error
         ? error.message
         : "Failed to fetch all media data URLs";
+    console.log("Server: Caught error:", message);
     return { success: false, error: message };
   }
 }

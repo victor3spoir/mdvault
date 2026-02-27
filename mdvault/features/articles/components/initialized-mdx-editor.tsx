@@ -33,6 +33,13 @@ import {
   toolbarPlugin,
   UndoRedo,
 } from "@mdxeditor/editor";
+import { javascript } from "@codemirror/lang-javascript";
+import { css } from "@codemirror/lang-css";
+import { html } from "@codemirror/lang-html";
+import { python } from "@codemirror/lang-python";
+import { json } from "@codemirror/lang-json";
+import { yaml } from "@codemirror/lang-yaml";
+import { markdown } from "@codemirror/lang-markdown";
 import { IconPhoto } from "@tabler/icons-react";
 import type { ForwardedRef } from "react";
 import "@mdxeditor/editor/style.css";
@@ -112,6 +119,10 @@ export default function InitializedMDXEditor({
             md: "Markdown",
             yml: "YAML",
           },
+          // NOTE: the `languageExtension` option was removed from the plugin
+          // config type in a recent @mdxeditor/editor update.  Syntax highlighting
+          // for the listed languages is now provided automatically by the package,
+          // or can be customized via `codeMirrorExtensions` if needed.
         }),
         imagePlugin({
           imageUploadHandler,
