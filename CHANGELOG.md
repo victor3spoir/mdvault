@@ -6,6 +6,22 @@ All notable changes to this project will be documented in this file.
 ### ✅ Features
 - Introduced hybrid media cache with request queue; images fetch on-demand from GitHub and convert to Blob URLs (commit fd73ef2).
 
+## [0.1.2]
+### 🛠 Fixes
+- Corrected CI/CD error and cleaned pipeline (commit d3aee49).
+
+## [0.1.1]
+### ✨ Features
+- Updated CI/CD workflow with enhanced linting and security scans (commit 8ad68b5).
+
+## [0.1.0]
+### ⚙️ Initial Release
+- Launched baseline CMS with dark mode, environment docs, and CI improvements.
+
+## [1.0.0] - 2026-02-27
+### ✅ Features
+- Introduced hybrid media cache with request queue; images fetch on-demand from GitHub and convert to Blob URLs (commit fd73ef2).
+
 ### 🛠️ Fixes
 - Fixed media display and resolved concurrent overload issues (commit 0f3669c).
 - Enabled CodeMirror syntax highlighting for MDX editor code blocks (commit 5f90a25).
