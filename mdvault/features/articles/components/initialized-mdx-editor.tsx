@@ -33,6 +33,13 @@ import {
   toolbarPlugin,
   UndoRedo,
 } from "@mdxeditor/editor";
+import { javascript } from "@codemirror/lang-javascript";
+import { css } from "@codemirror/lang-css";
+import { html } from "@codemirror/lang-html";
+import { python } from "@codemirror/lang-python";
+import { json } from "@codemirror/lang-json";
+import { yaml } from "@codemirror/lang-yaml";
+import { markdown } from "@codemirror/lang-markdown";
 import { IconPhoto } from "@tabler/icons-react";
 import type { ForwardedRef } from "react";
 import "@mdxeditor/editor/style.css";
@@ -111,6 +118,29 @@ export default function InitializedMDXEditor({
             json: "JSON",
             md: "Markdown",
             yml: "YAML",
+          },
+          languageExtension: (language) => {
+            switch (language) {
+              case "js":
+              case "jsx":
+              case "ts":
+              case "tsx":
+                return javascript({ jsx: true, typescript: language.includes("ts") });
+              case "css":
+                return css();
+              case "html":
+                return html();
+              case "python":
+                return python();
+              case "json":
+                return json();
+              case "md":
+                return markdown();
+              case "yml":
+                return yaml();
+              default:
+                return null;
+            }
           },
         }),
         imagePlugin({
