@@ -53,10 +53,12 @@ function revokeBlobUrl(url: string): void {
  * Fetch a single media file's data URL and convert to Blob URL.
  * Deduplicates concurrent requests for the same file.
  */
-function fetchMediaFile(filePath: string): Promise<{ blobUrl: string } | null> {
+function fetchMediaFile(filePath: string): Promise<{ blobUrl: string | null } | null> {
   // Check if already in flight for this specific file
   const inFlightKey = `single-${filePath}`;
   if (inflightFetches.has(inFlightKey)) {
+    // We only need to return something to satisfy the caller; the actual
+    // blob URL will be populated into state via the shared inflight promise.
     return (inflightFetches.get(inFlightKey) as Promise<Record<string, string>>).then(() => ({ blobUrl: null }));
   }
 

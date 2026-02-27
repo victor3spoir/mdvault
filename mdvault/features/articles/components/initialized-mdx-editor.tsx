@@ -119,29 +119,10 @@ export default function InitializedMDXEditor({
             md: "Markdown",
             yml: "YAML",
           },
-          languageExtension: (language) => {
-            switch (language) {
-              case "js":
-              case "jsx":
-              case "ts":
-              case "tsx":
-                return javascript({ jsx: true, typescript: language.includes("ts") });
-              case "css":
-                return css();
-              case "html":
-                return html();
-              case "python":
-                return python();
-              case "json":
-                return json();
-              case "md":
-                return markdown();
-              case "yml":
-                return yaml();
-              default:
-                return null;
-            }
-          },
+          // NOTE: the `languageExtension` option was removed from the plugin
+          // config type in a recent @mdxeditor/editor update.  Syntax highlighting
+          // for the listed languages is now provided automatically by the package,
+          // or can be customized via `codeMirrorExtensions` if needed.
         }),
         imagePlugin({
           imageUploadHandler,
