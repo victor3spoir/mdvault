@@ -1,0 +1,66 @@
+import { IconEye, IconFileText, IconPhoto } from "@tabler/icons-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { PageLayout } from "#/components/page-layout";
+import { RecentActivity } from "#/features/dashboard/components/recent-activity";
+import { getDashboardOverview } from "#/features/dashboard/dashboard.functions";
+
+const quickLinks = [
+	{ label: "Browse Articles", to: "/cms/articles" },
+	{ label: "Create Post", to: "/cms/posts/new" },
+	{ label: "Open Media", to: "/cms/media" },
+] as const;
+
+export const Route = createFileRoute("/cms/")({
+	loader: () => getDashboardOverview(),
+	component: DashboardPage,
+});
+
+function DashboardPage() {
+	const { stats, activities } = Route.useLoaderData();
+	const statCards = [
+		{ label: "Articles", value: stats.totalArticles, icon: IconFileText },
+		{ label: "Published", value: stats.publishedArticles, icon: IconEye },
+		{ label: "Drafts", value: stats.draftArticles, icon: IconFileText },
+		{ label: "Media Files", value: stats.mediaFiles, icon: IconPhoto },
+	] as const;
+
+	return (
+		<PageLayout
+			title="Dashboard"
+			description="Live content data is now loaded from the configured GitHub repository."
+		>
+			<div className="grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-4">
+				{statCards.map((stat) => (
+					<div key={stat.label} className="rounded-2xl border bg-card p-5">
+						<div className="flex items-start justify-between">
+							<div>
+								<p className="text-sm text-muted-foreground">{stat.label}</p>
+								<p className="mt-2 text-3xl font-bold">{stat.value}</p>
+							</div>
+							<div className="rounded-xl bg-primary/10 p-2.5 text-primary">
+								<stat.icon className="size-5" />
+							</div>
+						</div>
+					</div>
+				))}
+			</div>
+
+			<div className="rounded-2xl border bg-card p-6">
+				<h2 className="text-lg font-semibold">Quick Links</h2>
+				<div className="mt-4 grid grid-cols-[repeat(auto-fit,minmax(min(220px,100%),1fr))] gap-3">
+					{quickLinks.map((link) => (
+						<Link
+							key={link.to}
+							to={link.to}
+							className="rounded-xl border bg-background px-4 py-3 text-sm font-medium transition-colors hover:border-primary/50 hover:text-primary"
+						>
+							{link.label}
+						</Link>
+					))}
+				</div>
+			</div>
+
+			<RecentActivity activities={activities} />
+		</PageLayout>
+	);
+}
