@@ -3,10 +3,27 @@ import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { PrivateImage } from "#/features/media/components/private-image";
-import { getPostBySlug } from "#/features/posts/posts.functions";
+import { prefetchMediaDataUrls } from "#/features/media/media.queries";
+import {
+	collectPostImageSources,
+	postQueryOptions,
+} from "#/features/posts/posts.queries";
 
 export const Route = createFileRoute("/cms/posts/$slug")({
-	loader: ({ params }) => getPostBySlug({ data: { slug: params.slug } }),
+	loader: async ({ context, params }) => {
+		const post = await context.queryClient.ensureQueryData(
+			postQueryOptions(params.slug),
+		);
+
+		if (post) {
+			await prefetchMediaDataUrls(
+				context.queryClient,
+				collectPostImageSources(post),
+			);
+		}
+
+		return post;
+	},
 	component: PostDetailPage,
 });
 
@@ -15,9 +32,7 @@ function PostDetailPage() {
 
 	if (!post) {
 		return (
-			<PageLayout
-				title="Post Not Found"
-			>
+			<PageLayout title="Post Not Found">
 				<div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
 					The requested post could not be loaded.
 				</div>

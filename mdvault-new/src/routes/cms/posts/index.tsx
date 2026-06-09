@@ -4,10 +4,19 @@ import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { PostCard } from "#/features/posts/components/post-card";
-import { getPosts } from "#/features/posts/posts.functions";
+import {
+	postsListQueryOptions,
+	prefetchPostsMedia,
+} from "#/features/posts/posts.queries";
 
 export const Route = createFileRoute("/cms/posts/")({
-	loader: () => getPosts(),
+	loader: async ({ context }) => {
+		const posts = await context.queryClient.ensureQueryData(
+			postsListQueryOptions(),
+		);
+		await prefetchPostsMedia(context.queryClient, posts);
+		return posts;
+	},
 	component: PostsPage,
 });
 

@@ -6,6 +6,7 @@ import {
 	listImages,
 	uploadImage,
 } from "#/features/media/media.server";
+import { normalizeMediaSource } from "#/features/media/media.utils";
 
 export const getImages = createServerFn({ method: "GET" }).handler(async () => {
 	const result = await listImages();
@@ -16,18 +17,6 @@ export const getImages = createServerFn({ method: "GET" }).handler(async () => {
 
 	return result.data;
 });
-
-export const getMediaDataUrlFn = createServerFn({ method: "GET" })
-	.validator((data: { path: string }) => data)
-	.handler(async ({ data }) => {
-		const result = await getMediaDataUrl(data.path);
-
-		if (!result.success) {
-			throw new Error(result.error);
-		}
-
-		return result.data;
-	});
 
 export const uploadImageMutation = createServerFn({ method: "POST" })
 	.validator(
@@ -59,6 +48,19 @@ export const checkMediaUsageFn = createServerFn({ method: "GET" })
 	.validator((data: { imageUrl: string }) => data)
 	.handler(async ({ data }) => {
 		const result = await checkMediaUsage(data.imageUrl);
+
+		if (!result.success) {
+			throw new Error(result.error);
+		}
+
+		return result.data;
+	});
+
+export const getMediaDataUrlFn = createServerFn({ method: "GET" })
+	.validator((data: { src: string }) => data)
+	.handler(async ({ data }) => {
+		const src = normalizeMediaSource(data.src);
+		const result = await getMediaDataUrl(src);
 
 		if (!result.success) {
 			throw new Error(result.error);

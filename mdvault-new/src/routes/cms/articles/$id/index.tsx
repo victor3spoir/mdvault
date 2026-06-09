@@ -2,12 +2,29 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
-import { getArticleById } from "#/features/articles/articles.functions";
+import {
+	articleQueryOptions,
+	collectArticleImageSources,
+} from "#/features/articles/articles.queries";
 import { MarkdownContent } from "#/features/content/components/markdown-content";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { prefetchMediaDataUrls } from "#/features/media/media.queries";
 
-export const Route = createFileRoute("/cms/articles/$id")({
-	loader: ({ params }) => getArticleById({ data: { id: params.id } }),
+export const Route = createFileRoute("/cms/articles/$id/")({
+	loader: async ({ context, params }) => {
+		const article = await context.queryClient.ensureQueryData(
+			articleQueryOptions(params.id),
+		);
+
+		if (article) {
+			await prefetchMediaDataUrls(
+				context.queryClient,
+				collectArticleImageSources(article),
+			);
+		}
+
+		return article;
+	},
 	component: ArticleDetailPage,
 });
 
@@ -16,9 +33,7 @@ function ArticleDetailPage() {
 
 	if (!article) {
 		return (
-			<PageLayout
-				title="Article Not Found"
-			>
+			<PageLayout title="Article Not Found">
 				<div className="rounded-xl border bg-card p-6 text-sm text-muted-foreground">
 					The requested article could not be loaded.
 				</div>

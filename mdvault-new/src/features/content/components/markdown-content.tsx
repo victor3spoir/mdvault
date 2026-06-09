@@ -16,25 +16,6 @@ function MarkdownImage({
 		return null;
 	}
 
-	const isRemote = src.startsWith("http://") || src.startsWith("https://");
-
-	if (isRemote) {
-		return (
-			<figure className="my-8 space-y-3">
-				<img
-					src={src}
-					alt={alt ?? ""}
-					className="w-full rounded-2xl border bg-muted object-cover"
-				/>
-				{title ? (
-					<figcaption className="text-center text-sm text-muted-foreground">
-						{title}
-					</figcaption>
-				) : null}
-			</figure>
-		);
-	}
-
 	return (
 		<figure className="my-8 space-y-3">
 			<div className="overflow-hidden rounded-2xl border bg-muted">

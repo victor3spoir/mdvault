@@ -1,5 +1,5 @@
 import { IconLoader2 } from "@tabler/icons-react";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
 	AlertDialog,
@@ -28,7 +28,10 @@ export function MediaDeleteDialog({
 	images,
 	onConfirm,
 }: MediaDeleteDialogProps) {
-	const targets = images ?? (image ? [image] : []);
+	const targets = useMemo(
+		() => images ?? (image ? [image] : []),
+		[image, images],
+	);
 	const [open, setOpen] = useState(false);
 	const [usage, setUsage] = useState<Record<string, MediaUsage>>({});
 	const [isLoadingUsage, setIsLoadingUsage] = useState(false);
@@ -36,10 +39,12 @@ export function MediaDeleteDialog({
 
 	useEffect(() => {
 		if (!open || targets.length === 0) {
-			setUsage({});
+			setUsage((current) => (Object.keys(current).length === 0 ? current : {}));
+			setIsLoadingUsage(false);
 			return;
 		}
 
+		let cancelled = false;
 		setIsLoadingUsage(true);
 		Promise.all(
 			targets.map(async (target) => {
@@ -54,9 +59,19 @@ export function MediaDeleteDialog({
 			}),
 		)
 			.then((entries) => {
-				setUsage(Object.fromEntries(entries));
+				if (!cancelled) {
+					setUsage(Object.fromEntries(entries));
+				}
 			})
-			.finally(() => setIsLoadingUsage(false));
+			.finally(() => {
+				if (!cancelled) {
+					setIsLoadingUsage(false);
+				}
+			});
+
+		return () => {
+			cancelled = true;
+		};
 	}, [open, targets]);
 
 	const usedTargets = targets.filter((target) => usage[target.path]?.isUsed);

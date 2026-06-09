@@ -5,20 +5,37 @@ import {
 	type UpdateArticleInput,
 	UpdateArticleSchema,
 } from "#/features/articles/article.schema";
+import {
+	generateFrontmatter,
+	parseArticleFrontmatter,
+} from "#/features/articles/articles.frontmatter";
 import type {
 	Article,
 	ArticleFrontmatter,
 	GitHubFile,
 } from "#/features/articles/articles.types";
-import {
-	generateFrontmatter,
-	parseArticleFrontmatter,
-} from "#/features/articles/articles.utils";
 import type { ActionResult } from "#/features/shared/shared.types";
 import { getGitHubClient } from "#/integrations/github/github-client.server";
 import { getGitHubEnv } from "#/integrations/github/github-env.server";
 import { sanitizeMarkdown } from "#/lib/sanitize";
 import { createSafeErrorMessage, logger } from "#/lib/server/logger";
+
+function base64ToUtf8(base64: string) {
+	const binary = atob(base64);
+	const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+	return new TextDecoder().decode(bytes);
+}
+
+function utf8ToBase64(text: string) {
+	const bytes = new TextEncoder().encode(text);
+	let binary = "";
+
+	for (const byte of bytes) {
+		binary += String.fromCharCode(byte);
+	}
+
+	return btoa(binary);
+}
 
 function createArticleObject(
 	id: string,
@@ -56,7 +73,7 @@ async function getArticleContent(path: string) {
 		throw new Error("Invalid file type");
 	}
 
-	return Buffer.from(response.data.content, "base64").toString("utf-8");
+	return base64ToUtf8(response.data.content);
 }
 
 async function fetchLatestSha(path: string) {
@@ -93,7 +110,7 @@ async function updateGitHubFile(
 		repo: env.GITHUB_REPO,
 		path,
 		message,
-		content: Buffer.from(content).toString("base64"),
+		content: utf8ToBase64(content),
 		sha: latestSha || sha,
 	});
 
@@ -171,9 +188,7 @@ export async function getArticle(id: string): Promise<ActionResult<Article>> {
 			return { success: false, error: "Article not found" };
 		}
 
-		const content = Buffer.from(response.data.content, "base64").toString(
-			"utf-8",
-		);
+		const content = base64ToUtf8(response.data.content);
 		const { frontmatter, body } = parseArticleFrontmatter(content);
 
 		return {

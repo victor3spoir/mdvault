@@ -1,4 +1,5 @@
 import type { MDXEditorMethods } from "@mdxeditor/editor";
+import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useCallback, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -15,10 +16,8 @@ import { ArticleEditorHeader } from "#/features/articles/components/article-edit
 import { ArticleEditorSettingsSidebar } from "#/features/articles/components/article-editor-settings-sidebar";
 import { ForwardRefEditor } from "#/features/articles/components/forward-ref-editor";
 import { ImageInsertDialog } from "#/features/media/components/image-insert-dialog";
-import {
-	getMediaDataUrlFn,
-	uploadImageMutation,
-} from "#/features/media/media.functions";
+import { uploadImageMutation } from "#/features/media/media.functions";
+import { mediaDataUrlQueryOptions } from "#/features/media/media.queries";
 import type { MediaFile } from "#/features/media/media.types";
 
 interface ArticleEditorProps {
@@ -38,6 +37,7 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
 export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 	const navigate = useNavigate();
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const editorRef = useRef<MDXEditorMethods>(null);
 	const [isPending, startTransition] = useTransition();
 	const [title, setTitle] = useState(article?.title ?? "");
@@ -67,12 +67,22 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 		[router],
 	);
 
-	const imagePreviewHandler = useCallback(async (src: string) => {
-		if (src.startsWith("http") || src.startsWith("data:")) {
-			return src;
-		}
-		return getMediaDataUrlFn({ data: { path: src } });
-	}, []);
+	const imagePreviewHandler = useCallback(
+		async (src: string) => {
+			const trimmed = src.trim();
+			if (
+				!trimmed ||
+				trimmed.startsWith("http") ||
+				trimmed.startsWith("data:") ||
+				trimmed.startsWith("blob:")
+			) {
+				return trimmed;
+			}
+
+			return queryClient.ensureQueryData(mediaDataUrlQueryOptions(trimmed));
+		},
+		[queryClient],
+	);
 
 	const handleImageInsert = (image: MediaFile) => {
 		editorRef.current?.insertMarkdown(`![image](${image.url})`);

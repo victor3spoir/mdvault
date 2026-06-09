@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getArticleById } from "#/features/articles/articles.functions";
+import { articleQueryOptions } from "#/features/articles/articles.queries";
 import { ArticleEditor } from "#/features/articles/components/article-editor";
 
 export const Route = createFileRoute("/cms/articles/$id/edit")({
-	loader: ({ params }) => getArticleById({ data: { id: params.id } }),
+	loader: ({ context, params }) =>
+		context.queryClient.ensureQueryData(articleQueryOptions(params.id)),
 	component: EditArticlePage,
 });
 

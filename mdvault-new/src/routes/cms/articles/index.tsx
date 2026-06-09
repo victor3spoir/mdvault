@@ -7,7 +7,7 @@ import {
 	IconX,
 } from "@tabler/icons-react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
@@ -24,9 +24,11 @@ import {
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
-	SelectValue,
 } from "#/components/ui/select";
-import { getArticles } from "#/features/articles/articles.functions";
+import {
+	articlesListQueryOptions,
+	prefetchArticlesMedia,
+} from "#/features/articles/articles.queries";
 import { ArticleCard } from "#/features/articles/components/article-card";
 
 export const Route = createFileRoute("/cms/articles/")({
@@ -40,13 +42,22 @@ export const Route = createFileRoute("/cms/articles/")({
 		lang: search.lang === "fr" || search.lang === "en" ? search.lang : "all",
 		sortBy: search.sortBy === "title" ? "title" : "date",
 		sortOrder: search.sortOrder === "asc" ? "asc" : "desc",
-		tags: Array.isArray(search.tags)
-			? search.tags.filter(
-					(value): value is string => typeof value === "string",
-				)
-			: [],
+		tags:
+			typeof search.tags === "string"
+				? [search.tags]
+				: Array.isArray(search.tags)
+					? search.tags.filter(
+							(value): value is string => typeof value === "string",
+						)
+					: [],
 	}),
-	loader: () => getArticles(),
+	loader: async ({ context }) => {
+		const articles = await context.queryClient.ensureQueryData(
+			articlesListQueryOptions(),
+		);
+		await prefetchArticlesMedia(context.queryClient, articles);
+		return articles;
+	},
 	component: ArticlesPage,
 });
 
@@ -54,15 +65,26 @@ function ArticlesPage() {
 	const articles = Route.useLoaderData();
 	const search = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
-	const [localQuery, setLocalQuery] = useState(search.searchQuery);
 	const allTags = Array.from(
 		new Set(articles.flatMap((article) => article.tags ?? []).sort()),
 	);
+	const statusLabel =
+		search.status === "published"
+			? "Published"
+			: search.status === "draft"
+				? "Drafts"
+				: "All Status";
+	const langLabel =
+		search.lang === "fr"
+			? "Francais"
+			: search.lang === "en"
+				? "English"
+				: "All Languages";
 
 	const filteredArticles = useMemo(() => {
 		return articles
 			.filter((article) => {
-				const query = localQuery.trim().toLowerCase();
+				const query = search.searchQuery.trim().toLowerCase();
 				const matchesSearch =
 					!query ||
 					article.title.toLowerCase().includes(query) ||
@@ -91,7 +113,7 @@ function ArticlesPage() {
 					modifier
 				);
 			});
-	}, [articles, localQuery, search]);
+	}, [articles, search]);
 
 	const toggleTag = (tag: string) => {
 		const nextTags = search.tags.includes(tag)
@@ -130,10 +152,9 @@ function ArticlesPage() {
 					<div className="relative flex-1">
 						<IconSearch className="absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted-foreground" />
 						<Input
-							value={localQuery}
+							value={search.searchQuery}
 							onChange={(event) => {
 								const value = event.target.value;
-								setLocalQuery(value);
 								navigate({
 									search: (prev) => ({ ...prev, searchQuery: value }),
 								});
@@ -158,7 +179,7 @@ function ArticlesPage() {
 							<SelectTrigger className="h-11 w-35 rounded-2xl border-none bg-muted/50 focus:ring-1 focus:ring-primary/20">
 								<div className="flex items-center gap-2">
 									<IconFilter className="size-4 text-muted-foreground" />
-									<SelectValue placeholder="Status" />
+									<span className="truncate text-sm">{statusLabel}</span>
 								</div>
 							</SelectTrigger>
 							<SelectContent className="rounded-2xl border-muted">
@@ -180,7 +201,7 @@ function ArticlesPage() {
 							}
 						>
 							<SelectTrigger className="h-11 w-40 rounded-2xl border-none bg-muted/50 focus:ring-1 focus:ring-primary/20">
-								<SelectValue placeholder="Language" />
+								<span className="truncate text-sm">{langLabel}</span>
 							</SelectTrigger>
 							<SelectContent className="rounded-2xl border-muted">
 								<SelectItem value="all">All Languages</SelectItem>

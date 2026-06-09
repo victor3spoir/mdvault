@@ -1,6 +1,5 @@
-import { Image } from "@unpic/react";
-import { useEffect, useState } from "react";
-import { getMediaDataUrlFn } from "#/features/media/media.functions";
+import { useQuery } from "@tanstack/react-query";
+import { mediaDataUrlQueryOptions } from "#/features/media/media.queries";
 import { cn } from "#/lib/utils";
 
 interface PrivateImageProps {
@@ -10,37 +9,8 @@ interface PrivateImageProps {
 }
 
 export function PrivateImage({ src, alt, className }: PrivateImageProps) {
-	const [resolvedSrc, setResolvedSrc] = useState(
-		src.startsWith("http") || src.startsWith("data:") ? src : "",
-	);
-
-	useEffect(() => {
-		let cancelled = false;
-
-		async function resolveImage() {
-			if (!src || src.startsWith("http") || src.startsWith("data:")) {
-				setResolvedSrc(src);
-				return;
-			}
-
-			try {
-				const dataUrl = await getMediaDataUrlFn({ data: { path: src } });
-				if (!cancelled) {
-					setResolvedSrc(dataUrl);
-				}
-			} catch {
-				if (!cancelled) {
-					setResolvedSrc("");
-				}
-			}
-		}
-
-		resolveImage();
-
-		return () => {
-			cancelled = true;
-		};
-	}, [src]);
+	const query = useQuery(mediaDataUrlQueryOptions(src));
+	const resolvedSrc = query.data ?? "";
 
 	if (!resolvedSrc) {
 		return (
@@ -56,13 +26,6 @@ export function PrivateImage({ src, alt, className }: PrivateImageProps) {
 	}
 
 	return (
-		<Image
-			src={resolvedSrc}
-			alt={alt}
-			className={className}
-			layout="constrained"
-			width={100}
-			height={100}
-		/>
+		<img src={resolvedSrc} alt={alt} className={className} draggable={false} />
 	);
 }

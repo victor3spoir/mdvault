@@ -6,14 +6,24 @@ import { PageLayout } from "#/components/page-layout";
 import { MediaFilters } from "#/features/media/components/media-filters";
 import { MediaGallery } from "#/features/media/components/media-gallery";
 import { MediaUploadSheet } from "#/features/media/components/media-upload-sheet";
+import { deleteImageMutation } from "#/features/media/media.functions";
 import {
-	deleteImageMutation,
-	getImages,
-} from "#/features/media/media.functions";
+	mediaListQueryOptions,
+	prefetchMediaDataUrls,
+} from "#/features/media/media.queries";
 import type { MediaFile } from "#/features/media/media.types";
 
 export const Route = createFileRoute("/cms/media/")({
-	loader: () => getImages(),
+	loader: async ({ context }) => {
+		const images = await context.queryClient.ensureQueryData(
+			mediaListQueryOptions(),
+		);
+		await prefetchMediaDataUrls(
+			context.queryClient,
+			images.map((image) => image.url),
+		);
+		return images;
+	},
 	component: MediaPage,
 });
 
@@ -64,10 +74,7 @@ function MediaPage() {
 	};
 
 	return (
-		<PageLayout
-			title="Media Library"
-			description="Manage your digital assets"
-		>
+		<PageLayout title="Media Library" description="Manage your digital assets">
 			<div className="space-y-6">
 				<div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
 					{stats.map((stat) => (

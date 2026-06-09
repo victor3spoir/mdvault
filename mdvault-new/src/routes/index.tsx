@@ -23,17 +23,17 @@ function LandingPage() {
 	];
 
 	return (
-		<main className="relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-8 text-center">
+		<main className="relative isolate flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-8 text-center">
 			<div className="absolute top-4 right-4 z-20">
 				<ThemeToggle />
 			</div>
-			<div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[44px_44px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+			<div className="absolute inset-0 z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[44px_44px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 			<LandingBackground />
-			<div className="absolute top-0 left-1/2 -z-10 h-100 w-150 -translate-x-1/2 bg-primary/15 opacity-60 blur-[120px]" />
-			<div className="absolute right-0 bottom-20 -z-10 h-80 w-80 bg-accent/10 opacity-40 blur-[100px]" />
-			<div className="absolute top-1/3 left-0 -z-10 h-60 w-60 bg-primary/5 opacity-30 blur-[90px]" />
+			<div className="absolute top-0 left-1/2 z-10 h-100 w-150 -translate-x-1/2 bg-primary/15 opacity-60 blur-[120px]" />
+			<div className="absolute right-0 bottom-20 z-10 h-80 w-80 bg-accent/10 opacity-40 blur-[100px]" />
+			<div className="absolute top-1/3 left-0 z-10 h-60 w-60 bg-primary/5 opacity-30 blur-[90px]" />
 
-			<div className="container relative z-10 mx-auto flex h-full max-w-4xl flex-col items-center justify-center gap-4">
+			<div className="container relative z-20 mx-auto flex h-full max-w-4xl flex-col items-center justify-center gap-4">
 				<div className="animate-in slide-in-from-top-8 fade-in shrink-0 duration-1000">
 					<Logo className="scale-100 sm:scale-125" />
 				</div>

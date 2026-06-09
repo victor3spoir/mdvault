@@ -1,14 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageLayout } from "#/components/page-layout";
-import { getArticles } from "#/features/articles/articles.functions";
+import { articlesListQueryOptions } from "#/features/articles/articles.queries";
 import { PostForm } from "#/features/posts/components/post-form";
-import { getPostBySlug } from "#/features/posts/posts.functions";
+import { postQueryOptions } from "#/features/posts/posts.queries";
 
 export const Route = createFileRoute("/cms/posts/$slug/edit")({
-	loader: async ({ params }) => ({
-		post: await getPostBySlug({ data: { slug: params.slug } }),
-		articles: await getArticles(),
-	}),
+	loader: async ({ context, params }) => {
+		const [post, articles] = await Promise.all([
+			context.queryClient.ensureQueryData(postQueryOptions(params.slug)),
+			context.queryClient.ensureQueryData(articlesListQueryOptions()),
+		]);
+
+		return { post, articles };
+	},
 	component: EditPostPage,
 });
 

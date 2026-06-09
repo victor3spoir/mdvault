@@ -2,7 +2,7 @@ import { IconEye, IconFileText, IconPhoto } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageLayout } from "#/components/page-layout";
 import { RecentActivity } from "#/features/dashboard/components/recent-activity";
-import { getDashboardOverview } from "#/features/dashboard/dashboard.functions";
+import { dashboardOverviewQueryOptions } from "#/features/dashboard/dashboard.queries";
 
 const quickLinks = [
 	{ label: "Browse Articles", to: "/cms/articles" },
@@ -11,7 +11,8 @@ const quickLinks = [
 ] as const;
 
 export const Route = createFileRoute("/cms/")({
-	loader: () => getDashboardOverview(),
+	loader: ({ context }) =>
+		context.queryClient.ensureQueryData(dashboardOverviewQueryOptions()),
 	component: DashboardPage,
 });
 

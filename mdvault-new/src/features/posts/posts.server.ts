@@ -17,6 +17,23 @@ import { getGitHubEnv } from "#/integrations/github/github-env.server";
 import { sanitizeMarkdown } from "#/lib/sanitize";
 import { createSafeErrorMessage, logger } from "#/lib/server/logger";
 
+function base64ToUtf8(base64: string) {
+	const binary = atob(base64);
+	const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+	return new TextDecoder().decode(bytes);
+}
+
+function utf8ToBase64(text: string) {
+	const bytes = new TextEncoder().encode(text);
+	let binary = "";
+
+	for (const byte of bytes) {
+		binary += String.fromCharCode(byte);
+	}
+
+	return btoa(binary);
+}
+
 function createPostObject(
 	id: string,
 	frontmatter: PostFrontmatter,
@@ -72,7 +89,7 @@ async function getPostContent(path: string) {
 		throw new Error("Path is a directory, not a file");
 	}
 
-	return Buffer.from(response.data.content, "base64").toString("utf-8");
+	return base64ToUtf8(response.data.content);
 }
 
 function generateFrontmatterText(data: PostFrontmatter) {
@@ -126,7 +143,7 @@ async function updateGitHubFile(
 		repo: env.GITHUB_REPO,
 		path,
 		message,
-		content: Buffer.from(content).toString("base64"),
+		content: utf8ToBase64(content),
 		sha: latestSha || sha,
 	});
 
