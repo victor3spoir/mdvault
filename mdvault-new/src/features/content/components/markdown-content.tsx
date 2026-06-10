@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Markdown, { type Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { CodeBlock } from "#/components/ui/code-block";
@@ -34,22 +35,37 @@ function MarkdownImage({
 	);
 }
 
-const components: Components = {
-	h1: ({ children }) => (
-		<h1 className="mt-10 mb-4 text-4xl font-bold tracking-tight first:mt-0">
-			{children}
-		</h1>
-	),
-	h2: ({ children }) => (
-		<h2 className="mt-10 mb-4 border-b pb-3 text-3xl font-semibold tracking-tight">
-			{children}
-		</h2>
-	),
-	h3: ({ children }) => (
-		<h3 className="mt-8 mb-3 text-2xl font-semibold tracking-tight">
-			{children}
-		</h3>
-	),
+function getNodeText(node: ReactNode): string {
+	if (typeof node === "string" || typeof node === "number") {
+		return String(node);
+	}
+
+	if (Array.isArray(node)) {
+		return node.map(getNodeText).join("");
+	}
+
+	return "";
+}
+
+export function slugifyMarkdownHeading(value: string) {
+	return value
+		.toLowerCase()
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.replace(/[^a-z0-9]+/g, "-")
+		.replace(/^-|-$/g, "");
+}
+
+function createHeadingId(children: ReactNode, counts: Map<string, number>) {
+	const baseId = slugifyMarkdownHeading(getNodeText(children)) || "section";
+	const count = counts.get(baseId) ?? 0;
+
+	counts.set(baseId, count + 1);
+
+	return count === 0 ? baseId : `${baseId}-${count + 1}`;
+}
+
+const baseComponents: Components = {
 	p: ({ children }) => (
 		<p className="my-5 text-lg leading-8 text-foreground/90">{children}</p>
 	),
@@ -121,6 +137,35 @@ const components: Components = {
 };
 
 export function MarkdownContent({ source }: { source: string }) {
+	const headingCounts = new Map<string, number>();
+	const components: Components = {
+		...baseComponents,
+		h1: ({ children }) => (
+			<h1
+				id={createHeadingId(children, headingCounts)}
+				className="scroll-mt-24 mt-10 mb-4 text-4xl font-bold tracking-tight first:mt-0"
+			>
+				{children}
+			</h1>
+		),
+		h2: ({ children }) => (
+			<h2
+				id={createHeadingId(children, headingCounts)}
+				className="scroll-mt-24 mt-10 mb-4 border-b pb-3 text-3xl font-semibold tracking-tight"
+			>
+				{children}
+			</h2>
+		),
+		h3: ({ children }) => (
+			<h3
+				id={createHeadingId(children, headingCounts)}
+				className="scroll-mt-24 mt-8 mb-3 text-2xl font-semibold tracking-tight"
+			>
+				{children}
+			</h3>
+		),
+	};
+
 	return (
 		<Markdown remarkPlugins={[remarkGfm]} components={components}>
 			{source}

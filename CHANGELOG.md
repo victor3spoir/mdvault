@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased] - 2026-06-10
+### ✅ Features
+- Added TanStack Start article table of contents with sticky navigation.
+- Added inline code support to the MDX editor toolbar.
+- Added migrated Settings panels for GitHub repository, authentication, and site configuration.
+
+### 🛠 Fixes
+- Added TanStack Start root error and not-found screens.
+- Fixed article table-of-contents visibility by deriving it from markdown content instead of DOM timing.
+- Fixed CMS article TOC sticky behavior by allowing visible overflow in the CMS inset layout.
+
+### 🔧 Chores
+- Formatted the TanStack app with Biome so `bun run check` passes.
+
 ## [1.0.0] - 2026-02-27
 ### ✅ Features
 - Introduced hybrid media cache with request queue; images fetch on-demand from GitHub and convert to Blob URLs (commit fd73ef2).

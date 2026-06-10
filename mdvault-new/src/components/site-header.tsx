@@ -86,7 +86,9 @@ export function SiteHeader() {
 									{crumb.label}
 								</Link>
 							) : (
-								<span className="font-medium text-foreground">{crumb.label}</span>
+								<span className="font-medium text-foreground">
+									{crumb.label}
+								</span>
 							)}
 						</span>
 					))}

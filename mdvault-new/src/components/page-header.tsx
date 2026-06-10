@@ -6,11 +6,7 @@ interface PageHeaderProps {
 	actions?: ReactNode;
 }
 
-export function PageHeader({
-	title,
-	description,
-	actions,
-}: PageHeaderProps) {
+export function PageHeader({ title, description, actions }: PageHeaderProps) {
 	return (
 		<div className="flex flex-col gap-4 rounded-3xl border bg-card/70 p-6 backdrop-blur-sm lg:flex-row lg:items-start lg:justify-between">
 			<div className="space-y-2">

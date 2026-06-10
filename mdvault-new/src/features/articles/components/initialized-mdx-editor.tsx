@@ -3,6 +3,7 @@ import {
 	BoldItalicUnderlineToggles,
 	ChangeCodeMirrorLanguage,
 	CodeMirrorEditor,
+	CodeToggle,
 	ConditionalContents,
 	CreateLink,
 	codeBlockPlugin,
@@ -133,6 +134,7 @@ export default function InitializedMDXEditor({
 												<UndoRedo />
 												<Separator />
 												<BoldItalicUnderlineToggles />
+												<CodeToggle />
 												<Separator />
 												<ListsToggle />
 												<Separator />

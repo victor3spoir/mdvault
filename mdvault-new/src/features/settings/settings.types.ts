@@ -8,3 +8,20 @@ export interface GitHubUser {
 	company: string | null;
 	location: string | null;
 }
+
+export interface SettingsRepositoryInfo {
+	owner: string;
+	repo: string;
+	branch: string;
+}
+
+export interface SettingsSiteInfo {
+	name: string;
+	url: string;
+}
+
+export interface SettingsPageData {
+	user: GitHubUser;
+	repository: SettingsRepositoryInfo;
+	site: SettingsSiteInfo;
+}

@@ -6,6 +6,7 @@ import {
 	articleQueryOptions,
 	collectArticleImageSources,
 } from "#/features/articles/articles.queries";
+import { TableOfContents } from "#/features/articles/components/table-of-contents";
 import { MarkdownContent } from "#/features/content/components/markdown-content";
 import { PrivateImage } from "#/features/media/components/private-image";
 import { prefetchMediaDataUrls } from "#/features/media/media.queries";
@@ -101,6 +102,9 @@ function ArticleDetailPage() {
 						<MarkdownContent source={article.content} />
 					</article>
 				</div>
+				<aside className="hidden lg:block">
+					<TableOfContents source={article.content} />
+				</aside>
 			</div>
 		</PageLayout>
 	);
