@@ -59,24 +59,20 @@ Upload, organize, and manage all your images in one place.
 
 ### Prerequisites
 
-- Docker and Docker Compose installed (for Docker deployment)
 - A GitHub repository for storing content
-- GitHub Personal Access Token (for API authentication)
+- A GitHub personal access token with read/write access to that repository
+- Docker and Docker Compose for container deployment, or Bun for local development
 
 ### Quick Start with Docker
 
-MDVault is available as a containerized application. You can pull the image directly from GitHub Container Registry.
-
-#### Using Docker Compose (Recommended)
-
-1. Ensure you have a `compose.yml` file (or use the one provided in the repo):
+MDVault is published to GitHub Container Registry. Bind the container to loopback by default so it is reachable only from the host:
 
 ```yaml
 services:
   mdvault:
     image: ghcr.io/victor3spoir/mdvault:latest
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       GITHUB_TOKEN: "your_personal_access_token"
       GITHUB_OWNER: "your_github_username"
@@ -84,182 +80,125 @@ services:
     restart: unless-stopped
 ```
 
-2. Start the container:
+Start it with:
 
 ```bash
 docker compose up -d
 ```
 
-#### Using Docker CLI
+Or use Docker directly:
 
 ```bash
 docker pull ghcr.io/victor3spoir/mdvault:latest
 
 docker run -d \
-  -p 3000:3000 \
+  --name mdvault \
+  -p 127.0.0.1:3000:3000 \
   -e GITHUB_TOKEN=your_token \
   -e GITHUB_OWNER=your_username \
   -e GITHUB_REPO=your_repo \
+  --restart unless-stopped \
   ghcr.io/victor3spoir/mdvault:latest
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
-
-### Installation
-
-1. Set up environment variables:
-
-```bash
-cp .env.example .env.local
-```
-
-2. Configure your GitHub repository:
-   - Add your GitHub token to `.env.local`
-   - Specify your repository name for storing content
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000). Keep the loopback binding when a reverse proxy on the same host provides controlled access.
 
 ### Environment Variables
 
-#### Required Variables
+MDVault uses the configured GitHub token as its only GitHub API credential.
 
-MDVault requires three environment variables to connect to your GitHub repository. Here's what each one means:
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GITHUB_TOKEN` | GitHub personal access token used by the server to read and write repository content. | Required |
+| `GITHUB_OWNER` | GitHub user or organization that owns the content repository. | Required |
+| `GITHUB_REPO` | Content repository name, without an owner or URL. | Required |
+| `ARTICLES_PATH` | Directory containing articles. | `articles` |
+| `POSTS_PATH` | Directory containing posts. | `posts` |
+| `MEDIA_PATH` | Directory containing media files. | `media` |
 
-| Variable | Description | Example |
-|----------|-------------|----------|
-| `GITHUB_TOKEN` | A personal access token from GitHub for API authentication. [Create one here](https://github.com/settings/tokens). Must have `repo` scope to read/write content. | `ghp_16C7e42F292c6912E7...` |
-| `GITHUB_OWNER` | Your GitHub username or organization name. Just the name, not a URL. | `victor3spoir` |
-| `GITHUB_REPO` | The repository name where your content will be stored. Just the name, not a URL or full path. | `my-content-repo` |
-
-#### Optional Variables (Experienced Users Only)
-
-> ⚠️ **Note**: The following variables have sensible defaults and should **only be modified by experienced users**. Normal users should omit these and use the default values.
-
-| Variable | Description | Default | Example |
-|----------|-------------|---------|---------|
-| `ARTICLES_PATH` | Directory path in the repository where articles are stored. | `articles` | `content/articles` |
-| `POSTS_PATH` | Directory path in the repository where posts are stored. | `posts` | `content/posts` |
-| `MEDIA_PATH` | Directory path in the repository where media/images are stored. | `media` | `assets/media` |
-
-**Example `.env.local` (Minimal - Recommended for most users):**
+For local development, create `mdvault/.env.local`:
 
 ```dotenv
-GITHUB_TOKEN=ghp_16C7e42F292c6912E7...
+GITHUB_TOKEN=<your_github_token>
 GITHUB_OWNER=victor3spoir
 GITHUB_REPO=my-content-repo
-```
 
-**Example `.env.local` (Advanced - Custom paths):**
-
-```dotenv
-GITHUB_TOKEN=ghp_16C7e42F292c6912E7...
-GITHUB_OWNER=victor3spoir
-GITHUB_REPO=my-content-repo
-ARTICLES_PATH=content/articles
-POSTS_PATH=content/posts
-MEDIA_PATH=assets/images
+# Optional
+ARTICLES_PATH=articles
+POSTS_PATH=posts
+MEDIA_PATH=media
 ```
 
 #### GitHub Token Permissions
 
-When creating your personal access token, you need to grant the following permissions:
+Fine-grained personal access tokens are recommended. Limit the token to the content repository and grant:
 
-**For Fine-grained Personal Access tokens (Recommended):**
+- **Contents:** Read and write
+- **Metadata:** Read-only
 
-- Select your repository/ies as the resource owner
-- Grant the following **Repository permissions**:
-  - `contents`: **Read and write** - allows creating, updating, and deleting files
-  - `metadata`: **Read-only** - grants read-only access to repository metadata
+A classic token needs the broader `repo` scope for private repositories. The required capabilities are reading, creating, updating, and deleting repository files and creating the corresponding commits.
 
-**For Classic Personal Access tokens:**
+### Security Model
 
-- Grant the **`repo`** scope - provides full control of private repositories
-- This includes all permissions needed to read, write, and delete files
+MDVault deliberately has **no application login, user accounts, or in-app authentication**. `GITHUB_TOKEN` is a server-side credential for GitHub API operations; it does not authenticate people accessing the MDVault interface.
 
-**Minimum Required Capabilities:**
+Access control is a deployment responsibility. Run MDVault only on a trusted network or place it behind firewall, VPN, or reverse-proxy access controls. Do not expose the application directly to the public internet.
 
-- Create files (for saving new articles and media)
-- Update files (for editing existing content)
-- Delete files (for removing articles)
-- Read repository contents
-- Commit to the repository
+## Development
 
-For security best practices, use **fine-grained tokens** with specific repository access rather than classic tokens with broad permissions.
-
-## Development & Contributing
-
-### Prerequisites for Development
-
-- Node.js 18+
-- Bun or npm installed
-- A GitHub repository for storing content
-- GitHub Personal Access Token (for API authentication)
-
-### Setting Up for Development
-
-1. Clone the repository:
+The application lives in `mdvault/` and uses Bun as its primary package manager and runtime.
 
 ```bash
-git clone https://github.com/victor3spoir/mdvault.git
-cd mdvault
+git clone https://github.com/victor3spoir/mdvault.git mdvault-repo
+cd mdvault-repo/mdvault
+bun install --frozen-lockfile
 ```
 
-2. Install dependencies:
+After creating `.env.local`, use these commands:
 
 ```bash
-bun install
-# or
-npm install
+bun run dev             # Development server on port 3000
+bun run check           # Biome checks
+bun run typecheck       # TypeScript typecheck
+bun run test            # Vitest test suite
+bun run build           # Production build
 ```
 
-3. Set up your `.env.local` file with your GitHub credentials (see [Environment Variables](#environment-variables) section above)
-
-### Running the Development Server
+To inspect a production build through Vite's preview server:
 
 ```bash
-bun dev
-# or
-npm run dev
+bun run preview
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application. The dev server supports hot reload for instant feedback.
-
-### Building for Production
+Nitro writes the deployable server to `.output/server/index.mjs`. Run that output directly for production:
 
 ```bash
-bun run build
-npm run start
+HOST=127.0.0.1 PORT=3000 bun .output/server/index.mjs
 ```
 
-### Code Quality
-
-```bash
-bun run lint    # Run Biome linter and formatter checks
-bun run format  # Format code with Biome
-```
-
-### Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. Fork the repository
-2. Create a feature branch (`git switch -c feature/amazing-feature`)
-3. Make your changes and ensure tests pass
-4. Run linting and formatting (`bun run lint` and `bun run format`)
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
-
-Please make sure your code follows the project's style guidelines and passes all checks.
+The Docker image sets its internal host to `0.0.0.0` so Docker can route traffic to it; the host-side port mapping remains loopback-only by default.
 
 ## Architecture
 
-- **Frontend**: Next.js 16 with React 19
-- **Editor**: MDXEditor with live Markdown support
-- **Backend**: GitHub API (Octokit) for content storage
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **Icons**: Tabler Icons for consistent iconography
+- **Application framework:** TanStack Start with React 19
+- **Routing and SSR:** TanStack Router with file-based routes
+- **Server state:** TanStack Query with router SSR integration
+- **Build and server runtime:** Vite and Nitro, producing a Node-compatible server in `.output/`
+- **Content storage:** GitHub API through Octokit
+- **Editor:** MDXEditor with live Markdown support
+- **Styling:** Tailwind CSS with shadcn/ui components
+
+## Contributing
+
+Before opening a pull request, run:
+
+```bash
+bun run check
+bun run typecheck
+bun run test
+bun run build
+```
 
 ## License
 
 MIT License - feel free to use this project for personal or commercial purposes.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
