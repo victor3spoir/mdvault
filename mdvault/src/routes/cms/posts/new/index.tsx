@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { PageLayout } from "#/components/page-layout";
 import { articlesListQueryOptions } from "#/features/articles/articles.queries";
-import { PostForm } from "#/features/posts/components/post-form";
+import { PostEditor } from "#/features/posts/components/post-editor";
 
 export const Route = createFileRoute("/cms/posts/new/")({
 	loader: ({ context }) =>
@@ -12,12 +11,5 @@ export const Route = createFileRoute("/cms/posts/new/")({
 function NewPostPage() {
 	const articles = Route.useLoaderData();
 
-	return (
-		<PageLayout
-			title="New Post"
-			description="Create a new short-form markdown post."
-		>
-			<PostForm articles={articles} />
-		</PageLayout>
-	);
+	return <PostEditor articles={articles} />;
 }

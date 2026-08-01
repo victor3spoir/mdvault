@@ -26,6 +26,7 @@ import {
 } from "#/features/posts/posts.functions";
 import { invalidatePostQueries } from "#/features/posts/posts.queries";
 import type { Post } from "#/features/posts/posts.types";
+import { getPostExcerpt } from "#/features/posts/posts.utils";
 import { formatDate } from "#/lib/date";
 
 export function PostCard({ post }: { post: Post }) {
@@ -119,9 +120,11 @@ export function PostCard({ post }: { post: Post }) {
 					<h3 className="mb-2 line-clamp-2 text-lg font-bold tracking-tight transition-colors group-hover:text-primary">
 						{post.title}
 					</h3>
-					<p className="mb-4 line-clamp-3 flex-1 text-sm leading-relaxed text-muted-foreground">
-						{post.content}
-					</p>
+					<div className="mb-4 flex-1">
+						<p className="line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+							{getPostExcerpt(post.content, 100)}
+						</p>
+					</div>
 
 					<div className="mb-4 flex flex-wrap items-center gap-3 text-[11px] font-medium text-muted-foreground">
 						<span>{formatDate(post.createdAt)}</span>
