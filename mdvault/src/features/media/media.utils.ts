@@ -104,7 +104,9 @@ export function extractMarkdownImageSources(markdown: string) {
 	for (const match of markdown.matchAll(regex)) {
 		const value = match[1]?.trim();
 		if (value) {
-			sources.add(value);
+			// strip display fragment (#w=..&align=..) so repo paths stay clean
+			const hashIndex = value.indexOf("#");
+			sources.add(hashIndex === -1 ? value : value.slice(0, hashIndex));
 		}
 	}
 

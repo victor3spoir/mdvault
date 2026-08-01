@@ -7,6 +7,8 @@ import {
 	IconH2,
 	IconH3,
 	IconH4,
+	IconH5,
+	IconH6,
 	IconItalic,
 	IconLink,
 	IconList,
@@ -85,6 +87,8 @@ export function EditorToolbar({
 			h2: current.isActive("heading", { level: 2 }),
 			h3: current.isActive("heading", { level: 3 }),
 			h4: current.isActive("heading", { level: 4 }),
+			h5: current.isActive("heading", { level: 5 }),
+			h6: current.isActive("heading", { level: 6 }),
 			bulletList: current.isActive("bulletList"),
 			orderedList: current.isActive("orderedList"),
 			blockquote: current.isActive("blockquote"),
@@ -109,7 +113,7 @@ export function EditorToolbar({
 	};
 
 	return (
-		<div className="flex shrink-0 flex-wrap items-center gap-0.5 border-b bg-background/95 px-3 py-1.5">
+		<div className="flex shrink-0 flex-wrap items-center justify-center gap-0.5 border-b bg-background/95 px-3 py-1.5">
 			<ToolbarButton
 				label="Undo"
 				disabled={!state.canUndo}
@@ -178,6 +182,20 @@ export function EditorToolbar({
 				onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
 			>
 				<IconH4 className="size-4" />
+			</ToolbarButton>
+			<ToolbarButton
+				label="Heading 5"
+				active={state.h5}
+				onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
+			>
+				<IconH5 className="size-4" />
+			</ToolbarButton>
+			<ToolbarButton
+				label="Heading 6"
+				active={state.h6}
+				onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
+			>
+				<IconH6 className="size-4" />
 			</ToolbarButton>
 
 			<Separator orientation="vertical" className="mx-1 h-5" />

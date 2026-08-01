@@ -380,6 +380,15 @@ a {
   font-size: 1.125rem;
 }
 
+.tiptap-editor h5 {
+  font-size: 1rem;
+}
+
+.tiptap-editor h6 {
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
 .tiptap-editor ul,
 .tiptap-editor ol {
   padding-left: 1.5rem;

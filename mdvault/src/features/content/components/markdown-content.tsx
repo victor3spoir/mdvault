@@ -5,7 +5,9 @@ import { Markdown, type MarkdownComponents } from "@tanstack/markdown/react";
 import { type ComponentPropsWithoutRef, useRef, useState } from "react";
 import { Button } from "#/components/ui/button";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { splitImageSource } from "#/features/media/image-display";
 import { highlighter } from "#/lib/highlight";
+import { cn } from "#/lib/utils";
 
 const highlightMarkdownCode: CodeHighlighter =
 	createTanStackMarkdownHighlighter(highlighter);
@@ -118,14 +120,29 @@ const components = {
 		if (!src) {
 			return null;
 		}
+		const { src: cleanSrc, attrs } = splitImageSource(src);
+		const width = attrs.width ?? 100;
+		const align = attrs.align ?? "center";
 		return (
 			<figure className="my-8 space-y-3">
-				<div className="overflow-hidden rounded-2xl border bg-muted">
-					<PrivateImage
-						src={src}
-						alt={alt ?? ""}
-						className="max-h-[32rem] w-full object-contain"
-					/>
+				<div
+					className={cn(
+						"flex",
+						align === "left" && "justify-start",
+						align === "center" && "justify-center",
+						align === "right" && "justify-end",
+					)}
+				>
+					<div
+						className="overflow-hidden rounded-2xl border bg-muted"
+						style={{ width: `${width}%` }}
+					>
+						<PrivateImage
+							src={cleanSrc}
+							alt={alt ?? ""}
+							className="max-h-[32rem] w-full object-contain"
+						/>
+					</div>
 				</div>
 				{title ? (
 					<figcaption className="text-center text-sm text-muted-foreground">

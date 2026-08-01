@@ -48,7 +48,7 @@ function CodeBlockView({ node, updateAttributes }: NodeViewProps) {
 					</option>
 				))}
 			</select>
-			<pre>
+			<pre spellCheck={false}>
 				<NodeViewContent<"code"> as="code" />
 			</pre>
 		</NodeViewWrapper>
