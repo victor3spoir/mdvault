@@ -382,7 +382,6 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 						setCoverImage(value);
 						setHasUnsavedChanges(true);
 					}}
-					onCollapse={() => setSidebarCollapsed(true)}
 				/>
 			</div>
 

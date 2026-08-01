@@ -5,10 +5,12 @@ import {
 	NodeViewWrapper,
 	ReactNodeViewRenderer,
 } from "@tiptap/react";
+import { createCodeBlockHighlightPlugin } from "#/features/articles/components/editor/code-block-highlight";
 
 const LANGUAGES = [
 	{ value: "plaintext", label: "Plain text" },
 	{ value: "bash", label: "Bash" },
+	{ value: "csharp", label: "C#" },
 	{ value: "css", label: "CSS" },
 	{ value: "dockerfile", label: "Dockerfile" },
 	{ value: "go", label: "Go" },
@@ -54,13 +56,20 @@ function CodeBlockView({ node, updateAttributes }: NodeViewProps) {
 }
 
 /**
- * Code block with a per-block language selector (shown on hover). The chosen
- * language serializes to the markdown fence info string (```lang), so the
- * rendered article view applies syntax highlighting.
+ * Code block with a per-block language selector (shown on hover) and live
+ * TanStack Highlight syntax colors while editing. The chosen language
+ * serializes to the markdown fence info string (```lang), so the rendered
+ * article view applies the same highlighting.
  */
 export const CodeBlockExtension = CodeBlock.extend({
 	addNodeView() {
 		return ReactNodeViewRenderer(CodeBlockView);
+	},
+	addProseMirrorPlugins() {
+		return [
+			...(this.parent?.() ?? []),
+			createCodeBlockHighlightPlugin(this.name),
+		];
 	},
 }).configure({
 	defaultLanguage: "plaintext",

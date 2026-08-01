@@ -21,6 +21,7 @@ import { yaml } from "@tanstack/highlight/languages/yaml";
 import { createThemeCss } from "@tanstack/highlight/theme";
 import { githubDarkTheme } from "@tanstack/highlight/themes/github-dark";
 import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
+import { csharp } from "#/lib/highlight-csharp";
 
 /**
  * Isomorphic highlighter shared by SSR and the browser. Unknown languages
@@ -29,6 +30,7 @@ import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
 export const highlighter = createHighlighter({
 	languages: [
 		plaintext,
+		csharp,
 		css,
 		diff,
 		dockerfile,

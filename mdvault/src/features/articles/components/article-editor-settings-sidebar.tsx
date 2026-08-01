@@ -33,7 +33,6 @@ interface ArticleEditorSettingsSidebarProps {
 	onDescriptionChange: (value: string) => void;
 	onTagsChange: (value: string[]) => void;
 	onCoverImageChange: (url: string) => void;
-	onCollapse: () => void;
 }
 
 export function ArticleEditorSettingsSidebar({
@@ -46,7 +45,6 @@ export function ArticleEditorSettingsSidebar({
 	onDescriptionChange,
 	onTagsChange,
 	onCoverImageChange,
-	onCollapse,
 }: ArticleEditorSettingsSidebarProps) {
 	const [tagInput, setTagInput] = useState("");
 
@@ -62,15 +60,6 @@ export function ArticleEditorSettingsSidebar({
 			<div className="flex h-full w-80 flex-col overflow-hidden">
 				<div className="flex h-12 shrink-0 items-center justify-between border-b px-4">
 					<h3 className="text-sm font-semibold">Article Settings</h3>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="size-7 rounded-lg"
-						aria-label="Close article settings"
-						onClick={onCollapse}
-					>
-						<IconX className="size-3.5" />
-					</Button>
 				</div>
 
 				<div className="flex-1 overflow-y-auto">

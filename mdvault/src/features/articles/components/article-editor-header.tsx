@@ -3,13 +3,14 @@ import {
 	IconCheck,
 	IconCloud,
 	IconCloudOff,
-	IconColumns2,
 	IconDeviceFloppy,
 	IconEye,
 	IconFileText,
+	IconLoader2,
 	IconSettings,
 	IconTrash,
-	IconX,
+	IconWorldOff,
+	IconWorldUpload,
 } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "#/components/ui/badge";
@@ -122,7 +123,7 @@ export function ArticleEditorHeader({
 				</div>
 			</div>
 
-			<div className="flex items-center gap-2">
+			<div className="flex items-center gap-1.5">
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button
@@ -133,64 +134,100 @@ export function ArticleEditorHeader({
 							aria-pressed={previewMode}
 							onClick={onTogglePreview}
 						>
-							<IconColumns2 className="size-4" />
+							<IconEye className="size-4" />
 						</Button>
 					</TooltipTrigger>
-					<TooltipContent side="bottom">Live preview</TooltipContent>
+					<TooltipContent side="bottom">
+						{previewMode ? "Close live preview" : "Live preview"}
+					</TooltipContent>
 				</Tooltip>
-				{mode === "edit" && article ? (
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button variant="ghost" size="sm" asChild>
-								<Link to="/cms/articles/$id" params={{ id: article.id }}>
-									<IconEye className="size-4" />
-									Preview
-								</Link>
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent side="bottom">Open article preview</TooltipContent>
-					</Tooltip>
-				) : null}
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={onSave}
-					disabled={isSaving || !title}
-				>
-					<IconDeviceFloppy className="size-4" />
-					{isSaving ? "Saving..." : "Save"}
-				</Button>
+
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant="ghost"
+							size="icon"
+							className="size-8 rounded-lg"
+							aria-label="Save article"
+							onClick={onSave}
+							disabled={isSaving || !title}
+						>
+							{isSaving ? (
+								<IconLoader2 className="size-4 animate-spin" />
+							) : (
+								<IconDeviceFloppy className="size-4" />
+							)}
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="bottom">
+						{isSaving ? "Saving..." : "Save article"}
+					</TooltipContent>
+				</Tooltip>
+
 				{mode === "edit" && article ? (
 					<>
-						<Button variant="outline" size="sm" onClick={onTogglePublish}>
-							{article.published ? (
-								<IconX className="size-4" />
-							) : (
-								<IconCheck className="size-4" />
-							)}
-							{article.published ? "Unpublish" : "Publish"}
-						</Button>
-						<Button variant="outline" size="sm" onClick={onDelete}>
-							<IconTrash className="size-4" />
-							Delete
-						</Button>
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="size-8 rounded-lg"
+									aria-label={
+										article.published ? "Unpublish article" : "Publish article"
+									}
+									onClick={onTogglePublish}
+								>
+									{article.published ? (
+										<IconWorldOff className="size-4" />
+									) : (
+										<IconWorldUpload className="size-4" />
+									)}
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent side="bottom">
+								{article.published ? "Unpublish" : "Publish"}
+							</TooltipContent>
+						</Tooltip>
+
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant="ghost"
+									size="icon"
+									className="size-8 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+									aria-label="Delete article"
+									onClick={onDelete}
+								>
+									<IconTrash className="size-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent side="bottom">Delete article</TooltipContent>
+						</Tooltip>
 					</>
 				) : null}
-				<Button
-					variant={sidebarCollapsed ? "secondary" : "ghost"}
-					size="icon"
-					className="size-8 rounded-lg"
-					aria-label={
-						sidebarCollapsed
-							? "Open article settings"
-							: "Close article settings"
-					}
-					aria-controls="article-settings-sidebar"
-					aria-expanded={!sidebarCollapsed}
-					onClick={onToggleSidebar}
-				>
-					<IconSettings className="size-4" />
-				</Button>
+
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant={sidebarCollapsed ? "secondary" : "ghost"}
+							size="icon"
+							className="size-8 rounded-lg"
+							aria-label={
+								sidebarCollapsed
+									? "Open article settings"
+									: "Close article settings"
+							}
+							aria-controls="article-settings-sidebar"
+							aria-expanded={!sidebarCollapsed}
+							onClick={onToggleSidebar}
+						>
+							<IconSettings className="size-4" />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="bottom">
+						{sidebarCollapsed ? "Article settings" : "Close settings"}
+					</TooltipContent>
+				</Tooltip>
 			</div>
 		</header>
 	);
