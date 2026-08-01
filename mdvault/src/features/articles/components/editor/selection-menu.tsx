@@ -76,9 +76,16 @@ export function SelectionMenu({ editor }: SelectionMenuProps) {
 		<BubbleMenu
 			editor={editor}
 			pluginKey="selectionMenu"
-			shouldShow={({ editor: current, from, to }) =>
-				from !== to && !current.isActive("codeBlock")
-			}
+			shouldShow={({ editor: current, state: editorState, from, to }) => {
+				const { selection } = editorState;
+				const isNodeSelection = "node" in selection;
+				return (
+					from !== to &&
+					!isNodeSelection &&
+					!current.isActive("codeBlock") &&
+					!current.isActive("image")
+				);
+			}}
 			className="flex items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-lg"
 		>
 			<MenuButton

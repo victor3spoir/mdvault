@@ -68,33 +68,39 @@ export function ImageSelector({
 	}
 
 	return (
-		<div className="space-y-4">
-			<div className="relative">
-				<IconSearch className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-				<Input
-					placeholder="Search images..."
-					value={searchQuery}
-					onChange={(event) => setSearchQuery(event.target.value)}
-					className="h-10 rounded-xl pl-10 text-sm"
-				/>
+		<div className="space-y-3">
+			<div className="flex items-center gap-2">
+				<div className="relative flex-1">
+					<IconSearch className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+					<Input
+						placeholder="Search images..."
+						value={searchQuery}
+						onChange={(event) => setSearchQuery(event.target.value)}
+						className="h-10 rounded-xl pl-10 text-sm"
+					/>
+				</div>
+				<span className="shrink-0 rounded-full border bg-muted/40 px-2.5 py-1 font-mono text-[11px] tabular-nums text-muted-foreground">
+					{filteredImages.length}/{images.length}
+				</span>
 			</div>
 
-			<div className="max-h-[26rem] overflow-y-auto pr-2">
+			<div className="overflow-y-auto pr-1">
 				{filteredImages.length === 0 ? (
-					<div className="flex items-center justify-center py-12 text-center">
-						<p className="text-sm text-muted-foreground">
-							No images match your search
+					<div className="flex flex-col items-center justify-center gap-1 py-12 text-center">
+						<p className="text-sm font-medium">No images match your search</p>
+						<p className="text-xs text-muted-foreground">
+							Try a different keyword
 						</p>
 					</div>
 				) : (
-					<div className="grid grid-cols-[repeat(auto-fill,minmax(min(150px,100%),1fr))] gap-4">
+					<div className="grid grid-cols-[repeat(auto-fill,minmax(min(140px,100%),1fr))] gap-3">
 						{filteredImages.map((image) => (
 							<button
 								key={image.id}
 								type="button"
 								onClick={() => onSelectImage(image)}
 								className={cn(
-									"group relative aspect-square overflow-hidden rounded-2xl border-2 transition-all duration-300",
+									"group relative aspect-square overflow-hidden rounded-xl border-2 transition-all duration-300 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
 									selectedImageUrl === image.url
 										? "border-primary ring-4 ring-primary/10 shadow-lg"
 										: "border-transparent bg-muted/50 hover:border-primary/40 hover:shadow-md",

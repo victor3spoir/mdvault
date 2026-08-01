@@ -62,6 +62,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const editorRef = useRef<RichTextEditorHandle>(null);
+	const titleRef = useRef<HTMLTextAreaElement>(null);
 	const [isPending, startTransition] = useTransition();
 	const [title, setTitle] = useState(article?.title ?? "");
 	const [lang, setLang] = useState<"fr" | "en">(article?.lang ?? "en");
@@ -78,6 +79,16 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 		article ? { path: article.path, sha: article.sha } : null,
 	);
 	const allowNavigation = useUnsavedChanges(hasUnsavedChanges);
+
+	// Autosize fallback for browsers without CSS field-sizing support.
+	useEffect(() => {
+		const element = titleRef.current;
+		if (!element || CSS.supports("field-sizing", "content")) {
+			return;
+		}
+		element.style.height = "auto";
+		element.style.height = `${element.scrollHeight}px`;
+	}, []);
 
 	const draftKey = `article:${article?.id ?? "new"}`;
 	const { savedAt } = useAutosaveDraft<ArticleDraft>(
@@ -150,8 +161,15 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 		[router],
 	);
 
-	const handleImageInsert = (image: MediaFile) => {
-		editorRef.current?.insertMarkdown(`![image](${image.url})`);
+	const handleImageInsert = (
+		image: MediaFile,
+		details: { alt: string; caption: string },
+	) => {
+		const alt = details.alt || "image";
+		const markdown = details.caption
+			? `![${alt}](${image.url} "${details.caption.replace(/"/g, "'")}")`
+			: `![${alt}](${image.url})`;
+		editorRef.current?.insertMarkdown(markdown);
 		setImageInsertDialogOpen(false);
 		setHasUnsavedChanges(true);
 	};
@@ -289,16 +307,26 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					)}
 				>
 					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
-						<input
-							type="text"
+						<textarea
+							ref={titleRef}
+							rows={1}
 							placeholder="Article title..."
 							value={title}
 							aria-label="Article title"
 							onChange={(event) => {
-								setTitle(event.target.value);
+								setTitle(event.target.value.replace(/\n/g, " "));
 								setHasUnsavedChanges(true);
+								if (!CSS.supports("field-sizing", "content")) {
+									event.target.style.height = "auto";
+									event.target.style.height = `${event.target.scrollHeight}px`;
+								}
 							}}
-							className="w-full bg-transparent text-3xl font-bold tracking-tight outline-none placeholder:text-muted-foreground/40"
+							onKeyDown={(event) => {
+								if (event.key === "Enter") {
+									event.preventDefault();
+								}
+							}}
+							className="w-full resize-none overflow-hidden bg-transparent text-3xl font-bold tracking-tight outline-none [field-sizing:content] placeholder:text-muted-foreground/40"
 						/>
 						<div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
 							<span>{stats.wordCount} words</span>
@@ -389,6 +417,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				open={imageInsertDialogOpen}
 				onClose={() => setImageInsertDialogOpen(false)}
 				onSelect={handleImageInsert}
+				withDetails
 			/>
 		</div>
 	);

@@ -3,6 +3,8 @@ import {
 	IconArrowLeft,
 	IconError404,
 	IconHome,
+	IconRefresh,
+	IconRotateClockwise,
 } from "@tabler/icons-react";
 import type { QueryClient } from "@tanstack/react-query";
 import {
@@ -134,13 +136,17 @@ function RootErrorComponent({ error, reset }: ErrorComponentProps) {
 					</p>
 				</div>
 
-				<div className="flex flex-col gap-3 sm:flex-row">
-					<Button onClick={handleRetry} className="flex-1">
-						<IconAlertTriangle className="size-4" />
-						Try Again
+				<div className="flex flex-col justify-center gap-3 sm:flex-row">
+					<Button onClick={handleRetry}>
+						<IconRotateClockwise className="size-4" />
+						Retry
 					</Button>
-					<Button asChild variant="outline" className="flex-1">
-						<Link to="/">
+					<Button variant="outline" onClick={() => window.location.reload()}>
+						<IconRefresh className="size-4" />
+						Refresh Page
+					</Button>
+					<Button asChild variant="outline">
+						<Link to="/cms">
 							<IconHome className="size-4" />
 							Go Home
 						</Link>

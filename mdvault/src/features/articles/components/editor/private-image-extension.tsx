@@ -1,4 +1,5 @@
 import {
+	IconAccessible,
 	IconAlignCenter,
 	IconAlignLeft,
 	IconAlignRight,
@@ -9,6 +10,7 @@ import {
 	NodeViewWrapper,
 	ReactNodeViewRenderer,
 } from "@tiptap/react";
+import { useEffect, useRef, useState } from "react";
 import { PrivateImage } from "#/features/media/components/private-image";
 import {
 	type ImageAlign,
@@ -32,11 +34,27 @@ const ALIGN_OPTIONS: Array<{
 function PrivateImageView({ node, selected, updateAttributes }: NodeViewProps) {
 	const src = typeof node.attrs.src === "string" ? node.attrs.src : "";
 	const alt = typeof node.attrs.alt === "string" ? node.attrs.alt : "";
+	const title = typeof node.attrs.title === "string" ? node.attrs.title : "";
 	const width = typeof node.attrs.width === "number" ? node.attrs.width : 100;
 	const align: ImageAlign =
 		node.attrs.align === "left" || node.attrs.align === "right"
 			? node.attrs.align
 			: "center";
+
+	const [altOpen, setAltOpen] = useState(false);
+	const altInputRef = useRef<HTMLInputElement>(null);
+
+	useEffect(() => {
+		if (!selected) {
+			setAltOpen(false);
+		}
+	}, [selected]);
+
+	useEffect(() => {
+		if (altOpen) {
+			altInputRef.current?.focus();
+		}
+	}, [altOpen]);
 
 	return (
 		<NodeViewWrapper className="my-4" data-drag-handle>
@@ -53,51 +71,120 @@ function PrivateImageView({ node, selected, updateAttributes }: NodeViewProps) {
 						src={src}
 						alt={alt}
 						className={cn(
-							"w-full rounded-xl border object-contain",
-							selected && "ring-2 ring-primary",
+							"w-full rounded-xl border object-contain transition-shadow",
+							selected &&
+								"ring-2 ring-ring/40 ring-offset-2 ring-offset-background",
 						)}
 					/>
 
 					{selected ? (
 						<div
 							contentEditable={false}
-							className="absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 -translate-y-full items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-lg"
+							className="absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 -translate-y-full flex-col items-center gap-1"
 						>
-							{WIDTH_OPTIONS.map((option) => (
+							<div className="flex items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-lg">
+								{WIDTH_OPTIONS.map((option) => (
+									<button
+										key={option}
+										type="button"
+										aria-label={`Width ${option}%`}
+										title={`Width ${option}%`}
+										onMouseDown={(event) => event.preventDefault()}
+										onClick={() => updateAttributes({ width: option })}
+										className={cn(
+											"rounded-md px-1.5 py-1 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+											width === option && "bg-primary/10 text-primary",
+										)}
+									>
+										{option}%
+									</button>
+								))}
+
+								<span className="mx-0.5 h-4 w-px bg-border" />
+
+								{ALIGN_OPTIONS.map((option) => (
+									<button
+										key={option.value}
+										type="button"
+										aria-label={option.label}
+										title={option.label}
+										onMouseDown={(event) => event.preventDefault()}
+										onClick={() => updateAttributes({ align: option.value })}
+										className={cn(
+											"flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+											align === option.value && "bg-primary/10 text-primary",
+										)}
+									>
+										<option.icon className="size-3.5" />
+									</button>
+								))}
+
+								<span className="mx-0.5 h-4 w-px bg-border" />
+
 								<button
-									key={option}
 									type="button"
-									aria-label={`Width ${option}%`}
-									title={`Width ${option}%`}
+									aria-label="Edit alt text"
+									title="Edit alt text"
 									onMouseDown={(event) => event.preventDefault()}
-									onClick={() => updateAttributes({ width: option })}
+									onClick={() => setAltOpen((value) => !value)}
 									className={cn(
-										"rounded-md px-1.5 py-1 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-										width === option && "bg-primary/10 text-primary",
+										"flex h-7 items-center gap-1 rounded-md px-1.5 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+										(altOpen || alt) && "bg-primary/10 text-primary",
 									)}
 								>
-									{option}%
+									<IconAccessible className="size-3.5" />
+									Alt
 								</button>
-							))}
+							</div>
 
-							<span className="mx-0.5 h-4 w-px bg-border" />
+							{altOpen ? (
+								<div className="rounded-lg border bg-popover p-1 shadow-lg">
+									<input
+										ref={altInputRef}
+										type="text"
+										value={alt}
+										placeholder="Describe this image (alt text)..."
+										aria-label="Image alt text"
+										onChange={(event) =>
+											updateAttributes({ alt: event.target.value })
+										}
+										onKeyDown={(event) => {
+											if (event.key === "Enter" || event.key === "Escape") {
+												event.preventDefault();
+												setAltOpen(false);
+											}
+										}}
+										className="w-64 rounded-md bg-transparent px-2 py-1 text-xs outline-none placeholder:text-muted-foreground/60"
+									/>
+								</div>
+							) : null}
+						</div>
+					) : null}
 
-							{ALIGN_OPTIONS.map((option) => (
-								<button
-									key={option.value}
-									type="button"
-									aria-label={option.label}
-									title={option.label}
-									onMouseDown={(event) => event.preventDefault()}
-									onClick={() => updateAttributes({ align: option.value })}
-									className={cn(
-										"flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-										align === option.value && "bg-primary/10 text-primary",
-									)}
-								>
-									<option.icon className="size-3.5" />
-								</button>
-							))}
+					{selected || title ? (
+						<div contentEditable={false} className="mt-2">
+							{selected ? (
+								<input
+									type="text"
+									value={title}
+									placeholder="Add a caption..."
+									aria-label="Image caption"
+									onChange={(event) =>
+										updateAttributes({ title: event.target.value })
+									}
+									onKeyDown={(event) => {
+										if (event.key === "Enter" || event.key === "Escape") {
+											event.preventDefault();
+											event.currentTarget.blur();
+										}
+									}}
+									className="w-full bg-transparent text-center text-sm italic text-muted-foreground outline-none placeholder:not-italic placeholder:text-muted-foreground/50"
+								/>
+							) : (
+								<p className="text-center text-sm italic text-muted-foreground">
+									{title}
+								</p>
+							)}
 						</div>
 					) : null}
 				</div>

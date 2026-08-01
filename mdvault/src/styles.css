@@ -474,9 +474,14 @@ a {
 }
 
 .tiptap-editor .ProseMirror-selectednode {
-  outline: 2px solid var(--primary);
+  outline: 2px solid color-mix(in oklab, var(--ring) 45%, transparent);
   outline-offset: 2px;
   border-radius: 0.25rem;
+}
+
+/* Image node views draw their own subtle selection ring */
+.tiptap-editor .ProseMirror-selectednode[data-drag-handle] {
+  outline: none;
 }
 
 /* ── TanStack Highlight theme (github-light / github-dark) ── */
