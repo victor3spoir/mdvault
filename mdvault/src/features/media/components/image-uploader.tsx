@@ -16,6 +16,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "#/components/ui/tooltip";
+import { compressImage } from "#/features/media/media.compress";
 import { uploadImageMutation } from "#/features/media/media.functions";
 import type { MediaFile } from "#/features/media/media.types";
 
@@ -129,11 +130,12 @@ export function ImageUploader({
 		);
 
 		try {
+			const prepared = await compressImage(target.file);
 			const uploaded = await uploadImageMutation({
 				data: {
-					fileName: target.file.name,
-					mimeType: target.file.type,
-					base64: await fileToBase64(target.file),
+					fileName: prepared.name,
+					mimeType: prepared.type,
+					base64: await fileToBase64(prepared),
 				},
 			});
 

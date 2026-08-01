@@ -3,6 +3,7 @@ import {
 	IconCheck,
 	IconCloud,
 	IconCloudOff,
+	IconColumns2,
 	IconDeviceFloppy,
 	IconEye,
 	IconFileText,
@@ -28,8 +29,10 @@ interface ArticleEditorHeaderProps {
 	isSaving: boolean;
 	hasUnsavedChanges: boolean;
 	sidebarCollapsed: boolean;
+	previewMode: boolean;
 	onSave: () => void;
 	onToggleSidebar: () => void;
+	onTogglePreview: () => void;
 	onTogglePublish: () => void;
 	onDelete: () => void;
 }
@@ -41,8 +44,10 @@ export function ArticleEditorHeader({
 	isSaving,
 	hasUnsavedChanges,
 	sidebarCollapsed,
+	previewMode,
 	onSave,
 	onToggleSidebar,
+	onTogglePreview,
 	onTogglePublish,
 	onDelete,
 }: ArticleEditorHeaderProps) {
@@ -118,6 +123,21 @@ export function ArticleEditorHeader({
 			</div>
 
 			<div className="flex items-center gap-2">
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant={previewMode ? "secondary" : "ghost"}
+							size="icon"
+							className="size-8 rounded-lg"
+							aria-label="Toggle live preview"
+							aria-pressed={previewMode}
+							onClick={onTogglePreview}
+						>
+							<IconColumns2 className="size-4" />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="bottom">Live preview</TooltipContent>
+				</Tooltip>
 				{mode === "edit" && article ? (
 					<Tooltip>
 						<TooltipTrigger asChild>

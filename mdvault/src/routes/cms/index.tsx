@@ -1,7 +1,9 @@
 import {
+	IconArrowRight,
+	IconArticle,
 	IconEye,
 	IconFileText,
-	IconMessage,
+	IconMessage2,
 	IconPhoto,
 } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -29,7 +31,7 @@ function DashboardPage() {
 			label: "Articles",
 			value: stats.totalArticles,
 			detail: undefined,
-			icon: IconFileText,
+			icon: IconArticle,
 			iconClassName: "bg-blue-500/10 text-blue-500",
 		},
 		{
@@ -50,7 +52,7 @@ function DashboardPage() {
 			label: "Posts",
 			value: stats.totalPosts,
 			detail: `${stats.publishedPosts} published · ${stats.draftPosts} drafts`,
-			icon: IconMessage,
+			icon: IconMessage2,
 			iconClassName: "bg-cyan-500/10 text-cyan-500",
 		},
 		{
@@ -80,8 +82,8 @@ function DashboardPage() {
 									</p>
 								) : null}
 							</div>
-							<div className={cn("rounded-xl p-2.5", stat.iconClassName)}>
-								<stat.icon className="size-5" aria-hidden="true" />
+							<div className={cn("rounded-lg p-2", stat.iconClassName)}>
+								<stat.icon className="size-4" aria-hidden="true" />
 							</div>
 						</div>
 					</div>
@@ -95,9 +97,10 @@ function DashboardPage() {
 						<Link
 							key={link.to}
 							to={link.to}
-							className="rounded-xl border bg-background px-4 py-3 text-sm font-medium transition-colors hover:border-primary/50 hover:text-primary"
+							className="group flex items-center justify-between rounded-lg bg-muted/40 px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
 						>
 							{link.label}
+							<IconArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
 						</Link>
 					))}
 				</div>

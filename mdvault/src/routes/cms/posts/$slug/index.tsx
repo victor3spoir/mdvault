@@ -11,7 +11,7 @@ import {
 } from "#/features/posts/posts.queries";
 import { formatDate } from "#/lib/date";
 
-export const Route = createFileRoute("/cms/posts/$slug")({
+export const Route = createFileRoute("/cms/posts/$slug/")({
 	loader: async ({ context, params }) => {
 		const post = await context.queryClient.ensureQueryData(
 			postQueryOptions(params.slug),

@@ -1,4 +1,10 @@
-import { IconEye, IconTrash } from "@tabler/icons-react";
+import {
+	IconEye,
+	IconLink,
+	IconMarkdown,
+	IconTrash,
+} from "@tabler/icons-react";
+import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import { Checkbox } from "#/components/ui/checkbox";
 import {
@@ -25,6 +31,15 @@ export function MediaCard({
 	onSelectedChange,
 	onDelete,
 }: MediaCardProps) {
+	const copy = async (value: string, message: string) => {
+		try {
+			await navigator.clipboard.writeText(value);
+			toast.success(message);
+		} catch {
+			toast.error("Could not copy to clipboard");
+		}
+	};
+
 	return (
 		<TooltipProvider>
 			<div className="group relative aspect-square overflow-hidden rounded-lg border bg-muted/20 transition-all hover:border-primary/50 hover:shadow-lg">
@@ -49,6 +64,36 @@ export function MediaCard({
 								</MediaPreviewDialog>
 							</TooltipTrigger>
 							<TooltipContent>Preview</TooltipContent>
+						</Tooltip>
+
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									type="button"
+									size="icon"
+									className="rounded-lg"
+									onClick={() => copy(media.url, "URL copied")}
+								>
+									<IconLink className="size-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Copy URL</TooltipContent>
+						</Tooltip>
+
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									type="button"
+									size="icon"
+									className="rounded-lg"
+									onClick={() =>
+										copy(`![${media.name}](${media.url})`, "Markdown copied")
+									}
+								>
+									<IconMarkdown className="size-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent>Copy Markdown</TooltipContent>
 						</Tooltip>
 
 						<Tooltip>

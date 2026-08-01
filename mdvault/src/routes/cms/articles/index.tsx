@@ -160,7 +160,7 @@ function ArticlesPage() {
 		>
 			{articles.length > 0 ? (
 				<div className="flex flex-col gap-4">
-					<div className="flex flex-col gap-4 rounded-3xl border bg-card/50 p-4 backdrop-blur-sm sm:flex-row sm:items-center">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 						<div className="relative flex-1">
 							<IconSearch className="absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted-foreground" />
 							<Input
@@ -295,7 +295,7 @@ function ArticlesPage() {
 					</div>
 
 					{allTags.length > 0 ? (
-						<div className="flex flex-wrap gap-2 px-2">
+						<div className="flex flex-wrap gap-2">
 							{allTags.map((tag) => (
 								<Badge
 									key={tag}

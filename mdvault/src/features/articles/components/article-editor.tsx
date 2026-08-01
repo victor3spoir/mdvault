@@ -1,7 +1,6 @@
-import type { MDXEditorMethods } from "@mdxeditor/editor";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
-import { useCallback, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
 	createArticleMutation,
@@ -15,18 +14,38 @@ import type { Article } from "#/features/articles/articles.types";
 import { getContentStats } from "#/features/articles/articles.utils";
 import { ArticleEditorHeader } from "#/features/articles/components/article-editor-header";
 import { ArticleEditorSettingsSidebar } from "#/features/articles/components/article-editor-settings-sidebar";
-import { ForwardRefEditor } from "#/features/articles/components/forward-ref-editor";
+import {
+	RichTextEditor,
+	type RichTextEditorHandle,
+} from "#/features/articles/components/editor/rich-text-editor";
+import { MarkdownContent } from "#/features/content/components/markdown-content";
 import { ImageInsertDialog } from "#/features/media/components/image-insert-dialog";
+import { compressImage } from "#/features/media/media.compress";
 import { uploadImageMutation } from "#/features/media/media.functions";
-import { mediaDataUrlQueryOptions } from "#/features/media/media.queries";
 import type { MediaFile } from "#/features/media/media.types";
 import type { ContentRevision } from "#/features/shared/content-revision";
+import {
+	clearDraft,
+	loadDraft,
+	useAutosaveDraft,
+} from "#/hooks/use-autosave-draft";
 import { useUnsavedChanges } from "#/hooks/use-unsaved-changes";
 import { formatDate } from "#/lib/date";
+import { cn } from "#/lib/utils";
 
 interface ArticleEditorProps {
 	article?: Article | null;
 	mode: "create" | "edit";
+}
+
+interface ArticleDraft {
+	title: string;
+	description: string;
+	tags: string[];
+	coverImage: string;
+	lang: "fr" | "en";
+	published: boolean;
+	content: string;
 }
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
@@ -42,7 +61,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 	const navigate = useNavigate();
 	const router = useRouter();
 	const queryClient = useQueryClient();
-	const editorRef = useRef<MDXEditorMethods>(null);
+	const editorRef = useRef<RichTextEditorHandle>(null);
 	const [isPending, startTransition] = useTransition();
 	const [title, setTitle] = useState(article?.title ?? "");
 	const [lang, setLang] = useState<"fr" | "en">(article?.lang ?? "en");
@@ -52,6 +71,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 	const [published, setPublished] = useState(article?.published ?? false);
 	const [editorContent, setEditorContent] = useState(article?.content ?? "");
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+	const [previewMode, setPreviewMode] = useState(false);
 	const [imageInsertDialogOpen, setImageInsertDialogOpen] = useState(false);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const [revision, setRevision] = useState<ContentRevision | null>(
@@ -59,13 +79,68 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 	);
 	const allowNavigation = useUnsavedChanges(hasUnsavedChanges);
 
+	const draftKey = `article:${article?.id ?? "new"}`;
+	const { savedAt } = useAutosaveDraft<ArticleDraft>(
+		draftKey,
+		{
+			title,
+			description,
+			tags,
+			coverImage,
+			lang,
+			published,
+			content: editorContent,
+		},
+		{ enabled: hasUnsavedChanges },
+	);
+
+	const restoredRef = useRef(false);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: run once to offer draft restore
+	useEffect(() => {
+		if (restoredRef.current) {
+			return;
+		}
+		restoredRef.current = true;
+
+		const draft = loadDraft<ArticleDraft>(draftKey);
+		if (!draft) {
+			return;
+		}
+
+		if (article && new Date(draft.savedAt) <= new Date(article.updatedAt)) {
+			clearDraft(draftKey);
+			return;
+		}
+
+		toast("Unsaved draft found", {
+			description: `Saved locally ${formatDate(draft.savedAt)}`,
+			duration: 10000,
+			action: {
+				label: "Restore",
+				onClick: () => {
+					const data = draft.data;
+					setTitle(data.title);
+					setDescription(data.description);
+					setTags(data.tags);
+					setCoverImage(data.coverImage);
+					setLang(data.lang);
+					setPublished(data.published);
+					setEditorContent(data.content);
+					editorRef.current?.setMarkdown(data.content);
+					setHasUnsavedChanges(true);
+				},
+			},
+		});
+	}, []);
+
 	const handleImageUpload = useCallback(
 		async (file: File) => {
-			const base64 = arrayBufferToBase64(await file.arrayBuffer());
+			const prepared = await compressImage(file);
+			const base64 = arrayBufferToBase64(await prepared.arrayBuffer());
 			const uploaded = await uploadImageMutation({
 				data: {
-					fileName: file.name,
-					mimeType: file.type,
+					fileName: prepared.name,
+					mimeType: prepared.type,
 					base64,
 				},
 			});
@@ -73,23 +148,6 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 			return uploaded.url;
 		},
 		[router],
-	);
-
-	const imagePreviewHandler = useCallback(
-		async (src: string) => {
-			const trimmed = src.trim();
-			if (
-				!trimmed ||
-				trimmed.startsWith("http") ||
-				trimmed.startsWith("data:") ||
-				trimmed.startsWith("blob:")
-			) {
-				return trimmed;
-			}
-
-			return queryClient.ensureQueryData(mediaDataUrlQueryOptions(trimmed));
-		},
-		[queryClient],
 	);
 
 	const handleImageInsert = (image: MediaFile) => {
@@ -121,6 +179,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				if (mode === "create") {
 					const id = await createArticleMutation({ data: input });
 					setHasUnsavedChanges(false);
+					clearDraft(draftKey);
 					await invalidateArticleQueries(queryClient);
 					allowNavigation();
 					await navigate({ to: "/cms/articles/$id/edit", params: { id } });
@@ -130,6 +189,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					});
 					setRevision(nextRevision);
 					setHasUnsavedChanges(false);
+					clearDraft(draftKey);
 					await invalidateArticleQueries(queryClient);
 				}
 
@@ -179,6 +239,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				await deleteArticleMutation({
 					data: { id: currentArticle.id, revision },
 				});
+				clearDraft(draftKey);
 				await invalidateArticleQueries(queryClient);
 				toast.success("Article deleted");
 				allowNavigation();
@@ -193,6 +254,16 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 
 	const stats = getContentStats(editorContent);
 
+	const handleTogglePreview = () => {
+		setPreviewMode((value) => {
+			const next = !value;
+			if (next) {
+				setSidebarCollapsed(true);
+			}
+			return next;
+		});
+	};
+
 	return (
 		<div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-background">
 			<ArticleEditorHeader
@@ -202,14 +273,21 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				isSaving={isPending}
 				hasUnsavedChanges={hasUnsavedChanges}
 				sidebarCollapsed={sidebarCollapsed}
+				previewMode={previewMode}
 				onSave={handleSave}
 				onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
+				onTogglePreview={handleTogglePreview}
 				onTogglePublish={handleTogglePublish}
 				onDelete={handleDelete}
 			/>
 
 			<div className="flex flex-1 overflow-hidden">
-				<div className="flex flex-1 flex-col overflow-hidden">
+				<div
+					className={cn(
+						"flex-col overflow-hidden",
+						previewMode ? "hidden lg:flex lg:w-1/2" : "flex flex-1",
+					)}
+				>
 					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
 						<input
 							type="text"
@@ -226,7 +304,18 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 							<span>{stats.wordCount} words</span>
 							<span>•</span>
 							<span>{stats.readTime} min read</span>
-							{article?.createdAt ? (
+							{savedAt ? (
+								<>
+									<span>•</span>
+									<span>
+										Draft saved{" "}
+										{new Date(savedAt).toLocaleTimeString([], {
+											hour: "2-digit",
+											minute: "2-digit",
+										})}
+									</span>
+								</>
+							) : article?.createdAt ? (
 								<>
 									<span>•</span>
 									<span>Created {formatDate(article.createdAt)}</span>
@@ -236,11 +325,10 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					</div>
 
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-						<ForwardRefEditor
+						<RichTextEditor
 							ref={editorRef}
 							markdown={article?.content ?? ""}
 							onImageUpload={handleImageUpload}
-							imagePreviewHandler={imagePreviewHandler}
 							onImageInsertClick={() => setImageInsertDialogOpen(true)}
 							onChange={(value) => {
 								setEditorContent(value);
@@ -249,6 +337,28 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 						/>
 					</div>
 				</div>
+
+				{previewMode ? (
+					<div className="flex min-h-0 flex-1 flex-col overflow-y-auto border-l bg-background lg:w-1/2">
+						<div className="sticky top-0 z-10 flex shrink-0 items-center border-b bg-background/95 px-8 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
+							Live Preview
+						</div>
+						<article className="mx-auto w-full max-w-[70ch] px-8 py-8">
+							{title ? (
+								<h1 className="mb-6 text-4xl font-bold tracking-tight">
+									{title}
+								</h1>
+							) : null}
+							{editorContent.trim() ? (
+								<MarkdownContent source={editorContent} />
+							) : (
+								<p className="text-sm text-muted-foreground">
+									Nothing to preview yet. Start writing to see it here.
+								</p>
+							)}
+						</article>
+					</div>
+				) : null}
 
 				<ArticleEditorSettingsSidebar
 					lang={lang}

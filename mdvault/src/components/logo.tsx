@@ -11,7 +11,7 @@ export function Logo({ className, size = 36 }: LogoProps) {
 			role="img"
 			aria-label="mdvault logo"
 			className={cn(
-				"flex items-center rounded-lg bg-cover bg-center",
+				"flex shrink-0 items-center rounded-lg bg-cover bg-center",
 				className,
 			)}
 			style={{

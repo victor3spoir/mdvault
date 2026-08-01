@@ -1,11 +1,10 @@
-"use client";
-
 import {
+	IconArticle,
 	IconChevronDown,
 	IconChevronRight,
-	IconFileText,
 	IconHome,
 	IconList,
+	IconMessage2,
 	IconPhoto,
 	IconPlus,
 	IconSettings,
@@ -45,7 +44,7 @@ const navItems: NavItem[] = [
 	{ title: "Dashboard", href: "/cms", icon: <IconHome className="size-4" /> },
 	{
 		title: "Articles",
-		icon: <IconFileText className="size-4" />,
+		icon: <IconArticle className="size-4" />,
 		children: [
 			{ title: "All Articles", href: "/cms/articles" },
 			{ title: "New Article", href: "/cms/articles/new" },
@@ -53,7 +52,7 @@ const navItems: NavItem[] = [
 	},
 	{
 		title: "Posts",
-		icon: <IconFileText className="size-4" />,
+		icon: <IconMessage2 className="size-4" />,
 		children: [
 			{ title: "All Posts", href: "/cms/posts" },
 			{ title: "New Post", href: "/cms/posts/new" },
@@ -155,8 +154,11 @@ export function CmsSidebar() {
 
 	return (
 		<Sidebar variant="inset" collapsible="icon">
-			<SidebarHeader className="border-b border-sidebar-border px-4 py-4 h-16">
-				<Link to="/cms" className="flex items-center gap-3">
+			<SidebarHeader className="border-b border-sidebar-border px-4 py-4 h-16 group-data-[collapsible=icon]:px-0">
+				<Link
+					to="/cms"
+					className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center"
+				>
 					<Logo />
 					{!isCollapsed ? (
 						<span className="text-xl font-bold tracking-tight">

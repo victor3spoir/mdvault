@@ -16,12 +16,12 @@ import { Route as CmsSettingsIndexRouteImport } from './routes/cms/settings/inde
 import { Route as CmsPostsIndexRouteImport } from './routes/cms/posts/index'
 import { Route as CmsMediaIndexRouteImport } from './routes/cms/media/index'
 import { Route as CmsArticlesIndexRouteImport } from './routes/cms/articles/index'
-import { Route as CmsPostsNewRouteImport } from './routes/cms/posts/new'
-import { Route as CmsPostsSlugRouteImport } from './routes/cms/posts/$slug'
+import { Route as CmsPostsNewIndexRouteImport } from './routes/cms/posts/new/index'
+import { Route as CmsPostsSlugIndexRouteImport } from './routes/cms/posts/$slug/index'
 import { Route as CmsArticlesNewIndexRouteImport } from './routes/cms/articles/new/index'
 import { Route as CmsArticlesIdIndexRouteImport } from './routes/cms/articles/$id/index'
-import { Route as CmsPostsSlugEditRouteImport } from './routes/cms/posts/$slug/edit'
 import { Route as CmsArticlesIdEditRouteImport } from './routes/cms/articles/$id/edit'
+import { Route as CmsPostsSlugEditIndexRouteImport } from './routes/cms/posts/$slug/edit/index'
 
 const CmsRouteRoute = CmsRouteRouteImport.update({
   id: '/cms',
@@ -58,14 +58,14 @@ const CmsArticlesIndexRoute = CmsArticlesIndexRouteImport.update({
   path: '/articles/',
   getParentRoute: () => CmsRouteRoute,
 } as any)
-const CmsPostsNewRoute = CmsPostsNewRouteImport.update({
-  id: '/posts/new',
-  path: '/posts/new',
+const CmsPostsNewIndexRoute = CmsPostsNewIndexRouteImport.update({
+  id: '/posts/new/',
+  path: '/posts/new/',
   getParentRoute: () => CmsRouteRoute,
 } as any)
-const CmsPostsSlugRoute = CmsPostsSlugRouteImport.update({
-  id: '/posts/$slug',
-  path: '/posts/$slug',
+const CmsPostsSlugIndexRoute = CmsPostsSlugIndexRouteImport.update({
+  id: '/posts/$slug/',
+  path: '/posts/$slug/',
   getParentRoute: () => CmsRouteRoute,
 } as any)
 const CmsArticlesNewIndexRoute = CmsArticlesNewIndexRouteImport.update({
@@ -78,14 +78,14 @@ const CmsArticlesIdIndexRoute = CmsArticlesIdIndexRouteImport.update({
   path: '/articles/$id/',
   getParentRoute: () => CmsRouteRoute,
 } as any)
-const CmsPostsSlugEditRoute = CmsPostsSlugEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => CmsPostsSlugRoute,
-} as any)
 const CmsArticlesIdEditRoute = CmsArticlesIdEditRouteImport.update({
   id: '/articles/$id/edit',
   path: '/articles/$id/edit',
+  getParentRoute: () => CmsRouteRoute,
+} as any)
+const CmsPostsSlugEditIndexRoute = CmsPostsSlugEditIndexRouteImport.update({
+  id: '/posts/$slug/edit/',
+  path: '/posts/$slug/edit/',
   getParentRoute: () => CmsRouteRoute,
 } as any)
 
@@ -93,46 +93,46 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cms': typeof CmsRouteRouteWithChildren
   '/cms/': typeof CmsIndexRoute
-  '/cms/posts/$slug': typeof CmsPostsSlugRouteWithChildren
-  '/cms/posts/new': typeof CmsPostsNewRoute
   '/cms/articles/': typeof CmsArticlesIndexRoute
   '/cms/media/': typeof CmsMediaIndexRoute
   '/cms/posts/': typeof CmsPostsIndexRoute
   '/cms/settings/': typeof CmsSettingsIndexRoute
   '/cms/articles/$id/edit': typeof CmsArticlesIdEditRoute
-  '/cms/posts/$slug/edit': typeof CmsPostsSlugEditRoute
   '/cms/articles/$id/': typeof CmsArticlesIdIndexRoute
   '/cms/articles/new/': typeof CmsArticlesNewIndexRoute
+  '/cms/posts/$slug/': typeof CmsPostsSlugIndexRoute
+  '/cms/posts/new/': typeof CmsPostsNewIndexRoute
+  '/cms/posts/$slug/edit/': typeof CmsPostsSlugEditIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/cms': typeof CmsIndexRoute
-  '/cms/posts/$slug': typeof CmsPostsSlugRouteWithChildren
-  '/cms/posts/new': typeof CmsPostsNewRoute
   '/cms/articles': typeof CmsArticlesIndexRoute
   '/cms/media': typeof CmsMediaIndexRoute
   '/cms/posts': typeof CmsPostsIndexRoute
   '/cms/settings': typeof CmsSettingsIndexRoute
   '/cms/articles/$id/edit': typeof CmsArticlesIdEditRoute
-  '/cms/posts/$slug/edit': typeof CmsPostsSlugEditRoute
   '/cms/articles/$id': typeof CmsArticlesIdIndexRoute
   '/cms/articles/new': typeof CmsArticlesNewIndexRoute
+  '/cms/posts/$slug': typeof CmsPostsSlugIndexRoute
+  '/cms/posts/new': typeof CmsPostsNewIndexRoute
+  '/cms/posts/$slug/edit': typeof CmsPostsSlugEditIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cms': typeof CmsRouteRouteWithChildren
   '/cms/': typeof CmsIndexRoute
-  '/cms/posts/$slug': typeof CmsPostsSlugRouteWithChildren
-  '/cms/posts/new': typeof CmsPostsNewRoute
   '/cms/articles/': typeof CmsArticlesIndexRoute
   '/cms/media/': typeof CmsMediaIndexRoute
   '/cms/posts/': typeof CmsPostsIndexRoute
   '/cms/settings/': typeof CmsSettingsIndexRoute
   '/cms/articles/$id/edit': typeof CmsArticlesIdEditRoute
-  '/cms/posts/$slug/edit': typeof CmsPostsSlugEditRoute
   '/cms/articles/$id/': typeof CmsArticlesIdIndexRoute
   '/cms/articles/new/': typeof CmsArticlesNewIndexRoute
+  '/cms/posts/$slug/': typeof CmsPostsSlugIndexRoute
+  '/cms/posts/new/': typeof CmsPostsNewIndexRoute
+  '/cms/posts/$slug/edit/': typeof CmsPostsSlugEditIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -140,45 +140,45 @@ export interface FileRouteTypes {
     | '/'
     | '/cms'
     | '/cms/'
-    | '/cms/posts/$slug'
-    | '/cms/posts/new'
     | '/cms/articles/'
     | '/cms/media/'
     | '/cms/posts/'
     | '/cms/settings/'
     | '/cms/articles/$id/edit'
-    | '/cms/posts/$slug/edit'
     | '/cms/articles/$id/'
     | '/cms/articles/new/'
+    | '/cms/posts/$slug/'
+    | '/cms/posts/new/'
+    | '/cms/posts/$slug/edit/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/cms'
-    | '/cms/posts/$slug'
-    | '/cms/posts/new'
     | '/cms/articles'
     | '/cms/media'
     | '/cms/posts'
     | '/cms/settings'
     | '/cms/articles/$id/edit'
-    | '/cms/posts/$slug/edit'
     | '/cms/articles/$id'
     | '/cms/articles/new'
+    | '/cms/posts/$slug'
+    | '/cms/posts/new'
+    | '/cms/posts/$slug/edit'
   id:
     | '__root__'
     | '/'
     | '/cms'
     | '/cms/'
-    | '/cms/posts/$slug'
-    | '/cms/posts/new'
     | '/cms/articles/'
     | '/cms/media/'
     | '/cms/posts/'
     | '/cms/settings/'
     | '/cms/articles/$id/edit'
-    | '/cms/posts/$slug/edit'
     | '/cms/articles/$id/'
     | '/cms/articles/new/'
+    | '/cms/posts/$slug/'
+    | '/cms/posts/new/'
+    | '/cms/posts/$slug/edit/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -237,18 +237,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CmsArticlesIndexRouteImport
       parentRoute: typeof CmsRouteRoute
     }
-    '/cms/posts/new': {
-      id: '/cms/posts/new'
+    '/cms/posts/new/': {
+      id: '/cms/posts/new/'
       path: '/posts/new'
-      fullPath: '/cms/posts/new'
-      preLoaderRoute: typeof CmsPostsNewRouteImport
+      fullPath: '/cms/posts/new/'
+      preLoaderRoute: typeof CmsPostsNewIndexRouteImport
       parentRoute: typeof CmsRouteRoute
     }
-    '/cms/posts/$slug': {
-      id: '/cms/posts/$slug'
+    '/cms/posts/$slug/': {
+      id: '/cms/posts/$slug/'
       path: '/posts/$slug'
-      fullPath: '/cms/posts/$slug'
-      preLoaderRoute: typeof CmsPostsSlugRouteImport
+      fullPath: '/cms/posts/$slug/'
+      preLoaderRoute: typeof CmsPostsSlugIndexRouteImport
       parentRoute: typeof CmsRouteRoute
     }
     '/cms/articles/new/': {
@@ -265,13 +265,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CmsArticlesIdIndexRouteImport
       parentRoute: typeof CmsRouteRoute
     }
-    '/cms/posts/$slug/edit': {
-      id: '/cms/posts/$slug/edit'
-      path: '/edit'
-      fullPath: '/cms/posts/$slug/edit'
-      preLoaderRoute: typeof CmsPostsSlugEditRouteImport
-      parentRoute: typeof CmsPostsSlugRoute
-    }
     '/cms/articles/$id/edit': {
       id: '/cms/articles/$id/edit'
       path: '/articles/$id/edit'
@@ -279,25 +272,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CmsArticlesIdEditRouteImport
       parentRoute: typeof CmsRouteRoute
     }
+    '/cms/posts/$slug/edit/': {
+      id: '/cms/posts/$slug/edit/'
+      path: '/posts/$slug/edit'
+      fullPath: '/cms/posts/$slug/edit/'
+      preLoaderRoute: typeof CmsPostsSlugEditIndexRouteImport
+      parentRoute: typeof CmsRouteRoute
+    }
   }
 }
 
-interface CmsPostsSlugRouteChildren {
-  CmsPostsSlugEditRoute: typeof CmsPostsSlugEditRoute
-}
-
-const CmsPostsSlugRouteChildren: CmsPostsSlugRouteChildren = {
-  CmsPostsSlugEditRoute: CmsPostsSlugEditRoute,
-}
-
-const CmsPostsSlugRouteWithChildren = CmsPostsSlugRoute._addFileChildren(
-  CmsPostsSlugRouteChildren,
-)
-
 interface CmsRouteRouteChildren {
   CmsIndexRoute: typeof CmsIndexRoute
-  CmsPostsSlugRoute: typeof CmsPostsSlugRouteWithChildren
-  CmsPostsNewRoute: typeof CmsPostsNewRoute
   CmsArticlesIndexRoute: typeof CmsArticlesIndexRoute
   CmsMediaIndexRoute: typeof CmsMediaIndexRoute
   CmsPostsIndexRoute: typeof CmsPostsIndexRoute
@@ -305,12 +291,13 @@ interface CmsRouteRouteChildren {
   CmsArticlesIdEditRoute: typeof CmsArticlesIdEditRoute
   CmsArticlesIdIndexRoute: typeof CmsArticlesIdIndexRoute
   CmsArticlesNewIndexRoute: typeof CmsArticlesNewIndexRoute
+  CmsPostsSlugIndexRoute: typeof CmsPostsSlugIndexRoute
+  CmsPostsNewIndexRoute: typeof CmsPostsNewIndexRoute
+  CmsPostsSlugEditIndexRoute: typeof CmsPostsSlugEditIndexRoute
 }
 
 const CmsRouteRouteChildren: CmsRouteRouteChildren = {
   CmsIndexRoute: CmsIndexRoute,
-  CmsPostsSlugRoute: CmsPostsSlugRouteWithChildren,
-  CmsPostsNewRoute: CmsPostsNewRoute,
   CmsArticlesIndexRoute: CmsArticlesIndexRoute,
   CmsMediaIndexRoute: CmsMediaIndexRoute,
   CmsPostsIndexRoute: CmsPostsIndexRoute,
@@ -318,6 +305,9 @@ const CmsRouteRouteChildren: CmsRouteRouteChildren = {
   CmsArticlesIdEditRoute: CmsArticlesIdEditRoute,
   CmsArticlesIdIndexRoute: CmsArticlesIdIndexRoute,
   CmsArticlesNewIndexRoute: CmsArticlesNewIndexRoute,
+  CmsPostsSlugIndexRoute: CmsPostsSlugIndexRoute,
+  CmsPostsNewIndexRoute: CmsPostsNewIndexRoute,
+  CmsPostsSlugEditIndexRoute: CmsPostsSlugEditIndexRoute,
 }
 
 const CmsRouteRouteWithChildren = CmsRouteRoute._addFileChildren(

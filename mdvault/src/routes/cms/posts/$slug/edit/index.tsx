@@ -4,7 +4,7 @@ import { articlesListQueryOptions } from "#/features/articles/articles.queries";
 import { PostForm } from "#/features/posts/components/post-form";
 import { postQueryOptions } from "#/features/posts/posts.queries";
 
-export const Route = createFileRoute("/cms/posts/$slug/edit")({
+export const Route = createFileRoute("/cms/posts/$slug/edit/")({
 	loader: async ({ context, params }) => {
 		const [post, articles] = await Promise.all([
 			context.queryClient.ensureQueryData(postQueryOptions(params.slug)),
