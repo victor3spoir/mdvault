@@ -2,81 +2,120 @@
 <img src="./images/logo.png" alt="logo" height="75" width="75">
 <h1>MDVault</h1>
 
-GitHub-powered Markdown content management system. Create, edit, and manage your posts with a modern, intuitive interface.
+**GitHub-powered Markdown content management.** Write, organize and publish your articles, posts and custom content types — **with the images they use** — versioned in your own repository.
+
+<a href="https://victor3spoir.github.io/mdvault/">Website</a> ·
+<a href="#getting-started">Getting started</a> ·
+<a href="#features">Features</a>
+
+<p>
+<a href="https://github.com/victor3spoir/mdvault/releases"><img alt="latest release" src="https://shieldcn.dev/github/release/victor3spoir/mdvault.svg?variant=secondary" /></a>
+<a href="https://github.com/victor3spoir/mdvault/blob/main/LICENCE"><img alt="license" src="https://shieldcn.dev/github/license/victor3spoir/mdvault.svg?variant=secondary" /></a>
+<a href="https://github.com/victor3spoir/mdvault/pkgs/container/mdvault"><img alt="container image on ghcr.io" src="https://shieldcn.dev/badge/image-ghcr.io-2a9d8f.svg?variant=secondary&amp;logo=docker" /></a>
+<a href="https://github.com/victor3spoir/mdvault/stargazers"><img alt="GitHub stars" src="https://shieldcn.dev/github/stars/victor3spoir/mdvault.svg?variant=secondary" /></a>
+<a href="https://github.com/victor3spoir/mdvault/commits"><img alt="last commit" src="https://shieldcn.dev/github/last-commit/victor3spoir/mdvault.svg?variant=secondary" /></a>
+</p>
 </div>
+
+![Dashboard](./docs/public/screenshots/dashboard.png)
 
 ## What is MDVault?
 
-MDVault is a lightweight, developer-friendly CMS designed for managing Markdown-based content stored directly in GitHub repositories. It provides a clean web interface for writing, editing, and organizing posts & manage media without the complexity of traditional CMS platforms.
+Developers keep their content in Git — but editing raw Markdown files, uploading images somewhere else and wiring their paths by hand is tedious. MDVault manages the **whole content bundle**: the Markdown, its frontmatter, *and* every image it references — committed side by side in the same repository.
 
-## Key Features
+- **Text and media together.** Images dropped into the editor are optimized, committed to the repo and linked by relative path. Clone the repository and nothing is missing — no external asset host, no broken links.
+- **No database.** The repository *is* the database.
+- **No lock-in.** Plain Markdown with YAML frontmatter, readable by any static site generator.
+- **Full history.** Every create, update, publish or delete is a commit.
 
-- **Markdown Editor**: Rich MDX editor with live preview and formatting tools
-- **GitHub Integration**: Store all content in your GitHub repository as the single source of truth
-- **Image Management**: Upload and organize images with built-in gallery and preview
-- **Metadata Management**: Easily manage post titles, descriptions, slugs, tags, and cover images
-- **Post Organization**: Browse, search, and manage all posts from a centralized dashboard
-- **Draft & Publish**: Save drafts or publish posts directly from the editor
+## Features
 
-## Why Use MDVault?
-
-- **Cost Effective**: No backend server costs - GitHub is your database
-- **Version Control**: Full Git history of all content changes
-- **Developer Friendly**: Built for developers who prefer working with Markdown
-- **Privacy First**: Your content stays in your own GitHub repository
-- **Simple Setup**: Minimal configuration required to get started
-- **Modern UI**: Clean, responsive interface that works on desktop and tablet
-- **Centralization**: All your assets are centralized in your repos for free.
+| | |
+|---|---|
+| **Rich WYSIWYG editor** | Tiptap-based editor with headings, lists, quotes, links, tables, images and code blocks — everything round-trips to clean Markdown |
+| **Text & media in one repo** | Images uploaded from the editor are optimized, committed alongside your Markdown and referenced by relative path |
+| **Custom content types** | Declare new asset types in Settings; folders are created in the repo, sidebar links appear instantly, and each type picks its own editor |
+| **Live split preview** | Write on the left, see the published rendering on the right — same renderer and syntax colors as the final page |
+| **Autosave & drafts** | Local drafts survive refreshes and crashes, with publish/unpublish controls in every editor and content card |
+| **Command palette** | <kbd>⌘</kbd>/<kbd>Ctrl</kbd> + <kbd>K</kbd> to jump to any article, post or custom asset, or start a new one |
+| **Media library** | Drag-and-drop uploads with automatic image optimization, one-click URL/Markdown copy, and usage checks before deleting |
+| **Image controls in-editor** | Resize (25–100%), align left/center/right, alt text and captions — persisted inside plain Markdown |
+| **Syntax highlighting** | Code highlighted while typing and in output, 20+ languages with a per-block language picker |
+| **Search & filters** | Shared search, status, language, tag filters and sorting across every content list, with state in the URL |
+| **Plain-text posts** | Short-form content uses a text-only editor schema, so posts stay plain by design — and can point at the article they promote |
+| **Light & dark themes** | The whole workspace, editor and preview follow your theme choice |
+| **Table editing** | Floating menu to insert/delete rows and columns, toggle headers, merge and split cells |
+| **Private media rendering** | Images from private repos are fetched server-side and cached, so previews work without exposing your token |
+| **Git-native storage** | Descriptive commit messages and SHA-based conflict detection, so concurrent edits never silently overwrite |
 
 ## Screenshots
 
 ### Dashboard
+Metrics per content section — articles, posts and every custom type you define — plus a log of the commits MDVault made for you.
+![Dashboard](./docs/public/screenshots/dashboard.png)
 
-Get an overview of all your content with the intuitive dashboard.
-![Dashboard](./images/dashboard.png)
+### Articles
+Cards with cover, status, tags and inline publish, edit and delete actions — with shared search, status, language and tag filters.
+![Articles](./docs/public/screenshots/articles.png)
 
-### Articles Management
+### Editor
+Distraction-free writing surface with word count, read time and save status, plus a collapsible settings sidebar for language, description, tags and cover image.
+![Editor](./docs/public/screenshots/editor.png)
 
-Manage your articles with full control over metadata and content.
-![Articles](./images/articles.png)
+### Posts
+Short-form, plain-text content — enforced by the schema, not by disabled buttons — that can reference a related article.
+![Posts](./docs/public/screenshots/posts.png)
 
-### Rich Markdown Editor
+### Custom content types (Vault)
+Your own types, each with its own list, editor and repository folder under `vault/`.
+![Vault](./docs/public/screenshots/vault.png)
 
-Write and edit content with the powerful MDX editor featuring live preview.
-![Editor](./images/edit.png)
+### Media library
+Upload, filter and reuse images across your content, with usage checks before deleting.
+![Media](./docs/public/screenshots/media.png)
 
-### Posts Management
+### Settings
+Connected GitHub account, repository info, and the asset types manager where new content types are defined.
+![Settings](./docs/public/screenshots/settings.png)
 
-Create and manage LinkedIn-style posts with ease.
-![Posts](./images/posts.png)
+## How it works
 
-### Media Gallery
+![How MDVault works](./docs/public/diagrams/mdvault-flow.png)
 
-Upload, organize, and manage all your images in one place.
-![Media](./images/media.png)
+1. **Point it at a repository** — provide a GitHub token, owner and repo name. MDVault reads and writes through the GitHub API; there is no other data store.
+2. **Write and upload in the browser** — content is edited as rich text and serialized to Markdown with YAML frontmatter. Images dropped into the editor are optimized, uploaded to the repository's media folder and linked by relative path.
+3. **Every action is a commit** — saving, publishing or deleting commits the file with a descriptive message. File SHAs guard against concurrent overwrites.
+4. **Your site consumes the repo** — your static site or app reads the same Markdown files *and the same image files* straight from Git.
+
+```
+your-content-repo/
+├── mdvault.config.json     # asset types you defined
+├── articles/               # long-form content (.md)
+├── posts/                  # short-form content (.md)
+├── media/                  # images, committed alongside
+└── vault/
+    ├── projects/           # custom type
+    └── docs/               # custom type
+```
 
 ## Getting Started
 
 ### Prerequisites
 
-- Docker and Docker Compose installed (for Docker deployment)
 - A GitHub repository for storing content
-- GitHub Personal Access Token (for API authentication)
+- A GitHub personal access token with read/write access to that repository
+- Docker and Docker Compose, or Bun for local development
 
-### Quick Start with Docker
+### Quick start with Docker
 
-MDVault is available as a containerized application. You can pull the image directly from GitHub Container Registry.
-
-#### Using Docker Compose (Recommended)
-
-1. Ensure you have a `compose.yml` file (or use the one provided in the repo):
+MDVault is published to GitHub Container Registry. Bind the container to loopback so it is reachable only from the host:
 
 ```yaml
 services:
   mdvault:
     image: ghcr.io/victor3spoir/mdvault:latest
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       GITHUB_TOKEN: "your_personal_access_token"
       GITHUB_OWNER: "your_github_username"
@@ -84,182 +123,118 @@ services:
     restart: unless-stopped
 ```
 
-2. Start the container:
-
 ```bash
 docker compose up -d
 ```
 
-#### Using Docker CLI
+Or with Docker directly:
 
 ```bash
-docker pull ghcr.io/victor3spoir/mdvault:latest
-
 docker run -d \
-  -p 3000:3000 \
+  --name mdvault \
+  -p 127.0.0.1:3000:3000 \
   -e GITHUB_TOKEN=your_token \
   -e GITHUB_OWNER=your_username \
   -e GITHUB_REPO=your_repo \
+  --restart unless-stopped \
   ghcr.io/victor3spoir/mdvault:latest
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000), then head to **Settings → Dynamic Content** to define your own asset types, or start writing straight away.
 
-### Installation
+### Environment variables
 
-1. Set up environment variables:
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `GITHUB_TOKEN` | Token used by the server to read and write repository content | Required |
+| `GITHUB_OWNER` | User or organization that owns the content repository | Required |
+| `GITHUB_REPO` | Content repository name, without owner or URL | Required |
+| `ARTICLES_PATH` | Directory containing articles | `articles` |
+| `POSTS_PATH` | Directory containing posts | `posts` |
+| `MEDIA_PATH` | Directory containing media files | `media` |
 
-```bash
-cp .env.example .env.local
-```
+Custom content types are stored under `vault/<type>/` and configured through `mdvault.config.json` at the repository root — created and managed from the Settings UI.
 
-2. Configure your GitHub repository:
-   - Add your GitHub token to `.env.local`
-   - Specify your repository name for storing content
-
-### Environment Variables
-
-#### Required Variables
-
-MDVault requires three environment variables to connect to your GitHub repository. Here's what each one means:
-
-| Variable | Description | Example |
-|----------|-------------|----------|
-| `GITHUB_TOKEN` | A personal access token from GitHub for API authentication. [Create one here](https://github.com/settings/tokens). Must have `repo` scope to read/write content. | `ghp_16C7e42F292c6912E7...` |
-| `GITHUB_OWNER` | Your GitHub username or organization name. Just the name, not a URL. | `victor3spoir` |
-| `GITHUB_REPO` | The repository name where your content will be stored. Just the name, not a URL or full path. | `my-content-repo` |
-
-#### Optional Variables (Experienced Users Only)
-
-> ⚠️ **Note**: The following variables have sensible defaults and should **only be modified by experienced users**. Normal users should omit these and use the default values.
-
-| Variable | Description | Default | Example |
-|----------|-------------|---------|---------|
-| `ARTICLES_PATH` | Directory path in the repository where articles are stored. | `articles` | `content/articles` |
-| `POSTS_PATH` | Directory path in the repository where posts are stored. | `posts` | `content/posts` |
-| `MEDIA_PATH` | Directory path in the repository where media/images are stored. | `media` | `assets/media` |
-
-**Example `.env.local` (Minimal - Recommended for most users):**
+For local development, create `mdvault/.env.local`:
 
 ```dotenv
-GITHUB_TOKEN=ghp_16C7e42F292c6912E7...
+GITHUB_TOKEN=<your_github_token>
 GITHUB_OWNER=victor3spoir
 GITHUB_REPO=my-content-repo
+
+# Optional
+ARTICLES_PATH=articles
+POSTS_PATH=posts
+MEDIA_PATH=media
 ```
 
-**Example `.env.local` (Advanced - Custom paths):**
+### GitHub token permissions
 
-```dotenv
-GITHUB_TOKEN=ghp_16C7e42F292c6912E7...
-GITHUB_OWNER=victor3spoir
-GITHUB_REPO=my-content-repo
-ARTICLES_PATH=content/articles
-POSTS_PATH=content/posts
-MEDIA_PATH=assets/images
-```
+Fine-grained personal access tokens are recommended. Limit the token to the content repository and grant:
 
-#### GitHub Token Permissions
+- **Contents:** Read and write
+- **Metadata:** Read-only
 
-When creating your personal access token, you need to grant the following permissions:
+A classic token needs the broader `repo` scope for private repositories.
 
-**For Fine-grained Personal Access tokens (Recommended):**
+### Security model
 
-- Select your repository/ies as the resource owner
-- Grant the following **Repository permissions**:
-  - `contents`: **Read and write** - allows creating, updating, and deleting files
-  - `metadata`: **Read-only** - grants read-only access to repository metadata
+MDVault deliberately has **no application login, user accounts, or in-app authentication**. `GITHUB_TOKEN` is a server-side credential for GitHub API operations; it does not authenticate people accessing the interface.
 
-**For Classic Personal Access tokens:**
+Access control is a deployment responsibility. Run MDVault only on a trusted network or place it behind firewall, VPN, or reverse-proxy access controls. Do not expose it directly to the public internet.
 
-- Grant the **`repo`** scope - provides full control of private repositories
-- This includes all permissions needed to read, write, and delete files
+## Development
 
-**Minimum Required Capabilities:**
-
-- Create files (for saving new articles and media)
-- Update files (for editing existing content)
-- Delete files (for removing articles)
-- Read repository contents
-- Commit to the repository
-
-For security best practices, use **fine-grained tokens** with specific repository access rather than classic tokens with broad permissions.
-
-## Development & Contributing
-
-### Prerequisites for Development
-
-- Node.js 18+
-- Bun or npm installed
-- A GitHub repository for storing content
-- GitHub Personal Access Token (for API authentication)
-
-### Setting Up for Development
-
-1. Clone the repository:
+The application lives in `mdvault/` and uses Bun as its primary package manager and runtime.
 
 ```bash
-git clone https://github.com/victor3spoir/mdvault.git
-cd mdvault
+git clone https://github.com/victor3spoir/mdvault.git mdvault-repo
+cd mdvault-repo/mdvault
+bun install --frozen-lockfile
 ```
 
-2. Install dependencies:
+After creating `.env.local`:
 
 ```bash
-bun install
-# or
-npm install
+bun run dev             # Development server on port 3000
+bun run check           # Biome checks
+bun run typecheck       # TypeScript typecheck
+bun run test            # Vitest test suite
+bun run build           # Production build
 ```
 
-3. Set up your `.env.local` file with your GitHub credentials (see [Environment Variables](#environment-variables) section above)
-
-### Running the Development Server
+Nitro writes the deployable server to `.output/server/index.mjs`:
 
 ```bash
-bun dev
-# or
-npm run dev
+HOST=127.0.0.1 PORT=3000 bun .output/server/index.mjs
 ```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application. The dev server supports hot reload for instant feedback.
-
-### Building for Production
-
-```bash
-bun run build
-npm run start
-```
-
-### Code Quality
-
-```bash
-bun run lint    # Run Biome linter and formatter checks
-bun run format  # Format code with Biome
-```
-
-### Contributing
-
-Contributions are welcome! Here's how you can help:
-
-1. Fork the repository
-2. Create a feature branch (`git switch -c feature/amazing-feature`)
-3. Make your changes and ensure tests pass
-4. Run linting and formatting (`bun run lint` and `bun run format`)
-5. Commit your changes (`git commit -m 'Add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
-
-Please make sure your code follows the project's style guidelines and passes all checks.
 
 ## Architecture
 
-- **Frontend**: Next.js 16 with React 19
-- **Editor**: MDXEditor with live Markdown support
-- **Backend**: GitHub API (Octokit) for content storage
-- **Styling**: Tailwind CSS with shadcn/ui components
-- **Icons**: Tabler Icons for consistent iconography
+- **Framework:** TanStack Start with React 19
+- **Routing & SSR:** TanStack Router with file-based routes
+- **Server state:** TanStack Query with router SSR integration
+- **Build & runtime:** Vite and Nitro, producing a Node-compatible server in `.output/`
+- **Content storage:** GitHub API through Octokit
+- **Editor:** Tiptap (rich) and a minimal plain-text editor, both serializing Markdown
+- **Rendering & highlighting:** TanStack Markdown and TanStack Highlight
+- **Styling:** Tailwind CSS v4 with shadcn/ui components
+
+## Documentation site
+
+The presentation site lives in [`docs/`](./docs) and deploys to Vercel: set the project's **Root Directory** to `docs` and the rest is read from `docs/vercel.json`. See [`docs/README.md`](./docs/README.md) for details.
+
+## Contributing
+
+Before opening a pull request, run:
+
+```bash
+bun run check
+bun run typecheck
+bun run test
+bun run build
+```
 
 ## License
 
 MIT License - feel free to use this project for personal or commercial purposes.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

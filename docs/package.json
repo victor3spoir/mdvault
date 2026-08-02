@@ -1,0 +1,16 @@
+{
+	"name": "mdvault-docs",
+	"description": "Documentation site for MDVault — GitHub-powered Markdown content management.",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "vite",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"@tabler/icons": "^3.46.0",
+		"typescript": "^5",
+		"vite": "^8.2.0"
+	}
+}

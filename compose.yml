@@ -6,18 +6,16 @@ services:
     restart: unless-stopped
     deploy:
       resources:
-        limits:
+        reservations:
           cpus: "0.5"
           memory: "600MiB"
+        limits:
+          cpus: "0.7"
+          memory: "800MiB"
     ports:
       - "127.0.0.1:33000:3000"
     environment:
-      # GitHub personal access token (create at https://github.com/settings/tokens)
-      # Must have 'repo' scope permissions
-      GITHUB_TOKEN: ""
-      # Your GitHub username or organization name (just the name, not a URL)
-      GITHUB_OWNER: ""
-      # Repository name for storing content (just the name, not a full URL)
-      # Example: 'my-content' NOT 'github.com/user/my-content'
-      GITHUB_REPO: ""
+      GITHUB_TOKEN: ${GITHUB_TOKEN}
+      GITHUB_OWNER: ${GITHUB_OWNER}
+      GITHUB_REPO: ${GITHUB_REPO} # Example: 'my-content' NOT 'github.com/user/my-content'
 
