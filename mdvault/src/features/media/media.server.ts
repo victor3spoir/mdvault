@@ -5,46 +5,25 @@ import { listPosts } from "#/features/posts/posts.server";
 import type { ActionResult } from "#/features/shared/shared.types";
 import { getGitHubClient } from "#/integrations/github/github-client.server";
 import { getGitHubEnv } from "#/integrations/github/github-env.server";
-import { runGitHubRead } from "#/integrations/github/github-read.server";
 import {
 	getRepositoryMediaFilePath,
 	normalizeRepositoryPath,
 } from "#/lib/repository-path";
+import {
+	base64ToBytes,
+	bytesToBase64,
+	deleteRepositoryFile,
+} from "#/lib/server/github-files.server";
 import { createSafeErrorMessage, logger } from "#/lib/server/logger";
-
-function base64ToBytes(base64: string) {
-	const binary = atob(base64);
-	return Uint8Array.from(binary, (char) => char.charCodeAt(0));
-}
-
-function bytesToBase64(bytes: Uint8Array) {
-	let binary = "";
-
-	for (const byte of bytes) {
-		binary += String.fromCharCode(byte);
-	}
-
-	return btoa(binary);
-}
 
 async function getRepositoryTreeEntries(
 	octokit: ReturnType<typeof getGitHubClient>,
 ) {
 	const env = getGitHubEnv();
-	const repository = await octokit.repos.get({
-		owner: env.GITHUB_OWNER,
-		repo: env.GITHUB_REPO,
-	});
-	const defaultBranch = repository.data.default_branch ?? "main";
-	const ref = await octokit.git.getRef({
-		owner: env.GITHUB_OWNER,
-		repo: env.GITHUB_REPO,
-		ref: `heads/${defaultBranch}`,
-	});
 	const tree = await octokit.git.getTree({
 		owner: env.GITHUB_OWNER,
 		repo: env.GITHUB_REPO,
-		tree_sha: ref.data.object.sha,
+		tree_sha: "HEAD",
 		recursive: "true",
 	});
 
@@ -74,28 +53,18 @@ async function getRepositoryBlobBytes(
 
 export async function listImages(): Promise<ActionResult<MediaFile[]>> {
 	try {
-		const imageFiles = await runGitHubRead(async (octokit) => {
-			const env = getGitHubEnv();
-			const tree = await getRepositoryTreeEntries(octokit);
+		const octokit = getGitHubClient();
+		const env = getGitHubEnv();
+		const tree = await getRepositoryTreeEntries(octokit);
 
-			const imageExtensions = [
-				".jpg",
-				".jpeg",
-				".png",
-				".gif",
-				".webp",
-				".svg",
-				".avif",
-			];
-			const mediaPrefix = `${env.MEDIA_PATH}/`;
-			return tree.filter(
-				(item) =>
-					item.type === "blob" &&
-					typeof item.path === "string" &&
-					item.path.startsWith(mediaPrefix) &&
-					imageExtensions.some((ext) => item.path.toLowerCase().endsWith(ext)),
-			);
-		});
+		const mediaPrefix = `${env.MEDIA_PATH}/`;
+		const imageFiles = tree.filter(
+			(item) =>
+				item.type === "blob" &&
+				typeof item.path === "string" &&
+				item.path.startsWith(mediaPrefix) &&
+				isSupportedMediaPath(item.path),
+		);
 
 		return {
 			success: true,
@@ -129,6 +98,10 @@ export async function listImages(): Promise<ActionResult<MediaFile[]>> {
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const MAX_IMAGE_BASE64_LENGTH = Math.ceil(MAX_IMAGE_BYTES / 3) * 4;
 
+/**
+ * The single source of truth for the media this app understands. Anything not
+ * listed here is neither listed, served nor accepted.
+ */
 const MEDIA_MIME_TYPES: Record<string, string> = {
 	jpg: "image/jpeg",
 	jpeg: "image/jpeg",
@@ -138,6 +111,23 @@ const MEDIA_MIME_TYPES: Record<string, string> = {
 	svg: "image/svg+xml",
 	avif: "image/avif",
 };
+
+/**
+ * SVG can carry scripts, so it is never accepted from an upload. Existing SVGs
+ * already committed to the repository are still listed and served, because they
+ * are only ever rendered through `<img>`, where scripts cannot execute.
+ */
+const UPLOADABLE_EXTENSIONS = Object.keys(MEDIA_MIME_TYPES).filter(
+	(extension) => extension !== "svg",
+);
+
+function mediaExtension(path: string) {
+	return path.split(".").pop()?.toLowerCase() ?? "";
+}
+
+function isSupportedMediaPath(path: string) {
+	return mediaExtension(path) in MEDIA_MIME_TYPES;
+}
 
 function decodeUploadBase64(value: string) {
 	if (
@@ -213,17 +203,15 @@ function validateUploadImage(
 		return null;
 	}
 
-	const extensionFromName = fileName.split(".").pop()?.toLowerCase();
-	const extension =
-		extensionFromName && MEDIA_MIME_TYPES[extensionFromName]
-			? extensionFromName
-			: Object.entries(MEDIA_MIME_TYPES).find(
-					([, value]) => value === mimeType && value !== "image/svg+xml",
-				)?.[0];
+	const extensionFromName = mediaExtension(fileName);
+	const extension = UPLOADABLE_EXTENSIONS.includes(extensionFromName)
+		? extensionFromName
+		: UPLOADABLE_EXTENSIONS.find(
+				(candidate) => MEDIA_MIME_TYPES[candidate] === mimeType,
+			);
 
 	if (
 		!extension ||
-		extension === "svg" ||
 		MEDIA_MIME_TYPES[extension] !== mimeType ||
 		!hasValidImageSignature(extension, bytes)
 	) {
@@ -283,43 +271,46 @@ export async function getMediaFile(filePath: string): Promise<
 	}>
 > {
 	try {
-		return await runGitHubRead(async (octokit) => {
-			const env = getGitHubEnv();
-			const trimmedPath = normalizeMediaFilePath(filePath, env.MEDIA_PATH);
+		const octokit = getGitHubClient();
+		const env = getGitHubEnv();
+		const trimmedPath = normalizeMediaFilePath(filePath, env.MEDIA_PATH);
 
-			if (!trimmedPath) {
-				return { success: false, error: "Missing file path" };
-			}
+		if (!trimmedPath) {
+			return { success: false, error: "Missing file path" };
+		}
 
-			const ext = trimmedPath.split(".").pop()?.toLowerCase() ?? "";
-			const mimeType = MEDIA_MIME_TYPES[ext] ?? "application/octet-stream";
-			const response = await octokit.repos.getContent({
-				owner: env.GITHUB_OWNER,
-				repo: env.GITHUB_REPO,
-				path: trimmedPath,
-			});
+		// Only media this app understands is ever served back to the browser.
+		if (!isSupportedMediaPath(trimmedPath)) {
+			return { success: false, error: "Unsupported media type" };
+		}
 
-			if (Array.isArray(response.data) || response.data.type !== "file") {
-				return { success: false, error: "Not a file" };
-			}
-
-			const fileData =
-				response.data.encoding === "base64" && response.data.content.trim()
-					? {
-							content: base64ToBytes(response.data.content.replace(/\n/g, "")),
-							etag: response.data.sha,
-						}
-					: await getRepositoryBlobBytes(octokit, response.data.sha);
-
-			return {
-				success: true,
-				data: {
-					content: fileData.content,
-					contentType: mimeType,
-					etag: fileData.etag,
-				},
-			};
+		const mimeType = MEDIA_MIME_TYPES[mediaExtension(trimmedPath)] as string;
+		const response = await octokit.repos.getContent({
+			owner: env.GITHUB_OWNER,
+			repo: env.GITHUB_REPO,
+			path: trimmedPath,
 		});
+
+		if (Array.isArray(response.data) || response.data.type !== "file") {
+			return { success: false, error: "Not a file" };
+		}
+
+		const fileData =
+			response.data.encoding === "base64" && response.data.content.trim()
+				? {
+						content: base64ToBytes(response.data.content.replace(/\n/g, "")),
+						etag: response.data.sha,
+					}
+				: await getRepositoryBlobBytes(octokit, response.data.sha);
+
+		return {
+			success: true,
+			data: {
+				content: fileData.content,
+				contentType: mimeType,
+				etag: fileData.etag,
+			},
+		};
 	} catch (error) {
 		logger.error("Failed to fetch media file", error, { filePath });
 		return { success: false, error: createSafeErrorMessage(error) };
@@ -343,15 +334,11 @@ export async function getMediaDataUrl(
 		if (!normalizedPath) {
 			return { success: false, error: "Invalid media file path" };
 		}
-		const ext = normalizedPath.split(".").pop()?.toLowerCase();
-		const mimeType = ext
-			? (MEDIA_MIME_TYPES[ext] ?? fileResult.data.contentType)
-			: fileResult.data.contentType;
 		const base64 = bytesToBase64(fileResult.data.content);
 
 		return {
 			success: true,
-			data: `data:${mimeType};base64,${base64}`,
+			data: `data:${fileResult.data.contentType};base64,${base64}`,
 		};
 	} catch (error) {
 		logger.error("Failed to fetch media data url", error, { filePath });
@@ -416,14 +403,11 @@ export async function deleteImage(input: {
 		if (!path) {
 			return { success: false, error: "Invalid media file name" };
 		}
-		const octokit = getGitHubClient();
-		await octokit.repos.deleteFile({
-			owner: env.GITHUB_OWNER,
-			repo: env.GITHUB_REPO,
+		await deleteRepositoryFile(
 			path,
-			message: `Delete image: ${input.fileName}`,
-			sha: input.sha,
-		});
+			`Delete image: ${input.fileName}`,
+			input.sha,
+		);
 
 		return { success: true, data: true };
 	} catch (error) {

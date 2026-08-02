@@ -46,7 +46,17 @@ export const uploadImageMutation = createServerFn({ method: "POST" })
 
 export const deleteImageMutation = createServerFn({ method: "POST" })
 	.middleware([securityMiddleware])
-	.validator((data: { fileName: string; sha: string }) => data)
+	.validator((data: { fileName: string; sha: string }) =>
+		z
+			.object({
+				fileName: z.string().trim().min(1).max(255),
+				sha: z
+					.string()
+					.trim()
+					.regex(/^[a-f0-9]{40}$/i, "Invalid media file revision"),
+			})
+			.parse(data),
+	)
 	.handler(async ({ data }) => {
 		const result = await deleteImage(data);
 
@@ -59,7 +69,9 @@ export const deleteImageMutation = createServerFn({ method: "POST" })
 
 export const checkMediaUsageFn = createServerFn({ method: "GET" })
 	.middleware([securityMiddleware])
-	.validator((data: { imageUrl: string }) => data)
+	.validator((data: { imageUrl: string }) =>
+		z.object({ imageUrl: z.string().trim().min(1).max(2048) }).parse(data),
+	)
 	.handler(async ({ data }) => {
 		const result = await checkMediaUsage(data.imageUrl);
 
@@ -72,7 +84,9 @@ export const checkMediaUsageFn = createServerFn({ method: "GET" })
 
 export const getMediaDataUrlFn = createServerFn({ method: "GET" })
 	.middleware([securityMiddleware])
-	.validator((data: { src: string }) => data)
+	.validator((data: { src: string }) =>
+		z.object({ src: z.string().trim().min(1).max(2048) }).parse(data),
+	)
 	.handler(async ({ data }) => {
 		const src = normalizeMediaSource(data.src);
 		const result = await getMediaDataUrl(src);

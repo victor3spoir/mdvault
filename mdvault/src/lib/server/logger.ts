@@ -21,7 +21,11 @@ function log(
 	context?: Record<string, unknown>,
 ) {
 	const prefix = `[${new Date().toISOString()}] [${level.toUpperCase()}]`;
-	const details = context ? ` ${JSON.stringify(context)}` : "";
+	// Context is masked too: it routinely carries paths, URLs and error payloads
+	// that can echo a token back into the logs.
+	const details = context
+		? ` ${maskSensitiveData(JSON.stringify(context))}`
+		: "";
 	const line = `${prefix} ${maskSensitiveData(message)}${details}`;
 
 	if (level === "error") {
@@ -56,7 +60,9 @@ export const logger = {
 };
 
 export function createSafeErrorMessage(error: unknown): string {
-	if (process.env.NODE_ENV === "production") {
+	// Default to the safe message: only an explicit development environment ever
+	// exposes internal error details to a caller.
+	if (process.env.NODE_ENV !== "development") {
 		return "An error occurred. Please try again later.";
 	}
 

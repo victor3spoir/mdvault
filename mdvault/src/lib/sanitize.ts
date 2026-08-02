@@ -1,26 +1,35 @@
+/**
+ * Metadata sanitisation.
+ *
+ * These helpers exist to keep *metadata* (titles, descriptions, tags) plain and
+ * predictable, not to defend against XSS. Rendering safety comes from the
+ * layers that actually own it: the markdown renderer never emits raw HTML, and
+ * React refuses `javascript:` URLs. Pattern matching on strings such as
+ * `javascript:` is trivially bypassed and must not be relied on.
+ */
+
+/**
+ * Collapses a value to a single line of plain text: markup is dropped, control
+ * characters and line breaks are removed so the value cannot restructure the
+ * YAML frontmatter it is stored in.
+ */
 export function sanitizeText(text: string): string {
-	if (!text || typeof text !== "string") {
+	if (typeof text !== "string") {
 		return "";
 	}
 
-	let sanitized = text.replace(/<[^>]*>/g, "");
-	sanitized = sanitized
-		.replace(/&lt;/g, "<")
-		.replace(/&gt;/g, ">")
-		.replace(/&amp;/g, "&")
-		.replace(/&quot;/g, '"')
-		.replace(/&#39;/g, "'");
-
-	sanitized = sanitized
-		.replace(/javascript:/gi, "")
-		.replace(/on\w+\s*=/gi, "")
-		.replace(/eval\(/gi, "");
-
-	return sanitized.trim();
+	return (
+		text
+			.replace(/<[^>]*>/g, "")
+			// biome-ignore lint/suspicious/noControlCharactersInRegex: stripping control characters is the intent
+			.replace(/[\u0000-\u001f\u007f]+/g, " ")
+			.replace(/\s+/g, " ")
+			.trim()
+	);
 }
 
 export function isValidUrl(url: string): boolean {
-	if (!url || typeof url !== "string") {
+	if (typeof url !== "string" || !url) {
 		return false;
 	}
 
@@ -32,21 +41,12 @@ export function isValidUrl(url: string): boolean {
 	}
 }
 
-export function sanitizeMarkdown(content: string): string {
-	if (!content || typeof content !== "string") {
-		return "";
-	}
-
-	return content;
-}
-
 export function sanitizeTag(tag: string): string {
-	if (!tag || typeof tag !== "string") {
+	if (typeof tag !== "string" || !tag) {
 		return "";
 	}
 
 	return tag
-		.replace(/<[^>]*>/g, "")
 		.trim()
 		.toLowerCase()
 		.replace(/[^a-z0-9\-_]/g, "")

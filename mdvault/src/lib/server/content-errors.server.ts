@@ -3,6 +3,7 @@ import {
 	ContentNotFoundError,
 	InvalidContentError,
 } from "#/features/shared/content-revision";
+import { FrontmatterError } from "#/lib/frontmatter";
 import { createSafeErrorMessage } from "#/lib/server/logger";
 
 function getErrorStatus(error: unknown) {
@@ -23,6 +24,10 @@ export function isGitHubNotFoundError(error: unknown) {
 }
 
 export function createContentErrorMessage(error: unknown, label: string) {
+	if (error instanceof FrontmatterError) {
+		return `Invalid ${label.toLowerCase()} metadata: ${error.message}`;
+	}
+
 	if (
 		error instanceof ContentConflictError ||
 		error instanceof ContentNotFoundError ||

@@ -22,6 +22,12 @@ const securityHeadersMiddleware = createMiddleware().server(
 			"camera=(), microphone=(), geolocation=()",
 		);
 		result.response.headers.set("Cross-Origin-Opener-Policy", "same-origin");
+		// Directives that cannot break script or style loading, but do remove
+		// framing, plugin embedding and <base> hijacking outright.
+		result.response.headers.set(
+			"Content-Security-Policy",
+			"frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
+		);
 		return result;
 	},
 );
