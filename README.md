@@ -4,8 +4,8 @@
 
 **GitHub-powered Markdown content management.** Write, organize and publish your articles, posts and custom content types — **with the images they use** — versioned in your own repository.
 
-<a href="https://victor3spoir.github.io/mdvault/">Website</a> ·
-<a href="#getting-started">Getting started</a> ·
+<a href="https://mdvault-docs.vercel.app/">Website</a> ·
+<a href="#quick-start">Quick start</a> ·
 <a href="#features">Features</a>
 
 <p>
@@ -27,6 +27,49 @@ Developers keep their content in Git — but editing raw Markdown files, uploadi
 - **No database.** The repository *is* the database.
 - **No lock-in.** Plain Markdown with YAML frontmatter, readable by any static site generator.
 - **Full history.** Every create, update, publish or delete is a commit.
+
+## Quick start
+
+You need a GitHub repository for your content and a personal access token that can write to it ([permissions below](#github-token-permissions)).
+
+MDVault is published to GitHub Container Registry. Bind it to loopback so it is only reachable from your machine:
+
+```bash
+docker run -d \
+  --name mdvault \
+  -p 127.0.0.1:3000:3000 \
+  -e GITHUB_TOKEN=your_token \
+  -e GITHUB_OWNER=your_username \
+  -e GITHUB_REPO=your_repo \
+  --restart unless-stopped \
+  ghcr.io/victor3spoir/mdvault:latest
+```
+
+<details>
+<summary>Or with Docker Compose</summary>
+
+```yaml
+services:
+  mdvault:
+    image: ghcr.io/victor3spoir/mdvault:latest
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GITHUB_TOKEN: "your_personal_access_token"
+      GITHUB_OWNER: "your_github_username"
+      GITHUB_REPO: "your_content_repository"
+    restart: unless-stopped
+```
+
+```bash
+docker compose up -d
+```
+
+</details>
+
+Open **http://127.0.0.1:3000** and start writing — or go to **Settings → Dynamic Content** to define your own content types.
+
+> Prefer to run it from source? See [Development](#development). Full configuration is in [Configuration](#configuration).
 
 ## Features
 
@@ -98,49 +141,7 @@ your-content-repo/
     └── docs/               # custom type
 ```
 
-## Getting Started
-
-### Prerequisites
-
-- A GitHub repository for storing content
-- A GitHub personal access token with read/write access to that repository
-- Docker and Docker Compose, or Bun for local development
-
-### Quick start with Docker
-
-MDVault is published to GitHub Container Registry. Bind the container to loopback so it is reachable only from the host:
-
-```yaml
-services:
-  mdvault:
-    image: ghcr.io/victor3spoir/mdvault:latest
-    ports:
-      - "127.0.0.1:3000:3000"
-    environment:
-      GITHUB_TOKEN: "your_personal_access_token"
-      GITHUB_OWNER: "your_github_username"
-      GITHUB_REPO: "your_content_repository"
-    restart: unless-stopped
-```
-
-```bash
-docker compose up -d
-```
-
-Or with Docker directly:
-
-```bash
-docker run -d \
-  --name mdvault \
-  -p 127.0.0.1:3000:3000 \
-  -e GITHUB_TOKEN=your_token \
-  -e GITHUB_OWNER=your_username \
-  -e GITHUB_REPO=your_repo \
-  --restart unless-stopped \
-  ghcr.io/victor3spoir/mdvault:latest
-```
-
-Open [http://127.0.0.1:3000](http://127.0.0.1:3000), then head to **Settings → Dynamic Content** to define your own asset types, or start writing straight away.
+## Configuration
 
 ### Environment variables
 
@@ -222,7 +223,7 @@ HOST=127.0.0.1 PORT=3000 bun .output/server/index.mjs
 
 ## Documentation site
 
-The presentation site lives in [`docs/`](./docs) and deploys to Vercel: set the project's **Root Directory** to `docs` and the rest is read from `docs/vercel.json`. See [`docs/README.md`](./docs/README.md) for details.
+The presentation site is live at **[mdvault-docs.vercel.app](https://mdvault-docs.vercel.app/)** and lives in [`docs/`](./docs). It deploys to Vercel with the project's **Root Directory** set to `docs`; everything else is read from `docs/vercel.json`. See [`docs/README.md`](./docs/README.md) for details.
 
 ## Contributing
 
