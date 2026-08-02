@@ -36,7 +36,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 				content: "width=device-width, initial-scale=1",
 			},
 			{
-				title: "MDVault",
+				title: "MDVault — GitHub-powered Markdown content management",
+			},
+			{
+				name: "description",
+				content:
+					"GitHub-powered Markdown content management. Write, organize and publish articles, posts and custom types — with their images — in your own repository.",
 			},
 		],
 		links: [

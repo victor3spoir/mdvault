@@ -21,6 +21,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
+import { EditorTitleInput } from "#/components/editor-title-input";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
@@ -394,16 +395,14 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 			<div className="flex flex-1 overflow-hidden">
 				<div className="flex flex-1 flex-col overflow-hidden">
 					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
-						<input
-							type="text"
-							placeholder="Post title..."
+						<EditorTitleInput
 							value={title}
-							aria-label="Post title"
-							onChange={(event) => {
-								setTitle(event.target.value);
+							placeholder="Post title..."
+							ariaLabel="Post title"
+							onChange={(value) => {
+								setTitle(value);
 								markDirty();
 							}}
-							className="w-full bg-transparent text-3xl font-bold tracking-tight outline-none placeholder:text-muted-foreground/40"
 						/>
 						<div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
 							<span>{stats.wordCount} words</span>
@@ -429,7 +428,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 					id="post-settings-sidebar"
 					aria-label="Post settings"
 					className={cn(
-						"shrink-0 border-l bg-muted/20 transition-all duration-300 ease-in-out",
+						"shrink-0 border-l bg-muted/20 transition-[width,opacity] duration-200 ease-out",
 						sidebarCollapsed ? "w-0 overflow-hidden" : "w-80",
 					)}
 				>

@@ -12,7 +12,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 			disableTransitionOnChange
 		>
 			<TooltipProvider>{children}</TooltipProvider>
-			<Toaster position="top-right" richColors closeButton duration={4000} />
+			<Toaster position="top-center" richColors closeButton duration={4000} />
 		</ThemeProvider>
 	);
 }

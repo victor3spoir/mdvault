@@ -31,7 +31,13 @@ const ALIGN_OPTIONS: Array<{
 	{ value: "right", label: "Align right", icon: IconAlignRight },
 ];
 
-function PrivateImageView({ node, selected, updateAttributes }: NodeViewProps) {
+function PrivateImageView({
+	node,
+	selected,
+	updateAttributes,
+	editor,
+	getPos,
+}: NodeViewProps) {
 	const src = typeof node.attrs.src === "string" ? node.attrs.src : "";
 	const alt = typeof node.attrs.alt === "string" ? node.attrs.alt : "";
 	const title = typeof node.attrs.title === "string" ? node.attrs.title : "";
@@ -56,8 +62,22 @@ function PrivateImageView({ node, selected, updateAttributes }: NodeViewProps) {
 		}
 	}, [altOpen]);
 
+	/**
+	 * ProseMirror resolves clicks by coordinates, which the rendered image can
+	 * swallow, so select the node explicitly to guarantee the toolbar opens.
+	 */
+	const selectNode = () => {
+		if (typeof getPos !== "function") {
+			return;
+		}
+		const pos = getPos();
+		if (typeof pos === "number") {
+			editor.commands.setNodeSelection(pos);
+		}
+	};
+
 	return (
-		<NodeViewWrapper className="my-4" data-drag-handle>
+		<NodeViewWrapper className="my-4" data-drag-handle onClick={selectNode}>
 			<div
 				className={cn(
 					"relative flex",
@@ -80,7 +100,7 @@ function PrivateImageView({ node, selected, updateAttributes }: NodeViewProps) {
 					{selected ? (
 						<div
 							contentEditable={false}
-							className="absolute -top-3 left-1/2 z-10 flex -translate-x-1/2 -translate-y-full flex-col items-center gap-1"
+							className="absolute inset-x-0 top-2 z-10 flex flex-col items-center gap-1"
 						>
 							<div className="flex items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-lg">
 								{WIDTH_OPTIONS.map((option) => (

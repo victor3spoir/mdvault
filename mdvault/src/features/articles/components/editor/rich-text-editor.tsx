@@ -4,9 +4,11 @@ import { Markdown } from "@tiptap/markdown";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { forwardRef, useImperativeHandle } from "react";
+import { EditorLoading } from "#/components/editor-loading";
 import { CodeBlockExtension } from "#/features/articles/components/editor/code-block-extension";
 import { PrivateImageExtension } from "#/features/articles/components/editor/private-image-extension";
 import { SelectionMenu } from "#/features/articles/components/editor/selection-menu";
+import { TableMenu } from "#/features/articles/components/editor/table-menu";
 import { EditorToolbar } from "#/features/articles/components/editor/toolbar";
 
 export interface RichTextEditorHandle {
@@ -98,17 +100,14 @@ export const RichTextEditor = forwardRef<
 	);
 
 	if (!editor) {
-		return (
-			<div className="flex flex-1 items-center justify-center bg-muted/30">
-				<span className="text-sm text-muted-foreground">Loading editor...</span>
-			</div>
-		);
+		return <EditorLoading withToolbar />;
 	}
 
 	return (
 		<div className="flex min-h-0 flex-1 flex-col">
 			<EditorToolbar editor={editor} onImageInsertClick={onImageInsertClick} />
 			<SelectionMenu editor={editor} />
+			<TableMenu editor={editor} />
 			<div className="min-h-0 flex-1 overflow-y-auto">
 				<EditorContent editor={editor} className="h-full" />
 			</div>

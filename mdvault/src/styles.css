@@ -590,3 +590,34 @@ pre.th-code {
   opacity: 0.6;
   pointer-events: none;
 }
+
+/* ── Reduced motion ─────────────────────────────────────────── */
+
+/*
+ * Respect the operating system's reduced-motion preference.
+ *
+ * Keyframe animations (dialog slides, accordion sweeps) are effectively
+ * removed, while transitions are capped rather than killed so colour and
+ * opacity still change smoothly - asking for less motion is not asking for no
+ * feedback. `transform` itself is deliberately left alone: Radix positions
+ * popovers, dropdowns and tooltips with it, and overriding it would send them
+ * to the wrong corner of the screen.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 100ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Progress indicators must keep spinning - they report that work is running. */
+  .animate-spin {
+    animation-duration: 1s !important;
+    animation-iteration-count: infinite !important;
+  }
+}

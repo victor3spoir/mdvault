@@ -1,11 +1,14 @@
 import { IconChevronRight, IconHome, IconSearch } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
+import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
 import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 
 interface Breadcrumb {
 	label: string;
 	href?: string;
+	search?: Record<string, string>;
 }
 
 const staticLabels: Record<string, string> = {
@@ -13,6 +16,7 @@ const staticLabels: Record<string, string> = {
 	posts: "Posts",
 	media: "Media Library",
 	settings: "Settings",
+	vault: "Vault",
 	new: "New",
 	edit: "Edit",
 };
@@ -29,7 +33,42 @@ function getDynamicLabel(previousSegment?: string) {
 	return "Details";
 }
 
-function buildBreadcrumbs(pathname: string): Breadcrumb[] {
+/**
+ * Vault routes are type-scoped: the trail points back to the asset type list
+ * (e.g. Projects) and carries the type search param so links stay resolvable.
+ */
+function buildVaultBreadcrumbs(
+	segments: string[],
+	vaultType: string,
+	vaultLabel: string,
+): Breadcrumb[] {
+	const breadcrumbs: Breadcrumb[] = [{ label: "Dashboard", href: "/cms" }];
+	const rest = segments.slice(1);
+	const isListPage = rest.length === 0;
+
+	breadcrumbs.push({
+		label: vaultLabel,
+		href: isListPage ? undefined : "/cms/vault",
+		search: isListPage ? undefined : { type: vaultType, searchQuery: "" },
+	});
+
+	const last = rest[rest.length - 1];
+	if (last === "new") {
+		breadcrumbs.push({ label: "New" });
+	} else if (last === "edit") {
+		breadcrumbs.push({ label: "Edit" });
+	} else if (rest.length > 0) {
+		breadcrumbs.push({ label: "Details" });
+	}
+
+	return breadcrumbs;
+}
+
+function buildBreadcrumbs(
+	pathname: string,
+	vaultType: string,
+	vaultLabel: string,
+): Breadcrumb[] {
 	if (!pathname.startsWith("/cms")) {
 		return [];
 	}
@@ -39,6 +78,10 @@ function buildBreadcrumbs(pathname: string): Breadcrumb[] {
 
 	if (segments.length === 0) {
 		return breadcrumbs;
+	}
+
+	if (segments[0] === "vault") {
+		return buildVaultBreadcrumbs(segments, vaultType, vaultLabel);
 	}
 
 	let currentPath = "/cms";
@@ -63,8 +106,17 @@ function buildBreadcrumbs(pathname: string): Breadcrumb[] {
 }
 
 export function SiteHeader() {
-	const { pathname } = useLocation();
-	const breadcrumbs = buildBreadcrumbs(pathname);
+	const { pathname, search } = useLocation();
+	const isVaultRoute = pathname.startsWith("/cms/vault");
+	const vaultType = (search as { type?: string }).type ?? "";
+	const config = useQuery({
+		...vaultConfigQueryOptions(),
+		enabled: isVaultRoute,
+	});
+	const vaultLabel =
+		config.data?.assetTypes.find((type) => type.id === vaultType)?.label ??
+		"Vault";
+	const breadcrumbs = buildBreadcrumbs(pathname, vaultType, vaultLabel);
 
 	return (
 		<header className="h-16 border-b bg-background/90 px-6 py-4 backdrop-blur sticky top-0 z-30">
@@ -92,6 +144,7 @@ export function SiteHeader() {
 								) : crumb.href ? (
 									<Link
 										to={crumb.href}
+										search={crumb.search}
 										className="transition-colors hover:text-foreground"
 									>
 										{crumb.label}

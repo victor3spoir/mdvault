@@ -21,20 +21,22 @@ export function MediaUploadSheet({ onUploadSuccess }: MediaUploadSheetProps) {
 			<SheetTrigger asChild>
 				<Button
 					type="button"
-					className="h-10 gap-2 rounded-lg px-4 font-semibold"
+					size="sm"
+					className="h-8 gap-2 rounded-lg px-3 shadow-sm hover:shadow-md"
 				>
 					<IconPhotoPlus className="size-4" />
 					Upload Asset
 				</Button>
 			</SheetTrigger>
-			<SheetContent side="right" className="w-full sm:max-w-xl">
-				<SheetHeader className="pb-8">
+			<SheetContent side="right" className="flex w-full flex-col sm:max-w-xl">
+				<SheetHeader className="shrink-0">
 					<SheetTitle className="text-xl font-bold">Upload Asset</SheetTitle>
 					<SheetDescription>
-						Add new images to your media library
+						Add new images to your media library. They are optimized before
+						being committed to the repository.
 					</SheetDescription>
 				</SheetHeader>
-				<div className="rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/5 p-2">
+				<div className="flex min-h-0 flex-1 flex-col px-4 pb-4">
 					<ImageUploader onUploadSuccess={onUploadSuccess} />
 				</div>
 			</SheetContent>

@@ -100,7 +100,7 @@ export function ArticleEditorSettingsSidebar({
 			id="article-settings-sidebar"
 			aria-label="Article settings"
 			className={cn(
-				"shrink-0 border-l bg-muted/20 transition-all duration-300 ease-in-out",
+				"shrink-0 border-l bg-muted/20 transition-[width,opacity] duration-200 ease-out",
 				collapsed ? "w-0 overflow-hidden" : "w-80",
 			)}
 		>

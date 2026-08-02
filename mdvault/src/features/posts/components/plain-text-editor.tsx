@@ -6,6 +6,7 @@ import { Placeholder, UndoRedo } from "@tiptap/extensions";
 import { Markdown } from "@tiptap/markdown";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { forwardRef, useImperativeHandle } from "react";
+import { EditorLoading } from "#/components/editor-loading";
 
 export interface PlainTextEditorHandle {
 	getMarkdown: () => string;
@@ -65,11 +66,7 @@ export const PlainTextEditor = forwardRef<
 	);
 
 	if (!editor) {
-		return (
-			<div className="flex flex-1 items-center justify-center bg-muted/30 py-12">
-				<span className="text-sm text-muted-foreground">Loading editor...</span>
-			</div>
-		);
+		return <EditorLoading />;
 	}
 
 	return (

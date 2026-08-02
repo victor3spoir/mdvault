@@ -4,6 +4,7 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { PageLayout } from "#/components/page-layout";
+import { Badge } from "#/components/ui/badge";
 import { Skeleton } from "#/components/ui/skeleton";
 import { MediaFilters } from "#/features/media/components/media-filters";
 import { MediaGallery } from "#/features/media/components/media-gallery";
@@ -56,11 +57,6 @@ function MediaPage() {
 		[images],
 	);
 
-	const stats = [
-		{ title: "Total Assets", value: images.length },
-		{ title: "File Types", value: imageTypes.length },
-	] as const;
-
 	const deleteImages = async (targets: MediaFile[]) => {
 		for (const target of targets) {
 			await deleteImageMutation({
@@ -81,32 +77,28 @@ function MediaPage() {
 	};
 
 	return (
-		<PageLayout title="Media Library" description="Manage your digital assets">
-			<div className="space-y-6">
-				<div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
-					{stats.map((stat) => (
-						<div
-							key={stat.title}
-							className="rounded-xl border bg-card/50 p-4 backdrop-blur-sm"
-						>
-							<p className="text-sm font-medium text-muted-foreground">
-								{stat.title}
-							</p>
-							<p className="mt-2 text-3xl font-bold text-foreground">
-								{stat.value}
-							</p>
-						</div>
-					))}
+		<PageLayout
+			title="Media Library"
+			description="Upload, organize, and reuse the images across your content."
+			actions={
+				<div className="flex items-center gap-2">
+					<Badge
+						variant="secondary"
+						className="hidden h-6 rounded-lg px-2 text-xs font-bold sm:flex"
+					>
+						{images.length} Assets
+					</Badge>
+					<MediaUploadSheet
+						onUploadSuccess={(image) => {
+							setImages((current) => [image, ...current]);
+							router.invalidate();
+							toast.success("Image uploaded");
+						}}
+					/>
 				</div>
-
-				<MediaUploadSheet
-					onUploadSuccess={(image) => {
-						setImages((current) => [image, ...current]);
-						router.invalidate();
-						toast.success("Image uploaded");
-					}}
-				/>
-
+			}
+		>
+			<div className="space-y-6">
 				<MediaFilters
 					imageTypes={imageTypes}
 					search={search}

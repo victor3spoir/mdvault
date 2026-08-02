@@ -7,7 +7,7 @@ import {
 	IconSearch,
 	IconSettings,
 } from "@tabler/icons-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import {
 	type ReactNode,
@@ -19,6 +19,11 @@ import {
 } from "react";
 import { articlesListQueryOptions } from "#/features/articles/articles.queries";
 import { postsListQueryOptions } from "#/features/posts/posts.queries";
+import {
+	vaultAssetsQueryOptions,
+	vaultConfigQueryOptions,
+} from "#/features/vault/vault.queries";
+import { getAssetIcon } from "#/features/vault/vault-icons";
 import { cn } from "#/lib/utils";
 
 declare global {
@@ -47,6 +52,18 @@ export function CommandPalette() {
 
 	const articles = useQuery({ ...articlesListQueryOptions(), enabled: open });
 	const posts = useQuery({ ...postsListQueryOptions(), enabled: open });
+	const vaultConfig = useQuery({ ...vaultConfigQueryOptions(), enabled: open });
+	const assetTypes = useMemo(
+		() => vaultConfig.data?.assetTypes ?? [],
+		[vaultConfig.data],
+	);
+	const vaultAssets = useQueries({
+		queries: assetTypes.map((type) => ({
+			...vaultAssetsQueryOptions(type.id),
+			enabled: open,
+		})),
+		combine: (results) => results.map((result) => result.data ?? []),
+	});
 
 	const close = useCallback(() => {
 		setOpen(false);
@@ -160,8 +177,61 @@ export function CommandPalette() {
 				),
 		}));
 
-		return [...navItems, ...articleItems, ...postItems];
-	}, [articles.data, posts.data, navigate, go]);
+		const vaultNavItems: CommandItem[] = assetTypes.flatMap((type) => {
+			const Icon = getAssetIcon(type.icon);
+			const singular = type.label.replace(/s$/i, "");
+			return [
+				{
+					id: `nav-new-${type.id}`,
+					label: `New ${singular}`,
+					group: "Actions",
+					icon: <IconPlus className="size-4" />,
+					keywords: `create new ${type.label} ${type.id}`,
+					run: () =>
+						go(() =>
+							navigate({ to: "/cms/vault/new", search: { type: type.id } }),
+						),
+				},
+				{
+					id: `nav-${type.id}`,
+					label: type.label,
+					group: "Navigation",
+					icon: <Icon className="size-4" />,
+					keywords: `${type.label} ${type.id} vault content`,
+					run: () =>
+						go(() => navigate({ to: "/cms/vault", search: { type: type.id } })),
+				},
+			];
+		});
+
+		const vaultItems: CommandItem[] = assetTypes.flatMap((type, index) => {
+			const Icon = getAssetIcon(type.icon);
+			return (vaultAssets[index] ?? []).map((asset) => ({
+				id: `vault-${type.id}-${asset.id}`,
+				label: asset.title,
+				hint: asset.published ? "Published" : "Draft",
+				group: type.label,
+				icon: <Icon className="size-4" />,
+				keywords: `${asset.title} ${asset.tags?.join(" ") ?? ""} ${type.label}`,
+				run: () =>
+					go(() =>
+						navigate({
+							to: "/cms/vault/$id/edit",
+							params: { id: asset.id },
+							search: { type: type.id },
+						}),
+					),
+			}));
+		});
+
+		return [
+			...navItems,
+			...vaultNavItems,
+			...articleItems,
+			...postItems,
+			...vaultItems,
+		];
+	}, [articles.data, posts.data, assetTypes, vaultAssets, navigate, go]);
 
 	const filtered = useMemo(() => {
 		const term = query.trim().toLowerCase();
@@ -240,7 +310,7 @@ export function CommandPalette() {
 						value={query}
 						onChange={(event) => setQuery(event.target.value)}
 						onKeyDown={handleListKeyDown}
-						placeholder="Search articles, posts, media..."
+						placeholder="Search articles, posts, content..."
 						className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
 					/>
 					<kbd className="hidden rounded border bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground sm:inline-block">

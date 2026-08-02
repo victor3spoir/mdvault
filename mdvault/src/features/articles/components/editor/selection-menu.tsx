@@ -79,9 +79,11 @@ export function SelectionMenu({ editor }: SelectionMenuProps) {
 			shouldShow={({ editor: current, state: editorState, from, to }) => {
 				const { selection } = editorState;
 				const isNodeSelection = "node" in selection;
+				const isCellSelection = "$anchorCell" in selection;
 				return (
 					from !== to &&
 					!isNodeSelection &&
+					!isCellSelection &&
 					!current.isActive("codeBlock") &&
 					!current.isActive("image")
 				);

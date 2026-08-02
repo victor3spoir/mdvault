@@ -1,10 +1,20 @@
-import { IconMoon, IconSun } from "@tabler/icons-react";
+import { IconMoon, IconSun, IconSunMoon } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
 import { Button } from "#/components/ui/button";
 import { cn } from "#/lib/utils";
 
 const themeOrder = ["light", "dark", "system"] as const;
+
+/**
+ * The icon reflects the *selected* mode, not the resolved one, so "System"
+ * stays distinguishable from an explicit Light or Dark choice.
+ */
+const themeIcons = {
+	light: IconSun,
+	dark: IconMoon,
+	system: IconSunMoon,
+} as const;
 
 function getNextTheme(theme: string | undefined) {
 	const currentIndex = themeOrder.indexOf(
@@ -59,7 +69,7 @@ export function ThemeToggle() {
 			aria-label={`Current theme: ${currentLabel}. Switch to ${nextLabel}.`}
 			title={`Current theme: ${currentLabel}. Switch to ${nextLabel}.`}
 			className={cn(
-				"group relative h-10 w-10 overflow-hidden rounded-xl border border-border/80 text-foreground shadow-xs transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm",
+				"group relative h-10 w-10 overflow-hidden rounded-xl border border-border/80 text-foreground shadow-xs transition-[background-color,box-shadow,translate] duration-200 ease-out hover:shadow-sm [@media(hover:hover)and(pointer:fine)]:hover:-translate-y-0.5",
 				activeTheme === "dark"
 					? "bg-muted/55 hover:bg-muted/75"
 					: "bg-background/95 hover:bg-muted/65",
@@ -73,11 +83,23 @@ export function ThemeToggle() {
 						: "bg-[linear-gradient(135deg,rgba(15,23,42,0.05)_0,rgba(15,23,42,0.05)_12%,transparent_12%,transparent_24%),radial-gradient(circle_at_70%_28%,rgba(56,189,248,0.14),transparent_42%)]",
 				)}
 			/>
-			{activeTheme === "dark" ? (
-				<IconMoon className="relative z-10 size-4" />
-			) : (
-				<IconSun className="relative z-10 size-4" />
-			)}
+			{themeOrder.map((mode) => {
+				const Icon = themeIcons[mode];
+				const isActive = currentTheme === mode;
+
+				return (
+					<Icon
+						key={mode}
+						aria-hidden="true"
+						className={cn(
+							"absolute z-10 size-4 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)]",
+							isActive
+								? "scale-100 opacity-100 blur-0"
+								: "scale-[0.25] opacity-0 blur-[4px]",
+						)}
+					/>
+				);
+			})}
 			<span className="sr-only">{`Current theme: ${currentLabel}. Switch to ${nextLabel}.`}</span>
 		</Button>
 	);

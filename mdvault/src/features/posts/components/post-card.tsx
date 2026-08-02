@@ -27,12 +27,15 @@ import {
 import { invalidatePostQueries } from "#/features/posts/posts.queries";
 import type { Post } from "#/features/posts/posts.types";
 import { getPostExcerpt } from "#/features/posts/posts.utils";
+import { useValueChanged } from "#/hooks/use-value-changed";
 import { formatDate } from "#/lib/date";
+import { cn } from "#/lib/utils";
 
 export function PostCard({ post }: { post: Post }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [isPending, startTransition] = useTransition();
+	const statusChanged = useValueChanged(post.published);
 
 	const handleDelete = () => {
 		if (!window.confirm(`Delete "${post.title}"?`)) {
@@ -85,7 +88,7 @@ export function PostCard({ post }: { post: Post }) {
 
 	return (
 		<TooltipProvider>
-			<article className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-all hover:border-primary/20 hover:shadow-lg">
+			<article className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-[border-color,box-shadow] duration-200 ease-out hover:border-primary/20 hover:shadow-lg">
 				<div className="relative aspect-video overflow-hidden bg-muted">
 					{post.coverImage ? (
 						<PrivateImage
@@ -102,7 +105,11 @@ export function PostCard({ post }: { post: Post }) {
 					<div className="absolute left-3 top-3">
 						<Badge
 							variant={post.published ? "default" : "secondary"}
-							className="h-6 gap-1 rounded-lg px-2 text-[10px] font-bold uppercase tracking-wider shadow-lg"
+							className={cn(
+								"h-6 gap-1 rounded-lg px-2 text-[10px] font-bold uppercase tracking-wider shadow-lg",
+								statusChanged &&
+									"animate-in fade-in zoom-in-95 duration-200 ease-out",
+							)}
 						>
 							{post.published ? (
 								<>

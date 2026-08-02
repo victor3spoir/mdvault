@@ -31,6 +31,7 @@ import { invalidateArticleQueries } from "#/features/articles/articles.queries";
 import type { Article } from "#/features/articles/articles.types";
 import { getContentStats } from "#/features/articles/articles.utils";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { useValueChanged } from "#/hooks/use-value-changed";
 import { formatDate } from "#/lib/date";
 import { cn } from "#/lib/utils";
 
@@ -38,6 +39,7 @@ export function ArticleCard({ article }: { article: Article }) {
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const [isPending, startTransition] = useTransition();
+	const statusChanged = useValueChanged(article.published);
 	const stats = getContentStats(article.content);
 
 	const handleDelete = () => {
@@ -93,7 +95,7 @@ export function ArticleCard({ article }: { article: Article }) {
 		<TooltipProvider>
 			<article
 				className={cn(
-					"group relative flex flex-col overflow-hidden rounded-2xl border transition-all hover:border-primary/20 hover:shadow-lg",
+					"group relative flex flex-col overflow-hidden rounded-2xl border transition-[border-color,box-shadow] duration-200 ease-out hover:border-primary/20 hover:shadow-lg",
 					article.published
 						? "bg-card"
 						: "border-dashed border-muted-foreground/30 bg-card/60",
@@ -115,7 +117,11 @@ export function ArticleCard({ article }: { article: Article }) {
 					<div className="absolute inset-x-3 top-3 flex gap-2">
 						<Badge
 							variant={article.published ? "default" : "secondary"}
-							className="h-6 gap-1 rounded-lg px-2 text-[10px] font-bold uppercase tracking-wider shadow-lg"
+							className={cn(
+								"h-6 gap-1 rounded-lg px-2 text-[10px] font-bold uppercase tracking-wider shadow-lg",
+								statusChanged &&
+									"animate-in fade-in zoom-in-95 duration-200 ease-out",
+							)}
 						>
 							{article.published ? (
 								<>

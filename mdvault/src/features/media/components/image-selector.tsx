@@ -100,7 +100,7 @@ export function ImageSelector({
 								type="button"
 								onClick={() => onSelectImage(image)}
 								className={cn(
-									"group relative aspect-square overflow-hidden rounded-xl border-2 transition-all duration-300 focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
+									"group relative aspect-square overflow-hidden rounded-xl border-2 transition-[border-color,box-shadow] duration-200 ease-out focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none",
 									selectedImageUrl === image.url
 										? "border-primary ring-4 ring-primary/10 shadow-lg"
 										: "border-transparent bg-muted/50 hover:border-primary/40 hover:shadow-md",
@@ -116,7 +116,7 @@ export function ImageSelector({
 								/>
 								<div
 									className={cn(
-										"absolute inset-0 transition-all duration-300",
+										"absolute inset-0 transition-opacity duration-200 ease-out",
 										selectedImageUrl === image.url
 											? "bg-primary/20"
 											: "bg-black/0 group-hover:bg-black/5",
