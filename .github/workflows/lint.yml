@@ -1,15 +1,13 @@
-name: CI / CD Pipeline
+name: Lint, Test & Security
 
 on:
   push:
     branches:
       - "**"
-    branches-ignore: 
-      - main
-      - dev
   pull_request:
     branches:
       - dev
+      - main
 
 env:
   REGISTRY: ghcr.io
