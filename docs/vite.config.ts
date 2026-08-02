@@ -20,7 +20,7 @@ function resolveSiteUrl() {
 		process.env.VERCEL_URL;
 
 	if (!host) {
-		return "https://mdvault.vercel.app";
+		return "https://mdvault-docs.vercel.app";
 	}
 
 	return (host.startsWith("http") ? host : `https://${host}`).replace(
