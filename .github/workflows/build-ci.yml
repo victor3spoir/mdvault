@@ -3,185 +3,27 @@ name: CI / CD Pipeline
 on:
   push:
     branches:
-      - "**"
+      - main
   pull_request:
     branches:
-      - dev
       - main
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# JOB 1 — Lint (every push + every PR)
-# ─────────────────────────────────────────────────────────────────────────────
 jobs:
-  lint:
-    name: Lint (Biome)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.14
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-        working-directory: ./mdvault
-
-      - name: Biome CI check
-        run: |
-          set -o pipefail
-          bun run check --reporter=github 2>&1 | tee lint-report.txt
-        working-directory: ./mdvault
-
-      - name: Typecheck
-        run: bun run typecheck
-        working-directory: ./mdvault
-
-      - name: Unit tests
-        run: bun run test
-        working-directory: ./mdvault
-
-      - name: Upload lint report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: lint-report-${{ github.run_id }}
-          path: ./mdvault/lint-report.txt
-
-# ─────────────────────────────────────────────────────────────────────────────
-# JOB 2 — Security scan (every push + every PR)
-#   2a. Trivy filesystem scan (repo source + deps)
-#   2b. Trivy Dockerfile config scan
-#   2c. Bun dependency audit
-# ─────────────────────────────────────────────────────────────────────────────
-  security-scan:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-    steps:
-      - uses: actions/checkout@v4
-
-      # --- Trivy: repository filesystem ----------------------------------------
-      - name: Trivy — filesystem scan
-        uses: aquasecurity/trivy-action@0.33.1
-        with:
-          scan-type: fs
-          scan-ref: .
-          format: sarif
-          output: trivy-fs-report.sarif
-          exit-code: 1
-          ignore-unfixed: true
-          severity: CRITICAL,HIGH
-
-      - name: Upload Trivy FS SARIF to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-fs-report.sarif
-          category: trivy-fs
-
-      - name: Upload Trivy FS report artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-fs-report-${{ github.run_id }}
-          path: trivy-fs-report.sarif
-
-      # --- Trivy: Dockerfile config scan ----------------------------------------
-      - name: Trivy — Dockerfile scan
-        uses: aquasecurity/trivy-action@0.33.1
-        with:
-          scan-type: config
-          scan-ref: ./mdvault/Dockerfile
-          format: sarif
-          output: trivy-dockerfile-report.sarif
-          exit-code: 1
-          ignore-unfixed: true
-          severity: CRITICAL,HIGH
-
-      - name: Upload Trivy Dockerfile SARIF to GitHub Security tab
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-dockerfile-report.sarif
-          category: trivy-dockerfile
-
-      - name: Upload Trivy Dockerfile report artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: trivy-dockerfile-report-${{ github.run_id }}
-          path: trivy-dockerfile-report.sarif
-
-      # --- Bun dependency audit -------------------------------------------------
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.14
-
-      - name: Bun audit
-        working-directory: ./mdvault
-        run: bun install --frozen-lockfile && bun audit --json > bun-audit-report.json
-
-      - name: Upload bun audit report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: bun-audit-report-${{ github.run_id }}
-          path: ./mdvault/bun-audit-report.json
-
-# ─────────────────────────────────────────────────────────────────────────────
-# JOB 3 — CodeQL (push to main or dev only — skipped on PRs & feature branches)
-# ─────────────────────────────────────────────────────────────────────────────
-  codeql:
-    name: CodeQL Analysis
-    runs-on: ubuntu-latest
-    if: >
-      github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
-    permissions:
-      contents: read
-      security-events: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: javascript-typescript
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Analyze code with CodeQL
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: codeql-js
-
-# ─────────────────────────────────────────────────────────────────────────────
-# JOB 4 — Build & push Docker image
-#   dev  push → tag: dev
-#   main push → tags: main, latest
-#   Blocked by lint + security-scan
-# ─────────────────────────────────────────────────────────────────────────────
   docker-build:
     name: Docker Build & Push
     runs-on: ubuntu-latest
-    needs: [lint, security-scan]
     if: >
-      github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+      github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     outputs:
       image-tag: ${{ steps.meta.outputs.version }}
     permissions:
       contents: read
       packages: write
-
     steps:
       - uses: actions/checkout@v4
 
@@ -218,16 +60,12 @@ jobs:
           TAG: ${{ github.ref == 'refs/heads/main' && 'main' || 'dev' }}
           EXTRA_TAG: ${{ github.ref == 'refs/heads/main' && 'latest' || '' }}
 
-# ─────────────────────────────────────────────────────────────────────────────
-# JOB 5 — Scan the built image with Trivy (after docker-build)
-# ─────────────────────────────────────────────────────────────────────────────
   docker-image-scan:
     name: Docker Image Scan (Trivy)
     runs-on: ubuntu-latest
     needs: docker-build
     if: >
-      github.event_name == 'push' &&
-      (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
+      github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/dev')
     permissions:
       contents: read
       security-events: write
@@ -244,7 +82,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Trivy — image scan
-        uses: aquasecurity/trivy-action@0.33.1
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: >-
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{

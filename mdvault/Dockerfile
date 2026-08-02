@@ -1,19 +1,19 @@
-FROM oven/bun:1.3.14-alpine AS base
+FROM oven/bun:1.3.14 AS base
 
 WORKDIR /app
 
 FROM base AS dependencies
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile --production=false
+RUN bun install --frozen-lockfile 
 
 FROM dependencies AS build
 COPY . .
 RUN bun run build
 
 FROM base AS runtime
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=3000
+ENV NODE_ENV=production \
+  HOST=0.0.0.0 \
+  PORT=3000
 
 COPY --from=build /app/.output ./.output
 
