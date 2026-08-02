@@ -1,35 +1,22 @@
-FROM oven/bun:1.3.5-alpine AS base
-FROM base AS builder
-WORKDIR /usr/app
-ENV NEXT_TELEMETRY_DISABLED=1
+FROM oven/bun:1.3.14 AS base
+
+WORKDIR /app
+
+FROM base AS dependencies
 COPY package.json bun.lock ./
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile 
+
+FROM dependencies AS build
 COPY . .
-ENV NODE_OPTIONS='--max-old-space-size=4096'
-
-ENV GITHUB_TOKEN=ghp_000000000 \
-  GITHUB_OWNER=fake-username \
-  GITHUB_REPO=fake-repo 
-
 RUN bun run build
 
+FROM base AS runtime
+ENV NODE_ENV=production \
+  HOST=0.0.0.0 \
+  PORT=3000
 
-FROM base AS prod
-WORKDIR /usr/app
-RUN apk update && apk upgrade --no-cache
-
-COPY --from=builder /usr/app/public ./public
-COPY --from=builder --chown=bun:bun /usr/app/.next/standalone ./
-COPY --from=builder --chown=bun:bun /usr/app/.next/static ./.next/static
+COPY --from=build /app/.output ./.output
 
 USER bun
-
 EXPOSE 3000
-ENV NODE_ENV=production \
-  HOSTNAME="0.0.0.0" \
-  PORT=3000 \
-  GITHUB_TOKEN= \
-  GITHUB_OWNER= \
-  GITHUB_REPO=
-ENTRYPOINT [ "bun" ]
-CMD ["server.js"]
+CMD ["bun", ".output/server/index.mjs"]

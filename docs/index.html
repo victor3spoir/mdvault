@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>MDVault — GitHub-powered Markdown content management</title>
+		<meta
+			name="description"
+			content="GitHub-powered Markdown content management. Write, organize and publish articles, posts and custom types — with their images — in your own repository."
+		/>
+		<link rel="canonical" href="%SITE_URL%/" />
+		<meta name="theme-color" content="#0f4c5c" />
+		<meta name="color-scheme" content="light dark" />
+
+		<meta property="og:site_name" content="MDVault" />
+		<meta
+			property="og:title"
+			content="MDVault — GitHub-powered Markdown content management"
+		/>
+		<meta
+			property="og:description"
+			content="Write, organize and publish articles, posts and custom types — with their images — in your own repository."
+		/>
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="%SITE_URL%/" />
+		<meta property="og:image" content="%SITE_URL%/og-image.png" />
+		<meta property="og:image:width" content="1440" />
+		<meta property="og:image:height" content="1160" />
+		<meta
+			property="og:image:alt"
+			content="The MDVault dashboard showing content sections and recent activity."
+		/>
+
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta
+			name="twitter:title"
+			content="MDVault — GitHub-powered Markdown content management"
+		/>
+		<meta
+			name="twitter:description"
+			content="Write, organize and publish articles, posts and custom types — with their images — in your own repository."
+		/>
+		<meta name="twitter:image" content="%SITE_URL%/og-image.png" />
+
+		<link rel="icon" href="/logo.png" />
+		<link rel="apple-touch-icon" href="/logo.png" />
+		<link rel="stylesheet" href="./styles.css" />
+		<!-- Loaded synchronously so the stored theme applies before first paint. -->
+		<script src="/theme.js"></script>
+	</head>
+	<body>
+		<header class="nav">
+			<a class="nav__brand" href="#top">
+				<img src="/logo.png" alt="" width="32" height="32" />
+				<span>mdvault</span>
+			</a>
+			<nav class="nav__links">
+				<a href="#features">Features</a>
+				<a href="#screens">Screens</a>
+				<a href="#how">How it works</a>
+				<a href="#start">Get started</a>
+			</nav>
+			<div class="nav__actions">
+				<button
+					class="theme-toggle"
+					type="button"
+					data-theme-toggle
+					hidden
+					aria-label="Change theme"
+					title="Change theme"
+				>
+					<span class="theme-toggle__icon theme-toggle__icon--light"
+						><i data-icon="sun"></i></span
+					>
+					<span class="theme-toggle__icon theme-toggle__icon--dark"
+						><i data-icon="moon"></i></span
+					>
+					<span class="theme-toggle__icon theme-toggle__icon--auto"
+						><i data-icon="sun-moon"></i></span
+					>
+				</button>
+				<a
+					class="nav__cta"
+					href="https://github.com/victor3spoir/mdvault"
+					target="_blank"
+					rel="noreferrer"
+					><i data-icon="brand-github"></i> GitHub</a
+				>
+			</div>
+		</header>
+
+		<main id="top">
+			<section class="hero">
+				<div class="hero__glow" aria-hidden="true"></div>
+				<div class="container hero__inner">
+					<span class="pill"
+						><i data-icon="sparkles"></i> GitHub-powered Markdown content
+						management</span
+					>
+					<h1>
+						Your Markdown,<br />
+						<span class="gradient">Perfectly Vaulted</span>
+					</h1>
+					<p class="lead">
+						Write, organize and publish your articles, posts and custom content
+						types — <strong>with the images they use</strong> — versioned in your
+						own GitHub repository. No database, no external asset host — every
+						change is a commit.
+					</p>
+					<div class="hero__actions">
+						<a
+							class="btn btn--primary"
+							href="https://github.com/victor3spoir/mdvault"
+							target="_blank"
+							rel="noreferrer"
+							><i data-icon="rocket"></i> Get started</a
+						>
+						<a class="btn btn--ghost" href="#screens">
+							See the app <i data-icon="arrow-right"></i>
+						</a>
+					</div>
+					<ul class="hero__stats">
+						<li><strong>1</strong><span>repo for text &amp; media</span></li>
+						<li><strong>0</strong><span>databases required</span></li>
+						<li><strong>∞</strong><span>content types you define</span></li>
+					</ul>
+				</div>
+				<div class="container hero__shot">
+					<img
+						src="/screenshots/dashboard.png"
+						alt="MDVault dashboard showing per-section content metrics and a log of recent commits"
+						loading="lazy"
+					/>
+				</div>
+			</section>
+
+			<section class="section" id="aim">
+				<div class="container narrow">
+					<h2>What is it for?</h2>
+					<p class="section__lead">
+						Developers keep their content in Git — but editing raw Markdown
+						files, uploading images somewhere else and wiring their paths by
+						hand is tedious. MDVault manages the <strong>whole content
+						bundle</strong>: the Markdown, its frontmatter, and every image it
+						references — committed side by side in the same repository.
+					</p>
+					<div class="cards cards--3">
+						<article class="card">
+							<span class="card__icon"><i data-icon="article"></i></span>
+							<h3>For blogs &amp; docs</h3>
+							<p>
+								Write long-form articles with headings, tables, code blocks and
+								images, then publish when ready.
+							</p>
+						</article>
+						<article class="card">
+							<span class="card__icon"><i data-icon="message-2"></i></span>
+							<h3>For social posts</h3>
+							<p>
+								Draft short, plain-text posts (LinkedIn style) and link them to
+								the article they promote.
+							</p>
+						</article>
+						<article class="card">
+							<span class="card__icon"><i data-icon="stack-2"></i></span>
+							<h3>For anything else</h3>
+							<p>
+								Define your own content types — notes, tutorials, projects — and
+								MDVault builds the whole workspace around them.
+							</p>
+						</article>
+					</div>
+				</div>
+			</section>
+
+			<section class="section section--alt" id="features">
+				<div class="container">
+					<h2>Features</h2>
+					<p class="section__lead">
+						The essentials — plus autosave, a command palette, image
+						optimization and search built in.
+					</p>
+					<div class="cards cards--4">
+						<article class="card">
+							<span class="card__icon"><i data-icon="edit"></i></span>
+							<h3>Rich WYSIWYG editor</h3>
+							<p>
+								Headings, lists, tables, images and code blocks with syntax
+								highlighting — everything round-trips to clean Markdown.
+							</p>
+						</article>
+						<article class="card">
+							<span class="card__icon"><i data-icon="layout-columns"></i></span>
+							<h3>Live split preview</h3>
+							<p>
+								Write on the left, see the published rendering on the right —
+								the same renderer used for the final page.
+							</p>
+						</article>
+						<article class="card">
+							<span class="card__icon"><i data-icon="category-plus"></i></span>
+							<h3>Custom content types</h3>
+							<p>
+								Declare your own types in Settings. Folders are created in the
+								repo and the whole workspace adapts around them.
+							</p>
+						</article>
+						<article class="card">
+							<span class="card__icon"><i data-icon="photo-share"></i></span>
+							<h3>Text &amp; media in one repo</h3>
+							<p>
+								Images uploaded from the editor are committed next to your
+								Markdown and linked by relative path — clone the repo and nothing
+								is missing. Every change is a commit.
+							</p>
+						</article>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="screens">
+				<div class="container">
+					<h2>Inside the app</h2>
+					<p class="section__lead">
+						A quick tour of the main spaces.
+					</p>
+
+					<div class="shots">
+						<figure class="shot">
+							<img
+								src="/screenshots/articles.png"
+								alt="Articles list with search, status and language filters, tag chips and article cards"
+								loading="lazy"
+							/>
+							<figcaption>
+								<strong>Articles</strong> — cards with cover, status, tags and
+								inline publish, edit and delete actions.
+							</figcaption>
+						</figure>
+						<figure class="shot">
+							<img
+								src="/screenshots/editor.png"
+								alt="Article editor with formatting toolbar and settings sidebar"
+								loading="lazy"
+							/>
+							<figcaption>
+								<strong>Editor</strong> — distraction-free writing surface with a
+								collapsible settings sidebar for language, description, tags and
+								cover image.
+							</figcaption>
+						</figure>
+						<figure class="shot">
+							<img
+								src="/screenshots/posts.png"
+								alt="Posts list showing short-form content cards"
+								loading="lazy"
+							/>
+							<figcaption>
+								<strong>Posts</strong> — short-form, plain-text content that can
+								reference a related article.
+							</figcaption>
+						</figure>
+						<figure class="shot">
+							<img
+								src="/screenshots/vault.png"
+								alt="Vault page listing assets of a user-defined content type"
+								loading="lazy"
+							/>
+							<figcaption>
+								<strong>Vault</strong> — your own content types, each with its
+								own list, editor and repository folder.
+							</figcaption>
+						</figure>
+						<figure class="shot">
+							<img
+								src="/screenshots/media.png"
+								alt="Media library grid with search and file type filters"
+								loading="lazy"
+							/>
+							<figcaption>
+								<strong>Media</strong> — upload, filter and reuse images; copy a
+								URL or Markdown snippet from any asset.
+							</figcaption>
+						</figure>
+						<figure class="shot">
+							<img
+								src="/screenshots/settings.png"
+								alt="Settings page with user profile and dynamic content tabs"
+								loading="lazy"
+							/>
+							<figcaption>
+								<strong>Settings</strong> — connected GitHub account, repository
+								info, and the asset types manager.
+							</figcaption>
+						</figure>
+					</div>
+				</div>
+			</section>
+
+			<section class="section section--alt" id="how">
+				<div class="container wide">
+					<h2>How it works</h2>
+					<p class="section__lead">
+						From your keyboard to your website — your text and your images
+						travel together, through one repository you own.
+					</p>
+
+					<figure class="diagram">
+						<a
+							class="diagram__frame"
+							href="/diagrams/mdvault-flow.png"
+							target="_blank"
+							rel="noreferrer"
+							title="Open the full-size diagram"
+						>
+							<img
+								src="/diagrams/mdvault-flow.png"
+								alt="MDVault architecture: articles, posts, projects and images are edited in MDVault, committed as Markdown and media into a single GitHub repository, then pulled and rendered by your own website."
+								loading="lazy"
+								width="4124"
+								height="1884"
+							/>
+						</a>
+						<figcaption>
+							The amber trail follows a single image — dropped into the editor,
+							committed next to the Markdown that references it, and served on
+							your page. Click to view full size.
+						</figcaption>
+					</figure>
+				</div>
+
+				<div class="container narrow">
+					<ol class="steps">
+						<li>
+							<h3>Point it at a repository</h3>
+							<p>
+								Provide a GitHub token, owner and repo name. MDVault reads and
+								writes content through the GitHub API — there is no other data
+								store.
+							</p>
+						</li>
+						<li>
+							<h3>Write and upload in the browser</h3>
+							<p>
+								Content is edited as rich text and serialized to Markdown with
+								YAML frontmatter. Images dropped into the editor are uploaded to
+								the repository's media folder and linked by relative path —
+								optimized on the way in.
+							</p>
+						</li>
+						<li>
+							<h3>Every action is a commit</h3>
+							<p>
+								Saving, publishing or deleting commits the file with a
+								descriptive message. Conflicts are detected through file SHAs,
+								so concurrent edits can't silently overwrite each other.
+							</p>
+						</li>
+						<li>
+							<h3>Your site consumes the repo</h3>
+							<p>
+								Your static site, blog or app reads the same Markdown files and
+								the same image files straight from Git — MDVault never sits
+								between your content and your build.
+							</p>
+						</li>
+					</ol>
+
+					<div class="tree">
+						<pre><code>your-content-repo/
+├── mdvault.config.json     <span class="muted"># asset types you defined</span>
+├── articles/               <span class="muted"># long-form content (.md)</span>
+├── posts/                  <span class="muted"># short-form content (.md)</span>
+├── media/                  <span class="muted"># images, committed alongside</span>
+└── vault/
+    ├── projects/           <span class="muted"># custom type</span>
+    └── docs/               <span class="muted"># custom type</span></code></pre>
+					</div>
+				</div>
+			</section>
+
+			<section class="section" id="start">
+				<div class="container narrow">
+					<h2>Getting started</h2>
+
+					<h3 class="step-title"><i data-icon="key"></i> 1. Prepare a repository &amp; token</h3>
+					<p>
+						Create (or pick) a GitHub repository for your content, then generate
+						a fine-grained personal access token limited to it with
+						<strong>Contents: read and write</strong> and
+						<strong>Metadata: read-only</strong>.
+					</p>
+
+					<h3 class="step-title"><i data-icon="brand-docker"></i> 2. Run with Docker</h3>
+					<pre><code>services:
+  mdvault:
+    image: ghcr.io/victor3spoir/mdvault:latest
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      GITHUB_TOKEN: "your_personal_access_token"
+      GITHUB_OWNER: "your_github_username"
+      GITHUB_REPO: "your_content_repository"
+    restart: unless-stopped</code></pre>
+					<pre><code>docker compose up -d</code></pre>
+
+					<h3 class="step-title"><i data-icon="browser"></i> 3. Open the app</h3>
+					<p>
+						Visit <code>http://127.0.0.1:3000</code>, then head to
+						<strong>Settings → Dynamic Content</strong> to define your own asset
+						types, or start writing straight away.
+					</p>
+
+					<h3 class="step-title"><i data-icon="settings"></i> Configuration</h3>
+					<div class="table-wrap">
+						<table>
+							<thead>
+								<tr>
+									<th>Variable</th>
+									<th>Description</th>
+									<th>Default</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr>
+									<td><code>GITHUB_TOKEN</code></td>
+									<td>Token used to read and write repository content</td>
+									<td>Required</td>
+								</tr>
+								<tr>
+									<td><code>GITHUB_OWNER</code></td>
+									<td>User or organization owning the repository</td>
+									<td>Required</td>
+								</tr>
+								<tr>
+									<td><code>GITHUB_REPO</code></td>
+									<td>Content repository name</td>
+									<td>Required</td>
+								</tr>
+								<tr>
+									<td><code>ARTICLES_PATH</code></td>
+									<td>Directory containing articles</td>
+									<td><code>articles</code></td>
+								</tr>
+								<tr>
+									<td><code>POSTS_PATH</code></td>
+									<td>Directory containing posts</td>
+									<td><code>posts</code></td>
+								</tr>
+								<tr>
+									<td><code>MEDIA_PATH</code></td>
+									<td>Directory containing media files</td>
+									<td><code>media</code></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="callout callout--warning">
+						<i data-icon="shield-lock"></i>
+						<div>
+							<strong>Security model.</strong> MDVault has no application login
+							by design — the GitHub token authenticates the app to GitHub, not
+							people to the app. Run it on a trusted network or behind a VPN,
+							firewall or authenticating reverse proxy. Do not expose it directly
+							to the public internet.
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="section section--cta">
+				<div class="container narrow center">
+					<h2>Ready to write?</h2>
+					<p>
+						Point MDVault at a repository and start publishing — your text and
+						your images stay together, versioned alongside your code.
+					</p>
+					<a
+						class="btn btn--primary"
+						href="https://github.com/victor3spoir/mdvault"
+						target="_blank"
+						rel="noreferrer"
+						><i data-icon="brand-github"></i> View on GitHub</a
+					>
+				</div>
+			</section>
+		</main>
+
+		<footer class="footer">
+			<div class="container footer__inner">
+				<span>MDVault — MIT licensed</span>
+				<a
+					href="https://github.com/victor3spoir/mdvault"
+					target="_blank"
+					rel="noreferrer"
+					><i data-icon="brand-github"></i>
+					github.com/victor3spoir/mdvault</a
+				>
+			</div>
+		</footer>
+	</body>
+</html>
