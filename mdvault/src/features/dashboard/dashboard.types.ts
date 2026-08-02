@@ -24,6 +24,27 @@ export type DashboardContentItem = {
 	published: boolean;
 };
 
+/**
+ * Metrics for one content section. Articles, posts and every user defined vault
+ * type produce the same shape, so the dashboard renders them identically.
+ */
+export type ContentSectionStats = {
+	/** "articles", "posts", or the vault type id. */
+	id: string;
+	label: string;
+	/** Icon key: a vault `AssetIcon` for custom types, or a built-in key. */
+	icon: string;
+	total: number;
+	published: number;
+	drafts: number;
+	/** Most recent update across the section, if it has any content. */
+	lastUpdatedAt?: string;
+	browseTo: string;
+	createTo: string;
+	/** Search params to append when linking, used by vault types. */
+	search?: { type: string };
+};
+
 export type DashboardStats = {
 	totalArticles: number;
 	publishedArticles: number;
@@ -36,5 +57,6 @@ export type DashboardStats = {
 
 export type DashboardOverview = {
 	stats: DashboardStats;
+	sections: ContentSectionStats[];
 	activities: Activity[];
 };
