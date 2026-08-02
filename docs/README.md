@@ -37,7 +37,7 @@ Canonical, OpenGraph, `robots.txt` and `sitemap.xml` need an absolute URL.
 1. `SITE_URL` — set this once you have a custom domain
 2. `VERCEL_PROJECT_PRODUCTION_URL` — set automatically by Vercel
 3. `VERCEL_URL` — preview deployments
-4. `https://mdvault.vercel.app` — local fallback
+4. `https://mdvault-docs.vercel.app` — local fallback
 
 Production and preview deployments are therefore correct out of the box. After
 attaching a custom domain, add `SITE_URL=https://your-domain.com` to the
