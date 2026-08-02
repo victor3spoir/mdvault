@@ -1,55 +1,29 @@
-import {
-	IconFilter,
-	IconPlus,
-	IconSearch,
-	IconSortAscending,
-	IconSortDescending,
-} from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useEffect } from "react";
-import { z } from "zod";
+import { useEffect, useMemo } from "react";
+import { ContentFilterBar } from "#/components/content-filter-bar";
 import { ContentListEmptyState } from "#/components/content-list-empty-state";
 import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuGroup,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "#/components/ui/dropdown-menu";
-import { Input } from "#/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "#/components/ui/select";
 import { Skeleton } from "#/components/ui/skeleton";
 import { PostCard } from "#/features/posts/components/post-card";
 import {
 	postsListQueryOptions,
 	prefetchPostsMedia,
 } from "#/features/posts/posts.queries";
-import { filterAndSortPosts } from "#/features/posts/posts.utils";
-
-const postsSearchSchema = z.object({
-	searchQuery: z.string().default(""),
-	status: z.enum(["all", "published", "draft"]).default("all"),
-	lang: z.enum(["all", "fr", "en"]).default("all"),
-	sortBy: z.enum(["date", "title"]).default("date"),
-	sortOrder: z.enum(["asc", "desc"]).default("desc"),
-});
+import {
+	type ContentFilters,
+	collectContentTags,
+	contentFiltersSchema,
+	DEFAULT_CONTENT_FILTERS,
+	filterAndSortContent,
+} from "#/features/shared/content-filters";
 
 export const Route = createFileRoute("/cms/posts/")({
-	validateSearch: zodValidator(postsSearchSchema),
+	validateSearch: zodValidator(contentFiltersSchema),
 	loader: async ({ context }) => {
 		const posts = await context.queryClient.ensureQueryData(
 			postsListQueryOptions(),
@@ -63,29 +37,25 @@ export const Route = createFileRoute("/cms/posts/")({
 function PostsPage() {
 	const posts = Route.useLoaderData();
 	const queryClient = useQueryClient();
-	const { lang, searchQuery, sortBy, sortOrder, status } = Route.useSearch();
+	const filters = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
-	const filteredPosts = filterAndSortPosts(posts, {
-		lang,
-		searchQuery,
-		sortBy,
-		sortOrder,
-		status,
-	});
+	const allTags = collectContentTags(posts);
+
+	const filteredPosts = useMemo(
+		() => filterAndSortContent(posts, filters),
+		[posts, filters],
+	);
 
 	useEffect(() => {
 		void prefetchPostsMedia(queryClient, posts);
 	}, [posts, queryClient]);
 
+	const updateFilters = (patch: Partial<ContentFilters>) => {
+		navigate({ search: (prev) => ({ ...prev, ...patch }) });
+	};
+
 	const clearFilters = () => {
-		navigate({
-			search: (prev) => ({
-				...prev,
-				searchQuery: "",
-				status: "all",
-				lang: "all",
-			}),
-		});
+		navigate({ search: () => DEFAULT_CONTENT_FILTERS });
 	};
 
 	return (
@@ -100,8 +70,12 @@ function PostsPage() {
 					>
 						{filteredPosts.length} Posts
 					</Badge>
-					<Button asChild className="gap-2 rounded-xl">
-						<Link to="/cms/posts/new">
+					<Button
+						asChild
+						size="sm"
+						className="h-8 rounded-lg px-3 shadow-sm hover:shadow-md"
+					>
+						<Link to="/cms/posts/new" className="gap-2">
 							<IconPlus className="size-4" />
 							New Post
 						</Link>
@@ -109,6 +83,15 @@ function PostsPage() {
 				</div>
 			}
 		>
+			{posts.length > 0 ? (
+				<ContentFilterBar
+					filters={filters}
+					onChange={updateFilters}
+					label="posts"
+					availableTags={allTags}
+				/>
+			) : null}
+
 			{posts.length === 0 ? (
 				<ContentListEmptyState
 					title="No posts yet"
@@ -122,162 +105,22 @@ function PostsPage() {
 						</Button>
 					}
 				/>
+			) : filteredPosts.length === 0 ? (
+				<ContentListEmptyState
+					title="No posts match these filters"
+					description="Try another search, status, or language to find the post you need."
+					action={
+						<Button variant="outline" size="sm" onClick={clearFilters}>
+							Clear filters
+						</Button>
+					}
+				/>
 			) : (
-				<>
-					<div className="flex flex-col gap-4 rounded-3xl border bg-card/50 p-4 backdrop-blur-sm sm:flex-row sm:items-center">
-						<div className="relative flex-1">
-							<IconSearch className="absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted-foreground" />
-							<Input
-								value={searchQuery}
-								onChange={(event) =>
-									navigate({
-										search: (prev) => ({
-											...prev,
-											searchQuery: event.target.value,
-										}),
-									})
-								}
-								placeholder="Search posts by title, content or author..."
-								aria-label="Search posts"
-								className="h-11 rounded-2xl border-none bg-muted/50 pr-4 pl-11 focus-visible:ring-1 focus-visible:ring-primary/20"
-							/>
-						</div>
-
-						<div className="flex flex-wrap items-center gap-3">
-							<Select
-								value={status}
-								onValueChange={(value) =>
-									navigate({
-										search: (prev) => ({
-											...prev,
-											status: value as "all" | "published" | "draft",
-										}),
-									})
-								}
-							>
-								<SelectTrigger
-									aria-label="Filter posts by status"
-									className="h-11 w-35 rounded-2xl border-muted bg-muted/50 px-4 font-normal hover:bg-muted/70"
-								>
-									<IconFilter className="size-4 text-muted-foreground" />
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent className="w-40 rounded-2xl">
-									<SelectGroup>
-										<SelectItem value="all">All Status</SelectItem>
-										<SelectItem value="published">Published</SelectItem>
-										<SelectItem value="draft">Drafts</SelectItem>
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-
-							<Select
-								value={lang}
-								onValueChange={(value) =>
-									navigate({
-										search: (prev) => ({
-											...prev,
-											lang: value as "all" | "en" | "fr",
-										}),
-									})
-								}
-							>
-								<SelectTrigger
-									aria-label="Filter posts by language"
-									className="h-11 w-40 rounded-2xl border-muted bg-muted/50 px-4 font-normal hover:bg-muted/70"
-								>
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent className="w-40 rounded-2xl">
-									<SelectGroup>
-										<SelectItem value="all">All Languages</SelectItem>
-										<SelectItem value="en">English</SelectItem>
-										<SelectItem value="fr">Français</SelectItem>
-									</SelectGroup>
-								</SelectContent>
-							</Select>
-
-							<DropdownMenu>
-								<DropdownMenuTrigger asChild>
-									<Button
-										variant="ghost"
-										size="icon"
-										aria-label={`Sort posts ${sortOrder === "asc" ? "ascending" : "descending"}`}
-										className="size-11 rounded-2xl bg-muted/50 hover:bg-muted"
-									>
-										{sortOrder === "asc" ? (
-											<IconSortAscending />
-										) : (
-											<IconSortDescending />
-										)}
-									</Button>
-								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end" className="w-48 rounded-2xl">
-									<DropdownMenuLabel>Sort by</DropdownMenuLabel>
-									<DropdownMenuGroup>
-										<DropdownMenuItem
-											onClick={() =>
-												navigate({
-													search: (prev) => ({ ...prev, sortBy: "date" }),
-												})
-											}
-										>
-											Date
-										</DropdownMenuItem>
-										<DropdownMenuItem
-											onClick={() =>
-												navigate({
-													search: (prev) => ({ ...prev, sortBy: "title" }),
-												})
-											}
-										>
-											Title
-										</DropdownMenuItem>
-									</DropdownMenuGroup>
-									<DropdownMenuSeparator />
-									<DropdownMenuGroup>
-										<DropdownMenuItem
-											onClick={() =>
-												navigate({
-													search: (prev) => ({ ...prev, sortOrder: "asc" }),
-												})
-											}
-										>
-											Ascending
-										</DropdownMenuItem>
-										<DropdownMenuItem
-											onClick={() =>
-												navigate({
-													search: (prev) => ({ ...prev, sortOrder: "desc" }),
-												})
-											}
-										>
-											Descending
-										</DropdownMenuItem>
-									</DropdownMenuGroup>
-								</DropdownMenuContent>
-							</DropdownMenu>
-						</div>
-					</div>
-
-					{filteredPosts.length === 0 ? (
-						<ContentListEmptyState
-							title="No posts match these filters"
-							description="Try another search, status, or language to find the post you need."
-							action={
-								<Button variant="outline" size="sm" onClick={clearFilters}>
-									Clear filters
-								</Button>
-							}
-						/>
-					) : (
-						<div className="grid grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))] gap-6">
-							{filteredPosts.map((post) => (
-								<PostCard key={post.id} post={post} />
-							))}
-						</div>
-					)}
-				</>
+				<div className="grid grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))] gap-6">
+					{filteredPosts.map((post) => (
+						<PostCard key={post.id} post={post} />
+					))}
+				</div>
 			)}
 		</PageLayout>
 	);

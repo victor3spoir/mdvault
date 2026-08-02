@@ -1,14 +1,11 @@
 import {
 	IconArticle,
-	IconChevronDown,
-	IconChevronRight,
 	IconHome,
-	IconList,
 	IconMessage2,
 	IconPhoto,
-	IconPlus,
 	IconSettings,
 } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Logo } from "#/components/logo";
@@ -24,40 +21,25 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
-	SidebarMenuSub,
-	SidebarMenuSubButton,
-	SidebarMenuSubItem,
 	SidebarSeparator,
 	useSidebar,
 } from "#/components/ui/sidebar";
 import { getGitHubUserFn } from "#/features/settings/settings.functions";
 import type { GitHubUser } from "#/features/settings/settings.types";
+import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
+import { getAssetIcon } from "#/features/vault/vault-icons";
 
 interface NavItem {
 	title: string;
-	href?: string;
+	href: string;
 	icon: ReactNode;
-	children?: { title: string; href: string }[];
 }
 
 const navItems: NavItem[] = [
 	{ title: "Dashboard", href: "/cms", icon: <IconHome className="size-4" /> },
-	{
-		title: "Articles",
-		icon: <IconArticle className="size-4" />,
-		children: [
-			{ title: "All Articles", href: "/cms/articles" },
-			{ title: "New Article", href: "/cms/articles/new" },
-		],
-	},
-	{
-		title: "Posts",
-		icon: <IconMessage2 className="size-4" />,
-		children: [
-			{ title: "All Posts", href: "/cms/posts" },
-			{ title: "New Post", href: "/cms/posts/new" },
-		],
-	},
+];
+
+const workspaceItems: NavItem[] = [
 	{
 		title: "Media",
 		href: "/cms/media",
@@ -67,6 +49,19 @@ const navItems: NavItem[] = [
 		title: "Settings",
 		href: "/cms/settings",
 		icon: <IconSettings className="size-4" />,
+	},
+];
+
+const contentItems: NavItem[] = [
+	{
+		title: "Articles",
+		href: "/cms/articles",
+		icon: <IconArticle className="size-4" />,
+	},
+	{
+		title: "Posts",
+		href: "/cms/posts",
+		icon: <IconMessage2 className="size-4" />,
 	},
 ];
 
@@ -135,22 +130,12 @@ function UserProfileFooter() {
 }
 
 export function CmsSidebar() {
-	const [openMenus, setOpenMenus] = useState<string[]>(["Articles"]);
 	const { state } = useSidebar();
 	const isCollapsed = state === "collapsed";
 	const { pathname } = useLocation();
 
-	const toggleMenu = (title: string) => {
-		setOpenMenus((prev) =>
-			prev.includes(title)
-				? prev.filter((value) => value !== title)
-				: [...prev, title],
-		);
-	};
-
-	const isActive = (href?: string) => !!href && pathname === href;
-	const isChildActive = (item: NavItem) =>
-		!!item.children?.some((child) => pathname === child.href);
+	const isActive = (href: string) =>
+		href === "/cms" ? pathname === href : pathname.startsWith(href);
 
 	return (
 		<Sidebar variant="inset" collapsible="icon">
@@ -169,73 +154,15 @@ export function CmsSidebar() {
 			</SidebarHeader>
 
 			<SidebarContent>
-				<SidebarGroup>
-					<SidebarGroupLabel>Navigation</SidebarGroupLabel>
-					<SidebarGroupContent>
-						<SidebarMenu>
-							{navItems.map((item) => (
-								<SidebarMenuItem key={item.title}>
-									{item.children ? (
-										<>
-											<SidebarMenuButton
-												onClick={() => toggleMenu(item.title)}
-												isActive={isChildActive(item)}
-												className="justify-between"
-											>
-												<span className="flex items-center gap-2">
-													{item.icon}
-													<span>{item.title}</span>
-												</span>
-												{openMenus.includes(item.title) ? (
-													<IconChevronDown className="size-4" />
-												) : (
-													<IconChevronRight className="size-4" />
-												)}
-											</SidebarMenuButton>
-											<SidebarMenuSub
-												className={
-													openMenus.includes(item.title) ? "block" : "hidden"
-												}
-											>
-												{item.children.map((child) => (
-													<SidebarMenuSubItem key={child.href}>
-														<SidebarMenuSubButton
-															asChild
-															isActive={isActive(child.href)}
-														>
-															<Link to={child.href}>
-																{child.title === "New Article" ? (
-																	<IconPlus className="size-3" />
-																) : null}
-																{child.title === "All Articles" ? (
-																	<IconList className="size-3" />
-																) : null}
-																{child.title === "New Post" ? (
-																	<IconPlus className="size-3" />
-																) : null}
-																{child.title === "All Posts" ? (
-																	<IconList className="size-3" />
-																) : null}
-																<span>{child.title}</span>
-															</Link>
-														</SidebarMenuSubButton>
-													</SidebarMenuSubItem>
-												))}
-											</SidebarMenuSub>
-										</>
-									) : (
-										<SidebarMenuButton asChild isActive={isActive(item.href)}>
-											<Link to={item.href ?? "/cms"}>
-												{item.icon}
-												<span>{item.title}</span>
-											</Link>
-										</SidebarMenuButton>
-									)}
-								</SidebarMenuItem>
-							))}
-						</SidebarMenu>
-					</SidebarGroupContent>
-				</SidebarGroup>
+				<NavLinkGroup label="Navigation" items={navItems} isActive={isActive} />
+
+				<ContentSidebarGroup pathname={pathname} />
+
+				<NavLinkGroup
+					label="Workspace"
+					items={workspaceItems}
+					isActive={isActive}
+				/>
 			</SidebarContent>
 
 			<SidebarSeparator />
@@ -244,5 +171,85 @@ export function CmsSidebar() {
 				<UserProfileFooter />
 			</SidebarFooter>
 		</Sidebar>
+	);
+}
+
+function NavLinkGroup({
+	label,
+	items,
+	isActive,
+}: {
+	label: string;
+	items: NavItem[];
+	isActive: (href: string) => boolean;
+}) {
+	return (
+		<SidebarGroup>
+			<SidebarGroupLabel>{label}</SidebarGroupLabel>
+			<SidebarGroupContent>
+				<SidebarMenu>
+					{items.map((item) => (
+						<SidebarMenuItem key={item.title}>
+							<SidebarMenuButton asChild isActive={isActive(item.href)}>
+								<Link to={item.href}>
+									{item.icon}
+									<span>{item.title}</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					))}
+				</SidebarMenu>
+			</SidebarGroupContent>
+		</SidebarGroup>
+	);
+}
+
+function ContentSidebarGroup({ pathname }: { pathname: string }) {
+	const location = useLocation();
+	const config = useQuery({
+		...vaultConfigQueryOptions(),
+		enabled: pathname.startsWith("/cms"),
+	});
+	const types = config.data?.assetTypes ?? [];
+
+	const search = location.search as { type?: string };
+	const activeType = pathname.startsWith("/cms/vault")
+		? (search.type ?? null)
+		: null;
+
+	return (
+		<SidebarGroup>
+			<SidebarGroupLabel>Content</SidebarGroupLabel>
+			<SidebarGroupContent>
+				<SidebarMenu>
+					{contentItems.map((item) => (
+						<SidebarMenuItem key={item.title}>
+							<SidebarMenuButton
+								asChild
+								isActive={pathname.startsWith(item.href)}
+							>
+								<Link to={item.href}>
+									{item.icon}
+									<span>{item.title}</span>
+								</Link>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+					))}
+					{types.map((type) => {
+						const Icon = getAssetIcon(type.icon);
+						return (
+							<SidebarMenuItem key={type.id}>
+								<SidebarMenuButton asChild isActive={activeType === type.id}>
+									<Link to="/cms/vault" search={{ type: type.id }}>
+										<Icon className="size-4" />
+										<span>{type.label}</span>
+									</Link>
+								</SidebarMenuButton>
+							</SidebarMenuItem>
+						);
+					})}
+				</SidebarMenu>
+			</SidebarGroupContent>
+		</SidebarGroup>
 	);
 }
