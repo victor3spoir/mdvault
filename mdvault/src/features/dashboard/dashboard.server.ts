@@ -1,14 +1,45 @@
 import { listArticles } from "#/features/articles/articles.server";
 import type {
 	Activity,
+	ContentSectionStats,
 	DashboardContentItem,
 	DashboardOverview,
 	DashboardStats,
 } from "#/features/dashboard/dashboard.types";
 import { listImages } from "#/features/media/media.server";
 import { listPosts } from "#/features/posts/posts.server";
+import { listAssets } from "#/features/vault/vault.server";
+import { readVaultConfig } from "#/features/vault/vault-config.server";
+import { getGitHubClient } from "#/integrations/github/github-client.server";
 import { getGitHubEnv } from "#/integrations/github/github-env.server";
-import { runGitHubRead } from "#/integrations/github/github-read.server";
+import { mapWithConcurrency } from "#/lib/server/github-files.server";
+
+/**
+ * Reduces a content collection to the metrics every section shows. Keeping this
+ * pure means articles, posts and vault types cannot drift apart.
+ */
+export function deriveSectionStats(
+	section: Omit<
+		ContentSectionStats,
+		"total" | "published" | "drafts" | "lastUpdatedAt"
+	>,
+	items: readonly DashboardContentItem[],
+): ContentSectionStats {
+	const published = items.filter((item) => item.published).length;
+	const lastUpdatedAt = items
+		.map((item) => item.updatedAt)
+		.filter(Boolean)
+		.sort()
+		.at(-1);
+
+	return {
+		...section,
+		total: items.length,
+		published,
+		drafts: items.length - published,
+		lastUpdatedAt,
+	};
+}
 
 export function deriveDashboardStats({
 	articles,
@@ -121,14 +152,13 @@ export function deriveRecentActivity({
 
 async function getRecentMediaActivity(): Promise<Activity[]> {
 	try {
-		const commitRes = await runGitHubRead(async (octokit) => {
-			const env = getGitHubEnv();
-			return octokit.repos.listCommits({
-				owner: env.GITHUB_OWNER,
-				repo: env.GITHUB_REPO,
-				path: env.MEDIA_PATH,
-				per_page: 5,
-			});
+		const env = getGitHubEnv();
+		const octokit = getGitHubClient();
+		const commitRes = await octokit.repos.listCommits({
+			owner: env.GITHUB_OWNER,
+			repo: env.GITHUB_REPO,
+			path: env.MEDIA_PATH,
+			per_page: 5,
 		});
 
 		return commitRes.data.map((commit) => ({
@@ -147,16 +177,56 @@ async function getRecentMediaActivity(): Promise<Activity[]> {
 	}
 }
 
+/**
+ * Vault types are listed a few at a time: each listing already fans out to read
+ * its documents, so unbounded parallelism here would multiply into a burst
+ * large enough to trip GitHub's secondary rate limits.
+ */
+const VAULT_SECTION_CONCURRENCY = 3;
+
+async function loadVaultSections(): Promise<ContentSectionStats[]> {
+	const configResult = await readVaultConfig();
+	if (!configResult.success) {
+		return [];
+	}
+
+	return mapWithConcurrency(
+		configResult.data.config.assetTypes,
+		VAULT_SECTION_CONCURRENCY,
+		async (type) => {
+			const result = await listAssets(type.id);
+
+			return deriveSectionStats(
+				{
+					id: type.id,
+					label: type.label,
+					icon: type.icon,
+					browseTo: "/cms/vault",
+					createTo: "/cms/vault/new",
+					search: { type: type.id },
+				},
+				result.success ? result.data : [],
+			);
+		},
+	);
+}
+
 export async function loadDashboardOverview(
 	limit = 8,
 ): Promise<DashboardOverview> {
-	const [articlesResult, postsResult, imagesResult, mediaActivities] =
-		await Promise.all([
-			listArticles(),
-			listPosts(),
-			listImages(),
-			getRecentMediaActivity(),
-		]);
+	const [
+		articlesResult,
+		postsResult,
+		imagesResult,
+		mediaActivities,
+		vaultSections,
+	] = await Promise.all([
+		listArticles(),
+		listPosts(),
+		listImages(),
+		getRecentMediaActivity(),
+		loadVaultSections(),
+	]);
 	const articles = articlesResult.success ? articlesResult.data : [];
 	const posts = postsResult.success ? postsResult.data : [];
 	const images = imagesResult.success ? imagesResult.data : [];
@@ -167,6 +237,29 @@ export async function loadDashboardOverview(
 			posts,
 			mediaFiles: images.length,
 		}),
+		sections: [
+			deriveSectionStats(
+				{
+					id: "articles",
+					label: "Articles",
+					icon: "article",
+					browseTo: "/cms/articles",
+					createTo: "/cms/articles/new",
+				},
+				articles,
+			),
+			deriveSectionStats(
+				{
+					id: "posts",
+					label: "Posts",
+					icon: "post",
+					browseTo: "/cms/posts",
+					createTo: "/cms/posts/new",
+				},
+				posts,
+			),
+			...vaultSections,
+		],
 		activities: deriveRecentActivity({
 			articles,
 			posts,
