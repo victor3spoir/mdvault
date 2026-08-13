@@ -36,10 +36,9 @@ export const vaultAssetQueryOptions = (type: string, id: string) =>
 		staleTime: 30_000,
 	});
 
-export async function invalidateVaultQueries(queryClient: QueryClient) {
-	await queryClient.invalidateQueries({ queryKey: vaultKeys.all });
-}
-
 export async function invalidateVaultConfig(queryClient: QueryClient) {
-	await queryClient.invalidateQueries({ queryKey: vaultKeys.config() });
+	await queryClient.invalidateQueries({
+		queryKey: vaultKeys.config(),
+		refetchType: "all",
+	});
 }

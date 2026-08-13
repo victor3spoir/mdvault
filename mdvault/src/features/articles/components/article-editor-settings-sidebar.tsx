@@ -220,7 +220,7 @@ export function ArticleEditorSettingsSidebar({
 										<button
 											type="button"
 											aria-label={`Remove tag ${tag}`}
-											className="flex size-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+											className="flex size-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
 											onClick={() =>
 												onTagsChange(tags.filter((value) => value !== tag))
 											}

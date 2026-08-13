@@ -12,6 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as CmsRouteRouteImport } from './routes/cms/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CmsIndexRouteImport } from './routes/cms/index'
+import { Route as ApiPingRouteImport } from './routes/api/ping'
+import { Route as ApiMediaRouteImport } from './routes/api/media'
 import { Route as CmsVaultIndexRouteImport } from './routes/cms/vault/index'
 import { Route as CmsSettingsIndexRouteImport } from './routes/cms/settings/index'
 import { Route as CmsPostsIndexRouteImport } from './routes/cms/posts/index'
@@ -41,6 +43,16 @@ const CmsIndexRoute = CmsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => CmsRouteRoute,
+} as any)
+const ApiPingRoute = ApiPingRouteImport.update({
+  id: '/api/ping',
+  path: '/api/ping',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMediaRoute = ApiMediaRouteImport.update({
+  id: '/api/media',
+  path: '/api/media',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CmsVaultIndexRoute = CmsVaultIndexRouteImport.update({
   id: '/vault/',
@@ -116,6 +128,8 @@ const CmsPostsSlugEditIndexRoute = CmsPostsSlugEditIndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/cms': typeof CmsRouteRouteWithChildren
+  '/api/media': typeof ApiMediaRoute
+  '/api/ping': typeof ApiPingRoute
   '/cms/': typeof CmsIndexRoute
   '/cms/articles/': typeof CmsArticlesIndexRoute
   '/cms/media/': typeof CmsMediaIndexRoute
@@ -134,6 +148,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/media': typeof ApiMediaRoute
+  '/api/ping': typeof ApiPingRoute
   '/cms': typeof CmsIndexRoute
   '/cms/articles': typeof CmsArticlesIndexRoute
   '/cms/media': typeof CmsMediaIndexRoute
@@ -154,6 +170,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/cms': typeof CmsRouteRouteWithChildren
+  '/api/media': typeof ApiMediaRoute
+  '/api/ping': typeof ApiPingRoute
   '/cms/': typeof CmsIndexRoute
   '/cms/articles/': typeof CmsArticlesIndexRoute
   '/cms/media/': typeof CmsMediaIndexRoute
@@ -175,6 +193,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/cms'
+    | '/api/media'
+    | '/api/ping'
     | '/cms/'
     | '/cms/articles/'
     | '/cms/media/'
@@ -193,6 +213,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/api/media'
+    | '/api/ping'
     | '/cms'
     | '/cms/articles'
     | '/cms/media'
@@ -212,6 +234,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/cms'
+    | '/api/media'
+    | '/api/ping'
     | '/cms/'
     | '/cms/articles/'
     | '/cms/media/'
@@ -232,6 +256,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CmsRouteRoute: typeof CmsRouteRouteWithChildren
+  ApiMediaRoute: typeof ApiMediaRoute
+  ApiPingRoute: typeof ApiPingRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -256,6 +282,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/cms/'
       preLoaderRoute: typeof CmsIndexRouteImport
       parentRoute: typeof CmsRouteRoute
+    }
+    '/api/ping': {
+      id: '/api/ping'
+      path: '/api/ping'
+      fullPath: '/api/ping'
+      preLoaderRoute: typeof ApiPingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/media': {
+      id: '/api/media'
+      path: '/api/media'
+      fullPath: '/api/media'
+      preLoaderRoute: typeof ApiMediaRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/cms/vault/': {
       id: '/cms/vault/'
@@ -401,6 +441,8 @@ const CmsRouteRouteWithChildren = CmsRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CmsRouteRoute: CmsRouteRouteWithChildren,
+  ApiMediaRoute: ApiMediaRoute,
+  ApiPingRoute: ApiPingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

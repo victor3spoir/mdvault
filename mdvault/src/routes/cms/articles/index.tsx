@@ -1,18 +1,14 @@
 import { IconPlus } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { ContentFilterBar } from "#/components/content-filter-bar";
 import { ContentListEmptyState } from "#/components/content-list-empty-state";
 import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
-import {
-	articlesListQueryOptions,
-	prefetchArticlesMedia,
-} from "#/features/articles/articles.queries";
+import { articlesListQueryOptions } from "#/features/articles/articles.queries";
 import { ArticleCard } from "#/features/articles/components/article-card";
 import {
 	type ContentFilters,
@@ -36,14 +32,9 @@ export const Route = createFileRoute("/cms/articles/")({
 
 function ArticlesPage() {
 	const articles = Route.useLoaderData();
-	const queryClient = useQueryClient();
 	const filters = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const allTags = collectContentTags(articles);
-
-	useEffect(() => {
-		void prefetchArticlesMedia(queryClient, articles);
-	}, [articles, queryClient]);
 
 	const filteredArticles = useMemo(
 		() => filterAndSortContent(articles, filters),

@@ -37,20 +37,6 @@ export interface VaultConfigFile {
 	sha: string | null;
 }
 
-export interface VaultAssetFrontmatter {
-	type: string;
-	title: string;
-	description?: string;
-	published: boolean;
-	lang: "fr" | "en";
-	author?: string;
-	tags?: string[];
-	coverImage?: string;
-	createdAt?: string;
-	updatedAt?: string;
-	publishedDate?: string;
-}
-
 export interface VaultAsset {
 	id: string;
 	type: string;

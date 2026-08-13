@@ -2,8 +2,6 @@ import { getGitHubClient } from "#/integrations/github/github-client.server";
 import { getGitHubEnv } from "#/integrations/github/github-env.server";
 import { isGitHubNotFoundError } from "#/lib/server/content-errors.server";
 
-export type GitHubClient = ReturnType<typeof getGitHubClient>;
-
 export interface RepositoryFile {
 	path: string;
 	sha: string;
@@ -74,7 +72,7 @@ export async function mapWithConcurrency<TInput, TOutput>(
 	return results;
 }
 
-export function invalidateRepositoryListings() {
+function invalidateRepositoryListings() {
 	listingCache.clear();
 }
 

@@ -136,14 +136,3 @@ export async function unpublishArticle(
 ): Promise<ActionResult<ContentMutationResult>> {
 	return articles.setPublished(id, false, revision);
 }
-
-export async function getArticleStats() {
-	const result = await listArticles();
-	const list = result.success ? result.data : [];
-
-	return {
-		totalArticles: list.length,
-		publishedArticles: list.filter((article) => article.published).length,
-		draftArticles: list.filter((article) => !article.published).length,
-	};
-}

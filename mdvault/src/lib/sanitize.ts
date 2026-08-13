@@ -41,7 +41,7 @@ export function isValidUrl(url: string): boolean {
 	}
 }
 
-export function sanitizeTag(tag: string): string {
+function sanitizeTag(tag: string): string {
 	if (typeof tag !== "string" || !tag) {
 		return "";
 	}

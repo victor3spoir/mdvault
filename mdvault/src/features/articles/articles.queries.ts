@@ -3,13 +3,7 @@ import {
 	getArticleById,
 	getArticles,
 } from "#/features/articles/articles.functions";
-import type { Article } from "#/features/articles/articles.types";
 import { dashboardKeys } from "#/features/dashboard/dashboard.queries";
-import { prefetchMediaDataUrls } from "#/features/media/media.queries";
-import {
-	collectImageSources,
-	extractMarkdownImageSources,
-} from "#/features/media/media.utils";
 
 export const articleKeys = {
 	all: ["articles"] as const,
@@ -32,26 +26,22 @@ export const articleQueryOptions = (id: string) =>
 		staleTime: 30_000,
 	});
 
+/**
+ * Invalidates every article query after a mutation.
+ *
+ * See `invalidatePostQueries` for why `refetchType: "all"` is required: these
+ * lists render from loader data, so the queries have no active observer to
+ * trigger a refetch.
+ */
 export async function invalidateArticleQueries(queryClient: QueryClient) {
 	await Promise.all([
-		queryClient.invalidateQueries({ queryKey: articleKeys.all }),
-		queryClient.invalidateQueries({ queryKey: dashboardKeys.all }),
+		queryClient.invalidateQueries({
+			queryKey: articleKeys.all,
+			refetchType: "all",
+		}),
+		queryClient.invalidateQueries({
+			queryKey: dashboardKeys.all,
+			refetchType: "all",
+		}),
 	]);
-}
-
-export function collectArticleImageSources(article: Article) {
-	return collectImageSources([
-		article.coverImage,
-		...extractMarkdownImageSources(article.content),
-	]);
-}
-
-export async function prefetchArticlesMedia(
-	queryClient: QueryClient,
-	articles: Article[],
-) {
-	await prefetchMediaDataUrls(
-		queryClient,
-		articles.flatMap((article) => collectArticleImageSources(article)),
-	);
 }

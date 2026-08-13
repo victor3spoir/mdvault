@@ -2,7 +2,7 @@ import { z } from "zod";
 import { ASSET_ICONS } from "#/features/vault/vault.types";
 import { isValidUrl, sanitizeTags, sanitizeText } from "#/lib/sanitize";
 
-export const RESERVED_TYPE_IDS = new Set([
+const RESERVED_TYPE_IDS = new Set([
 	"articles",
 	"posts",
 	"media",

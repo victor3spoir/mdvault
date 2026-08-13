@@ -27,12 +27,3 @@ export interface Article {
 	path: string;
 	sha: string;
 }
-
-export interface GitHubFile {
-	name: string;
-	path: string;
-	sha: string;
-	size: number;
-	type: "file" | "dir";
-	download_url: string | null;
-}
