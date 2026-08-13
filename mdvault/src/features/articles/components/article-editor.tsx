@@ -78,6 +78,11 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 	 * by two booleans that have to be kept in agreement.
 	 */
 	const [panel, setPanel] = useState<"none" | "preview" | "settings">("none");
+	/**
+	 * The rich editor stays mounted while the source is shown: remounting it
+	 * would reload the article as it was fetched and drop unsaved edits.
+	 */
+	const [sourceMode, setSourceMode] = useState(false);
 	const [imageInsertDialogOpen, setImageInsertDialogOpen] = useState(false);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const [revision, setRevision] = useState<ContentRevision | null>(
@@ -177,7 +182,11 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 
 		startTransition(async () => {
 			try {
-				const content = editorRef.current?.getMarkdown() ?? "";
+				// In source mode the raw text never reached the rich editor, so the
+				// state is the only place holding what the author actually typed.
+				const content = sourceMode
+					? editorContent
+					: (editorRef.current?.getMarkdown() ?? "");
 				const input = {
 					title,
 					lang,
@@ -279,6 +288,17 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 		setPanel((current) => (current === target ? "none" : target));
 	};
 
+	const toggleSourceMode = () => {
+		setSourceMode((current) => {
+			// Leaving the source: hand the edited markdown back to the rich editor.
+			if (current) {
+				editorRef.current?.setMarkdown(editorContent);
+			}
+
+			return !current;
+		});
+	};
+
 	return (
 		<div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-background">
 			<ArticleEditorHeader
@@ -289,9 +309,11 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				hasUnsavedChanges={hasUnsavedChanges}
 				sidebarCollapsed={!settingsOpen}
 				previewMode={previewMode}
+				sourceMode={sourceMode}
 				onSave={handleSave}
 				onToggleSidebar={() => togglePanel("settings")}
 				onTogglePreview={() => togglePanel("preview")}
+				onToggleSource={toggleSourceMode}
 				onTogglePublish={handleTogglePublish}
 				onDelete={handleDelete}
 			/>
@@ -345,16 +367,31 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					</div>
 
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-						<RichTextEditor
-							ref={editorRef}
-							markdown={article?.content ?? ""}
-							onImageUpload={handleImageUpload}
-							onImageInsertClick={() => setImageInsertDialogOpen(true)}
-							onChange={(value) => {
-								setEditorContent(value);
-								setHasUnsavedChanges(true);
-							}}
-						/>
+						<div className={cn("flex min-h-0 flex-1", sourceMode && "hidden")}>
+							<RichTextEditor
+								ref={editorRef}
+								markdown={article?.content ?? ""}
+								onImageUpload={handleImageUpload}
+								onImageInsertClick={() => setImageInsertDialogOpen(true)}
+								onChange={(value) => {
+									setEditorContent(value);
+									setHasUnsavedChanges(true);
+								}}
+							/>
+						</div>
+
+						{sourceMode ? (
+							<textarea
+								value={editorContent}
+								aria-label="Markdown source"
+								spellCheck={false}
+								onChange={(event) => {
+									setEditorContent(event.target.value);
+									setHasUnsavedChanges(true);
+								}}
+								className="min-h-0 flex-1 resize-none bg-transparent px-8 py-6 font-mono text-sm leading-7 outline-none"
+							/>
+						) : null}
 					</div>
 				</div>
 

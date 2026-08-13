@@ -7,6 +7,7 @@ import {
 	IconEye,
 	IconFileText,
 	IconLoader2,
+	IconMarkdown,
 	IconSettings,
 	IconTrash,
 	IconWorldOff,
@@ -31,9 +32,11 @@ interface ArticleEditorHeaderProps {
 	hasUnsavedChanges: boolean;
 	sidebarCollapsed: boolean;
 	previewMode: boolean;
+	sourceMode: boolean;
 	onSave: () => void;
 	onToggleSidebar: () => void;
 	onTogglePreview: () => void;
+	onToggleSource: () => void;
 	onTogglePublish: () => void;
 	onDelete: () => void;
 }
@@ -46,9 +49,11 @@ export function ArticleEditorHeader({
 	hasUnsavedChanges,
 	sidebarCollapsed,
 	previewMode,
+	sourceMode,
 	onSave,
 	onToggleSidebar,
 	onTogglePreview,
+	onToggleSource,
 	onTogglePublish,
 	onDelete,
 }: ArticleEditorHeaderProps) {
@@ -111,6 +116,24 @@ export function ArticleEditorHeader({
 			</div>
 
 			<div className="flex items-center gap-1.5">
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant={sourceMode ? "secondary" : "ghost"}
+							size="icon"
+							className="size-8 rounded-lg"
+							aria-label="Toggle markdown source"
+							aria-pressed={sourceMode}
+							onClick={onToggleSource}
+						>
+							<IconMarkdown className="size-4" />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="bottom">
+						{sourceMode ? "Back to the editor" : "Markdown source"}
+					</TooltipContent>
+				</Tooltip>
+
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button
