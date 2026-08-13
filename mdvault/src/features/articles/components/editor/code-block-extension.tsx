@@ -6,6 +6,7 @@ import {
 	ReactNodeViewRenderer,
 } from "@tiptap/react";
 import { createCodeBlockHighlightPlugin } from "#/features/articles/components/editor/code-block-highlight";
+import { MermaidDiagram } from "#/features/content/components/mermaid-diagram";
 
 const LANGUAGES = [
 	{ value: "plaintext", label: "Plain text" },
@@ -14,11 +15,13 @@ const LANGUAGES = [
 	{ value: "css", label: "CSS" },
 	{ value: "dockerfile", label: "Dockerfile" },
 	{ value: "go", label: "Go" },
+	{ value: "hcl", label: "HCL / Terraform" },
 	{ value: "html", label: "HTML" },
 	{ value: "java", label: "Java" },
 	{ value: "javascript", label: "JavaScript" },
 	{ value: "json", label: "JSON" },
 	{ value: "markdown", label: "Markdown" },
+	{ value: "mermaid", label: "Mermaid" },
 	{ value: "php", label: "PHP" },
 	{ value: "python", label: "Python" },
 	{ value: "rust", label: "Rust" },
@@ -51,6 +54,11 @@ function CodeBlockView({ node, updateAttributes }: NodeViewProps) {
 			<pre spellCheck={false}>
 				<NodeViewContent<"code"> as="code" />
 			</pre>
+			{language === "mermaid" ? (
+				<div contentEditable={false} suppressContentEditableWarning>
+					<MermaidDiagram chart={node.textContent} className="mt-2" />
+				</div>
+			) : null}
 		</NodeViewWrapper>
 	);
 }
