@@ -327,21 +327,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 
 					<Separator orientation="vertical" className="h-5" />
 
-					<nav className="flex items-center gap-2 text-sm">
-						<Link
-							to="/cms/vault"
-							search={{ type: typeConfig.id, searchQuery: "" }}
-							className="text-muted-foreground transition-colors hover:text-foreground"
-						>
-							{typeConfig.label}
-						</Link>
-						<span className="text-muted-foreground/50">›</span>
-						<span className="max-w-60 truncate font-medium">
-							{title || "Untitled"}
-						</span>
-					</nav>
-
-					<div className="ml-3 flex items-center gap-2">
+					<div className="flex items-center gap-2">
 						<Badge
 							variant="secondary"
 							className={

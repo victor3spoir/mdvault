@@ -118,65 +118,88 @@ export function SiteHeader() {
 		"Vault";
 	const breadcrumbs = buildBreadcrumbs(pathname, vaultType, vaultLabel);
 
+	const openCommandPalette = () => {
+		window.dispatchEvent(new CustomEvent("command-palette:open"));
+	};
+
 	return (
-		<header className="h-16 border-b bg-background/90 px-6 py-4 backdrop-blur sticky top-0 z-30">
-			<div className="flex items-center gap-4">
-				<div className="flex flex-1 items-center gap-3">
-					<SidebarTrigger />
-					<Separator orientation="vertical" className="h-5" />
-					<nav className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
-						{breadcrumbs.map((crumb, index) => (
-							<span
-								key={`${crumb.href ?? "current"}-${crumb.label}`}
-								className="flex items-center gap-1.5"
-							>
-								{index > 0 && (
-									<IconChevronRight className="size-3.5 opacity-60" />
-								)}
-								{index === 0 ? (
-									<Link
-										to={crumb.href ?? "/cms"}
-										aria-label="Dashboard"
-										className="flex items-center transition-colors hover:text-foreground"
-									>
-										<IconHome className="size-4" />
-									</Link>
-								) : crumb.href ? (
-									<Link
-										to={crumb.href}
-										search={crumb.search}
-										className="transition-colors hover:text-foreground"
-									>
-										{crumb.label}
-									</Link>
-								) : (
-									<span className="font-medium text-foreground">
-										{crumb.label}
-									</span>
-								)}
-							</span>
-						))}
-					</nav>
-				</div>
+		<header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b bg-background/90 px-4 backdrop-blur sm:px-6">
+			<SidebarTrigger className="shrink-0" />
+			<Separator orientation="vertical" className="h-5 shrink-0" />
 
-				<button
-					type="button"
-					onClick={() =>
-						window.dispatchEvent(new CustomEvent("command-palette:open"))
-					}
-					className="flex w-full max-w-md items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-				>
-					<IconSearch className="size-4 shrink-0" />
-					<span className="hidden sm:inline">
-						Search articles, posts, media...
-					</span>
-					<kbd className="ml-auto hidden rounded border bg-background px-1.5 py-0.5 text-[10px] font-medium sm:inline-block">
-						⌘K
-					</kbd>
-				</button>
+			<nav
+				aria-label="Breadcrumb"
+				className="flex min-w-0 flex-1 items-center gap-1.5 overflow-hidden text-sm text-muted-foreground"
+			>
+				{breadcrumbs.map((crumb, index) => {
+					const isFirst = index === 0;
+					const isLast = index === breadcrumbs.length - 1;
+					const isFoldable = !isFirst && !isLast;
 
-				<div className="hidden flex-1 sm:block" />
-			</div>
+					return (
+						<span
+							key={`${crumb.href ?? "current"}-${crumb.label}`}
+							className={
+								isFoldable
+									? "hidden shrink-0 items-center gap-1.5 md:flex"
+									: isLast && !isFirst
+										? "flex min-w-0 items-center gap-1.5"
+										: "flex shrink-0 items-center gap-1.5"
+							}
+						>
+							{index > 0 && (
+								<IconChevronRight className="size-3.5 shrink-0 opacity-60" />
+							)}
+							{isFirst ? (
+								<Link
+									to={crumb.href ?? "/cms"}
+									aria-label="Dashboard"
+									className="-m-1.5 flex size-8 items-center justify-center rounded-md transition-colors hover:bg-muted hover:text-foreground"
+								>
+									<IconHome className="size-4" />
+								</Link>
+							) : crumb.href ? (
+								<Link
+									to={crumb.href}
+									search={crumb.search}
+									className="truncate transition-colors hover:text-foreground"
+								>
+									{crumb.label}
+								</Link>
+							) : (
+								<span
+									aria-current="page"
+									className="truncate font-medium text-foreground"
+								>
+									{crumb.label}
+								</span>
+							)}
+						</span>
+					);
+				})}
+			</nav>
+
+			{/* Below sm the field would crowd out the trail, so it becomes its icon. */}
+			<button
+				type="button"
+				onClick={openCommandPalette}
+				aria-label="Search"
+				className="flex size-9 shrink-0 items-center justify-center rounded-lg border bg-muted/40 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:hidden"
+			>
+				<IconSearch className="size-4" />
+			</button>
+
+			<button
+				type="button"
+				onClick={openCommandPalette}
+				className="hidden w-full max-w-xs shrink items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:flex lg:max-w-md"
+			>
+				<IconSearch className="size-4 shrink-0" />
+				<span className="truncate">Search articles, posts, media...</span>
+				<kbd className="ml-auto hidden rounded border bg-background px-1.5 py-0.5 text-[10px] font-medium lg:inline-block">
+					⌘K
+				</kbd>
+			</button>
 		</header>
 	);
 }
