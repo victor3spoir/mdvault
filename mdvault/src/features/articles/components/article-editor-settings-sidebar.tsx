@@ -100,8 +100,8 @@ export function ArticleEditorSettingsSidebar({
 			id="article-settings-sidebar"
 			aria-label="Article settings"
 			className={cn(
-				"shrink-0 border-l bg-muted/20 transition-[width,opacity] duration-200 ease-out",
-				collapsed ? "w-0 overflow-hidden" : "w-80",
+				"shrink-0 bg-muted/20 transition-[width,opacity] duration-200 ease-out",
+				collapsed ? "w-0 overflow-hidden" : "w-80 border-l",
 			)}
 		>
 			<div className="flex h-full w-80 flex-col overflow-hidden">

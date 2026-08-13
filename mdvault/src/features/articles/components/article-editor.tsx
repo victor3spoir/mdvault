@@ -72,8 +72,12 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 	const [coverImage, setCoverImage] = useState(article?.coverImage ?? "");
 	const [published, setPublished] = useState(article?.published ?? false);
 	const [editorContent, setEditorContent] = useState(article?.content ?? "");
-	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-	const [previewMode, setPreviewMode] = useState(false);
+	/**
+	 * Preview and settings compete for the same half of the workspace, so one
+	 * state with three values makes them exclusive by construction rather than
+	 * by two booleans that have to be kept in agreement.
+	 */
+	const [panel, setPanel] = useState<"none" | "preview" | "settings">("none");
 	const [imageInsertDialogOpen, setImageInsertDialogOpen] = useState(false);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const [revision, setRevision] = useState<ContentRevision | null>(
@@ -268,14 +272,11 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 
 	const stats = getContentStats(editorContent);
 
-	const handleTogglePreview = () => {
-		setPreviewMode((value) => {
-			const next = !value;
-			if (next) {
-				setSidebarCollapsed(true);
-			}
-			return next;
-		});
+	const previewMode = panel === "preview";
+	const settingsOpen = panel === "settings";
+
+	const togglePanel = (target: "preview" | "settings") => {
+		setPanel((current) => (current === target ? "none" : target));
 	};
 
 	return (
@@ -286,20 +287,27 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				article={article ? { ...article, published } : undefined}
 				isSaving={isPending}
 				hasUnsavedChanges={hasUnsavedChanges}
-				sidebarCollapsed={sidebarCollapsed}
+				sidebarCollapsed={!settingsOpen}
 				previewMode={previewMode}
 				onSave={handleSave}
-				onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
-				onTogglePreview={handleTogglePreview}
+				onToggleSidebar={() => togglePanel("settings")}
+				onTogglePreview={() => togglePanel("preview")}
 				onTogglePublish={handleTogglePublish}
 				onDelete={handleDelete}
 			/>
 
-			<div className="flex flex-1 overflow-hidden">
+			{/*
+			 * A container, not the viewport: the CMS sidebar can be open or closed, so
+			 * the workspace is narrower than the window by an amount media queries
+			 * cannot see. The split is decided by the space actually available.
+			 */}
+			<div className="@container/workspace flex flex-1 overflow-hidden">
 				<div
 					className={cn(
 						"flex-col overflow-hidden",
-						previewMode ? "hidden lg:flex lg:w-1/2" : "flex flex-1",
+						previewMode
+							? "hidden @3xl/workspace:flex @3xl/workspace:w-1/2"
+							: "flex flex-1",
 					)}
 				>
 					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
@@ -351,7 +359,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				</div>
 
 				{previewMode ? (
-					<div className="flex min-h-0 flex-1 flex-col overflow-y-auto border-l bg-background lg:w-1/2">
+					<div className="flex min-h-0 flex-1 flex-col overflow-y-auto border-l bg-background @3xl/workspace:w-1/2">
 						<div className="sticky top-0 z-10 flex shrink-0 items-center border-b bg-background/95 px-8 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
 							Live Preview
 						</div>
@@ -377,7 +385,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					description={description}
 					tags={tags}
 					coverImage={coverImage}
-					collapsed={sidebarCollapsed}
+					collapsed={!settingsOpen}
 					onLangChange={(value) => {
 						setLang(value);
 						setHasUnsavedChanges(true);
