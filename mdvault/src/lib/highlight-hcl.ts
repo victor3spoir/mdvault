@@ -123,12 +123,8 @@ const TOKEN_PATTERN =
 	/(?<comment>#[^\n]*|\/\/[^\n]*|\/\*[\s\S]*?\*\/)|(?<heredoc><<[-~]?(?<tag>\w+)[\s\S]*?^\s*\k<tag>)|(?<string>"(?:[^"\\]|\\.)*")|(?<number>\b\d+(?:\.\d+)?\b)|(?<word>[A-Za-z_][\w-]*)/gm;
 
 /**
- * HashiCorp Configuration Language: Terraform, OpenTofu and docker-bake files.
- *
- * Written by hand because `@tanstack/highlight` ships no HCL grammar. It covers
- * what actually shows up in documentation snippets - blocks, strings including
- * heredocs, interpolation scopes, built-in functions and comments - rather than
- * attempting a complete parser.
+ * HCL grammar, written by hand because `@tanstack/highlight` ships none. Covers
+ * what appears in documentation snippets, not the full language.
  */
 export const hcl = defineLanguage({
 	name: "hcl",

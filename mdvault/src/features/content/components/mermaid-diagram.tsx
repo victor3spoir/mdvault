@@ -3,19 +3,13 @@ import { cn } from "#/lib/utils";
 
 let mermaidReady: Promise<typeof import("mermaid").default> | null = null;
 
-/**
- * Loads and configures Mermaid once, on demand.
- *
- * The library is heavy and most documents contain no diagrams, so it is only
- * pulled in when one is actually rendered.
- */
+/** Loaded on demand: the library is heavy and most documents have no diagram. */
 function loadMermaid(isDark: boolean) {
 	if (!mermaidReady) {
 		mermaidReady = import("mermaid").then(({ default: mermaid }) => {
 			mermaid.initialize({
 				startOnLoad: false,
-				// User content is untrusted: `strict` blocks the HTML labels and
-				// click handlers that Mermaid would otherwise allow through.
+				// User content is untrusted: `strict` blocks HTML labels and click handlers.
 				securityLevel: "strict",
 				theme: isDark ? "dark" : "default",
 				fontFamily: "inherit",
@@ -34,11 +28,7 @@ function prefersDark() {
 	);
 }
 
-/**
- * Renders a Mermaid diagram, falling back to the original source when the
- * definition does not parse - a half-written diagram should show what was
- * written, not an empty box.
- */
+/** Falls back to the source when the definition does not parse. */
 export function MermaidDiagram({
 	chart,
 	className,

@@ -13,12 +13,7 @@ interface PrivateImageProps {
 	priority?: boolean;
 }
 
-/**
- * Builds the proxy URL for a repository media path.
- *
- * The bytes are served by `/api/media/*` rather than inlined as a data URL, so
- * the browser caches them, loads them lazily and fetches them in parallel.
- */
+/** Builds the proxy URL for a repository media path. */
 export function mediaUrl(
 	src: string,
 	{ version, width }: { version?: string; width?: number } = {},
@@ -33,8 +28,7 @@ export function mediaUrl(
 		return path;
 	}
 
-	// Media is flat inside the media directory, so the filename identifies it
-	// and the client never needs to know how that directory is named.
+	// Media is flat, so the filename alone identifies it.
 	const filename = path.split("/").pop() ?? "";
 	if (!filename) {
 		return "";

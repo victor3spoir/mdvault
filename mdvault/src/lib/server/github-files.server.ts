@@ -14,18 +14,10 @@ export interface RepositoryEntry {
 	sha: string;
 }
 
-/**
- * GitHub applies secondary rate limits to bursts of concurrent requests, and a
- * repository with hundreds of documents would otherwise open hundreds of
- * sockets at once. Keep the fan-out bounded.
- */
+/** GitHub applies secondary rate limits to bursts, so the fan-out is bounded. */
 const MAX_CONCURRENT_READS = 8;
 
-/**
- * Repository listings are re-read on nearly every navigation. A short TTL keeps
- * the UI responsive without holding stale data long enough to be noticed, and
- * keeps a handful of page loads from exhausting the hourly API quota.
- */
+/** Listings are re-read on nearly every navigation; a short TTL protects the quota. */
 const LISTING_CACHE_TTL_MS = 10_000;
 
 const listingCache = new Map<
@@ -76,12 +68,7 @@ function invalidateRepositoryListings() {
 	listingCache.clear();
 }
 
-/**
- * Lists the markdown documents directly inside `directory`.
- *
- * A missing directory is not an error: a fresh content repository simply has
- * nothing in it yet, and the caller should render an empty collection.
- */
+/** A missing directory is not an error: a fresh repository is simply empty. */
 export async function listMarkdownEntries(
 	directory: string,
 ): Promise<RepositoryEntry[]> {

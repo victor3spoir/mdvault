@@ -29,13 +29,9 @@ const HTML_ENTITIES: Record<string, string> = {
 };
 
 /**
- * Reads the raw source out of a highlighted `<pre>` React subtree.
- *
- * When a highlighter is configured, the markdown renderer hands the code to
- * `<code>` through `dangerouslySetInnerHTML` and leaves `children` undefined,
- * so walking children alone returns nothing. The highlighted markup wraps the
- * original source in spans without altering it, so stripping the tags and
- * decoding entities gives the source back.
+ * With a highlighter configured the renderer leaves `children` undefined and
+ * passes the code through `dangerouslySetInnerHTML`, so the source has to be
+ * read back out of the markup.
  */
 export function codeTextOf(node: ReactNode): string {
 	if (typeof node === "string") {

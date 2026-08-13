@@ -169,8 +169,7 @@ function hasAvifSignature(bytes: Uint8Array) {
 function hasValidImageSignature(extension: string, bytes: Uint8Array) {
 	switch (extension) {
 		case "svg":
-			// SVG is text, so there is no magic number to check - the payload has
-			// to actually look like an SVG document.
+			// SVG is text: no magic number, so the payload itself is checked.
 			return isSvgDocument(new TextDecoder().decode(bytes.slice(0, 2048)));
 		case "jpg":
 		case "jpeg":
@@ -298,7 +297,6 @@ async function getMediaFile(filePath: string): Promise<
 			return { success: false, error: "Missing file path" };
 		}
 
-		// Only media this app understands is ever served back to the browser.
 		if (!isSupportedMediaPath(trimmedPath)) {
 			return { success: false, error: "Unsupported media type" };
 		}

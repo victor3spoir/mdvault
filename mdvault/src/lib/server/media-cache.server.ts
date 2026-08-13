@@ -48,17 +48,9 @@ function cacheKey(path: string, version?: string) {
 }
 
 /**
- * Serves repository media with the properties a proxy needs to survive a page
- * that requests forty images at once:
- *
- * - a disk cache, so a restart does not re-download everything;
- * - single-flight, so N concurrent requests for the same file cause one read;
- * - a bounded queue, so a burst waits instead of tripping GitHub's secondary
- *   rate limits;
- * - retry with backoff that honours `Retry-After`;
- * - stale-on-error, so a rate limit degrades to a slightly old image rather
- *   than a broken one;
- * - honest outcomes, so only a real GitHub 404 can become a 404.
+ * Disk cache with single-flight, a bounded queue and stale-on-error, so a page
+ * requesting forty images causes one read each and a rate limit never becomes
+ * a 404.
  */
 export function createMediaStore({
 	readBlob,
@@ -156,10 +148,7 @@ export function createMediaStore({
 	}
 
 	return {
-		/**
-		 * `version` is the blob SHA when the caller knows it. A versioned entry is
-		 * immutable, so it never needs revalidating.
-		 */
+		/** A versioned entry is immutable, so it never revalidates. */
 		async get(path: string, version?: string): Promise<MediaFetchOutcome> {
 			const key = cacheKey(path, version);
 
@@ -187,7 +176,6 @@ export function createMediaStore({
 					return outcome;
 				}
 
-				// Rather than fail, keep serving what we already have.
 				if (cached && outcome.status !== "not-found") {
 					return { status: "ok", blob: cached.blob };
 				}
@@ -201,7 +189,6 @@ export function createMediaStore({
 			return request;
 		},
 
-		/** Exposed for tests and diagnostics. */
 		stats() {
 			return { memoryEntries: memory.size, inFlight: inFlight.size, active };
 		},

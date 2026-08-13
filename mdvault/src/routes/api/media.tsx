@@ -4,20 +4,11 @@ import { getGitHubEnv } from "#/integrations/github/github-env.server";
 import { getRepositoryMediaFilePath } from "#/lib/repository-path";
 
 /**
- * Serves repository media as ordinary image bytes.
+ * Serves repository media as image bytes: `?v=<sha>` makes the response
+ * immutable, `?w=<width>` returns a downscaled WebP.
  *
- * Previously these were inlined as base64 data URLs, which put tens of
- * megabytes into the SSR payload and could not be cached by the browser. A URL
- * costs a few bytes in the document and is cached, lazy-loaded and fetched in
- * parallel like any other image.
- *
- * The filename travels as a query parameter rather than a path segment: a path
- * ending in `.png` is claimed by the static-asset middleware before the router
- * ever sees it, and the request silently falls through to the 404 page.
- *
- * `?v=<sha>` marks a response immutable, and `?w=<width>` asks for a downscaled
- * WebP - the grid uses it so a page of thumbnails does not pull the full-size
- * assets.
+ * The filename is a query parameter because a path ending in `.png` is claimed
+ * by the static-asset middleware before the router sees it.
  */
 export const Route = createFileRoute("/api/media")({
 	server: {

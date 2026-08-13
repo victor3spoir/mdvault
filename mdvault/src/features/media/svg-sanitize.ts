@@ -1,12 +1,7 @@
 /**
- * SVG sanitisation.
- *
- * Unlike raster formats, an SVG is a document: it can carry scripts, event
- * handlers, external references and embedded HTML. MDVault renders media
- * through `<img>`, where scripts do not execute, but uploaded files are also
- * committed to a repository that other sites read and may inline, and users can
- * open a media URL directly. So the dangerous constructs are removed on the way
- * in, once, rather than being trusted to stay harmless downstream.
+ * An SVG is a document, not a bitmap: it can carry scripts and remote
+ * references. Uploads land in a repository other sites read and may inline, so
+ * the dangerous constructs are removed once, on the way in.
  */
 
 const SCRIPT_ELEMENTS = [
@@ -36,7 +31,6 @@ function isSafeUrl(value: string) {
 		// biome-ignore lint/suspicious/noControlCharactersInRegex: removing them is the point
 		.replace(/[\u0000-\u001f\s]/g, "");
 
-	// Same-document references (`#gradient`) and inert data images are fine.
 	if (url.startsWith("#")) {
 		return true;
 	}
@@ -44,7 +38,6 @@ function isSafeUrl(value: string) {
 		return true;
 	}
 
-	// Everything else - javascript:, data:text/html, remote fetches - is not.
 	return false;
 }
 
@@ -104,7 +97,6 @@ export function sanitizeSvg(source: string): SvgSanitizeResult {
 		return match;
 	});
 
-	// `javascript:` can also hide inside style declarations.
 	if (/javascript\s*:/i.test(svg)) {
 		svg = svg.replace(/javascript\s*:/gi, "");
 		removed.push("javascript: url");

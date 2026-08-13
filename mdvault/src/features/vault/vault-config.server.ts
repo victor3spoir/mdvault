@@ -139,10 +139,8 @@ export async function addAssetType(
 		};
 		VaultConfigSchema.parse(next);
 
-		// The config is the source of truth and is guarded by its file revision, so
-		// it is written first. The folder is derived state and is reconciled after;
-		// a failure there leaves a declared type with no folder, which the next
-		// write repairs, rather than an orphan folder with no type.
+		// Config first: it is the source of truth and revision guarded. A failure
+		// after it leaves a type without a folder, which the next write repairs.
 		await writeVaultConfig(next, `Add asset type: ${type.id}`, sha);
 		await ensureTypeFolder(type.id);
 

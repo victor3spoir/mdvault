@@ -25,10 +25,7 @@ import {
 } from "#/lib/server/github-files.server";
 import { logger } from "#/lib/server/logger";
 
-/**
- * Every stored document shares this shape. Individual kinds add their own
- * metadata (tags, related article, vault type) on top of it.
- */
+/** Shape shared by every stored document; kinds add their own metadata. */
 export interface ContentDocument {
 	id: string;
 	title: string;
@@ -43,9 +40,8 @@ export interface ContentDocument {
 }
 
 /**
- * Describes one kind of content. Articles, posts and vault assets differ only
- * in where they live, what their metadata looks like and how they are named -
- * everything else (reading, writing, revisions, publishing) is shared.
+ * Articles, posts and vault assets differ only in location, metadata and
+ * naming. Everything else is shared.
  */
 export interface ContentKind<TDocument extends ContentDocument, TCreate> {
 	/** Human readable noun used in error messages, e.g. "Article". */
@@ -74,10 +70,7 @@ export interface ContentKind<TDocument extends ContentDocument, TCreate> {
 	}) => TDocument;
 }
 
-/**
- * When a document is published we either keep the original publication date or
- * stamp a new one. Editing preserves it; explicitly publishing re-stamps it.
- */
+/** Editing preserves the publication date; publishing re-stamps it. */
 type PublishStamp = "preserve" | "stamp";
 
 function nextPublishedAt(
@@ -151,10 +144,7 @@ export function createContentStore<TDocument extends ContentDocument, TCreate>(
 			sha,
 		);
 
-	/**
-	 * Loads a document by id, tolerating both `.md` and `.mdx`, and honouring a
-	 * caller supplied path when the client already knows where the file lives.
-	 */
+	/** Tolerates both `.md` and `.mdx`, and a caller supplied path. */
 	const load = async (id: string, requestedPath?: string) => {
 		const root = kind.root();
 		const paths = requestedPath
@@ -194,7 +184,6 @@ export function createContentStore<TDocument extends ContentDocument, TCreate>(
 					try {
 						return [parseDocument(file)];
 					} catch (error) {
-						// One malformed file must not take down the whole collection.
 						logger.error(
 							`Skipping invalid ${kind.label.toLowerCase()}`,
 							error,
@@ -242,8 +231,7 @@ export function createContentStore<TDocument extends ContentDocument, TCreate>(
 				const document = kind.toNewDocument({
 					id,
 					input,
-					// Content arrives from the editor and may carry its own frontmatter;
-					// only the body is ever trusted.
+					// Editor content may carry its own frontmatter; only the body is used.
 					body: parseFrontmatter(contentOf(input)).body,
 					now,
 					author: currentAuthor(),

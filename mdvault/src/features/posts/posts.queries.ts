@@ -24,13 +24,8 @@ export const postQueryOptions = (slug: string) =>
 	});
 
 /**
- * Invalidates every post query after a mutation.
- *
- * `refetchType: "all"` matters here: the lists are rendered from route loader
- * data, not from a `useQuery` hook, so the queries have no active observer.
- * With the default (`"active"`) they would be marked stale but never refetched,
- * and `ensureQueryData` in the loader would happily hand back the stale cache -
- * the status of a post would only change after a full page reload.
+ * `refetchType: "all"` is required: lists render from loader data, so the
+ * queries have no active observer and would be marked stale without refetching.
  */
 export async function invalidatePostQueries(queryClient: QueryClient) {
 	await Promise.all([

@@ -19,11 +19,8 @@ interface PlainTextEditorProps {
 }
 
 /**
- * Builds the document from raw text, one paragraph per line.
- *
- * Going through Markdown here would be wrong: Markdown collapses single line
- * breaks and reserves blank lines for paragraphs, so a post could never contain
- * a plain line break, and every paragraph came back separated by a blank line.
+ * One paragraph per line. Markdown would collapse single line breaks and
+ * reserve blank lines for paragraphs, which posts must not do.
  */
 export function textToDocument(value: string) {
 	const lines = value.replace(/\r\n/g, "\n").split("\n");
@@ -46,11 +43,7 @@ function documentToText(editor: { getText: (options?: object) => string }) {
 	return editor.getText({ blockSeparator: "\n" });
 }
 
-/**
- * Minimal text-only editor for short-form posts. Paragraphs, line breaks and
- * undo/redo only — no headings, marks, lists, images, or code. Pasted rich
- * content degrades to plain text.
- */
+/** Paragraphs, line breaks and undo/redo only. Pasted rich content is flattened. */
 export const PlainTextEditor = forwardRef<
 	PlainTextEditorHandle,
 	PlainTextEditorProps

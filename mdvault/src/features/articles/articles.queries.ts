@@ -26,13 +26,7 @@ export const articleQueryOptions = (id: string) =>
 		staleTime: 30_000,
 	});
 
-/**
- * Invalidates every article query after a mutation.
- *
- * See `invalidatePostQueries` for why `refetchType: "all"` is required: these
- * lists render from loader data, so the queries have no active observer to
- * trigger a refetch.
- */
+/** `refetchType: "all"` required: see `invalidatePostQueries`. */
 export async function invalidateArticleQueries(queryClient: QueryClient) {
 	await Promise.all([
 		queryClient.invalidateQueries({

@@ -20,15 +20,8 @@ export interface ConfirmOptions {
 }
 
 /**
- * Promise based replacement for `window.confirm`.
- *
- * Render `confirmDialog` once in the component and await `confirm(...)` inside
- * a handler, so existing control flow stays exactly as it reads today:
- *
- * ```tsx
- * const { confirm, confirmDialog } = useConfirm();
- * if (!(await confirm({ title: "Delete this?" }))) return;
- * ```
+ * Promise based replacement for `window.confirm`. Render `confirmDialog` once,
+ * then await `confirm(...)` inside a handler.
  */
 export function useConfirm() {
 	const [options, setOptions] = useState<ConfirmOptions | null>(null);
@@ -41,7 +34,6 @@ export function useConfirm() {
 	}, []);
 
 	const confirm = useCallback((next: ConfirmOptions) => {
-		// A pending prompt is superseded rather than stacked.
 		resolverRef.current?.(false);
 		setOptions(next);
 
@@ -86,10 +78,6 @@ export function useConfirm() {
 	return { confirm, confirmDialog };
 }
 
-/**
- * Shared wording for content deletion. Every delete goes through the same
- * message, so the reassurance that git keeps a copy is never accidentally
- * dropped from one screen.
- */
+/** Shared wording so every delete keeps the reassurance that git has a copy. */
 export const DELETE_DESCRIPTION =
 	"This removes the file from your repository. The change is committed and can still be recovered from git history.";
