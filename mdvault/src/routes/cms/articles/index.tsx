@@ -107,7 +107,7 @@ function ArticlesPage() {
 					}
 				/>
 			) : (
-				<div className="grid grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))] gap-6">
+				<div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-6">
 					{filteredArticles.map((article) => (
 						<ArticleCard key={article.id} article={article} />
 					))}
@@ -120,7 +120,7 @@ function ArticlesPage() {
 function ArticlesPending() {
 	return (
 		<PageLayout title="Articles" description="Loading your articles...">
-			<div className="grid grid-cols-[repeat(auto-fill,minmax(min(280px,100%),1fr))] gap-6">
+			<div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-6">
 				{[
 					"article-skeleton-1",
 					"article-skeleton-2",
@@ -128,6 +128,8 @@ function ArticlesPending() {
 					"article-skeleton-4",
 					"article-skeleton-5",
 					"article-skeleton-6",
+					"article-skeleton-7",
+					"article-skeleton-8",
 				].map((id) => (
 					<div key={id} className="overflow-hidden rounded-2xl border">
 						<Skeleton className="aspect-video rounded-none" />
