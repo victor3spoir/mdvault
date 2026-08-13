@@ -10,7 +10,7 @@
 
 <p>
 <a href="https://github.com/victor3spoir/mdvault/releases"><img alt="latest release" src="https://shieldcn.dev/github/release/victor3spoir/mdvault.svg?variant=secondary" /></a>
-<a href="https://github.com/victor3spoir/mdvault/blob/main/LICENCE"><img alt="license" src="https://shieldcn.dev/github/license/victor3spoir/mdvault.svg?variant=secondary" /></a>
+<a href="https://github.com/victor3spoir/mdvault/blob/main/LICENSE"><img alt="license" src="https://shieldcn.dev/github/license/victor3spoir/mdvault.svg?variant=secondary" /></a>
 <a href="https://github.com/victor3spoir/mdvault/pkgs/container/mdvault"><img alt="container image on ghcr.io" src="https://shieldcn.dev/badge/image-ghcr.io-2a9d8f.svg?variant=secondary&amp;logo=docker" /></a>
 <a href="https://github.com/victor3spoir/mdvault/stargazers"><img alt="GitHub stars" src="https://shieldcn.dev/github/stars/victor3spoir/mdvault.svg?variant=secondary" /></a>
 <a href="https://github.com/victor3spoir/mdvault/commits"><img alt="last commit" src="https://shieldcn.dev/github/last-commit/victor3spoir/mdvault.svg?variant=secondary" /></a>
@@ -227,7 +227,7 @@ The presentation site is live at **[mdvault-docs.vercel.app](https://mdvault-doc
 
 ## Contributing
 
-Before opening a pull request, run:
+Branch from `dev`, and before opening a pull request run what CI runs:
 
 ```bash
 bun run check
@@ -236,6 +236,17 @@ bun run test
 bun run build
 ```
 
+Setup, conventions and review expectations are in [CONTRIBUTING.md](./CONTRIBUTING.md).
+Where the project is heading — and what it will deliberately never become — is in
+[ROADMAP.md](./ROADMAP.md).
+
+## Security
+
+MDVault runs with a token that can write to your repository, and ships without
+authentication of its own: bind it to loopback, or put a proxy in front of it.
+The threat model, deployment guidance and private reporting process are in
+[SECURITY.md](./SECURITY.md).
+
 ## License
 
-MIT License - feel free to use this project for personal or commercial purposes.
+[MIT](./LICENSE) — free for personal and commercial use.
