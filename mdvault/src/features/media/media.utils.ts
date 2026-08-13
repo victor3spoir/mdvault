@@ -96,29 +96,3 @@ function decodeBase64Url(token: string) {
 		return token.replace(/^\/+/, "");
 	}
 }
-
-export function extractMarkdownImageSources(markdown: string) {
-	const sources = new Set<string>();
-	const regex = /!\[[^\]]*]\(([^)\s]+)(?:\s+"[^"]*")?\)/g;
-
-	for (const match of markdown.matchAll(regex)) {
-		const value = match[1]?.trim();
-		if (value) {
-			// strip display fragment (#w=..&align=..) so repo paths stay clean
-			const hashIndex = value.indexOf("#");
-			sources.add(hashIndex === -1 ? value : value.slice(0, hashIndex));
-		}
-	}
-
-	return Array.from(sources);
-}
-
-export function collectImageSources(values: Array<string | undefined | null>) {
-	return Array.from(
-		new Set(
-			values
-				.map((value) => value?.trim())
-				.filter((value): value is string => Boolean(value)),
-		),
-	);
-}

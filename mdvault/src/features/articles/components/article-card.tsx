@@ -10,8 +10,7 @@ import {
 	IconTrash,
 	IconX,
 } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Badge } from "#/components/ui/badge";
@@ -27,23 +26,29 @@ import {
 	publishArticleMutation,
 	unpublishArticleMutation,
 } from "#/features/articles/articles.functions";
-import { invalidateArticleQueries } from "#/features/articles/articles.queries";
 import type { Article } from "#/features/articles/articles.types";
 import { getContentStats } from "#/features/articles/articles.utils";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { useContentRefresh } from "#/features/shared/use-content-refresh";
+import { DELETE_DESCRIPTION, useConfirm } from "#/hooks/use-confirm";
 import { useValueChanged } from "#/hooks/use-value-changed";
 import { formatDate } from "#/lib/date";
 import { cn } from "#/lib/utils";
 
 export function ArticleCard({ article }: { article: Article }) {
-	const router = useRouter();
-	const queryClient = useQueryClient();
+	const refreshContent = useContentRefresh("articles");
 	const [isPending, startTransition] = useTransition();
+	const { confirm, confirmDialog } = useConfirm();
 	const statusChanged = useValueChanged(article.published);
 	const stats = getContentStats(article.content);
 
-	const handleDelete = () => {
-		if (!window.confirm(`Delete "${article.title}"?`)) {
+	const handleDelete = async () => {
+		const confirmed = await confirm({
+			title: `Delete "${article.title}"?`,
+			description: DELETE_DESCRIPTION,
+		});
+
+		if (!confirmed) {
 			return;
 		}
 
@@ -56,8 +61,7 @@ export function ArticleCard({ article }: { article: Article }) {
 					},
 				});
 				toast.success("Article deleted");
-				await invalidateArticleQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 			} catch (error) {
 				toast.error(
 					error instanceof Error ? error.message : "Failed to delete article",
@@ -81,8 +85,7 @@ export function ArticleCard({ article }: { article: Article }) {
 					});
 					toast.success("Article published");
 				}
-				await invalidateArticleQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 			} catch (error) {
 				toast.error(
 					error instanceof Error ? error.message : "Failed to update article",
@@ -105,6 +108,7 @@ export function ArticleCard({ article }: { article: Article }) {
 					{article.coverImage ? (
 						<PrivateImage
 							src={article.coverImage}
+							width={400}
 							alt={article.title}
 							className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 						/>
@@ -285,6 +289,7 @@ export function ArticleCard({ article }: { article: Article }) {
 					</div>
 				</div>
 			</article>
+			{confirmDialog}
 		</TooltipProvider>
 	);
 }

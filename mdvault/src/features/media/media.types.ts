@@ -5,6 +5,8 @@ export interface MediaFile {
 	url: string;
 	uploadedAt: string;
 	sha: string;
+	/** Bytes, from the repository tree. 0 when unknown. */
+	size: number;
 }
 
 export interface MediaUsageReference {

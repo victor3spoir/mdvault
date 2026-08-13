@@ -8,8 +8,7 @@ import {
 	IconTrash,
 	IconX,
 } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Badge } from "#/components/ui/badge";
@@ -20,11 +19,11 @@ import {
 	TooltipTrigger,
 } from "#/components/ui/tooltip";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { useContentRefresh } from "#/features/shared/use-content-refresh";
 import {
 	deleteVaultAssetMutation,
 	setVaultAssetPublishedMutation,
 } from "#/features/vault/vault.functions";
-import { invalidateVaultQueries } from "#/features/vault/vault.queries";
 import type { VaultAsset } from "#/features/vault/vault.types";
 import { useConfirm } from "#/hooks/use-confirm";
 import { useValueChanged } from "#/hooks/use-value-changed";
@@ -37,8 +36,7 @@ interface VaultAssetCardProps {
 }
 
 export function VaultAssetCard({ asset, type }: VaultAssetCardProps) {
-	const queryClient = useQueryClient();
-	const router = useRouter();
+	const refreshContent = useContentRefresh("vault");
 	const [isPending, startTransition] = useTransition();
 	const statusChanged = useValueChanged(asset.published);
 	const { confirm, confirmDialog } = useConfirm();
@@ -63,8 +61,7 @@ export function VaultAssetCard({ asset, type }: VaultAssetCardProps) {
 					},
 				});
 				toast.success("Deleted");
-				await invalidateVaultQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 			} catch (error) {
 				toast.error(
 					error instanceof Error ? error.message : "Failed to delete",
@@ -85,8 +82,7 @@ export function VaultAssetCard({ asset, type }: VaultAssetCardProps) {
 					},
 				});
 				toast.success(asset.published ? "Unpublished" : "Published");
-				await invalidateVaultQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 			} catch (error) {
 				toast.error(
 					error instanceof Error ? error.message : "Failed to change status",
@@ -108,6 +104,7 @@ export function VaultAssetCard({ asset, type }: VaultAssetCardProps) {
 				{asset.coverImage ? (
 					<PrivateImage
 						src={asset.coverImage}
+						width={400}
 						alt={asset.title}
 						className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 					/>

@@ -2,8 +2,15 @@ import { IconCheck, IconCopy } from "@tabler/icons-react";
 import { createTanStackMarkdownHighlighter } from "@tanstack/highlight/markdown";
 import type { CodeHighlighter } from "@tanstack/markdown";
 import { Markdown, type MarkdownComponents } from "@tanstack/markdown/react";
-import { type ComponentPropsWithoutRef, useRef, useState } from "react";
+import {
+	type ComponentPropsWithoutRef,
+	isValidElement,
+	type ReactNode,
+	useRef,
+	useState,
+} from "react";
 import { Button } from "#/components/ui/button";
+import { MermaidDiagram } from "#/features/content/components/mermaid-diagram";
 import { PrivateImage } from "#/features/media/components/private-image";
 import { splitImageSource } from "#/features/media/image-display";
 import { highlighter } from "#/lib/highlight";
@@ -11,6 +18,53 @@ import { cn } from "#/lib/utils";
 
 const highlightMarkdownCode: CodeHighlighter =
 	createTanStackMarkdownHighlighter(highlighter);
+
+const HTML_ENTITIES: Record<string, string> = {
+	"&amp;": "&",
+	"&lt;": "<",
+	"&gt;": ">",
+	"&quot;": '"',
+	"&#39;": "'",
+	"&nbsp;": " ",
+};
+
+/**
+ * Reads the raw source out of a highlighted `<pre>` React subtree.
+ *
+ * When a highlighter is configured, the markdown renderer hands the code to
+ * `<code>` through `dangerouslySetInnerHTML` and leaves `children` undefined,
+ * so walking children alone returns nothing. The highlighted markup wraps the
+ * original source in spans without altering it, so stripping the tags and
+ * decoding entities gives the source back.
+ */
+export function codeTextOf(node: ReactNode): string {
+	if (typeof node === "string") {
+		return node;
+	}
+	if (Array.isArray(node)) {
+		return node.map(codeTextOf).join("");
+	}
+	if (
+		isValidElement<{
+			children?: ReactNode;
+			dangerouslySetInnerHTML?: { __html: string };
+		}>(node)
+	) {
+		const html = node.props.dangerouslySetInnerHTML?.__html;
+
+		if (typeof html === "string") {
+			return html
+				.replace(/<[^>]*>/g, "")
+				.replace(
+					/&[a-z]+;|&#\d+;/gi,
+					(entity) => HTML_ENTITIES[entity] ?? entity,
+				);
+		}
+
+		return codeTextOf(node.props.children);
+	}
+	return "";
+}
 
 function CodeBlockFrame({
 	"data-lang": lang,
@@ -152,7 +206,15 @@ const components = {
 			</figure>
 		);
 	},
-	pre: (props) => <CodeBlockFrame {...props} />,
+	pre: (props) => {
+		const lang = (props as { "data-lang"?: string })["data-lang"];
+
+		if (lang === "mermaid") {
+			return <MermaidDiagram chart={codeTextOf(props.children)} />;
+		}
+
+		return <CodeBlockFrame {...props} />;
+	},
 	hr: (props) => <hr {...props} className="my-10 border-border" />,
 	table: (props) => (
 		<div className="my-6 overflow-x-auto rounded-2xl border">

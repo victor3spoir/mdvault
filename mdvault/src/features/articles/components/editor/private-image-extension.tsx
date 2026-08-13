@@ -112,7 +112,7 @@ function PrivateImageView({
 										onMouseDown={(event) => event.preventDefault()}
 										onClick={() => updateAttributes({ width: option })}
 										className={cn(
-											"rounded-md px-1.5 py-1 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+											"rounded-md px-1.5 py-1 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
 											width === option && "bg-primary/10 text-primary",
 										)}
 									>
@@ -131,7 +131,7 @@ function PrivateImageView({
 										onMouseDown={(event) => event.preventDefault()}
 										onClick={() => updateAttributes({ align: option.value })}
 										className={cn(
-											"flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+											"flex size-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
 											align === option.value && "bg-primary/10 text-primary",
 										)}
 									>
@@ -145,10 +145,11 @@ function PrivateImageView({
 									type="button"
 									aria-label="Edit alt text"
 									title="Edit alt text"
+									aria-pressed={altOpen}
 									onMouseDown={(event) => event.preventDefault()}
 									onClick={() => setAltOpen((value) => !value)}
 									className={cn(
-										"flex h-7 items-center gap-1 rounded-md px-1.5 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+										"flex h-7 items-center gap-1 rounded-md px-1.5 text-[11px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
 										(altOpen || alt) && "bg-primary/10 text-primary",
 									)}
 								>
@@ -169,6 +170,7 @@ function PrivateImageView({
 											updateAttributes({ alt: event.target.value })
 										}
 										onKeyDown={(event) => {
+											event.stopPropagation();
 											if (event.key === "Enter" || event.key === "Escape") {
 												event.preventDefault();
 												setAltOpen(false);
@@ -193,6 +195,7 @@ function PrivateImageView({
 										updateAttributes({ title: event.target.value })
 									}
 									onKeyDown={(event) => {
+										event.stopPropagation();
 										if (event.key === "Enter" || event.key === "Escape") {
 											event.preventDefault();
 											event.currentTarget.blur();

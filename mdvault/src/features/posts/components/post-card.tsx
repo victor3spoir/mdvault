@@ -6,8 +6,7 @@ import {
 	IconTrash,
 	IconX,
 } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { Link, useRouter } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { Badge } from "#/components/ui/badge";
@@ -24,21 +23,27 @@ import {
 	publishPostMutation,
 	unpublishPostMutation,
 } from "#/features/posts/posts.functions";
-import { invalidatePostQueries } from "#/features/posts/posts.queries";
 import type { Post } from "#/features/posts/posts.types";
 import { getPostExcerpt } from "#/features/posts/posts.utils";
+import { useContentRefresh } from "#/features/shared/use-content-refresh";
+import { DELETE_DESCRIPTION, useConfirm } from "#/hooks/use-confirm";
 import { useValueChanged } from "#/hooks/use-value-changed";
 import { formatDate } from "#/lib/date";
 import { cn } from "#/lib/utils";
 
 export function PostCard({ post }: { post: Post }) {
-	const router = useRouter();
-	const queryClient = useQueryClient();
+	const refreshContent = useContentRefresh("posts");
 	const [isPending, startTransition] = useTransition();
+	const { confirm, confirmDialog } = useConfirm();
 	const statusChanged = useValueChanged(post.published);
 
-	const handleDelete = () => {
-		if (!window.confirm(`Delete "${post.title}"?`)) {
+	const handleDelete = async () => {
+		const confirmed = await confirm({
+			title: `Delete "${post.title}"?`,
+			description: DELETE_DESCRIPTION,
+		});
+
+		if (!confirmed) {
 			return;
 		}
 
@@ -51,8 +56,7 @@ export function PostCard({ post }: { post: Post }) {
 					},
 				});
 				toast.success("Post deleted");
-				await invalidatePostQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 			} catch (error) {
 				toast.error(
 					error instanceof Error ? error.message : "Failed to delete post",
@@ -76,8 +80,7 @@ export function PostCard({ post }: { post: Post }) {
 					});
 					toast.success("Post published");
 				}
-				await invalidatePostQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 			} catch (error) {
 				toast.error(
 					error instanceof Error ? error.message : "Failed to update post",
@@ -93,6 +96,7 @@ export function PostCard({ post }: { post: Post }) {
 					{post.coverImage ? (
 						<PrivateImage
 							src={post.coverImage}
+							width={400}
 							alt={post.title}
 							className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
 						/>
@@ -235,6 +239,7 @@ export function PostCard({ post }: { post: Post }) {
 					</div>
 				</div>
 			</article>
+			{confirmDialog}
 		</TooltipProvider>
 	);
 }

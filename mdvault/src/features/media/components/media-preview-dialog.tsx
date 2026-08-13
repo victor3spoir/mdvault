@@ -1,5 +1,7 @@
-import { IconCheck, IconCopy } from "@tabler/icons-react";
+import { IconCheck, IconCopy, IconDownload } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
 import {
 	Dialog,
@@ -10,6 +12,7 @@ import {
 	DialogTrigger,
 } from "#/components/ui/dialog";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { downloadMedia } from "#/features/media/media.download";
 import type { MediaFile } from "#/features/media/media.types";
 
 interface MediaPreviewDialogProps {
@@ -22,6 +25,22 @@ export function MediaPreviewDialog({
 	image,
 }: MediaPreviewDialogProps) {
 	const [copied, setCopied] = useState(false);
+	const [isDownloading, setIsDownloading] = useState(false);
+	const queryClient = useQueryClient();
+
+	const handleDownload = async () => {
+		setIsDownloading(true);
+		try {
+			await downloadMedia(queryClient, image.url, image.name);
+			toast.success(`Downloading ${image.name}`);
+		} catch (error) {
+			toast.error(
+				error instanceof Error ? error.message : "Failed to download",
+			);
+		} finally {
+			setIsDownloading(false);
+		}
+	};
 
 	return (
 		<Dialog>
@@ -31,6 +50,7 @@ export function MediaPreviewDialog({
 					<div className="relative flex h-80 items-center justify-center bg-muted/50">
 						<PrivateImage
 							src={image.url}
+							width={1600}
 							alt={image.name}
 							className="h-full w-full object-contain p-4"
 						/>
@@ -86,6 +106,16 @@ export function MediaPreviewDialog({
 								</Button>
 							</div>
 						</div>
+
+						<Button
+							variant="outline"
+							className="w-full gap-2"
+							disabled={isDownloading}
+							onClick={handleDownload}
+						>
+							<IconDownload className="size-4" />
+							Download
+						</Button>
 					</div>
 				</div>
 			</DialogContent>

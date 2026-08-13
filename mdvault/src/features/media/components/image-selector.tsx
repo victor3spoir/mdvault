@@ -108,6 +108,7 @@ export function ImageSelector({
 							>
 								<PrivateImage
 									src={image.url}
+									width={400}
 									alt={image.name}
 									className={cn(
 										"h-full w-full object-cover transition-transform duration-500 group-hover:scale-110",
