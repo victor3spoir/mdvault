@@ -26,6 +26,8 @@ const LANGUAGES = [
 	{ value: "python", label: "Python" },
 	{ value: "rust", label: "Rust" },
 	{ value: "sql", label: "SQL" },
+	{ value: "toml", label: "TOML" },
+	{ value: "tsx", label: "TSX" },
 	{ value: "typescript", label: "TypeScript" },
 	{ value: "yaml", label: "YAML" },
 ] as const;
