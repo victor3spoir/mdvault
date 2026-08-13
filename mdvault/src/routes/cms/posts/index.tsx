@@ -1,8 +1,7 @@
 import { IconPlus } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { ContentFilterBar } from "#/components/content-filter-bar";
 import { ContentListEmptyState } from "#/components/content-list-empty-state";
 import { PageLayout } from "#/components/page-layout";
@@ -10,10 +9,7 @@ import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
 import { PostCard } from "#/features/posts/components/post-card";
-import {
-	postsListQueryOptions,
-	prefetchPostsMedia,
-} from "#/features/posts/posts.queries";
+import { postsListQueryOptions } from "#/features/posts/posts.queries";
 import {
 	type ContentFilters,
 	collectContentTags,
@@ -36,7 +32,6 @@ export const Route = createFileRoute("/cms/posts/")({
 
 function PostsPage() {
 	const posts = Route.useLoaderData();
-	const queryClient = useQueryClient();
 	const filters = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const allTags = collectContentTags(posts);
@@ -45,10 +40,6 @@ function PostsPage() {
 		() => filterAndSortContent(posts, filters),
 		[posts, filters],
 	);
-
-	useEffect(() => {
-		void prefetchPostsMedia(queryClient, posts);
-	}, [posts, queryClient]);
 
 	const updateFilters = (patch: Partial<ContentFilters>) => {
 		navigate({ search: (prev) => ({ ...prev, ...patch }) });

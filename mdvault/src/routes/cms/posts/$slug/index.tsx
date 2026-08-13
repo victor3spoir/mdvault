@@ -4,11 +4,7 @@ import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { PrivateImage } from "#/features/media/components/private-image";
-import { prefetchMediaDataUrls } from "#/features/media/media.queries";
-import {
-	collectPostImageSources,
-	postQueryOptions,
-} from "#/features/posts/posts.queries";
+import { postQueryOptions } from "#/features/posts/posts.queries";
 import { formatDate } from "#/lib/date";
 
 export const Route = createFileRoute("/cms/posts/$slug/")({
@@ -18,10 +14,6 @@ export const Route = createFileRoute("/cms/posts/$slug/")({
 		);
 
 		if (post) {
-			await prefetchMediaDataUrls(
-				context.queryClient,
-				collectPostImageSources(post),
-			);
 		}
 
 		return post;
