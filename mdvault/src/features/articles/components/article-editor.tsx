@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -10,7 +9,6 @@ import {
 	unpublishArticleMutation,
 	updateArticleMutation,
 } from "#/features/articles/articles.functions";
-import { invalidateArticleQueries } from "#/features/articles/articles.queries";
 import type { Article } from "#/features/articles/articles.types";
 import { getContentStats } from "#/features/articles/articles.utils";
 import { ArticleEditorHeader } from "#/features/articles/components/article-editor-header";
@@ -25,11 +23,13 @@ import { compressImage } from "#/features/media/media.compress";
 import { uploadImageMutation } from "#/features/media/media.functions";
 import type { MediaFile } from "#/features/media/media.types";
 import type { ContentRevision } from "#/features/shared/content-revision";
+import { useContentRefresh } from "#/features/shared/use-content-refresh";
 import {
 	clearDraft,
 	loadDraft,
 	useAutosaveDraft,
 } from "#/hooks/use-autosave-draft";
+import { DELETE_DESCRIPTION, useConfirm } from "#/hooks/use-confirm";
 import { useUnsavedChanges } from "#/hooks/use-unsaved-changes";
 import { formatDate } from "#/lib/date";
 import { cn } from "#/lib/utils";
@@ -61,9 +61,10 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
 export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 	const navigate = useNavigate();
 	const router = useRouter();
-	const queryClient = useQueryClient();
+	const refreshContent = useContentRefresh("articles");
 	const editorRef = useRef<RichTextEditorHandle>(null);
 	const [isPending, startTransition] = useTransition();
+	const { confirm, confirmDialog } = useConfirm();
 	const [title, setTitle] = useState(article?.title ?? "");
 	const [lang, setLang] = useState<"fr" | "en">(article?.lang ?? "en");
 	const [description, setDescription] = useState(article?.description ?? "");
@@ -188,7 +189,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					const id = await createArticleMutation({ data: input });
 					setHasUnsavedChanges(false);
 					clearDraft(draftKey);
-					await invalidateArticleQueries(queryClient);
+					await refreshContent();
 					allowNavigation();
 					await navigate({ to: "/cms/articles/$id/edit", params: { id } });
 				} else if (article && revision) {
@@ -198,7 +199,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					setRevision(nextRevision);
 					setHasUnsavedChanges(false);
 					clearDraft(draftKey);
-					await invalidateArticleQueries(queryClient);
+					await refreshContent();
 				}
 
 				toast.success("Article saved");
@@ -223,7 +224,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 						});
 				setRevision(nextRevision);
 				setPublished(!published);
-				await invalidateArticleQueries(queryClient);
+				await refreshContent();
 				toast.success(published ? "Article unpublished" : "Article published");
 			} catch (error) {
 				toast.error(
@@ -233,13 +234,18 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 		});
 	};
 
-	const handleDelete = () => {
+	const handleDelete = async () => {
 		const currentArticle = article;
-		if (
-			!currentArticle ||
-			!revision ||
-			!window.confirm("Delete this article?")
-		) {
+		if (!currentArticle || !revision) {
+			return;
+		}
+
+		const confirmed = await confirm({
+			title: `Delete "${currentArticle.title}"?`,
+			description: DELETE_DESCRIPTION,
+		});
+
+		if (!confirmed) {
 			return;
 		}
 		startTransition(async () => {
@@ -248,7 +254,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					data: { id: currentArticle.id, revision },
 				});
 				clearDraft(draftKey);
-				await invalidateArticleQueries(queryClient);
+				await refreshContent();
 				toast.success("Article deleted");
 				allowNavigation();
 				await navigate({ to: "/cms/articles" });
@@ -397,6 +403,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				onSelect={handleImageInsert}
 				withDetails
 			/>
+			{confirmDialog}
 		</div>
 	);
 }

@@ -17,7 +17,6 @@ import {
 	IconWorldUpload,
 	IconX,
 } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import {
 	type ReactNode,
@@ -63,13 +62,13 @@ import {
 	type PlainTextEditorHandle,
 } from "#/features/posts/components/plain-text-editor";
 import type { ContentRevision } from "#/features/shared/content-revision";
+import { useContentRefresh } from "#/features/shared/use-content-refresh";
 import {
 	createVaultAssetMutation,
 	deleteVaultAssetMutation,
 	setVaultAssetPublishedMutation,
 	updateVaultAssetMutation,
 } from "#/features/vault/vault.functions";
-import { invalidateVaultQueries } from "#/features/vault/vault.queries";
 import type { AssetTypeConfig, VaultAsset } from "#/features/vault/vault.types";
 import { useConfirm } from "#/hooks/use-confirm";
 import { useUnsavedChanges } from "#/hooks/use-unsaved-changes";
@@ -113,7 +112,7 @@ function SettingsSection({
 
 export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
+	const refreshContent = useContentRefresh("vault");
 	const richRef = useRef<RichTextEditorHandle>(null);
 	const plainRef = useRef<PlainTextEditorHandle>(null);
 	const [isPending, startTransition] = useTransition();
@@ -218,7 +217,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 						data: { ...input, type: typeConfig.id },
 					});
 					setHasUnsavedChanges(false);
-					await invalidateVaultQueries(queryClient);
+					await refreshContent();
 					allowNavigation();
 					await navigate({
 						to: "/cms/vault/$id/edit",
@@ -231,8 +230,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 					});
 					setRevision(next);
 					setHasUnsavedChanges(false);
-					await invalidateVaultQueries(queryClient);
-					router.invalidate();
+					await refreshContent();
 				}
 
 				toast.success("Saved");
@@ -256,8 +254,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 				});
 				setRevision(next);
 				setPublished(!published);
-				await invalidateVaultQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 				toast.success(published ? "Unpublished" : "Published");
 			} catch (error) {
 				toast.error(
@@ -287,8 +284,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 				await deleteVaultAssetMutation({
 					data: { type: typeConfig.id, id: current.id, revision },
 				});
-				await invalidateVaultQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 				toast.success("Deleted");
 				allowNavigation();
 				await navigate({

@@ -85,3 +85,11 @@ export function useConfirm() {
 
 	return { confirm, confirmDialog };
 }
+
+/**
+ * Shared wording for content deletion. Every delete goes through the same
+ * message, so the reassurance that git keeps a copy is never accidentally
+ * dropped from one screen.
+ */
+export const DELETE_DESCRIPTION =
+	"This removes the file from your repository. The change is committed and can still be recovered from git history.";
