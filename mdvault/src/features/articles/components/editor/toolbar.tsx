@@ -12,6 +12,7 @@ import {
 	IconItalic,
 	IconLink,
 	IconList,
+	IconListCheck,
 	IconListNumbers,
 	IconMinus,
 	IconPhoto,
@@ -91,6 +92,7 @@ export function EditorToolbar({
 			h6: current.isActive("heading", { level: 6 }),
 			bulletList: current.isActive("bulletList"),
 			orderedList: current.isActive("orderedList"),
+			taskList: current.isActive("taskList"),
 			blockquote: current.isActive("blockquote"),
 			codeBlock: current.isActive("codeBlock"),
 			link: current.isActive("link"),
@@ -213,6 +215,13 @@ export function EditorToolbar({
 				onClick={() => editor.chain().focus().toggleOrderedList().run()}
 			>
 				<IconListNumbers className="size-4" />
+			</ToolbarButton>
+			<ToolbarButton
+				label="Checklist"
+				active={state.taskList}
+				onClick={() => editor.chain().focus().toggleTaskList().run()}
+			>
+				<IconListCheck className="size-4" />
 			</ToolbarButton>
 			<ToolbarButton
 				label="Blockquote"

@@ -1,3 +1,4 @@
+import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { TableKit } from "@tiptap/extension-table";
 import { Placeholder } from "@tiptap/extensions";
 import { Markdown } from "@tiptap/markdown";
@@ -40,6 +41,8 @@ export const RichTextEditor = forwardRef<
 			Markdown,
 			Placeholder.configure({ placeholder: "Start writing your article..." }),
 			TableKit.configure({ table: { resizable: false } }),
+			TaskList,
+			TaskItem.configure({ nested: true }),
 			PrivateImageExtension,
 		],
 		content: markdown,
