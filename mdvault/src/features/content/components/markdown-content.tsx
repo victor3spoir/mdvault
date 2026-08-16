@@ -82,12 +82,12 @@ function CodeBlockFrame({
 	};
 
 	return (
-		<div className="group relative my-6 overflow-hidden rounded-2xl border">
+		<div className="group relative my-6">
 			<pre
 				{...props}
 				ref={preRef}
 				data-lang={lang}
-				className="code-block overflow-x-auto p-5 text-sm leading-7"
+				className="code-block overflow-x-auto p-5 pr-24"
 			/>
 			<div className="absolute top-3 right-3 flex items-center gap-2">
 				<Button
@@ -213,14 +213,19 @@ const components = {
 	},
 	hr: (props) => <hr {...props} className="my-10 border-border" />,
 	table: (props) => (
-		<div className="my-6 overflow-x-auto rounded-2xl border">
-			<table {...props} className="min-w-full text-sm" />
+		<div className="my-6 max-w-full overflow-x-auto rounded-2xl border">
+			<table {...props} className="w-full table-fixed text-sm" />
 		</div>
 	),
 	th: (props) => (
-		<th {...props} className="bg-muted px-4 py-3 text-left font-semibold" />
+		<th
+			{...props}
+			className="break-words bg-muted px-4 py-3 text-left font-semibold"
+		/>
 	),
-	td: (props) => <td {...props} className="border-t px-4 py-3 align-top" />,
+	td: (props) => (
+		<td {...props} className="break-words border-t px-4 py-3 align-top" />
+	),
 } satisfies MarkdownComponents;
 
 export function MarkdownContent({ source }: { source: string }) {

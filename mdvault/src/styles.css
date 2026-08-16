@@ -10,6 +10,9 @@
   --surface-strong: rgba(255, 255, 255, 0.9);
   --line: rgba(23, 58, 64, 0.14);
 
+  --code-surface: #f6f8fa;
+  --code-border: rgba(23, 58, 64, 0.12);
+
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
   --card: oklch(1 0 0);
@@ -48,6 +51,9 @@
 .dark {
   --surface-strong: rgba(15, 27, 31, 0.92);
   --line: rgba(141, 229, 219, 0.18);
+
+  --code-surface: #0f1720;
+  --code-border: rgba(141, 229, 219, 0.16);
 
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
@@ -161,11 +167,20 @@ pre code {
   color: inherit;
 }
 
-.prose pre {
-  border: 1px solid var(--line);
+.prose pre,
+.code-block {
+  border: 1px solid var(--code-border);
   border-radius: 12px;
-  background: #1d2e45;
-  color: #e8efff;
+  background: var(--code-surface);
+  color: var(--th-token);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.code-block {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
+    Consolas, 'Liberation Mono', monospace);
 }
 
 button,
@@ -244,6 +259,37 @@ a {
   list-style: disc;
 }
 
+.tiptap-editor ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0.25rem;
+}
+
+.tiptap-editor ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.tiptap-editor ul[data-type='taskList'] li > label {
+  margin-top: 0.4rem;
+  user-select: none;
+}
+
+.tiptap-editor ul[data-type='taskList'] li > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tiptap-editor ul[data-type='taskList'] input[type='checkbox'] {
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.tiptap-editor ul[data-type='taskList'] li[data-checked='true'] > div {
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+}
+
 .tiptap-editor ol {
   list-style: decimal;
 }
@@ -268,18 +314,34 @@ a {
 }
 
 .tiptap-editor pre {
-  background-color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin: 1rem 0;
+  background-color: var(--code-surface);
+  border: 1px solid var(--code-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
   overflow-x: auto;
+  color: var(--th-token);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  tab-size: 2;
 }
 
 .tiptap-editor pre code {
   background: none;
+  border: 0;
   padding: 0;
-  font-size: 0.875rem;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+.tiptap-code-block {
+  margin: 1.5rem 0;
+}
+
+.tiptap-code-block pre {
+  margin: 0;
+  padding-right: 6rem;
 }
 
 .tiptap-editor a {
@@ -294,11 +356,23 @@ a {
   margin: 2rem 0;
 }
 
+.tiptap-editor .tableWrapper {
+  margin: 1rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .tiptap-editor table {
   border-collapse: collapse;
+  table-layout: fixed;
   width: 100%;
+  max-width: 100%;
   margin: 1rem 0;
   font-size: 0.9375rem;
+}
+
+.tiptap-editor .tableWrapper table {
+  margin: 0;
 }
 
 .tiptap-editor th,
@@ -306,6 +380,8 @@ a {
   border: 1px solid var(--border);
   padding: 0.5rem 0.75rem;
   vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .tiptap-editor th {
