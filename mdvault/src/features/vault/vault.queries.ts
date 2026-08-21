@@ -2,6 +2,7 @@ import { type QueryClient, queryOptions } from "@tanstack/react-query";
 import {
 	getVaultAssetById,
 	getVaultAssets,
+	getVaultAssetTranslations,
 	getVaultConfig,
 } from "#/features/vault/vault.functions";
 
@@ -13,6 +14,8 @@ export const vaultKeys = {
 	details: () => [...vaultKeys.all, "detail"] as const,
 	detail: (type: string, id: string) =>
 		[...vaultKeys.details(), type, id] as const,
+	translations: (type: string, id: string) =>
+		[...vaultKeys.detail(type, id), "translations"] as const,
 };
 
 export const vaultConfigQueryOptions = () =>
@@ -33,6 +36,13 @@ export const vaultAssetQueryOptions = (type: string, id: string) =>
 	queryOptions({
 		queryKey: vaultKeys.detail(type, id),
 		queryFn: () => getVaultAssetById({ data: { type, id } }),
+		staleTime: 30_000,
+	});
+
+export const vaultAssetTranslationsQueryOptions = (type: string, id: string) =>
+	queryOptions({
+		queryKey: vaultKeys.translations(type, id),
+		queryFn: () => getVaultAssetTranslations({ data: { type, id } }),
 		staleTime: 30_000,
 	});
 

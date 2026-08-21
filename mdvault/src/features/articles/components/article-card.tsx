@@ -5,7 +5,7 @@ import {
 	IconEye,
 	IconFileText,
 	IconHourglass,
-	IconLanguage,
+	IconLink,
 	IconSettings,
 	IconTrash,
 	IconX,
@@ -13,6 +13,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { LocaleFlag } from "#/components/locale-flag";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -29,18 +30,25 @@ import {
 import type { Article } from "#/features/articles/articles.types";
 import { getContentStats } from "#/features/articles/articles.utils";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { getLocaleBadge, getLocaleLabel } from "#/features/shared/locales";
 import { useContentRefresh } from "#/features/shared/use-content-refresh";
 import { DELETE_DESCRIPTION, useConfirm } from "#/hooks/use-confirm";
 import { useValueChanged } from "#/hooks/use-value-changed";
 import { formatDate } from "#/lib/date";
 import { cn } from "#/lib/utils";
 
-export function ArticleCard({ article }: { article: Article }) {
+interface ArticleCardProps {
+	article: Article;
+	linkedLocales?: readonly string[];
+}
+
+export function ArticleCard({ article, linkedLocales = [] }: ArticleCardProps) {
 	const refreshContent = useContentRefresh("articles");
 	const [isPending, startTransition] = useTransition();
 	const { confirm, confirmDialog } = useConfirm();
 	const statusChanged = useValueChanged(article.published);
 	const stats = getContentStats(article.content);
+	const linkedLocaleLabels = linkedLocales.map(getLocaleLabel);
 
 	const handleDelete = async () => {
 		const confirmed = await confirm({
@@ -140,8 +148,8 @@ export function ArticleCard({ article }: { article: Article }) {
 							variant="outline"
 							className="h-6 gap-1 rounded-lg border-primary/30 bg-background/90 px-2 text-[10px] font-semibold uppercase tracking-wide shadow-lg"
 						>
-							<IconLanguage className="size-3" />
-							{article.lang === "fr" ? "FR" : "EN"}
+							<LocaleFlag locale={article.lang} />
+							{getLocaleBadge(article.lang)}
 						</Badge>
 					</div>
 				</div>
@@ -183,6 +191,21 @@ export function ArticleCard({ article }: { article: Article }) {
 							<IconHourglass className="size-3.5" />
 							{stats.readTime} min read
 						</span>
+						{linkedLocales.length > 1 ? (
+							<Tooltip>
+								<TooltipTrigger asChild>
+									<button
+										type="button"
+										className="flex items-center gap-1.5 border-l pl-3"
+										aria-label={`${linkedLocales.length} linked language versions: ${linkedLocaleLabels.join(", ")}`}
+									>
+										<IconLink className="size-3.5" />
+										{linkedLocales.length} versions
+									</button>
+								</TooltipTrigger>
+								<TooltipContent>{linkedLocaleLabels.join(", ")}</TooltipContent>
+							</Tooltip>
+						) : null}
 						{article.author ? (
 							<span className="truncate border-l pl-3">
 								By {article.author}

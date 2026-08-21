@@ -1,10 +1,12 @@
 import { IconFileText } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { LocaleFlag } from "#/components/locale-flag";
 import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { PrivateImage } from "#/features/media/components/private-image";
 import { postQueryOptions } from "#/features/posts/posts.queries";
+import { getLocaleLabel } from "#/features/shared/locales";
 import { formatDate } from "#/lib/date";
 
 export const Route = createFileRoute("/cms/posts/$slug/")({
@@ -69,7 +71,8 @@ function PostDetailPage() {
 								<span>{formatDate(post.createdAt)}</span>
 								{post.author ? <span>• By {post.author}</span> : null}
 								<Badge variant="outline" className="text-[10px]">
-									{post.lang === "fr" ? "Français" : "English"}
+									<LocaleFlag locale={post.lang} />
+									{getLocaleLabel(post.lang)}
 								</Badge>
 							</div>
 						</div>

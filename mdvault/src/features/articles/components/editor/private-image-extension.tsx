@@ -11,7 +11,10 @@ import {
 	ReactNodeViewRenderer,
 } from "@tiptap/react";
 import { useEffect, useRef, useState } from "react";
-import { PrivateImage } from "#/features/media/components/private-image";
+import {
+	mediaUrl,
+	PrivateImage,
+} from "#/features/media/components/private-image";
 import {
 	type ImageAlign,
 	joinImageSource,
@@ -228,6 +231,13 @@ export const PrivateImageExtension = Image.extend({
 			width: { default: null },
 			align: { default: null },
 		};
+	},
+
+	renderHTML({ HTMLAttributes }) {
+		const src =
+			typeof HTMLAttributes.src === "string" ? HTMLAttributes.src : "";
+
+		return ["img", { ...HTMLAttributes, src: mediaUrl(src) }];
 	},
 
 	parseMarkdown: (token, helpers) => {

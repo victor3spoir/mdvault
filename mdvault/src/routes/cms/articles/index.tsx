@@ -9,7 +9,9 @@ import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
 import { articlesListQueryOptions } from "#/features/articles/articles.queries";
+import type { Article } from "#/features/articles/articles.types";
 import { ArticleCard } from "#/features/articles/components/article-card";
+import { groupTranslations } from "#/features/shared/article-translations";
 import {
 	type ContentFilters,
 	collectContentTags,
@@ -17,24 +19,44 @@ import {
 	DEFAULT_CONTENT_FILTERS,
 	filterAndSortContent,
 } from "#/features/shared/content-filters";
+import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
 
 export const Route = createFileRoute("/cms/articles/")({
 	validateSearch: zodValidator(contentFiltersSchema),
 	loader: async ({ context }) => {
-		const articles = await context.queryClient.ensureQueryData(
-			articlesListQueryOptions(),
-		);
-		return articles;
+		const [articles, config] = await Promise.all([
+			context.queryClient.ensureQueryData(articlesListQueryOptions()),
+			context.queryClient.ensureQueryData(vaultConfigQueryOptions()),
+		]);
+		return { articles, config };
 	},
 	pendingComponent: ArticlesPending,
 	component: ArticlesPage,
 });
 
+function indexLinkedLocales(articles: readonly Article[]) {
+	const index = new Map<string, string[]>();
+
+	for (const group of groupTranslations(articles)) {
+		if (group.members.length < 2) {
+			continue;
+		}
+
+		const locales = group.members.map((member) => member.lang);
+		for (const member of group.members) {
+			index.set(member.id, locales);
+		}
+	}
+
+	return index;
+}
+
 function ArticlesPage() {
-	const articles = Route.useLoaderData();
+	const { articles, config } = Route.useLoaderData();
 	const filters = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const allTags = collectContentTags(articles);
+	const linkedLocalesByArticle = indexLinkedLocales(articles);
 
 	const filteredArticles = useMemo(
 		() => filterAndSortContent(articles, filters),
@@ -80,6 +102,8 @@ function ArticlesPage() {
 					onChange={updateFilters}
 					label="articles"
 					availableTags={allTags}
+					locales={config.locales}
+					onClear={clearFilters}
 				/>
 			) : null}
 
@@ -109,7 +133,11 @@ function ArticlesPage() {
 			) : (
 				<div className="grid grid-cols-[repeat(auto-fill,minmax(min(250px,100%),1fr))] gap-6">
 					{filteredArticles.map((article) => (
-						<ArticleCard key={article.id} article={article} />
+						<ArticleCard
+							key={article.id}
+							article={article}
+							linkedLocales={linkedLocalesByArticle.get(article.id)}
+						/>
 					))}
 				</div>
 			)}

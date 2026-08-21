@@ -56,6 +56,7 @@ function vaultKind(type: string): ContentKind<VaultAsset, CreateAssetFields> {
 				author: frontmatter.author,
 				tags: frontmatter.tags,
 				coverImage: frontmatter.coverImage,
+				translationKey: frontmatter.translationKey,
 				path,
 				sha,
 			};
@@ -74,6 +75,7 @@ function vaultKind(type: string): ContentKind<VaultAsset, CreateAssetFields> {
 				createdAt: asset.createdAt,
 				updatedAt: asset.updatedAt,
 				publishedDate: asset.publishedAt,
+				translationKey: asset.translationKey,
 			};
 		},
 
@@ -92,6 +94,7 @@ function vaultKind(type: string): ContentKind<VaultAsset, CreateAssetFields> {
 				author: input.author || author,
 				tags: input.tags,
 				coverImage: input.coverImage,
+				translationKey: input.translationKey,
 				path: "",
 				sha: "",
 			};
@@ -147,6 +150,15 @@ export async function updateAsset(
 		UpdateVaultAssetSchema.parse(input),
 		revision,
 	);
+}
+
+export async function setAssetTranslationKey(
+	type: string,
+	id: string,
+	translationKey: string | undefined,
+	revision: ContentRevision,
+): Promise<ActionResult<ContentMutationResult>> {
+	return storeFor(type).update(id, { translationKey }, revision);
 }
 
 export async function deleteAsset(

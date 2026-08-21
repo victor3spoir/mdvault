@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MDVault modern logo</title>
+  <desc id="desc">A Markdown document secured inside an open digital vault.</desc>
+  <defs>
+    <linearGradient id="tile" x1="72" y1="52" x2="438" y2="468" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#20263A"/>
+      <stop offset="1" stop-color="#101522"/>
+    </linearGradient>
+    <linearGradient id="vault" x1="108" y1="214" x2="406" y2="442" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#818CF8"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="174" y1="150" x2="332" y2="350" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E9ECFF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#080B13" flood-opacity=".34"/>
+    </filter>
+  </defs>
+
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#tile)"/>
+  <path d="M112 220v-58c0-34 28-62 62-62h164c34 0 62 28 62 62v58" fill="none" stroke="#A5B4FC" stroke-width="28" stroke-linecap="round"/>
+  <path d="M137 205v-40c0-21 17-38 38-38h162c21 0 38 17 38 38v40" fill="none" stroke="#4C5270" stroke-width="12" stroke-linecap="round"/>
+
+  <g filter="url(#shadow)">
+    <path d="M90 218h332a22 22 0 0 1 22 22v154a54 54 0 0 1-54 54H122a54 54 0 0 1-54-54V240a22 22 0 0 1 22-22Z" fill="url(#vault)"/>
+    <path d="M68 268h376v126a54 54 0 0 1-54 54H122a54 54 0 0 1-54-54V268Z" fill="#1B2032" fill-opacity=".9"/>
+    <path d="M94 268h324" stroke="#A5B4FC" stroke-width="12" stroke-linecap="round" opacity=".8"/>
+    <path d="M106 302v76c0 19 15 34 34 34h232c19 0 34-15 34-34v-76" fill="none" stroke="#343B58" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <path d="M170 150a22 22 0 0 1 22-22h102l50 50v146a22 22 0 0 1-22 22H192a22 22 0 0 1-22-22V150Z" fill="url(#paper)"/>
+    <path d="M294 128v38a24 24 0 0 0 24 24h26" fill="#C7D2FE"/>
+    <path d="m294 128 50 50" fill="none" stroke="#A5B4FC" stroke-width="8" stroke-linecap="round"/>
+    <path d="M205 228v-38l22 28 22-28v38" fill="none" stroke="#343B58" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M296 194v48m0 0-18-18m18 18 18-18" fill="none" stroke="#6366F1" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M204 278h106M204 306h76" stroke="#A5ACC4" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <g>
+    <rect x="210" y="340" width="92" height="82" rx="24" fill="#F8FAFF"/>
+    <path d="M230 342v-12a26 26 0 0 1 52 0v12" fill="none" stroke="#F8FAFF" stroke-width="14" stroke-linecap="round"/>
+    <circle cx="256" cy="377" r="10" fill="#6366F1"/>
+    <path d="M256 384v13" stroke="#6366F1" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <path d="M98 420c28 32 68 44 110 44h96c42 0 82-12 110-44" fill="none" stroke="#FFFFFF" stroke-opacity=".08" stroke-width="10" stroke-linecap="round"/>
+</svg>

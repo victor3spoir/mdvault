@@ -30,6 +30,8 @@ export interface AssetTypeConfig {
 export interface VaultConfig {
 	version: number;
 	assetTypes: AssetTypeConfig[];
+	locales: string[];
+	defaultLocale: string;
 }
 
 export interface VaultConfigFile {
@@ -43,7 +45,7 @@ export interface VaultAsset {
 	title: string;
 	description?: string;
 	content: string;
-	lang: "fr" | "en";
+	lang: string;
 	createdAt: string;
 	updatedAt: string;
 	publishedAt?: string;
@@ -51,6 +53,7 @@ export interface VaultAsset {
 	author?: string;
 	tags?: string[];
 	coverImage?: string;
+	translationKey?: string;
 	path: string;
 	sha: string;
 }

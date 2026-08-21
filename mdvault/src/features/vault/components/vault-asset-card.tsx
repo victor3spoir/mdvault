@@ -4,13 +4,14 @@ import {
 	IconEdit,
 	IconEye,
 	IconFileText,
-	IconLanguage,
+	IconLink,
 	IconTrash,
 	IconX,
 } from "@tabler/icons-react";
 import { Link } from "@tanstack/react-router";
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { LocaleFlag } from "#/components/locale-flag";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -19,6 +20,7 @@ import {
 	TooltipTrigger,
 } from "#/components/ui/tooltip";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { getLocaleBadge, getLocaleLabel } from "#/features/shared/locales";
 import { useContentRefresh } from "#/features/shared/use-content-refresh";
 import {
 	deleteVaultAssetMutation,
@@ -33,13 +35,19 @@ import { cn } from "#/lib/utils";
 interface VaultAssetCardProps {
 	asset: VaultAsset;
 	type: string;
+	linkedLocales?: readonly string[];
 }
 
-export function VaultAssetCard({ asset, type }: VaultAssetCardProps) {
+export function VaultAssetCard({
+	asset,
+	type,
+	linkedLocales = [],
+}: VaultAssetCardProps) {
 	const refreshContent = useContentRefresh("vault");
 	const [isPending, startTransition] = useTransition();
 	const statusChanged = useValueChanged(asset.published);
 	const { confirm, confirmDialog } = useConfirm();
+	const linkedLocaleLabels = linkedLocales.map(getLocaleLabel);
 
 	const handleDelete = async () => {
 		const confirmed = await confirm({
@@ -136,8 +144,8 @@ export function VaultAssetCard({ asset, type }: VaultAssetCardProps) {
 						variant="outline"
 						className="h-6 gap-1 rounded-lg border-primary/30 bg-background/90 px-2 text-[10px] font-semibold uppercase tracking-wide shadow-lg"
 					>
-						<IconLanguage className="size-3" />
-						{asset.lang === "fr" ? "FR" : "EN"}
+						<LocaleFlag locale={asset.lang} />
+						{getLocaleBadge(asset.lang)}
 					</Badge>
 				</div>
 			</div>
@@ -177,6 +185,21 @@ export function VaultAssetCard({ asset, type }: VaultAssetCardProps) {
 						<IconCalendar className="size-3.5" />
 						{formatDate(asset.createdAt)}
 					</span>
+					{linkedLocales.length > 1 ? (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<button
+									type="button"
+									className="flex items-center gap-1.5 border-l pl-3"
+									aria-label={`${linkedLocales.length} linked language versions: ${linkedLocaleLabels.join(", ")}`}
+								>
+									<IconLink className="size-3.5" />
+									{linkedLocales.length} versions
+								</button>
+							</TooltipTrigger>
+							<TooltipContent>{linkedLocaleLabels.join(", ")}</TooltipContent>
+						</Tooltip>
+					) : null}
 					{asset.author ? (
 						<span className="truncate border-l pl-3">By {asset.author}</span>
 					) : null}

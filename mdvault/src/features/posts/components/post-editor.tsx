@@ -21,6 +21,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { EditorTitleInput } from "#/components/editor-title-input";
+import { LocaleFlag } from "#/components/locale-flag";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
@@ -55,6 +56,10 @@ import {
 } from "#/features/posts/posts.functions";
 import type { Post } from "#/features/posts/posts.types";
 import type { ContentRevision } from "#/features/shared/content-revision";
+import {
+	getLocaleLabel,
+	includeCurrentLocale,
+} from "#/features/shared/locales";
 import { useContentRefresh } from "#/features/shared/use-content-refresh";
 import { DELETE_DESCRIPTION, useConfirm } from "#/hooks/use-confirm";
 import { useUnsavedChanges } from "#/hooks/use-unsaved-changes";
@@ -63,6 +68,8 @@ import { cn } from "#/lib/utils";
 interface PostEditorProps {
 	post?: Post | null;
 	articles: Article[];
+	locales: readonly string[];
+	defaultLocale: string;
 }
 
 interface SettingsSectionProps {
@@ -96,7 +103,12 @@ function SettingsSection({
 	);
 }
 
-export function PostEditor({ post, articles }: PostEditorProps) {
+export function PostEditor({
+	post,
+	articles,
+	locales,
+	defaultLocale,
+}: PostEditorProps) {
 	const navigate = useNavigate();
 	const refreshContent = useContentRefresh("posts");
 	const editorRef = useRef<PlainTextEditorHandle>(null);
@@ -104,7 +116,8 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 	const { confirm, confirmDialog } = useConfirm();
 	const [title, setTitle] = useState(post?.title ?? "");
 	const [content, setContent] = useState(post?.content ?? "");
-	const [lang, setLang] = useState<"fr" | "en">(post?.lang ?? "fr");
+	const [lang, setLang] = useState(post?.lang ?? defaultLocale);
+	const localeOptions = includeCurrentLocale(locales, post?.lang);
 	const [articleId, setArticleId] = useState(post?.article ?? "");
 	const [coverImage, setCoverImage] = useState(post?.coverImage ?? "");
 	const [author, setAuthor] = useState(post?.author ?? "");
@@ -443,7 +456,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 								<Select
 									value={lang}
 									onValueChange={(value) => {
-										setLang(value as "fr" | "en");
+										setLang(value);
 										markDirty();
 									}}
 								>
@@ -452,12 +465,12 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 									</SelectTrigger>
 									<SelectContent>
 										<SelectGroup>
-											<SelectItem value="en">
-												<span aria-hidden="true">🇬🇧</span> English
-											</SelectItem>
-											<SelectItem value="fr">
-												<span aria-hidden="true">🇫🇷</span> Français
-											</SelectItem>
+											{localeOptions.map((locale) => (
+												<SelectItem key={locale} value={locale}>
+													<LocaleFlag locale={locale} />
+													{getLocaleLabel(locale)}
+												</SelectItem>
+											))}
 										</SelectGroup>
 									</SelectContent>
 								</Select>

@@ -74,6 +74,28 @@ interface EditorToolbarProps {
 	onImageInsertClick?: () => void;
 }
 
+/**
+ * Keeps related tools together: the group is the wrapping unit, so a narrow
+ * toolbar never splits "Bold / Italic / Strike" across two rows.
+ */
+function ToolbarGroup({ children }: { children: ReactNode }) {
+	return <div className="flex items-center gap-0.5">{children}</div>;
+}
+
+/**
+ * Rule dividers only make sense while the toolbar is a single row. Once it
+ * wraps, one would strand itself at the start of a line, so below that width
+ * the groups are separated by spacing instead.
+ */
+function ToolbarDivider() {
+	return (
+		<Separator
+			orientation="vertical"
+			className="mx-1 hidden self-center @3xl/toolbar:block data-[orientation=vertical]:h-5"
+		/>
+	);
+}
+
 export function EditorToolbar({
 	editor,
 	onImageInsertClick,
@@ -115,168 +137,188 @@ export function EditorToolbar({
 	};
 
 	return (
-		<div className="flex shrink-0 flex-wrap items-center justify-center gap-0.5 border-b bg-background/95 px-3 py-1.5">
-			<ToolbarButton
-				label="Undo"
-				disabled={!state.canUndo}
-				onClick={() => editor.chain().focus().undo().run()}
-			>
-				<IconArrowBackUp className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Redo"
-				disabled={!state.canRedo}
-				onClick={() => editor.chain().focus().redo().run()}
-			>
-				<IconArrowForwardUp className="size-4" />
-			</ToolbarButton>
-
-			<Separator orientation="vertical" className="mx-1 h-5" />
-
-			<ToolbarButton
-				label="Bold"
-				active={state.bold}
-				onClick={() => editor.chain().focus().toggleBold().run()}
-			>
-				<IconBold className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Italic"
-				active={state.italic}
-				onClick={() => editor.chain().focus().toggleItalic().run()}
-			>
-				<IconItalic className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Strikethrough"
-				active={state.strike}
-				onClick={() => editor.chain().focus().toggleStrike().run()}
-			>
-				<IconStrikethrough className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Inline code"
-				active={state.code}
-				onClick={() => editor.chain().focus().toggleCode().run()}
-			>
-				<IconCode className="size-4" />
-			</ToolbarButton>
-
-			<Separator orientation="vertical" className="mx-1 h-5" />
-
-			<ToolbarButton
-				label="Heading 2"
-				active={state.h2}
-				onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-			>
-				<IconH2 className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Heading 3"
-				active={state.h3}
-				onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-			>
-				<IconH3 className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Heading 4"
-				active={state.h4}
-				onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-			>
-				<IconH4 className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Heading 5"
-				active={state.h5}
-				onClick={() => editor.chain().focus().toggleHeading({ level: 5 }).run()}
-			>
-				<IconH5 className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Heading 6"
-				active={state.h6}
-				onClick={() => editor.chain().focus().toggleHeading({ level: 6 }).run()}
-			>
-				<IconH6 className="size-4" />
-			</ToolbarButton>
-
-			<Separator orientation="vertical" className="mx-1 h-5" />
-
-			<ToolbarButton
-				label="Bullet list"
-				active={state.bulletList}
-				onClick={() => editor.chain().focus().toggleBulletList().run()}
-			>
-				<IconList className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Numbered list"
-				active={state.orderedList}
-				onClick={() => editor.chain().focus().toggleOrderedList().run()}
-			>
-				<IconListNumbers className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Checklist"
-				active={state.taskList}
-				onClick={() => editor.chain().focus().toggleTaskList().run()}
-			>
-				<IconListCheck className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Blockquote"
-				active={state.blockquote}
-				onClick={() => editor.chain().focus().toggleBlockquote().run()}
-			>
-				<IconBlockquote className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Code block"
-				active={state.codeBlock}
-				onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-			>
-				<IconSourceCode className="size-4" />
-			</ToolbarButton>
-
-			<Separator orientation="vertical" className="mx-1 h-5" />
-
-			{state.link ? (
+		<div className="@container/toolbar flex shrink-0 flex-wrap items-center justify-center gap-x-2 gap-y-1 border-b bg-background/95 px-3 py-1.5">
+			<ToolbarGroup>
 				<ToolbarButton
-					label="Remove link"
-					active
-					onClick={() => editor.chain().focus().unsetLink().run()}
+					label="Undo"
+					disabled={!state.canUndo}
+					onClick={() => editor.chain().focus().undo().run()}
 				>
-					<IconUnlink className="size-4" />
+					<IconArrowBackUp className="size-4" />
 				</ToolbarButton>
-			) : (
-				<ToolbarButton label="Add link" onClick={setLink}>
-					<IconLink className="size-4" />
+				<ToolbarButton
+					label="Redo"
+					disabled={!state.canRedo}
+					onClick={() => editor.chain().focus().redo().run()}
+				>
+					<IconArrowForwardUp className="size-4" />
 				</ToolbarButton>
-			)}
-			<ToolbarButton
-				label="Insert image from library"
-				onClick={() => onImageInsertClick?.()}
-			>
-				<IconPhoto className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Insert table"
-				onClick={() =>
-					editor
-						.chain()
-						.focus()
-						.insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-						.run()
-				}
-			>
-				<IconTable className="size-4" />
-			</ToolbarButton>
-			<ToolbarButton
-				label="Horizontal rule"
-				onClick={() => editor.chain().focus().setHorizontalRule().run()}
-			>
-				<IconMinus className="size-4" />
-			</ToolbarButton>
+			</ToolbarGroup>
+
+			<ToolbarDivider />
+
+			<ToolbarGroup>
+				<ToolbarButton
+					label="Bold"
+					active={state.bold}
+					onClick={() => editor.chain().focus().toggleBold().run()}
+				>
+					<IconBold className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Italic"
+					active={state.italic}
+					onClick={() => editor.chain().focus().toggleItalic().run()}
+				>
+					<IconItalic className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Strikethrough"
+					active={state.strike}
+					onClick={() => editor.chain().focus().toggleStrike().run()}
+				>
+					<IconStrikethrough className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Inline code"
+					active={state.code}
+					onClick={() => editor.chain().focus().toggleCode().run()}
+				>
+					<IconCode className="size-4" />
+				</ToolbarButton>
+			</ToolbarGroup>
+
+			<ToolbarDivider />
+
+			<ToolbarGroup>
+				<ToolbarButton
+					label="Heading 2"
+					active={state.h2}
+					onClick={() =>
+						editor.chain().focus().toggleHeading({ level: 2 }).run()
+					}
+				>
+					<IconH2 className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Heading 3"
+					active={state.h3}
+					onClick={() =>
+						editor.chain().focus().toggleHeading({ level: 3 }).run()
+					}
+				>
+					<IconH3 className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Heading 4"
+					active={state.h4}
+					onClick={() =>
+						editor.chain().focus().toggleHeading({ level: 4 }).run()
+					}
+				>
+					<IconH4 className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Heading 5"
+					active={state.h5}
+					onClick={() =>
+						editor.chain().focus().toggleHeading({ level: 5 }).run()
+					}
+				>
+					<IconH5 className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Heading 6"
+					active={state.h6}
+					onClick={() =>
+						editor.chain().focus().toggleHeading({ level: 6 }).run()
+					}
+				>
+					<IconH6 className="size-4" />
+				</ToolbarButton>
+			</ToolbarGroup>
+
+			<ToolbarDivider />
+
+			<ToolbarGroup>
+				<ToolbarButton
+					label="Bullet list"
+					active={state.bulletList}
+					onClick={() => editor.chain().focus().toggleBulletList().run()}
+				>
+					<IconList className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Numbered list"
+					active={state.orderedList}
+					onClick={() => editor.chain().focus().toggleOrderedList().run()}
+				>
+					<IconListNumbers className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Checklist"
+					active={state.taskList}
+					onClick={() => editor.chain().focus().toggleTaskList().run()}
+				>
+					<IconListCheck className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Blockquote"
+					active={state.blockquote}
+					onClick={() => editor.chain().focus().toggleBlockquote().run()}
+				>
+					<IconBlockquote className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Code block"
+					active={state.codeBlock}
+					onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+				>
+					<IconSourceCode className="size-4" />
+				</ToolbarButton>
+			</ToolbarGroup>
+
+			<ToolbarDivider />
+
+			<ToolbarGroup>
+				{state.link ? (
+					<ToolbarButton
+						label="Remove link"
+						active
+						onClick={() => editor.chain().focus().unsetLink().run()}
+					>
+						<IconUnlink className="size-4" />
+					</ToolbarButton>
+				) : (
+					<ToolbarButton label="Add link" onClick={setLink}>
+						<IconLink className="size-4" />
+					</ToolbarButton>
+				)}
+				<ToolbarButton
+					label="Insert image from library"
+					onClick={() => onImageInsertClick?.()}
+				>
+					<IconPhoto className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Insert table"
+					onClick={() =>
+						editor
+							.chain()
+							.focus()
+							.insertTable({ rows: 3, cols: 3, withHeaderRow: true })
+							.run()
+					}
+				>
+					<IconTable className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Horizontal rule"
+					onClick={() => editor.chain().focus().setHorizontalRule().run()}
+				>
+					<IconMinus className="size-4" />
+				</ToolbarButton>
+			</ToolbarGroup>
 		</div>
 	);
 }

@@ -2,7 +2,7 @@ export interface Post {
 	id: string;
 	title: string;
 	content: string;
-	lang: "fr" | "en";
+	lang: string;
 	createdAt: string;
 	updatedAt: string;
 	publishedAt?: string;

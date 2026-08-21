@@ -1,7 +1,9 @@
 import { IconChevronRight, IconHome, IconSearch } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
+import { cn } from "#/lib/utils";
 import { Separator } from "./ui/separator";
 import { SidebarTrigger } from "./ui/sidebar";
 
@@ -105,8 +107,27 @@ function buildBreadcrumbs(
 	return breadcrumbs;
 }
 
+/**
+ * The header only earns a shadow once the content slides under it, so it stays
+ * flat at rest and reads as a floating layer while scrolling.
+ */
+function useIsScrolled(threshold = 8) {
+	const [scrolled, setScrolled] = useState(false);
+
+	useEffect(() => {
+		const update = () => setScrolled(window.scrollY > threshold);
+
+		update();
+		window.addEventListener("scroll", update, { passive: true });
+		return () => window.removeEventListener("scroll", update);
+	}, [threshold]);
+
+	return scrolled;
+}
+
 export function SiteHeader() {
 	const { pathname, search } = useLocation();
+	const scrolled = useIsScrolled();
 	const isVaultRoute = pathname.startsWith("/cms/vault");
 	const vaultType = (search as { type?: string }).type ?? "";
 	const config = useQuery({
@@ -123,7 +144,19 @@ export function SiteHeader() {
 	};
 
 	return (
-		<header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b bg-background/90 px-4 backdrop-blur sm:px-6">
+		<header
+			className={cn(
+				// The inset layout offsets the main panel by 8px, so the sticky
+				// threshold must match it or the header jumps up on first scroll.
+				"sticky top-0 z-30 md:top-2",
+				"flex h-16 items-center gap-3 px-4 sm:px-6 md:rounded-t-xl",
+				"border-b bg-background/80 backdrop-blur-lg transition-shadow duration-200",
+				// The panel does not clip, so that same 8px band needs an opaque
+				// cover or scrolled content shows through above the header.
+				"md:before:absolute md:before:inset-x-0 md:before:bottom-full md:before:h-2 md:before:bg-sidebar",
+				scrolled ? "shadow-sm" : "shadow-none",
+			)}
+		>
 			<SidebarTrigger className="shrink-0" />
 			<Separator orientation="vertical" className="h-5 shrink-0" />
 

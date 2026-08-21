@@ -29,6 +29,7 @@
         "@tiptap/starter-kit": "^3.29.2",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
+        "country-flag-icons": "^1.6.20",
         "lucide-react": "^1.17.0",
         "mermaid": "^11.16.1",
         "next-themes": "^0.4.6",
@@ -784,6 +785,8 @@
     "cookie-es": ["cookie-es@3.1.1", "", {}, "sha512-UaXxwISYJPTr9hwQxMFYZ7kNhSXboMXP+Z3TRX6f1/NyaGPfuNUZOWP1pUEb75B2HjfklIYLVRfWiFZJyC6Npg=="],
 
     "cose-base": ["cose-base@1.0.3", "", { "dependencies": { "layout-base": "^1.0.0" } }, "sha512-s9whTXInMSgAp/NVXVNuVxVKzGH2qck3aQlVHxDCdAEPgtMKwc4Wq6/QKhgdEdgbLSi9rBTAcPoRa6JpiG4ksg=="],
+
+    "country-flag-icons": ["country-flag-icons@1.6.20", "", {}, "sha512-py8JiEKzjhYw6HPJ0L7SxLgCYim36UPRTZX43/kqGueUCZLSvnrqAiwW8HtQibur7mdkFQUkjOgdK+o/9FBtaw=="],
 
     "crossws": ["crossws@0.4.5", "", { "peerDependencies": { "srvx": ">=0.11.5" }, "optionalPeers": ["srvx"] }, "sha512-wUR89x/Rw7/8t+vn0CmGDYM9TD6VtARGb0LD5jq2wjtMy1vCP4M+sm6N6TigWeTYvnA8MoW29NqqXD0ep0rfBA=="],
 

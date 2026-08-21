@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MDVault logo with article stored inside a chest</title>
+  <desc id="desc">An open secure chest containing a partially visible Markdown article.</desc>
+  <defs>
+    <linearGradient id="lid" x1="88" y1="70" x2="426" y2="243" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7F6FF"/>
+      <stop offset="1" stop-color="#C7D2FE"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="65" y1="220" x2="438" y2="341" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E2E7FF"/>
+      <stop offset="1" stop-color="#9FAEF8"/>
+    </linearGradient>
+    <linearGradient id="front" x1="65" y1="286" x2="358" y2="451" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8F7FF"/>
+      <stop offset="1" stop-color="#D8DDF5"/>
+    </linearGradient>
+    <linearGradient id="side" x1="349" y1="314" x2="439" y2="434" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C5CCEB"/>
+      <stop offset="1" stop-color="#959FC9"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="160" y1="224" x2="350" y2="288" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EEF0FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#292B3B" flood-opacity=".24"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="259" cy="444" rx="185" ry="29" fill="#27293A" opacity=".16"/>
+
+  <!-- Open curved lid. -->
+  <g stroke="#383A4D" stroke-width="10" stroke-linejoin="round" filter="url(#shadow)">
+    <path d="M111 229 77 139q-5-17 8-30l40-39q12-12 29-9l218 36q21 3 34 20l27 36q9 12 5 27l-24 79Z" fill="url(#lid)"/>
+    <path d="m126 204-24-65 39-42 206 34q17 3 27 17l34 45-17 49Z" fill="#55586E"/>
+    <path d="m126 204 265 38" fill="none" stroke="#8B91B0" stroke-width="8"/>
+    <path d="m129 75 22 36 231 39 24-26" fill="none" stroke="#FFFFFF" stroke-opacity=".72" stroke-width="8"/>
+    <path d="m383 101-24 29 12 69 36 42" fill="none" stroke="#8B91B0" stroke-width="8"/>
+  </g>
+
+  <!-- Top surface and dark cavity of the chest. -->
+  <g stroke="#383A4D" stroke-width="10" stroke-linejoin="round" filter="url(#shadow)">
+    <path d="m65 257 91-52 283 49-90 61Z" fill="url(#rim)"/>
+    <path d="m101 257 68-37 231 40-60 40Z" fill="#292C3D"/>
+    <path d="m120 256 56-27 196 34-45 27Z" fill="#171A27"/>
+  </g>
+
+  <!-- The article lies flat inside the cavity instead of protruding from it. -->
+  <g filter="url(#shadow)" stroke-linejoin="round">
+    <path d="m154 256 57-32 151 27-61 38Z" fill="url(#paper)" stroke="#383A4D" stroke-width="8"/>
+    <path d="m330 245 32 6-28 17-19-4Z" fill="#C7D2FE" stroke="#383A4D" stroke-width="7"/>
+    <path d="m197 259 8-16 12 19 20-13-8 20" fill="none" stroke="#484A5D" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m281 250-10 22m0 0-7-10m7 10 15-6" fill="none" stroke="#6366F1" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="m202 278 65 12m-75 0 42 8" fill="none" stroke="#A3A8C2" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- Front wall and thick lip overlap the article, proving it is stored inside. -->
+  <g stroke="#383A4D" stroke-width="10" stroke-linejoin="round" filter="url(#shadow)">
+    <path d="m65 286 284 57v102L65 389Z" fill="url(#front)"/>
+    <path d="m349 343 90-59v102l-90 59Z" fill="url(#side)"/>
+    <path d="m65 257 284 58 90-61v31l-90 61-284-57Z" fill="url(#rim)"/>
+    <path d="m96 313 223 44v51L96 365Z" fill="#FFFFFF" fill-opacity=".2" stroke="#ABB2D3" stroke-width="8"/>
+    <path d="m375 352 38-25v42l-38 25Z" fill="#FFFFFF" fill-opacity=".12" stroke="#858DAF" stroke-width="8"/>
+    <path d="m65 257 284 58 90-61" fill="none" stroke="#FFFFFF" stroke-opacity=".72" stroke-width="7"/>
+  </g>
+
+  <!-- Padlock fixed to the chest front. -->
+  <g filter="url(#shadow)" stroke="#383A4D" stroke-linejoin="round">
+    <path d="M164 350v-17q0-31 31-31t31 31v17" fill="none" stroke-width="13" stroke-linecap="round"/>
+    <rect x="145" y="343" width="100" height="82" rx="25" fill="#F8F7FF" stroke-width="10"/>
+    <circle cx="195" cy="377" r="10" fill="#6366F1" stroke="none"/>
+    <path d="M195 385v14" stroke="#6366F1" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <path d="m87 398 30 6-18 20-31-6Z" fill="#B4BAD8" stroke="#383A4D" stroke-width="8" stroke-linejoin="round"/>
+  <path d="m320 444 29 6 24-17-29-6Z" fill="#8D96BC" stroke="#383A4D" stroke-width="8" stroke-linejoin="round"/>
+</svg>

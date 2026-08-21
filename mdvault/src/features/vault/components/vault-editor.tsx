@@ -13,6 +13,7 @@ import {
 	IconSettings,
 	IconTag,
 	IconTrash,
+	IconWorld,
 	IconWorldOff,
 	IconWorldUpload,
 	IconX,
@@ -27,6 +28,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { EditorTitleInput } from "#/components/editor-title-input";
+import { LocaleFlag } from "#/components/locale-flag";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
@@ -62,7 +64,12 @@ import {
 	type PlainTextEditorHandle,
 } from "#/features/posts/components/plain-text-editor";
 import type { ContentRevision } from "#/features/shared/content-revision";
+import {
+	getLocaleLabel,
+	includeCurrentLocale,
+} from "#/features/shared/locales";
 import { useContentRefresh } from "#/features/shared/use-content-refresh";
+import { VaultTranslationsSection } from "#/features/vault/components/vault-translations-section";
 import {
 	createVaultAssetMutation,
 	deleteVaultAssetMutation,
@@ -77,6 +84,8 @@ import { cn } from "#/lib/utils";
 interface VaultEditorProps {
 	typeConfig: AssetTypeConfig;
 	asset?: VaultAsset | null;
+	locales: readonly string[];
+	defaultLocale: string;
 }
 
 interface SettingsSectionProps {
@@ -110,7 +119,12 @@ function SettingsSection({
 	);
 }
 
-export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
+export function VaultEditor({
+	typeConfig,
+	asset,
+	locales,
+	defaultLocale,
+}: VaultEditorProps) {
 	const navigate = useNavigate();
 	const refreshContent = useContentRefresh("vault");
 	const richRef = useRef<RichTextEditorHandle>(null);
@@ -118,7 +132,8 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 	const [isPending, startTransition] = useTransition();
 	const [title, setTitle] = useState(asset?.title ?? "");
 	const [description, setDescription] = useState(asset?.description ?? "");
-	const [lang, setLang] = useState<"fr" | "en">(asset?.lang ?? "en");
+	const [lang, setLang] = useState(asset?.lang ?? defaultLocale);
+	const localeOptions = includeCurrentLocale(locales, asset?.lang);
 	const [tags, setTags] = useState<string[]>(asset?.tags ?? []);
 	const [tagInput, setTagInput] = useState("");
 	const [coverImage, setCoverImage] = useState(asset?.coverImage ?? "");
@@ -467,11 +482,18 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 				</div>
 			</header>
 
-			<div className="flex flex-1 overflow-hidden">
+			{/*
+			 * A container, not the viewport: the CMS sidebar can be open or closed, so
+			 * the workspace is narrower than the window by an amount media queries
+			 * cannot see. The split is decided by the space actually available.
+			 */}
+			<div className="@container/workspace flex flex-1 overflow-hidden">
 				<div
 					className={cn(
 						"flex-col overflow-hidden",
-						previewMode ? "hidden lg:flex lg:w-1/2" : "flex flex-1",
+						previewMode
+							? "hidden @3xl/workspace:flex @3xl/workspace:w-1/2"
+							: "flex flex-1",
 					)}
 				>
 					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
@@ -518,7 +540,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 				</div>
 
 				{previewMode ? (
-					<div className="flex min-h-0 flex-1 flex-col overflow-y-auto border-l bg-background lg:w-1/2">
+					<div className="flex min-h-0 flex-1 flex-col overflow-y-auto border-l bg-background @3xl/workspace:w-1/2">
 						<div className="sticky top-0 z-10 flex shrink-0 items-center border-b bg-background/95 px-8 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
 							Live Preview
 						</div>
@@ -563,7 +585,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 								<Select
 									value={lang}
 									onValueChange={(value) => {
-										setLang(value as "fr" | "en");
+										setLang(value);
 										markDirty();
 									}}
 								>
@@ -572,15 +594,27 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 									</SelectTrigger>
 									<SelectContent>
 										<SelectGroup>
-											<SelectItem value="en">
-												<span aria-hidden="true">🇬🇧</span> English
-											</SelectItem>
-											<SelectItem value="fr">
-												<span aria-hidden="true">🇫🇷</span> Français
-											</SelectItem>
+											{localeOptions.map((locale) => (
+												<SelectItem key={locale} value={locale}>
+													<LocaleFlag locale={locale} />
+													{getLocaleLabel(locale)}
+												</SelectItem>
+											))}
 										</SelectGroup>
 									</SelectContent>
 								</Select>
+							</SettingsSection>
+
+							<SettingsSection
+								icon={<IconWorld className="size-3.5" />}
+								title="Translations"
+							>
+								<VaultTranslationsSection
+									type={typeConfig.id}
+									assetId={asset?.id}
+									revision={revision}
+									onRevisionChange={setRevision}
+								/>
 							</SettingsSection>
 
 							<SettingsSection

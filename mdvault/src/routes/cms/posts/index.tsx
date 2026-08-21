@@ -17,21 +17,23 @@ import {
 	DEFAULT_CONTENT_FILTERS,
 	filterAndSortContent,
 } from "#/features/shared/content-filters";
+import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
 
 export const Route = createFileRoute("/cms/posts/")({
 	validateSearch: zodValidator(contentFiltersSchema),
 	loader: async ({ context }) => {
-		const posts = await context.queryClient.ensureQueryData(
-			postsListQueryOptions(),
-		);
-		return posts;
+		const [posts, config] = await Promise.all([
+			context.queryClient.ensureQueryData(postsListQueryOptions()),
+			context.queryClient.ensureQueryData(vaultConfigQueryOptions()),
+		]);
+		return { posts, config };
 	},
 	pendingComponent: PostsPending,
 	component: PostsPage,
 });
 
 function PostsPage() {
-	const posts = Route.useLoaderData();
+	const { posts, config } = Route.useLoaderData();
 	const filters = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const allTags = collectContentTags(posts);
@@ -78,8 +80,10 @@ function PostsPage() {
 				<ContentFilterBar
 					filters={filters}
 					onChange={updateFilters}
+					onClear={clearFilters}
 					label="posts"
 					availableTags={allTags}
+					locales={config.locales}
 				/>
 			) : null}
 

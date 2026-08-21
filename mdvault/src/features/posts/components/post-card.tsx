@@ -9,6 +9,7 @@ import {
 import { Link } from "@tanstack/react-router";
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { LocaleFlag } from "#/components/locale-flag";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import {
@@ -25,6 +26,7 @@ import {
 } from "#/features/posts/posts.functions";
 import type { Post } from "#/features/posts/posts.types";
 import { getPostExcerpt } from "#/features/posts/posts.utils";
+import { getLocaleLabel } from "#/features/shared/locales";
 import { useContentRefresh } from "#/features/shared/use-content-refresh";
 import { DELETE_DESCRIPTION, useConfirm } from "#/hooks/use-confirm";
 import { useValueChanged } from "#/hooks/use-value-changed";
@@ -163,7 +165,8 @@ export function PostCard({ post }: { post: Post }) {
 							variant="outline"
 							className="rounded-md text-[10px] font-medium"
 						>
-							{post.lang === "fr" ? "Français" : "English"}
+							<LocaleFlag locale={post.lang} />
+							{getLocaleLabel(post.lang)}
 						</Badge>
 
 						<div className="flex items-center gap-1">

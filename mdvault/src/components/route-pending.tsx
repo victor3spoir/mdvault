@@ -16,7 +16,7 @@ const CARD_KEYS = [
  */
 export function RoutePending() {
 	return (
-		<div className="flex min-h-screen flex-1 flex-col bg-background">
+		<div className="flex min-h-[calc(100svh-4rem)] flex-1 flex-col bg-background">
 			<main className="flex-1 p-6">
 				<div className="space-y-6">
 					<header className="flex flex-col gap-4 py-1 lg:flex-row lg:items-start lg:justify-between">

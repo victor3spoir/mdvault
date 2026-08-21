@@ -2,21 +2,23 @@ import { createFileRoute } from "@tanstack/react-router";
 import { articlesListQueryOptions } from "#/features/articles/articles.queries";
 import { PostEditor } from "#/features/posts/components/post-editor";
 import { postQueryOptions } from "#/features/posts/posts.queries";
+import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
 
 export const Route = createFileRoute("/cms/posts/$slug/edit/")({
 	loader: async ({ context, params }) => {
-		const [post, articles] = await Promise.all([
+		const [post, articles, config] = await Promise.all([
 			context.queryClient.ensureQueryData(postQueryOptions(params.slug)),
 			context.queryClient.ensureQueryData(articlesListQueryOptions()),
+			context.queryClient.ensureQueryData(vaultConfigQueryOptions()),
 		]);
 
-		return { post, articles };
+		return { post, articles, config };
 	},
 	component: EditPostPage,
 });
 
 function EditPostPage() {
-	const { post, articles } = Route.useLoaderData();
+	const { post, articles, config } = Route.useLoaderData();
 
 	if (!post) {
 		return (
@@ -28,5 +30,12 @@ function EditPostPage() {
 		);
 	}
 
-	return <PostEditor post={post} articles={articles} />;
+	return (
+		<PostEditor
+			post={post}
+			articles={articles}
+			locales={config.locales}
+			defaultLocale={config.defaultLocale}
+		/>
+	);
 }

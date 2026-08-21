@@ -49,6 +49,7 @@ const articleKind: ContentKind<Article, CreateArticleInput> = {
 			author: frontmatter.author,
 			tags: frontmatter.tags,
 			coverImage: frontmatter.coverImage,
+			translationKey: frontmatter.translationKey,
 			path,
 			sha,
 		};
@@ -66,6 +67,7 @@ const articleKind: ContentKind<Article, CreateArticleInput> = {
 			createdAt: article.createdAt,
 			updatedAt: article.updatedAt,
 			publishedDate: article.publishedAt,
+			translationKey: article.translationKey,
 		};
 	},
 
@@ -83,6 +85,7 @@ const articleKind: ContentKind<Article, CreateArticleInput> = {
 			author: input.author || author,
 			tags: input.tags,
 			coverImage: input.coverImage,
+			translationKey: input.translationKey,
 			path: "",
 			sha: "",
 		};
@@ -114,6 +117,18 @@ export async function updateArticle(
 	revision: ContentRevision,
 ): Promise<ActionResult<ContentMutationResult>> {
 	return articles.update(id, UpdateArticleSchema.parse(input), revision);
+}
+
+/**
+ * Written through the store directly: `UpdateArticleSchema` drops optional
+ * fields that are `undefined`, which would make clearing a key impossible.
+ */
+export async function setArticleTranslationKey(
+	id: string,
+	translationKey: string | undefined,
+	revision: ContentRevision,
+): Promise<ActionResult<ContentMutationResult>> {
+	return articles.update(id, { translationKey }, revision);
 }
 
 export async function deleteArticle(

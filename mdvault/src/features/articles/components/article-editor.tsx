@@ -23,6 +23,7 @@ import { compressImage } from "#/features/media/media.compress";
 import { uploadImageMutation } from "#/features/media/media.functions";
 import type { MediaFile } from "#/features/media/media.types";
 import type { ContentRevision } from "#/features/shared/content-revision";
+import { includeCurrentLocale } from "#/features/shared/locales";
 import { useContentRefresh } from "#/features/shared/use-content-refresh";
 import {
 	clearDraft,
@@ -37,6 +38,8 @@ import { cn } from "#/lib/utils";
 interface ArticleEditorProps {
 	article?: Article | null;
 	mode: "create" | "edit";
+	locales: readonly string[];
+	defaultLocale: string;
 }
 
 interface ArticleDraft {
@@ -44,7 +47,7 @@ interface ArticleDraft {
 	description: string;
 	tags: string[];
 	coverImage: string;
-	lang: "fr" | "en";
+	lang: string;
 	published: boolean;
 	content: string;
 }
@@ -58,7 +61,12 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
 	return btoa(binary);
 }
 
-export function ArticleEditor({ article, mode }: ArticleEditorProps) {
+export function ArticleEditor({
+	article,
+	mode,
+	locales,
+	defaultLocale,
+}: ArticleEditorProps) {
 	const navigate = useNavigate();
 	const router = useRouter();
 	const refreshContent = useContentRefresh("articles");
@@ -66,7 +74,8 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 	const [isPending, startTransition] = useTransition();
 	const { confirm, confirmDialog } = useConfirm();
 	const [title, setTitle] = useState(article?.title ?? "");
-	const [lang, setLang] = useState<"fr" | "en">(article?.lang ?? "en");
+	const [lang, setLang] = useState(article?.lang ?? defaultLocale);
+	const localeOptions = includeCurrentLocale(locales, article?.lang);
 	const [description, setDescription] = useState(article?.description ?? "");
 	const [tags, setTags] = useState<string[]>(article?.tags ?? []);
 	const [coverImage, setCoverImage] = useState(article?.coverImage ?? "");
@@ -423,6 +432,9 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					tags={tags}
 					coverImage={coverImage}
 					collapsed={!settingsOpen}
+					articleId={article?.id}
+					locales={localeOptions}
+					revision={revision}
 					onLangChange={(value) => {
 						setLang(value);
 						setHasUnsavedChanges(true);
@@ -439,6 +451,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 						setCoverImage(value);
 						setHasUnsavedChanges(true);
 					}}
+					onRevisionChange={setRevision}
 				/>
 			</div>
 
