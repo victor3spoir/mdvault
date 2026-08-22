@@ -1,0 +1,150 @@
+{
+  "schema_version": 1,
+  "tasks": [
+    {
+      "id": "editor-content-nodes",
+      "objective": "Add Markdown-round-tripping callout and safe media embed nodes with editor node views.",
+      "dependencies": [],
+      "read_set": [
+        "mdvault/src/features/articles/components/editor",
+        "mdvault/src/features/content/components/markdown-content.tsx"
+      ],
+      "write_set": [
+        "mdvault/src/features/articles/components/editor/callout-extension.tsx",
+        "mdvault/src/features/articles/components/editor/media-embed-extension.tsx",
+        "mdvault/src/features/articles/components/editor/rich-text-editor.tsx"
+      ],
+      "side_effects": [],
+      "owner": "coordinator",
+      "inputs": [
+        "GitHub alert syntax",
+        "standalone YouTube and Vimeo URLs"
+      ],
+      "expected_outputs": [
+        "Callouts serialize as portable GitHub alerts",
+        "Embeds serialize as their original standalone URL"
+      ],
+      "validation": [
+        "targeted Markdown round-trip tests",
+        "typecheck"
+      ],
+      "evidence_required": [
+        "passing tests",
+        "diff inspection"
+      ],
+      "stop_condition": "Both nodes parse, edit, and serialize without mathematics or unsafe arbitrary iframe support.",
+      "status": "pending"
+    },
+    {
+      "id": "editor-productivity-ui",
+      "objective": "Add slash commands, inline find/replace, live counts, and real drag handles.",
+      "dependencies": [
+        "editor-content-nodes"
+      ],
+      "read_set": [
+        "mdvault/src/features/articles/components/editor",
+        "mdvault/src/styles.css"
+      ],
+      "write_set": [
+        "mdvault/src/features/articles/components/editor",
+        "mdvault/src/styles.css",
+        "mdvault/package.json",
+        "mdvault/bun.lock"
+      ],
+      "side_effects": [
+        "install Tiptap drag-handle dependency"
+      ],
+      "owner": "coordinator",
+      "inputs": [
+        "existing toolbar patterns",
+        "Tiptap editor state"
+      ],
+      "expected_outputs": [
+        "keyboard-navigable slash menu",
+        "find next/previous and replace one/all",
+        "live word and character counts",
+        "hover/focus block drag handle"
+      ],
+      "validation": [
+        "targeted utility tests",
+        "typecheck",
+        "React Doctor"
+      ],
+      "evidence_required": [
+        "passing tests",
+        "runtime interaction check where available"
+      ],
+      "stop_condition": "All four controls work without disrupting source mode, image upload, tables, or selection menus.",
+      "status": "pending"
+    },
+    {
+      "id": "published-rendering",
+      "objective": "Render callouts and supported embeds consistently in preview and published content.",
+      "dependencies": [
+        "editor-content-nodes"
+      ],
+      "read_set": [
+        "mdvault/src/features/content/components/markdown-content.tsx"
+      ],
+      "write_set": [
+        "mdvault/src/features/content/components/markdown-content.tsx",
+        "mdvault/src/features/content"
+      ],
+      "side_effects": [],
+      "owner": "coordinator",
+      "inputs": [
+        "portable persisted Markdown"
+      ],
+      "expected_outputs": [
+        "typed callout presentation",
+        "privacy-conscious YouTube and Vimeo frames",
+        "ordinary links for unsupported URLs"
+      ],
+      "validation": [
+        "renderer utility tests",
+        "build"
+      ],
+      "evidence_required": [
+        "passing tests",
+        "render-path inspection"
+      ],
+      "stop_condition": "New persisted constructs render without mounting a read-only Tiptap editor.",
+      "status": "pending"
+    },
+    {
+      "id": "validation-review",
+      "objective": "Verify the integrated feature set and independently review the diff.",
+      "dependencies": [
+        "editor-productivity-ui",
+        "published-rendering"
+      ],
+      "read_set": [
+        "git diff",
+        "project validation output"
+      ],
+      "write_set": [],
+      "side_effects": [],
+      "owner": "coordinator",
+      "inputs": [
+        "completed implementation"
+      ],
+      "expected_outputs": [
+        "classified check results",
+        "review findings resolved or documented"
+      ],
+      "validation": [
+        "bun run check",
+        "bun run typecheck",
+        "bun run test",
+        "bun run build",
+        "React Doctor"
+      ],
+      "evidence_required": [
+        "command exit statuses",
+        "independent review"
+      ],
+      "stop_condition": "No introduced failures remain and scope is confirmed.",
+      "status": "pending"
+    }
+  ]
+}

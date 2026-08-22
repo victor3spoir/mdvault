@@ -16,7 +16,6 @@ import {
 	VaultAssetFrontmatterSchema,
 } from "#/features/vault/vault.schema";
 import { VAULT_ROOT, type VaultAsset } from "#/features/vault/vault.types";
-import { parseFrontmatter } from "#/lib/frontmatter";
 
 type CreateAssetFields = Omit<CreateVaultAssetInput, "type">;
 
@@ -57,6 +56,7 @@ function vaultKind(type: string): ContentKind<VaultAsset, CreateAssetFields> {
 				author: frontmatter.author,
 				tags: frontmatter.tags,
 				coverImage: frontmatter.coverImage,
+				translationKey: frontmatter.translationKey,
 				path,
 				sha,
 			};
@@ -75,6 +75,7 @@ function vaultKind(type: string): ContentKind<VaultAsset, CreateAssetFields> {
 				createdAt: asset.createdAt,
 				updatedAt: asset.updatedAt,
 				publishedDate: asset.publishedAt,
+				translationKey: asset.translationKey,
 			};
 		},
 
@@ -93,6 +94,7 @@ function vaultKind(type: string): ContentKind<VaultAsset, CreateAssetFields> {
 				author: input.author || author,
 				tags: input.tags,
 				coverImage: input.coverImage,
+				translationKey: input.translationKey,
 				path: "",
 				sha: "",
 			};
@@ -114,20 +116,6 @@ function storeFor(type: string) {
 	const store = createContentStore(vaultKind(type));
 	storeCache.set(type, store);
 	return store;
-}
-
-/** Exposed for tests: parses a stored asset document into its metadata. */
-export function parseVaultFrontmatter(content: string) {
-	const { data, body } = parseFrontmatter(content);
-	const document = vaultKind(String(data.type ?? "")).toDocument({
-		id: "preview",
-		data,
-		body,
-		path: "",
-		sha: "",
-	});
-
-	return { frontmatter: document, body: document.content };
 }
 
 export async function listAssets(
@@ -162,6 +150,15 @@ export async function updateAsset(
 		UpdateVaultAssetSchema.parse(input),
 		revision,
 	);
+}
+
+export async function setAssetTranslationKey(
+	type: string,
+	id: string,
+	translationKey: string | undefined,
+	revision: ContentRevision,
+): Promise<ActionResult<ContentMutationResult>> {
+	return storeFor(type).update(id, { translationKey }, revision);
 }
 
 export async function deleteAsset(

@@ -1,11 +1,6 @@
 /**
- * Metadata sanitisation.
- *
- * These helpers exist to keep *metadata* (titles, descriptions, tags) plain and
- * predictable, not to defend against XSS. Rendering safety comes from the
- * layers that actually own it: the markdown renderer never emits raw HTML, and
- * React refuses `javascript:` URLs. Pattern matching on strings such as
- * `javascript:` is trivially bypassed and must not be relied on.
+ * Keeps metadata plain and predictable. This is not an XSS defence: the
+ * markdown renderer never emits raw HTML and React refuses `javascript:` URLs.
  */
 
 /**
@@ -41,7 +36,7 @@ export function isValidUrl(url: string): boolean {
 	}
 }
 
-export function sanitizeTag(tag: string): string {
+function sanitizeTag(tag: string): string {
 	if (typeof tag !== "string" || !tag) {
 		return "";
 	}

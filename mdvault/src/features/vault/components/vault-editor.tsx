@@ -8,16 +8,17 @@ import {
 	IconFileText,
 	IconLanguage,
 	IconLoader2,
+	IconMarkdown,
 	IconPhoto,
 	IconPlus,
 	IconSettings,
 	IconTag,
 	IconTrash,
+	IconWorld,
 	IconWorldOff,
 	IconWorldUpload,
 	IconX,
 } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useRouter } from "@tanstack/react-router";
 import {
 	type ReactNode,
@@ -28,6 +29,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { EditorTitleInput } from "#/components/editor-title-input";
+import { LocaleFlag } from "#/components/locale-flag";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
@@ -64,12 +66,17 @@ import {
 } from "#/features/posts/components/plain-text-editor";
 import type { ContentRevision } from "#/features/shared/content-revision";
 import {
+	getLocaleLabel,
+	includeCurrentLocale,
+} from "#/features/shared/locales";
+import { useContentRefresh } from "#/features/shared/use-content-refresh";
+import { VaultTranslationsSection } from "#/features/vault/components/vault-translations-section";
+import {
 	createVaultAssetMutation,
 	deleteVaultAssetMutation,
 	setVaultAssetPublishedMutation,
 	updateVaultAssetMutation,
 } from "#/features/vault/vault.functions";
-import { invalidateVaultQueries } from "#/features/vault/vault.queries";
 import type { AssetTypeConfig, VaultAsset } from "#/features/vault/vault.types";
 import { useConfirm } from "#/hooks/use-confirm";
 import { useUnsavedChanges } from "#/hooks/use-unsaved-changes";
@@ -78,6 +85,8 @@ import { cn } from "#/lib/utils";
 interface VaultEditorProps {
 	typeConfig: AssetTypeConfig;
 	asset?: VaultAsset | null;
+	locales: readonly string[];
+	defaultLocale: string;
 }
 
 interface SettingsSectionProps {
@@ -111,15 +120,21 @@ function SettingsSection({
 	);
 }
 
-export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
+export function VaultEditor({
+	typeConfig,
+	asset,
+	locales,
+	defaultLocale,
+}: VaultEditorProps) {
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
+	const refreshContent = useContentRefresh("vault");
 	const richRef = useRef<RichTextEditorHandle>(null);
 	const plainRef = useRef<PlainTextEditorHandle>(null);
 	const [isPending, startTransition] = useTransition();
 	const [title, setTitle] = useState(asset?.title ?? "");
 	const [description, setDescription] = useState(asset?.description ?? "");
-	const [lang, setLang] = useState<"fr" | "en">(asset?.lang ?? "en");
+	const [lang, setLang] = useState(asset?.lang ?? defaultLocale);
+	const localeOptions = includeCurrentLocale(locales, asset?.lang);
 	const [tags, setTags] = useState<string[]>(asset?.tags ?? []);
 	const [tagInput, setTagInput] = useState("");
 	const [coverImage, setCoverImage] = useState(asset?.coverImage ?? "");
@@ -127,6 +142,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 	const [content, setContent] = useState(asset?.content ?? "");
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [previewMode, setPreviewMode] = useState(false);
+	const [sourceMode, setSourceMode] = useState(false);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const [revision, setRevision] = useState<ContentRevision | null>(
 		asset ? { path: asset.path, sha: asset.sha } : null,
@@ -174,15 +190,36 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 	);
 
 	const handleImageInsert = (image: MediaFile) => {
-		richRef.current?.insertMarkdown(`![image](${image.url})`);
+		const alt =
+			image.name
+				.trim()
+				.replace(/\.[^.]+$/, "")
+				.replace(/[-_]+/g, " ")
+				.replace(/[[\]\r\n]/g, " ") || "Image";
+		richRef.current?.insertMarkdown(`![${alt}](${image.url})`);
 		setImageInsertDialogOpen(false);
 		markDirty();
 	};
 
-	const getMarkdown = () =>
-		(isRich
-			? richRef.current?.getMarkdown()
-			: plainRef.current?.getMarkdown()) ?? "";
+	const getMarkdown = () => {
+		if (isRich) {
+			return sourceMode ? content : (richRef.current?.getMarkdown() ?? "");
+		}
+
+		return plainRef.current?.getMarkdown() ?? "";
+	};
+
+	const handleToggleSource = () => {
+		if (!isRich) return;
+
+		if (sourceMode) {
+			richRef.current?.setMarkdown(content, false);
+		} else {
+			setContent(richRef.current?.getMarkdown() ?? content);
+		}
+
+		setSourceMode((value) => !value);
+	};
 
 	function commitTag() {
 		const next = tagInput.trim().toLowerCase();
@@ -218,7 +255,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 						data: { ...input, type: typeConfig.id },
 					});
 					setHasUnsavedChanges(false);
-					await invalidateVaultQueries(queryClient);
+					await refreshContent();
 					allowNavigation();
 					await navigate({
 						to: "/cms/vault/$id/edit",
@@ -231,8 +268,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 					});
 					setRevision(next);
 					setHasUnsavedChanges(false);
-					await invalidateVaultQueries(queryClient);
-					router.invalidate();
+					await refreshContent();
 				}
 
 				toast.success("Saved");
@@ -256,8 +292,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 				});
 				setRevision(next);
 				setPublished(!published);
-				await invalidateVaultQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 				toast.success(published ? "Unpublished" : "Published");
 			} catch (error) {
 				toast.error(
@@ -287,8 +322,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 				await deleteVaultAssetMutation({
 					data: { type: typeConfig.id, id: current.id, revision },
 				});
-				await invalidateVaultQueries(queryClient);
-				router.invalidate();
+				await refreshContent();
 				toast.success("Deleted");
 				allowNavigation();
 				await navigate({
@@ -305,7 +339,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 
 	return (
 		<div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-background">
-			<header className="flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
+			<header className="flex h-12 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
 				<div className="flex items-center gap-3">
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -331,21 +365,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 
 					<Separator orientation="vertical" className="h-5" />
 
-					<nav className="flex items-center gap-2 text-sm">
-						<Link
-							to="/cms/vault"
-							search={{ type: typeConfig.id, searchQuery: "" }}
-							className="text-muted-foreground transition-colors hover:text-foreground"
-						>
-							{typeConfig.label}
-						</Link>
-						<span className="text-muted-foreground/50">›</span>
-						<span className="max-w-60 truncate font-medium">
-							{title || "Untitled"}
-						</span>
-					</nav>
-
-					<div className="ml-3 flex items-center gap-2">
+					<div className="flex items-center gap-2">
 						<Badge
 							variant="secondary"
 							className={
@@ -382,6 +402,26 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 				</div>
 
 				<div className="flex items-center gap-1.5">
+					{isRich ? (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant={sourceMode ? "secondary" : "ghost"}
+									size="icon"
+									className="size-8 rounded-lg"
+									aria-label="Toggle markdown source"
+									aria-pressed={sourceMode}
+									onClick={handleToggleSource}
+								>
+									<IconMarkdown className="size-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent side="bottom">
+								{sourceMode ? "Back to the editor" : "Markdown source"}
+							</TooltipContent>
+						</Tooltip>
+					) : null}
+
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Button
@@ -485,14 +525,21 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 				</div>
 			</header>
 
-			<div className="flex flex-1 overflow-hidden">
+			{/*
+			 * A container, not the viewport: the CMS sidebar can be open or closed, so
+			 * the workspace is narrower than the window by an amount media queries
+			 * cannot see. The split is decided by the space actually available.
+			 */}
+			<div className="@container/workspace flex flex-1 overflow-hidden">
 				<div
 					className={cn(
 						"flex-col overflow-hidden",
-						previewMode ? "hidden lg:flex lg:w-1/2" : "flex flex-1",
+						previewMode
+							? "hidden @3xl/workspace:flex @3xl/workspace:w-1/2"
+							: "flex flex-1",
 					)}
 				>
-					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
+					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-3">
 						<EditorTitleInput
 							value={title}
 							placeholder={`${typeConfig.label.replace(/s$/i, "")} title...`}
@@ -502,7 +549,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 								markDirty();
 							}}
 						/>
-						<div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+						<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
 							<span>{stats.wordCount} words</span>
 							<span>•</span>
 							<span>{isRich ? "Rich editor" : "Plain text"}</span>
@@ -511,16 +558,35 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
 						{isRich ? (
-							<RichTextEditor
-								ref={richRef}
-								markdown={asset?.content ?? ""}
-								onImageUpload={handleImageUpload}
-								onImageInsertClick={() => setImageInsertDialogOpen(true)}
-								onChange={(value) => {
-									setContent(value);
-									markDirty();
-								}}
-							/>
+							<>
+								<div
+									className={cn("flex min-h-0 flex-1", sourceMode && "hidden")}
+								>
+									<RichTextEditor
+										ref={richRef}
+										markdown={asset?.content ?? ""}
+										onImageUpload={handleImageUpload}
+										onImageInsertClick={() => setImageInsertDialogOpen(true)}
+										onChange={(value) => {
+											setContent(value);
+											markDirty();
+										}}
+									/>
+								</div>
+
+								{sourceMode ? (
+									<textarea
+										value={content}
+										aria-label="Markdown source"
+										spellCheck={false}
+										onChange={(event) => {
+											setContent(event.target.value);
+											markDirty();
+										}}
+										className="min-h-0 flex-1 resize-none bg-transparent px-8 py-6 font-mono text-sm leading-7 outline-none"
+									/>
+								) : null}
+							</>
 						) : (
 							<PlainTextEditor
 								ref={plainRef}
@@ -536,7 +602,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 				</div>
 
 				{previewMode ? (
-					<div className="flex min-h-0 flex-1 flex-col overflow-y-auto border-l bg-background lg:w-1/2">
+					<div className="flex min-h-0 flex-1 flex-col overflow-y-auto border-l bg-background @3xl/workspace:w-1/2">
 						<div className="sticky top-0 z-10 flex shrink-0 items-center border-b bg-background/95 px-8 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
 							Live Preview
 						</div>
@@ -581,7 +647,7 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 								<Select
 									value={lang}
 									onValueChange={(value) => {
-										setLang(value as "fr" | "en");
+										setLang(value);
 										markDirty();
 									}}
 								>
@@ -590,15 +656,27 @@ export function VaultEditor({ typeConfig, asset }: VaultEditorProps) {
 									</SelectTrigger>
 									<SelectContent>
 										<SelectGroup>
-											<SelectItem value="en">
-												<span aria-hidden="true">🇬🇧</span> English
-											</SelectItem>
-											<SelectItem value="fr">
-												<span aria-hidden="true">🇫🇷</span> Français
-											</SelectItem>
+											{localeOptions.map((locale) => (
+												<SelectItem key={locale} value={locale}>
+													<LocaleFlag locale={locale} />
+													{getLocaleLabel(locale)}
+												</SelectItem>
+											))}
 										</SelectGroup>
 									</SelectContent>
 								</Select>
+							</SettingsSection>
+
+							<SettingsSection
+								icon={<IconWorld className="size-3.5" />}
+								title="Translations"
+							>
+								<VaultTranslationsSection
+									type={typeConfig.id}
+									assetId={asset?.id}
+									revision={revision}
+									onRevisionChange={setRevision}
+								/>
 							</SettingsSection>
 
 							<SettingsSection

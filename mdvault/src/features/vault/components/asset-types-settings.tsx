@@ -181,7 +181,7 @@ export function AssetTypesSettings() {
 					Loading configuration...
 				</div>
 			) : (
-				<div className="grid grid-cols-[repeat(auto-fill,minmax(min(260px,100%),1fr))] gap-4">
+				<div className="grid grid-cols-[repeat(auto-fill,minmax(min(220px,100%),1fr))] gap-4">
 					{types.map((type) => {
 						const Icon = getAssetIcon(type.icon);
 						return (

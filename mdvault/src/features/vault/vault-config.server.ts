@@ -1,3 +1,8 @@
+import type { ContentLocaleConfig } from "#/features/shared/locales";
+import {
+	DEFAULT_CONTENT_LOCALE,
+	DEFAULT_CONTENT_LOCALES,
+} from "#/features/shared/locales";
 import type { ActionResult } from "#/features/shared/shared.types";
 import { VaultConfigSchema } from "#/features/vault/vault.schema";
 import {
@@ -16,7 +21,12 @@ import {
 import { base64ToUtf8, utf8ToBase64 } from "#/lib/server/github-files.server";
 import { logger } from "#/lib/server/logger";
 
-const EMPTY_CONFIG: VaultConfig = { version: 1, assetTypes: [] };
+const EMPTY_CONFIG: VaultConfig = {
+	version: 1,
+	assetTypes: [],
+	locales: [...DEFAULT_CONTENT_LOCALES],
+	defaultLocale: DEFAULT_CONTENT_LOCALE,
+};
 
 export async function readVaultConfig(): Promise<
 	ActionResult<VaultConfigFile>
@@ -139,10 +149,8 @@ export async function addAssetType(
 		};
 		VaultConfigSchema.parse(next);
 
-		// The config is the source of truth and is guarded by its file revision, so
-		// it is written first. The folder is derived state and is reconciled after;
-		// a failure there leaves a declared type with no folder, which the next
-		// write repairs, rather than an orphan folder with no type.
+		// Config first: it is the source of truth and revision guarded. A failure
+		// after it leaves a type without a folder, which the next write repairs.
 		await writeVaultConfig(next, `Add asset type: ${type.id}`, sha);
 		await ensureTypeFolder(type.id);
 
@@ -213,6 +221,30 @@ export async function removeAssetType(
 		return { success: true, data: next };
 	} catch (error) {
 		logger.error("Failed to remove asset type", error);
+		return {
+			success: false,
+			error: createContentErrorMessage(error, "Vault config"),
+		};
+	}
+}
+
+export async function updateContentLocales(
+	locales: ContentLocaleConfig,
+): Promise<ActionResult<VaultConfig>> {
+	try {
+		const current = await readVaultConfig();
+		if (!current.success) {
+			return current;
+		}
+
+		const { config, sha } = current.data;
+		const next = VaultConfigSchema.parse({ ...config, ...locales });
+
+		await writeVaultConfig(next, "Update content languages", sha);
+
+		return { success: true, data: next };
+	} catch (error) {
+		logger.error("Failed to update content languages", error);
 		return {
 			success: false,
 			error: createContentErrorMessage(error, "Vault config"),

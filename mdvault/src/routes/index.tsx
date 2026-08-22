@@ -2,7 +2,6 @@ import {
 	IconArrowRight,
 	IconBrandGithub,
 	IconRocket,
-	IconSparkles,
 	IconStack2,
 	IconWriting,
 } from "@tabler/icons-react";
@@ -24,10 +23,14 @@ const highlights = [
 
 function LandingPage() {
 	return (
-		<main className="relative isolate flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 py-8 text-center">
-			<div className="absolute top-4 right-4 z-20">
-				<ThemeToggle />
-			</div>
+		<main className="relative isolate flex min-h-screen w-full flex-col items-center justify-center overflow-hidden bg-background px-4 pt-20 pb-10 text-center">
+			<header className="absolute inset-x-0 top-0 z-30">
+				<nav className="mx-auto flex h-16 w-full max-w-5xl items-center justify-between px-4 sm:px-6">
+					<div className="flex items-center gap-2">
+						<ThemeToggle />
+					</div>
+				</nav>
+			</header>
 			<div className="absolute inset-0 z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[44px_44px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
 			<LandingBackground />
 			<div className="absolute top-0 left-1/2 z-10 h-100 w-150 -translate-x-1/2 bg-primary/15 opacity-60 blur-[120px]" />
@@ -40,7 +43,6 @@ function LandingPage() {
 				</div>
 
 				<div className="animate-in slide-in-from-top-4 fade-in inline-flex items-center gap-2 rounded-full border bg-muted/50 px-3 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur-sm duration-1000 delay-150">
-					<IconSparkles className="h-3 w-3 sm:h-4 sm:w-4" />
 					<span className="whitespace-nowrap">
 						GitHub-powered Markdown content management
 					</span>
@@ -49,13 +51,27 @@ function LandingPage() {
 				<div className="animate-in slide-in-from-bottom-4 fade-in flex max-w-3xl flex-col gap-3 duration-1000 delay-200">
 					<h1 className="text-3xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-6xl">
 						Welcome to MDVault, <br />
-						<span className="bg-linear-to-r from-primary via-primary/80 to-accent bg-clip-text text-transparent">
+						<span className="relative inline-block text-indigo-500 dark:text-indigo-400">
 							All Vaulted
+							<svg
+								aria-hidden="true"
+								viewBox="0 0 220 12"
+								preserveAspectRatio="none"
+								className="absolute -bottom-2 left-0 h-2.5 w-full text-indigo-500/40 dark:text-indigo-400/40 sm:-bottom-3 sm:h-3"
+							>
+								<path
+									d="M3 9C45 3 120 2 217 6"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="5"
+									strokeLinecap="round"
+								/>
+							</svg>
 						</span>
 					</h1>
 					<p className="mx-auto max-w-2xl text-sm leading-snug text-muted-foreground sm:text-base">
 						Write, organize and publish your articles, posts and custom content
-						types — with the images they use — versioned in your own GitHub
+						types, with the images they use, versioned in your own GitHub
 						repository.
 					</p>
 				</div>

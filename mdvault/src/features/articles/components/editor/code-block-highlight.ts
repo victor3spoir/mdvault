@@ -24,7 +24,6 @@ function buildDecorations(doc: ProseMirrorNode, nodeName: string) {
 		}
 
 		const { tokens } = highlighter.highlight(code, { lang: language });
-		// content starts right after the opening tag of the code block
 		let offset = pos + 1;
 
 		for (const token of tokens) {

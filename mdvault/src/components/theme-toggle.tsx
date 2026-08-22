@@ -68,21 +68,8 @@ export function ThemeToggle() {
 			onClick={() => setTheme(nextTheme)}
 			aria-label={`Current theme: ${currentLabel}. Switch to ${nextLabel}.`}
 			title={`Current theme: ${currentLabel}. Switch to ${nextLabel}.`}
-			className={cn(
-				"group relative h-10 w-10 overflow-hidden rounded-xl border border-border/80 text-foreground shadow-xs transition-[background-color,box-shadow,translate] duration-200 ease-out hover:shadow-sm [@media(hover:hover)and(pointer:fine)]:hover:-translate-y-0.5",
-				activeTheme === "dark"
-					? "bg-muted/55 hover:bg-muted/75"
-					: "bg-background/95 hover:bg-muted/65",
-			)}
+			className="group relative size-9 overflow-hidden rounded-lg border border-border bg-background text-foreground shadow-xs transition-colors duration-200 ease-out hover:bg-muted"
 		>
-			<span
-				className={cn(
-					"pointer-events-none absolute inset-0 opacity-90 transition-opacity duration-300 group-hover:opacity-100",
-					activeTheme === "dark"
-						? "bg-[linear-gradient(135deg,rgba(255,255,255,0.12)_0,rgba(255,255,255,0.12)_12%,transparent_12%,transparent_24%),radial-gradient(circle_at_70%_28%,rgba(96,165,250,0.22),transparent_42%)]"
-						: "bg-[linear-gradient(135deg,rgba(15,23,42,0.05)_0,rgba(15,23,42,0.05)_12%,transparent_12%,transparent_24%),radial-gradient(circle_at_70%_28%,rgba(56,189,248,0.14),transparent_42%)]",
-				)}
-			/>
 			{themeOrder.map((mode) => {
 				const Icon = themeIcons[mode];
 				const isActive = currentTheme === mode;

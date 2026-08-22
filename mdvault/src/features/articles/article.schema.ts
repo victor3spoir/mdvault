@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+	DEFAULT_CONTENT_LOCALE,
+	LocaleSchema,
+} from "#/features/shared/locales";
 import { isValidUrl, sanitizeTags, sanitizeText } from "#/lib/sanitize";
 
 const titleValidator = z
@@ -66,21 +70,37 @@ const authorValidator = z
 	.optional()
 	.transform((value) => (value ? sanitizeText(value) : undefined));
 
-const langValidator = z.enum(["fr", "en"]).default("en");
+const langValidator = LocaleSchema.default(DEFAULT_CONTENT_LOCALE);
 const publishedValidator = z.boolean().default(false);
 const optionalFrontmatterText = z.string().trim().min(1).optional();
+
+/**
+ * Groups the language variants of one article. Restricted to slug characters
+ * so a key stays usable in a URL if the public site ever routes on it.
+ */
+const translationKeyValidator = z
+	.string()
+	.trim()
+	.min(1, "Translation key cannot be empty")
+	.max(64, "Translation key must be less than 64 characters")
+	.regex(
+		/^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+		"Translation key can only contain lowercase letters, numbers and hyphens",
+	)
+	.optional();
 
 export const ArticleFrontmatterSchema = z.object({
 	title: z.string().trim().min(1).default("Untitled"),
 	description: z.string().optional(),
 	published: z.boolean().default(false),
-	lang: z.enum(["fr", "en"]).default("en"),
+	lang: LocaleSchema.default(DEFAULT_CONTENT_LOCALE),
 	author: optionalFrontmatterText,
 	tags: z.array(z.string()).optional(),
 	coverImage: z.string().trim().min(1).optional(),
 	createdAt: optionalFrontmatterText,
 	updatedAt: optionalFrontmatterText,
 	publishedDate: optionalFrontmatterText,
+	translationKey: translationKeyValidator,
 });
 
 export const CreateArticleSchema = z.object({
@@ -92,6 +112,7 @@ export const CreateArticleSchema = z.object({
 	tags: tagsValidator,
 	author: authorValidator,
 	published: publishedValidator,
+	translationKey: translationKeyValidator,
 });
 
 export const UpdateArticleSchema = z.object({
@@ -103,6 +124,7 @@ export const UpdateArticleSchema = z.object({
 	tags: tagsValidator.optional(),
 	author: authorValidator,
 	published: publishedValidator.optional(),
+	translationKey: translationKeyValidator,
 });
 
 export type CreateArticleInput = z.infer<typeof CreateArticleSchema>;

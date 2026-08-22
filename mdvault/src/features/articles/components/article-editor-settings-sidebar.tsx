@@ -4,9 +4,11 @@ import {
 	IconPhoto,
 	IconPlus,
 	IconTag,
+	IconWorld,
 	IconX,
 } from "@tabler/icons-react";
 import { type ReactNode, useState } from "react";
+import { LocaleFlag } from "#/components/locale-flag";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
@@ -19,21 +21,28 @@ import {
 	SelectValue,
 } from "#/components/ui/select";
 import { Textarea } from "#/components/ui/textarea";
+import { ArticleTranslationsSection } from "#/features/articles/components/article-translations-section";
 import { CoverImageSelector } from "#/features/media/components/cover-image-selector";
+import type { ContentRevision } from "#/features/shared/content-revision";
+import { getLocaleLabel } from "#/features/shared/locales";
 import { cn } from "#/lib/utils";
 
 const DESCRIPTION_RECOMMENDED_LENGTH = 160;
 
 interface ArticleEditorSettingsSidebarProps {
-	lang: "fr" | "en";
+	lang: string;
+	locales: readonly string[];
 	description: string;
 	tags: string[];
 	coverImage: string;
 	collapsed: boolean;
-	onLangChange: (value: "fr" | "en") => void;
+	articleId?: string;
+	revision: ContentRevision | null;
+	onLangChange: (value: string) => void;
 	onDescriptionChange: (value: string) => void;
 	onTagsChange: (value: string[]) => void;
 	onCoverImageChange: (url: string) => void;
+	onRevisionChange: (revision: ContentRevision) => void;
 }
 
 interface SettingsSectionProps {
@@ -76,10 +85,14 @@ export function ArticleEditorSettingsSidebar({
 	tags,
 	coverImage,
 	collapsed,
+	articleId,
+	locales,
+	revision,
 	onLangChange,
 	onDescriptionChange,
 	onTagsChange,
 	onCoverImageChange,
+	onRevisionChange,
 }: ArticleEditorSettingsSidebarProps) {
 	const [tagInput, setTagInput] = useState("");
 
@@ -100,8 +113,8 @@ export function ArticleEditorSettingsSidebar({
 			id="article-settings-sidebar"
 			aria-label="Article settings"
 			className={cn(
-				"shrink-0 border-l bg-muted/20 transition-[width,opacity] duration-200 ease-out",
-				collapsed ? "w-0 overflow-hidden" : "w-80",
+				"shrink-0 bg-muted/20 transition-[width,opacity] duration-200 ease-out",
+				collapsed ? "w-0 overflow-hidden" : "w-80 border-l",
 			)}
 		>
 			<div className="flex h-full w-80 flex-col overflow-hidden">
@@ -115,24 +128,32 @@ export function ArticleEditorSettingsSidebar({
 						title="Language"
 						htmlFor="article-language"
 					>
-						<Select
-							value={lang}
-							onValueChange={(value) => onLangChange(value as "fr" | "en")}
-						>
+						<Select value={lang} onValueChange={onLangChange}>
 							<SelectTrigger id="article-language" className="w-full">
 								<SelectValue />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectGroup>
-									<SelectItem value="en">
-										<span aria-hidden="true">🇬🇧</span> English
-									</SelectItem>
-									<SelectItem value="fr">
-										<span aria-hidden="true">🇫🇷</span> Français
-									</SelectItem>
+									{locales.map((locale) => (
+										<SelectItem key={locale} value={locale}>
+											<LocaleFlag locale={locale} />
+											{getLocaleLabel(locale)}
+										</SelectItem>
+									))}
 								</SelectGroup>
 							</SelectContent>
 						</Select>
+					</SettingsSection>
+
+					<SettingsSection
+						icon={<IconWorld className="size-3.5" />}
+						title="Translations"
+					>
+						<ArticleTranslationsSection
+							articleId={articleId}
+							revision={revision}
+							onRevisionChange={onRevisionChange}
+						/>
 					</SettingsSection>
 
 					<SettingsSection
@@ -220,7 +241,7 @@ export function ArticleEditorSettingsSidebar({
 										<button
 											type="button"
 											aria-label={`Remove tag ${tag}`}
-											className="flex size-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+											className="flex size-4 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
 											onClick={() =>
 												onTagsChange(tags.filter((value) => value !== tag))
 											}

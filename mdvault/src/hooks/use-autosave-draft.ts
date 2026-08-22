@@ -31,7 +31,7 @@ export function loadDraft<T>(key: string): StoredDraft<T> | null {
 	}
 }
 
-export function saveDraft<T>(key: string, data: T) {
+function saveDraft<T>(key: string, data: T) {
 	if (typeof window === "undefined") {
 		return;
 	}

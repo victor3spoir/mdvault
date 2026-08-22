@@ -1,7 +1,6 @@
 import { IconFileText } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
@@ -10,10 +9,7 @@ import { MediaFilters } from "#/features/media/components/media-filters";
 import { MediaGallery } from "#/features/media/components/media-gallery";
 import { MediaUploadSheet } from "#/features/media/components/media-upload-sheet";
 import { deleteImageMutation } from "#/features/media/media.functions";
-import {
-	mediaListQueryOptions,
-	prefetchMediaDataUrls,
-} from "#/features/media/media.queries";
+import { mediaListQueryOptions } from "#/features/media/media.queries";
 import type { MediaFile } from "#/features/media/media.types";
 
 export const Route = createFileRoute("/cms/media/")({
@@ -29,20 +25,12 @@ export const Route = createFileRoute("/cms/media/")({
 
 function MediaPage() {
 	const initialImages = Route.useLoaderData();
-	const queryClient = useQueryClient();
 	const router = useRouter();
 	const [images, setImages] = useState(initialImages);
 	const [search, setSearch] = useState("");
 	const [filter, setFilter] = useState("all");
 	const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
 	const [isPending, startTransition] = useTransition();
-
-	useEffect(() => {
-		void prefetchMediaDataUrls(
-			queryClient,
-			initialImages.map((image) => image.url),
-		);
-	}, [initialImages, queryClient]);
 
 	const imageTypes = useMemo(
 		() =>
@@ -162,7 +150,7 @@ function MediaPage() {
 function MediaPending() {
 	return (
 		<PageLayout title="Media" description="Loading your media library...">
-			<div className="grid grid-cols-[repeat(auto-fill,minmax(min(180px,100%),1fr))] gap-4">
+			<div className="grid grid-cols-[repeat(auto-fill,minmax(min(200px,100%),1fr))] gap-4">
 				{[
 					"media-skeleton-1",
 					"media-skeleton-2",

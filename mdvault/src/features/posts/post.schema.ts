@@ -1,4 +1,8 @@
 import { z } from "zod";
+import {
+	DEFAULT_CONTENT_LOCALE,
+	LocaleSchema,
+} from "#/features/shared/locales";
 import { isValidUrl, sanitizeText } from "#/lib/sanitize";
 
 const titleValidator = z
@@ -39,14 +43,14 @@ const authorValidator = z
 	.optional()
 	.transform((value) => (value ? sanitizeText(value) : undefined));
 
-const langValidator = z.enum(["fr", "en"]).default("en");
+const langValidator = LocaleSchema.default(DEFAULT_CONTENT_LOCALE);
 const publishedValidator = z.boolean().default(false);
 const optionalFrontmatterText = z.string().trim().min(1).optional();
 
 export const PostFrontmatterSchema = z.object({
 	title: z.string().trim().min(1).default("Untitled"),
 	published: z.boolean().default(false),
-	lang: z.enum(["fr", "en"]).default("en"),
+	lang: LocaleSchema.default(DEFAULT_CONTENT_LOCALE),
 	author: optionalFrontmatterText,
 	article: optionalFrontmatterText,
 	coverImage: z.string().trim().min(1).optional(),

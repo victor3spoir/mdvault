@@ -17,11 +17,11 @@ import {
 	IconWorldOff,
 	IconWorldUpload,
 } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { type ReactNode, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { EditorTitleInput } from "#/components/editor-title-input";
+import { LocaleFlag } from "#/components/locale-flag";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
@@ -54,15 +54,22 @@ import {
 	unpublishPostMutation,
 	updatePostMutation,
 } from "#/features/posts/posts.functions";
-import { invalidatePostQueries } from "#/features/posts/posts.queries";
 import type { Post } from "#/features/posts/posts.types";
 import type { ContentRevision } from "#/features/shared/content-revision";
+import {
+	getLocaleLabel,
+	includeCurrentLocale,
+} from "#/features/shared/locales";
+import { useContentRefresh } from "#/features/shared/use-content-refresh";
+import { DELETE_DESCRIPTION, useConfirm } from "#/hooks/use-confirm";
 import { useUnsavedChanges } from "#/hooks/use-unsaved-changes";
 import { cn } from "#/lib/utils";
 
 interface PostEditorProps {
 	post?: Post | null;
 	articles: Article[];
+	locales: readonly string[];
+	defaultLocale: string;
 }
 
 interface SettingsSectionProps {
@@ -96,14 +103,21 @@ function SettingsSection({
 	);
 }
 
-export function PostEditor({ post, articles }: PostEditorProps) {
+export function PostEditor({
+	post,
+	articles,
+	locales,
+	defaultLocale,
+}: PostEditorProps) {
 	const navigate = useNavigate();
-	const queryClient = useQueryClient();
+	const refreshContent = useContentRefresh("posts");
 	const editorRef = useRef<PlainTextEditorHandle>(null);
 	const [isPending, startTransition] = useTransition();
+	const { confirm, confirmDialog } = useConfirm();
 	const [title, setTitle] = useState(post?.title ?? "");
 	const [content, setContent] = useState(post?.content ?? "");
-	const [lang, setLang] = useState<"fr" | "en">(post?.lang ?? "fr");
+	const [lang, setLang] = useState(post?.lang ?? defaultLocale);
+	const localeOptions = includeCurrentLocale(locales, post?.lang);
 	const [articleId, setArticleId] = useState(post?.article ?? "");
 	const [coverImage, setCoverImage] = useState(post?.coverImage ?? "");
 	const [author, setAuthor] = useState(post?.author ?? "");
@@ -142,7 +156,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 				if (mode === "create") {
 					const id = await createPostMutation({ data: input });
 					toast.success("Post created");
-					await invalidatePostQueries(queryClient);
+					await refreshContent();
 					setHasUnsavedChanges(false);
 					allowNavigation();
 					await navigate({
@@ -159,7 +173,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 				setRevision(nextRevision);
 				setHasUnsavedChanges(false);
 				toast.success("Post saved");
-				await invalidatePostQueries(queryClient);
+				await refreshContent();
 			} catch (error) {
 				toast.error(
 					error instanceof Error ? error.message : "Failed to save post",
@@ -181,7 +195,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 				setRevision(nextRevision);
 				setPublished(!published);
 				toast.success(published ? "Post unpublished" : "Post published");
-				await invalidatePostQueries(queryClient);
+				await refreshContent();
 			} catch (error) {
 				toast.error(
 					error instanceof Error
@@ -192,9 +206,18 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 		});
 	};
 
-	const handleDelete = () => {
+	const handleDelete = async () => {
 		const currentPost = post;
-		if (!currentPost || !revision || !window.confirm("Delete this post?")) {
+		if (!currentPost || !revision) {
+			return;
+		}
+
+		const confirmed = await confirm({
+			title: `Delete "${currentPost.title}"?`,
+			description: DELETE_DESCRIPTION,
+		});
+
+		if (!confirmed) {
 			return;
 		}
 
@@ -204,7 +227,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 					data: { id: currentPost.id, revision },
 				});
 				toast.success("Post deleted");
-				await invalidatePostQueries(queryClient);
+				await refreshContent();
 				allowNavigation();
 				await navigate({ to: "/cms/posts" });
 			} catch (error) {
@@ -217,7 +240,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 
 	return (
 		<div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-background">
-			<header className="flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
+			<header className="flex h-12 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
 				<div className="flex items-center gap-3">
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -238,20 +261,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 
 					<Separator orientation="vertical" className="h-5" />
 
-					<nav className="flex items-center gap-2 text-sm">
-						<Link
-							to="/cms/posts"
-							className="text-muted-foreground transition-colors hover:text-foreground"
-						>
-							Posts
-						</Link>
-						<span className="text-muted-foreground/50">›</span>
-						<span className="max-w-60 truncate font-medium">
-							{title || "Untitled"}
-						</span>
-					</nav>
-
-					<div className="ml-3 flex items-center gap-2">
+					<div className="flex items-center gap-2">
 						<Badge
 							variant="secondary"
 							className={
@@ -394,7 +404,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 
 			<div className="flex flex-1 overflow-hidden">
 				<div className="flex flex-1 flex-col overflow-hidden">
-					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
+					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-3">
 						<EditorTitleInput
 							value={title}
 							placeholder="Post title..."
@@ -404,7 +414,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 								markDirty();
 							}}
 						/>
-						<div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+						<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
 							<span>{stats.wordCount} words</span>
 							<span>•</span>
 							<span>Plain text post</span>
@@ -446,7 +456,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 								<Select
 									value={lang}
 									onValueChange={(value) => {
-										setLang(value as "fr" | "en");
+										setLang(value);
 										markDirty();
 									}}
 								>
@@ -455,12 +465,12 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 									</SelectTrigger>
 									<SelectContent>
 										<SelectGroup>
-											<SelectItem value="en">
-												<span aria-hidden="true">🇬🇧</span> English
-											</SelectItem>
-											<SelectItem value="fr">
-												<span aria-hidden="true">🇫🇷</span> Français
-											</SelectItem>
+											{localeOptions.map((locale) => (
+												<SelectItem key={locale} value={locale}>
+													<LocaleFlag locale={locale} />
+													{getLocaleLabel(locale)}
+												</SelectItem>
+											))}
 										</SelectGroup>
 									</SelectContent>
 								</Select>
@@ -539,6 +549,7 @@ export function PostEditor({ post, articles }: PostEditorProps) {
 					</div>
 				</aside>
 			</div>
+			{confirmDialog}
 		</div>
 	);
 }

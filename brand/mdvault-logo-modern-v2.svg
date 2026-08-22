@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MDVault modern chest logo</title>
+  <desc id="desc">An open treasure chest containing a Markdown document, secured with a padlock.</desc>
+  <defs>
+    <linearGradient id="lid" x1="91" y1="76" x2="419" y2="239" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5F3FF"/>
+      <stop offset="1" stop-color="#C7D2FE"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="61" y1="223" x2="428" y2="313" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E0E7FF"/>
+      <stop offset="1" stop-color="#A5B4FC"/>
+    </linearGradient>
+    <linearGradient id="front" x1="66" y1="279" x2="350" y2="449" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8F7FF"/>
+      <stop offset="1" stop-color="#D8DDF5"/>
+    </linearGradient>
+    <linearGradient id="side" x1="344" y1="288" x2="438" y2="431" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C5CCEB"/>
+      <stop offset="1" stop-color="#9FA9D1"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="166" y1="128" x2="327" y2="329" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F0F2FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#292B3B" flood-opacity=".24"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="259" cy="444" rx="185" ry="29" fill="#27293A" opacity=".16"/>
+
+  <!-- Raised curved lid: deliberately keeps the chest silhouette of the original logo. -->
+  <g stroke="#383A4D" stroke-width="10" stroke-linejoin="round" filter="url(#shadow)">
+    <path d="M111 229 77 139q-5-17 8-30l40-39q12-12 29-9l218 36q21 3 34 20l27 36q9 12 5 27l-24 79Z" fill="url(#lid)"/>
+    <path d="m126 204-24-65 39-42 206 34q17 3 27 17l34 45-17 49Z" fill="#55586E"/>
+    <path d="m126 204 265 38" fill="none" stroke="#8B91B0" stroke-width="8"/>
+    <path d="m129 75 22 36 231 39 24-26" fill="none" stroke="#FFFFFF" stroke-opacity=".7" stroke-width="8"/>
+    <path d="m383 101-24 29 12 69 36 42" fill="none" stroke="#8B91B0" stroke-width="8"/>
+  </g>
+
+  <!-- Markdown page emerging from the open chest. -->
+  <g filter="url(#shadow)" stroke-linejoin="round">
+    <path d="M162 130q0-16 16-16h104l49 49v154q0 18-18 18H180q-18 0-18-18Z" fill="url(#paper)" stroke="#383A4D" stroke-width="10"/>
+    <path d="M282 115v37q0 20 20 20h29" fill="#C7D2FE" stroke="#383A4D" stroke-width="9"/>
+    <path d="M192 221v-42l25 30 25-30v42" fill="none" stroke="#484A5D" stroke-width="13" stroke-linecap="round"/>
+    <path d="M286 181v54m0 0-19-19m19 19 19-19" fill="none" stroke="#6366F1" stroke-width="13" stroke-linecap="round"/>
+    <path d="M192 270h106M192 299h78" fill="none" stroke="#A3A8C2" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <!-- Thick top rim and unmistakable chest body. -->
+  <g stroke="#383A4D" stroke-width="10" stroke-linejoin="round" filter="url(#shadow)">
+    <path d="m65 263 91-54 283 49-90 61Z" fill="url(#rim)"/>
+    <path d="m65 263 284 56v126L65 389Z" fill="url(#front)"/>
+    <path d="m349 319 90-61v128l-90 59Z" fill="url(#side)"/>
+    <path d="m65 286 284 56 90-61" fill="none" stroke="#7C83A6" stroke-width="9"/>
+    <path d="m97 293 221 43v72L97 365Z" fill="#FFFFFF" fill-opacity=".18" stroke="#ABB2D3" stroke-width="8"/>
+    <path d="m375 337 38-25v57l-38 25Z" fill="#FFFFFF" fill-opacity=".12" stroke="#858DAF" stroke-width="8"/>
+    <path d="m65 263 91-54 283 49" fill="none" stroke="#FFFFFF" stroke-opacity=".75" stroke-width="7"/>
+  </g>
+
+  <!-- Padlock mounted on the front of the chest. -->
+  <g filter="url(#shadow)" stroke="#383A4D" stroke-linejoin="round">
+    <path d="M164 346v-19q0-33 33-33t33 33v19" fill="none" stroke-width="13" stroke-linecap="round"/>
+    <rect x="146" y="339" width="102" height="84" rx="25" fill="#F8F7FF" stroke-width="10"/>
+    <circle cx="197" cy="374" r="10" fill="#6366F1" stroke="none"/>
+    <path d="M197 382v15" stroke="#6366F1" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <path d="m87 398 30 6-18 20-31-6Z" fill="#B4BAD8" stroke="#383A4D" stroke-width="8" stroke-linejoin="round"/>
+  <path d="m320 444 29 6 24-17-29-6Z" fill="#8D96BC" stroke="#383A4D" stroke-width="8" stroke-linejoin="round"/>
+</svg>

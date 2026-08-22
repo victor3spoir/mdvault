@@ -2,13 +2,14 @@ export interface ArticleFrontmatter {
 	title: string;
 	description?: string;
 	published: boolean;
-	lang: "fr" | "en";
+	lang: string;
 	author?: string;
 	tags?: string[];
 	coverImage?: string;
 	createdAt?: string;
 	updatedAt?: string;
 	publishedDate?: string;
+	translationKey?: string;
 }
 
 export interface Article {
@@ -16,7 +17,7 @@ export interface Article {
 	title: string;
 	description?: string;
 	content: string;
-	lang: "fr" | "en";
+	lang: string;
 	createdAt: string;
 	updatedAt: string;
 	publishedAt?: string;
@@ -24,15 +25,7 @@ export interface Article {
 	author?: string;
 	tags?: string[];
 	coverImage?: string;
+	translationKey?: string;
 	path: string;
 	sha: string;
-}
-
-export interface GitHubFile {
-	name: string;
-	path: string;
-	sha: string;
-	size: number;
-	type: "file" | "dir";
-	download_url: string | null;
 }

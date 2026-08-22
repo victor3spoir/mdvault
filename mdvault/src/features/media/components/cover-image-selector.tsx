@@ -16,6 +16,7 @@ const EMPTY_IMAGE: MediaFile = {
 	path: "",
 	url: "",
 	uploadedAt: "",
+	size: 0,
 	sha: "",
 };
 
@@ -31,6 +32,7 @@ export function CoverImageSelector({
 				<div className="group/cover relative overflow-hidden rounded-xl border bg-muted shadow-xs">
 					<PrivateImage
 						src={selectedImageUrl}
+						width={400}
 						alt="Cover image"
 						className="aspect-video w-full object-cover transition-transform duration-300 group-hover/cover:scale-[1.03]"
 					/>

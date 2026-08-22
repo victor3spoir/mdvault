@@ -11,6 +11,7 @@ import { PageLayout } from "#/components/page-layout";
 import { Input } from "#/components/ui/input";
 import { Label } from "#/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "#/components/ui/tabs";
+import { ContentLanguagesSettings } from "#/features/settings/components/content-languages-settings";
 import { CopyToClipboard } from "#/features/settings/components/copy-to-clipboard";
 import { UserProfileCard } from "#/features/settings/components/user-profile-card";
 import { getSettingsPageDataFn } from "#/features/settings/settings.functions";
@@ -46,6 +47,10 @@ function SettingsPage() {
 					<TabsTrigger value="assets">
 						<IconDatabase className="size-4" />
 						Dynamic Content
+					</TabsTrigger>
+					<TabsTrigger value="languages">
+						<IconWorld className="size-4" />
+						Languages
 					</TabsTrigger>
 				</TabsList>
 
@@ -182,6 +187,10 @@ function SettingsPage() {
 
 				<TabsContent value="assets">
 					<AssetTypesSettings />
+				</TabsContent>
+
+				<TabsContent value="languages">
+					<ContentLanguagesSettings />
 				</TabsContent>
 			</Tabs>
 		</PageLayout>

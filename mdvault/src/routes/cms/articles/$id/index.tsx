@@ -2,14 +2,10 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
-import {
-	articleQueryOptions,
-	collectArticleImageSources,
-} from "#/features/articles/articles.queries";
+import { articleQueryOptions } from "#/features/articles/articles.queries";
 import { TableOfContents } from "#/features/articles/components/table-of-contents";
 import { MarkdownContent } from "#/features/content/components/markdown-content";
 import { PrivateImage } from "#/features/media/components/private-image";
-import { prefetchMediaDataUrls } from "#/features/media/media.queries";
 import { formatDate } from "#/lib/date";
 
 export const Route = createFileRoute("/cms/articles/$id/")({
@@ -19,10 +15,6 @@ export const Route = createFileRoute("/cms/articles/$id/")({
 		);
 
 		if (article) {
-			await prefetchMediaDataUrls(
-				context.queryClient,
-				collectArticleImageSources(article),
-			);
 		}
 
 		return article;

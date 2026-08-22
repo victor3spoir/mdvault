@@ -3,27 +3,47 @@ import { HardBreak } from "@tiptap/extension-hard-break";
 import { Paragraph } from "@tiptap/extension-paragraph";
 import { Text } from "@tiptap/extension-text";
 import { Placeholder, UndoRedo } from "@tiptap/extensions";
-import { Markdown } from "@tiptap/markdown";
 import { EditorContent, useEditor } from "@tiptap/react";
 import { forwardRef, useImperativeHandle } from "react";
 import { EditorLoading } from "#/components/editor-loading";
 
 export interface PlainTextEditorHandle {
 	getMarkdown: () => string;
-	setMarkdown: (markdown: string) => void;
+	setMarkdown: (value: string) => void;
 }
 
 interface PlainTextEditorProps {
 	markdown: string;
 	placeholder?: string;
-	onChange?: (markdown: string) => void;
+	onChange?: (value: string) => void;
 }
 
 /**
- * Minimal text-only editor for short-form posts. Paragraphs, line breaks and
- * undo/redo only — no headings, marks, lists, images, or code. Pasted rich
- * content degrades to plain text.
+ * One paragraph per line. Markdown would collapse single line breaks and
+ * reserve blank lines for paragraphs, which posts must not do.
  */
+export function textToDocument(value: string) {
+	const lines = value.replace(/\r\n/g, "\n").split("\n");
+
+	return {
+		type: "doc",
+		content: lines.map((line) => ({
+			type: "paragraph",
+			...(line.length > 0 ? { content: [{ type: "text", text: line }] } : {}),
+		})),
+	};
+}
+
+/**
+ * Serializes back to raw text. `blockSeparator: "\n"` is what makes the round
+ * trip exact: what the author typed is what gets committed, line breaks
+ * included.
+ */
+function documentToText(editor: { getText: (options?: object) => string }) {
+	return editor.getText({ blockSeparator: "\n" });
+}
+
+/** Paragraphs, line breaks and undo/redo only. Pasted rich content is flattened. */
 export const PlainTextEditor = forwardRef<
 	PlainTextEditorHandle,
 	PlainTextEditorProps
@@ -36,30 +56,28 @@ export const PlainTextEditor = forwardRef<
 			Text,
 			HardBreak,
 			UndoRedo,
-			Markdown,
 			Placeholder.configure({
 				placeholder: placeholder ?? "Write your post...",
 			}),
 		],
-		content: markdown,
-		contentType: "markdown",
+		content: textToDocument(markdown),
 		editorProps: {
 			attributes: {
 				class:
-					"tiptap-plain w-full px-6 py-5 text-base leading-7 focus:outline-none",
+					"tiptap-plain w-full max-w-[68ch] px-6 py-5 text-[0.9375rem] leading-[1.55] focus:outline-none",
 			},
 		},
 		onUpdate: ({ editor: current }) => {
-			onChange?.(current.getMarkdown());
+			onChange?.(documentToText(current));
 		},
 	});
 
 	useImperativeHandle(
 		ref,
 		() => ({
-			getMarkdown: () => editor?.getMarkdown() ?? "",
+			getMarkdown: () => (editor ? documentToText(editor) : ""),
 			setMarkdown: (value: string) => {
-				editor?.commands.setContent(value, { contentType: "markdown" });
+				editor?.commands.setContent(textToDocument(value));
 			},
 		}),
 		[editor],

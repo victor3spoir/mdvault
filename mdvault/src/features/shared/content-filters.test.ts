@@ -152,6 +152,10 @@ describe("contentFiltersSchema", () => {
 			"guide",
 		]);
 	});
+
+	it("accepts and canonicalizes configured locale filters", () => {
+		expect(contentFiltersSchema.parse({ lang: "pt-br" }).lang).toBe("pt-BR");
+	});
 });
 
 describe("hasActiveContentFilters", () => {

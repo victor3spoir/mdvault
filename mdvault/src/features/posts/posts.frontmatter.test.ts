@@ -31,14 +31,14 @@ Post body`);
 		});
 	});
 
-	it("rejects invalid persisted metadata", () => {
-		expect(() =>
-			parseFrontmatterToPost(`---
-title: Invalid post
+	it("accepts configured locale identifiers beyond the legacy pair", () => {
+		const parsed = parseFrontmatterToPost(`---
+title: German post
 published: false
 lang: de
 ---
-Body`),
-		).toThrow("Invalid post content");
+Body`);
+
+		expect(parsed.lang).toBe("de");
 	});
 });
