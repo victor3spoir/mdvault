@@ -47,6 +47,14 @@ Every item below has to survive these:
 - Full keyboard paths and ARIA semantics across every editor surface
 - String extraction and a translation workflow for the UI itself
 
+**Writing assistance**
+
+- Native spellchecking driven by the current content language
+- Optional grammar and style diagnostics through a configurable provider
+- Explicit AI-assisted editing before considering inline autocompletion
+- See the detailed
+  [writing assistance perspective](./docs/writing-assistance-perspective.md)
+
 **Publishing integrations**
 
 - Post-commit hooks to trigger a site rebuild
