@@ -16,6 +16,7 @@ import {
 	IconListNumbers,
 	IconMinus,
 	IconPhoto,
+	IconSearch,
 	IconSourceCode,
 	IconStrikethrough,
 	IconTable,
@@ -29,6 +30,7 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "#/components/ui/tooltip";
+import { DocumentOutline } from "#/features/articles/components/editor/document-outline";
 import { cn } from "#/lib/utils";
 
 interface ToolbarButtonProps {
@@ -72,6 +74,8 @@ function ToolbarButton({
 interface EditorToolbarProps {
 	editor: Editor;
 	onImageInsertClick?: () => void;
+	onFindClick?: () => void;
+	findOpen?: boolean;
 }
 
 /**
@@ -99,6 +103,8 @@ function ToolbarDivider() {
 export function EditorToolbar({
 	editor,
 	onImageInsertClick,
+	onFindClick,
+	findOpen,
 }: EditorToolbarProps) {
 	const state = useEditorState({
 		editor,
@@ -281,6 +287,14 @@ export function EditorToolbar({
 			<ToolbarDivider />
 
 			<ToolbarGroup>
+				<ToolbarButton
+					label="Find and replace"
+					active={findOpen}
+					onClick={() => onFindClick?.()}
+				>
+					<IconSearch className="size-4" />
+				</ToolbarButton>
+				<DocumentOutline editor={editor} />
 				{state.link ? (
 					<ToolbarButton
 						label="Remove link"

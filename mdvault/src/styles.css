@@ -326,6 +326,60 @@ a {
   tab-size: 2;
 }
 
+.tiptap-callout,
+.markdown-callout {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--muted) 55%, transparent);
+}
+
+.tiptap-callout[data-callout='note'],
+.markdown-callout[data-callout='note'] {
+  border-color: color-mix(in oklab, oklch(0.62 0.15 245) 45%, var(--border));
+}
+
+.tiptap-callout[data-callout='tip'],
+.markdown-callout[data-callout='tip'] {
+  border-color: color-mix(in oklab, oklch(0.66 0.15 155) 45%, var(--border));
+}
+
+.tiptap-callout[data-callout='important'],
+.markdown-callout[data-callout='important'] {
+  border-color: color-mix(in oklab, oklch(0.62 0.16 305) 45%, var(--border));
+}
+
+.tiptap-callout[data-callout='warning'],
+.markdown-callout[data-callout='warning'] {
+  border-color: color-mix(in oklab, oklch(0.72 0.16 75) 55%, var(--border));
+}
+
+.tiptap-callout[data-callout='caution'],
+.markdown-callout[data-callout='caution'] {
+  border-color: color-mix(in oklab, oklch(0.62 0.2 28) 50%, var(--border));
+}
+
+.tiptap-callout-content > :first-child {
+  margin-top: 0;
+}
+
+.tiptap-callout-content > :last-child {
+  margin-bottom: 0;
+}
+
+.find-replace-match {
+  border-radius: 2px;
+  background: color-mix(in oklab, oklch(0.82 0.15 85) 62%, transparent);
+}
+
+.find-replace-match-active {
+  background: color-mix(in oklab, oklch(0.72 0.18 65) 82%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 30%, transparent);
+}
+
+.editor-drag-handle {
+  z-index: 30;
+  padding-right: 0.35rem;
+}
+
 .tiptap-editor pre code {
   background: none;
   border: 0;
@@ -480,7 +534,17 @@ a {
 /* ── Plain text post editor ─────────────────────────────────── */
 
 .tiptap-plain p {
-  margin: 0.625rem 0;
+  margin: 0.25rem 0 0;
+}
+
+.tiptap-plain p:first-child {
+  margin-top: 0;
+}
+
+/* A blank line the author typed becomes a real breathing gap. */
+.tiptap-plain p:empty {
+  height: 1rem;
+  margin: 0;
 }
 
 .tiptap-plain p.is-editor-empty:first-child::before {

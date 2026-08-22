@@ -8,6 +8,7 @@ import {
 	IconFileText,
 	IconLanguage,
 	IconLoader2,
+	IconMarkdown,
 	IconPhoto,
 	IconPlus,
 	IconSettings,
@@ -141,6 +142,7 @@ export function VaultEditor({
 	const [content, setContent] = useState(asset?.content ?? "");
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [previewMode, setPreviewMode] = useState(false);
+	const [sourceMode, setSourceMode] = useState(false);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const [revision, setRevision] = useState<ContentRevision | null>(
 		asset ? { path: asset.path, sha: asset.sha } : null,
@@ -188,15 +190,36 @@ export function VaultEditor({
 	);
 
 	const handleImageInsert = (image: MediaFile) => {
-		richRef.current?.insertMarkdown(`![image](${image.url})`);
+		const alt =
+			image.name
+				.trim()
+				.replace(/\.[^.]+$/, "")
+				.replace(/[-_]+/g, " ")
+				.replace(/[[\]\r\n]/g, " ") || "Image";
+		richRef.current?.insertMarkdown(`![${alt}](${image.url})`);
 		setImageInsertDialogOpen(false);
 		markDirty();
 	};
 
-	const getMarkdown = () =>
-		(isRich
-			? richRef.current?.getMarkdown()
-			: plainRef.current?.getMarkdown()) ?? "";
+	const getMarkdown = () => {
+		if (isRich) {
+			return sourceMode ? content : (richRef.current?.getMarkdown() ?? "");
+		}
+
+		return plainRef.current?.getMarkdown() ?? "";
+	};
+
+	const handleToggleSource = () => {
+		if (!isRich) return;
+
+		if (sourceMode) {
+			richRef.current?.setMarkdown(content, false);
+		} else {
+			setContent(richRef.current?.getMarkdown() ?? content);
+		}
+
+		setSourceMode((value) => !value);
+	};
 
 	function commitTag() {
 		const next = tagInput.trim().toLowerCase();
@@ -316,7 +339,7 @@ export function VaultEditor({
 
 	return (
 		<div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-background">
-			<header className="flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
+			<header className="flex h-12 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
 				<div className="flex items-center gap-3">
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -379,6 +402,26 @@ export function VaultEditor({
 				</div>
 
 				<div className="flex items-center gap-1.5">
+					{isRich ? (
+						<Tooltip>
+							<TooltipTrigger asChild>
+								<Button
+									variant={sourceMode ? "secondary" : "ghost"}
+									size="icon"
+									className="size-8 rounded-lg"
+									aria-label="Toggle markdown source"
+									aria-pressed={sourceMode}
+									onClick={handleToggleSource}
+								>
+									<IconMarkdown className="size-4" />
+								</Button>
+							</TooltipTrigger>
+							<TooltipContent side="bottom">
+								{sourceMode ? "Back to the editor" : "Markdown source"}
+							</TooltipContent>
+						</Tooltip>
+					) : null}
+
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Button
@@ -496,7 +539,7 @@ export function VaultEditor({
 							: "flex flex-1",
 					)}
 				>
-					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
+					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-3">
 						<EditorTitleInput
 							value={title}
 							placeholder={`${typeConfig.label.replace(/s$/i, "")} title...`}
@@ -506,7 +549,7 @@ export function VaultEditor({
 								markDirty();
 							}}
 						/>
-						<div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+						<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
 							<span>{stats.wordCount} words</span>
 							<span>•</span>
 							<span>{isRich ? "Rich editor" : "Plain text"}</span>
@@ -515,16 +558,35 @@ export function VaultEditor({
 
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
 						{isRich ? (
-							<RichTextEditor
-								ref={richRef}
-								markdown={asset?.content ?? ""}
-								onImageUpload={handleImageUpload}
-								onImageInsertClick={() => setImageInsertDialogOpen(true)}
-								onChange={(value) => {
-									setContent(value);
-									markDirty();
-								}}
-							/>
+							<>
+								<div
+									className={cn("flex min-h-0 flex-1", sourceMode && "hidden")}
+								>
+									<RichTextEditor
+										ref={richRef}
+										markdown={asset?.content ?? ""}
+										onImageUpload={handleImageUpload}
+										onImageInsertClick={() => setImageInsertDialogOpen(true)}
+										onChange={(value) => {
+											setContent(value);
+											markDirty();
+										}}
+									/>
+								</div>
+
+								{sourceMode ? (
+									<textarea
+										value={content}
+										aria-label="Markdown source"
+										spellCheck={false}
+										onChange={(event) => {
+											setContent(event.target.value);
+											markDirty();
+										}}
+										className="min-h-0 flex-1 resize-none bg-transparent px-8 py-6 font-mono text-sm leading-7 outline-none"
+									/>
+								) : null}
+							</>
 						) : (
 							<PlainTextEditor
 								ref={plainRef}

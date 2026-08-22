@@ -1,8 +1,19 @@
-import { IconCheck, IconCopy } from "@tabler/icons-react";
+import {
+	IconAlertTriangle,
+	IconBrandVimeo,
+	IconBrandYoutube,
+	IconBulb,
+	IconCheck,
+	IconCircleCheck,
+	IconCopy,
+	IconInfoCircle,
+	IconStar,
+} from "@tabler/icons-react";
 import { createTanStackMarkdownHighlighter } from "@tanstack/highlight/markdown";
 import type { CodeHighlighter } from "@tanstack/markdown";
 import { Markdown, type MarkdownComponents } from "@tanstack/markdown/react";
 import {
+	Children,
 	type ComponentPropsWithoutRef,
 	isValidElement,
 	type ReactNode,
@@ -10,7 +21,15 @@ import {
 	useState,
 } from "react";
 import { Button } from "#/components/ui/button";
+import {
+	type CalloutType,
+	calloutLabel,
+	isCalloutType,
+	normalizeCalloutMarkdown,
+	normalizeCalloutType,
+} from "#/features/content/callout";
 import { MermaidDiagram } from "#/features/content/components/mermaid-diagram";
+import { parseMediaEmbed } from "#/features/content/media-embed";
 import { PrivateImage } from "#/features/media/components/private-image";
 import { splitImageSource } from "#/features/media/image-display";
 import { highlighter } from "#/lib/highlight";
@@ -60,6 +79,105 @@ export function codeTextOf(node: ReactNode): string {
 		return codeTextOf(node.props.children);
 	}
 	return "";
+}
+
+const CALLOUT_ICONS = {
+	note: IconInfoCircle,
+	tip: IconBulb,
+	important: IconStar,
+	warning: IconAlertTriangle,
+	caution: IconCircleCheck,
+} satisfies Record<CalloutType, typeof IconInfoCircle>;
+
+function reactNodeText(node: ReactNode): string {
+	if (typeof node === "string" || typeof node === "number") {
+		return String(node);
+	}
+	if (Array.isArray(node)) {
+		return node.map(reactNodeText).join("");
+	}
+	if (isValidElement<{ children?: ReactNode }>(node)) {
+		return reactNodeText(node.props.children);
+	}
+	return "";
+}
+
+function calloutTypeOf(node: ReactNode): CalloutType | null {
+	const match = reactNodeText(node)
+		.trim()
+		.match(/^\[!([A-Z]+)\]$/i);
+	return match && isCalloutType(match[1])
+		? normalizeCalloutType(match[1])
+		: null;
+}
+
+function CalloutBlockquote({
+	children,
+	...props
+}: ComponentPropsWithoutRef<"blockquote">) {
+	const blocks = Children.toArray(children);
+	const type = calloutTypeOf(blocks[0]);
+	if (!type) {
+		return (
+			<blockquote
+				{...props}
+				className="my-6 border-l-4 border-primary pl-5 italic text-muted-foreground"
+			>
+				{children}
+			</blockquote>
+		);
+	}
+
+	const Icon = CALLOUT_ICONS[type];
+	return (
+		<aside
+			data-callout={type}
+			className="markdown-callout my-6 rounded-xl border p-5"
+		>
+			<div className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
+				<Icon className="size-4" />
+				{calloutLabel(type)}
+			</div>
+			<div className="[&>:first-child]:mt-0 [&>:last-child]:mb-0">
+				{blocks.slice(1)}
+			</div>
+		</aside>
+	);
+}
+
+function MediaEmbed({ source }: { source: string }) {
+	const media = parseMediaEmbed(source);
+	if (!media) {
+		return null;
+	}
+	const ProviderIcon =
+		media.provider === "youtube" ? IconBrandYoutube : IconBrandVimeo;
+
+	return (
+		<figure className="my-8 overflow-hidden rounded-2xl border bg-muted/30">
+			<div className="aspect-video">
+				<iframe
+					src={media.embedUrl}
+					title={media.label}
+					className="size-full"
+					loading="lazy"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowFullScreen
+				/>
+			</div>
+			<figcaption className="flex items-center gap-2 border-t px-4 py-2 text-xs text-muted-foreground">
+				<ProviderIcon className="size-4" />
+				<a
+					href={media.sourceUrl}
+					target="_blank"
+					rel="noreferrer"
+					className="truncate hover:text-foreground hover:underline"
+				>
+					{media.sourceUrl}
+				</a>
+			</figcaption>
+		</figure>
+	);
 }
 
 function CodeBlockFrame({
@@ -142,18 +260,22 @@ const components = {
 			className="scroll-mt-24 mt-8 mb-3 text-2xl font-semibold tracking-tight"
 		/>
 	),
-	p: (props) => (
-		<p {...props} className="my-5 text-lg leading-8 text-foreground/90" />
-	),
+	p: ({ children, ...props }) => {
+		const text = reactNodeText(children).trim();
+		const media = parseMediaEmbed(text);
+		if (media && text === media.sourceUrl.trim()) {
+			return <MediaEmbed source={text} />;
+		}
+		return (
+			<p {...props} className="my-5 text-lg leading-8 text-foreground/90">
+				{children}
+			</p>
+		);
+	},
 	ul: (props) => <ul {...props} className="my-5 ml-6 list-disc space-y-2" />,
 	ol: (props) => <ol {...props} className="my-5 ml-6 list-decimal space-y-2" />,
 	li: (props) => <li {...props} className="leading-8" />,
-	blockquote: (props) => (
-		<blockquote
-			{...props}
-			className="my-6 border-l-4 border-primary pl-5 italic text-muted-foreground"
-		/>
-	),
+	blockquote: (props) => <CalloutBlockquote {...props} />,
 	a: ({ href, ...props }) => {
 		const isInternal = href?.startsWith("/") || href?.startsWith("#");
 		return (
@@ -232,7 +354,7 @@ export function MarkdownContent({ source }: { source: string }) {
 	return (
 		<div className="markdown-content">
 			<Markdown components={components} highlighter={highlightMarkdownCode}>
-				{source}
+				{normalizeCalloutMarkdown(source)}
 			</Markdown>
 		</div>
 	);

@@ -240,7 +240,7 @@ export function PostEditor({
 
 	return (
 		<div className="flex h-[calc(100vh-4rem)] flex-col overflow-hidden bg-background">
-			<header className="flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
+			<header className="flex h-12 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
 				<div className="flex items-center gap-3">
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -404,7 +404,7 @@ export function PostEditor({
 
 			<div className="flex flex-1 overflow-hidden">
 				<div className="flex flex-1 flex-col overflow-hidden">
-					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
+					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-3">
 						<EditorTitleInput
 							value={title}
 							placeholder="Post title..."
@@ -414,7 +414,7 @@ export function PostEditor({
 								markDirty();
 							}}
 						/>
-						<div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+						<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
 							<span>{stats.wordCount} words</span>
 							<span>•</span>
 							<span>Plain text post</span>

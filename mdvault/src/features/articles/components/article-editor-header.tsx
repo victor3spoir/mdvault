@@ -58,7 +58,7 @@ export function ArticleEditorHeader({
 	onDelete,
 }: ArticleEditorHeaderProps) {
 	return (
-		<header className="flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
+		<header className="flex h-12 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
 			<div className="flex items-center gap-3">
 				<Tooltip>
 					<TooltipTrigger asChild>

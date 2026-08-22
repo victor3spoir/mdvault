@@ -341,7 +341,7 @@ export function ArticleEditor({
 							: "flex flex-1",
 					)}
 				>
-					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
+					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-3">
 						<EditorTitleInput
 							value={title}
 							placeholder="Article title..."
@@ -351,7 +351,7 @@ export function ArticleEditor({
 								setHasUnsavedChanges(true);
 							}}
 						/>
-						<div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+						<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
 							<span>{stats.wordCount} words</span>
 							<span>•</span>
 							<span>{stats.readTime} min read</span>

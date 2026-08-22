@@ -64,7 +64,7 @@ export const PlainTextEditor = forwardRef<
 		editorProps: {
 			attributes: {
 				class:
-					"tiptap-plain w-full px-6 py-5 text-base leading-7 focus:outline-none",
+					"tiptap-plain w-full max-w-[68ch] px-6 py-5 text-[0.9375rem] leading-[1.55] focus:outline-none",
 			},
 		},
 		onUpdate: ({ editor: current }) => {

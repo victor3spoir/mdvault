@@ -23,16 +23,17 @@ const staticLabels: Record<string, string> = {
 	edit: "Edit",
 };
 
-function getDynamicLabel(previousSegment?: string) {
-	if (previousSegment === "articles") {
-		return "Article";
-	}
-
-	if (previousSegment === "posts") {
-		return "Post";
-	}
-
-	return "Details";
+/**
+ * A record id resolves to a placeholder label ("Post", "Article", "Details")
+ * that repeats what the section already says, so the trail stops at the
+ * section it belongs to.
+ */
+function isRecordSegment(segment: string, previousSegment?: string) {
+	return (
+		previousSegment !== undefined &&
+		staticLabels[previousSegment] !== undefined &&
+		staticLabels[segment] === undefined
+	);
 }
 
 /**
@@ -59,8 +60,6 @@ function buildVaultBreadcrumbs(
 		breadcrumbs.push({ label: "New" });
 	} else if (last === "edit") {
 		breadcrumbs.push({ label: "Edit" });
-	} else if (rest.length > 0) {
-		breadcrumbs.push({ label: "Details" });
 	}
 
 	return breadcrumbs;
@@ -87,22 +86,30 @@ function buildBreadcrumbs(
 	}
 
 	let currentPath = "/cms";
+	let lastSegmentSkipped = false;
 
 	segments.forEach((segment, index) => {
 		currentPath += `/${segment}`;
-		const previousSegment = segments[index - 1];
 		const isLast = index === segments.length - 1;
-		const label =
-			staticLabels[segment] ??
-			(previousSegment === "articles" || previousSegment === "posts"
-				? getDynamicLabel(previousSegment)
-				: decodeURIComponent(segment).replace(/[-_]/g, " "));
+
+		if (isRecordSegment(segment, segments[index - 1])) {
+			lastSegmentSkipped = isLast;
+			return;
+		}
 
 		breadcrumbs.push({
-			label,
-			href: isLast ? undefined : currentPath,
+			label:
+				staticLabels[segment] ??
+				decodeURIComponent(segment).replace(/[-_]/g, " "),
+			href: currentPath,
 		});
 	});
+
+	// The deepest visible crumb is the page itself, unless the real page was a
+	// record we dropped: then the section above stays a working link.
+	if (!lastSegmentSkipped && breadcrumbs.length > 1) {
+		breadcrumbs[breadcrumbs.length - 1].href = undefined;
+	}
 
 	return breadcrumbs;
 }
@@ -149,7 +156,7 @@ export function SiteHeader() {
 				// The inset layout offsets the main panel by 8px, so the sticky
 				// threshold must match it or the header jumps up on first scroll.
 				"sticky top-0 z-30 md:top-2",
-				"flex h-16 items-center gap-3 px-4 sm:px-6 md:rounded-t-xl",
+				"flex h-14 items-center gap-3 px-4 sm:px-6 md:rounded-t-xl",
 				"border-b bg-background/80 backdrop-blur-lg transition-shadow duration-200",
 				// The panel does not clip, so that same 8px band needs an opaque
 				// cover or scrolled content shows through above the header.

@@ -5,6 +5,7 @@ import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { PostContent } from "#/features/posts/components/post-content";
 import { postQueryOptions } from "#/features/posts/posts.queries";
 import { getLocaleLabel } from "#/features/shared/locales";
 import { formatDate } from "#/lib/date";
@@ -90,10 +91,8 @@ function PostDetailPage() {
 						</Button>
 					) : null}
 
-					<div className="prose prose-sm dark:prose-invert mt-6 max-w-none">
-						<p className="whitespace-pre-wrap text-foreground">
-							{post.content}
-						</p>
+					<div className="mt-6">
+						<PostContent content={post.content} />
 					</div>
 				</div>
 			</div>
