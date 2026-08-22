@@ -6,7 +6,7 @@ import { DocsPager } from "#/features/docs/components/docs-pager";
 import { DocsToc } from "#/features/docs/components/docs-toc";
 import { docsPageQueryOptions } from "#/features/docs/docs.queries";
 
-export const Route = createFileRoute("/$")({
+export const Route = createFileRoute("/docs/$")({
 	loader: ({ context, params }) =>
 		context.queryClient.ensureQueryData(
 			docsPageQueryOptions(params._splat ?? ""),
@@ -50,11 +50,6 @@ function DocsPage() {
 					{page.frontmatter.description}
 				</p>
 
-				{/**
-				 * `prose` comes from @tailwindcss/typography; the code fences opt out
-				 * with `prose-pre:*` because they are already styled by the
-				 * highlighter theme and by DocsCodeBlock.
-				 */}
 				<div className="prose prose-zinc max-w-none dark:prose-invert prose-pre:m-0 prose-pre:border-0 prose-pre:bg-transparent prose-pre:p-0 prose-headings:scroll-mt-20 prose-headings:font-semibold prose-headings:tracking-tight prose-a:font-normal prose-a:underline-offset-4">
 					<DocsMarkdown
 						document={page.document}
@@ -72,10 +67,6 @@ function DocsPage() {
 	);
 }
 
-/**
- * A 404 in docs usually means a renamed page, so the recovery offered is the
- * search dialog and the index — not a generic apology.
- */
 function DocsNotFound() {
 	return (
 		<div className="mx-auto w-full max-w-3xl py-24">
@@ -91,7 +82,7 @@ function DocsNotFound() {
 					Ctrl K
 				</kbd>{" "}
 				to search, or start again from the{" "}
-				<Link to="/" className="underline underline-offset-4">
+				<Link to="/docs" className="underline underline-offset-4">
 					documentation index
 				</Link>
 				.

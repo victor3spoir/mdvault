@@ -67,10 +67,10 @@ The filename is a query parameter rather than a path segment because a URL
 ending in `.png` is claimed by the static-asset middleware before the router
 sees it.
 
-Full status codes are listed in [HTTP endpoints](/reference/http-endpoints).
+Full status codes are listed in [HTTP endpoints](/docs/reference/http-endpoints).
 
 Building the same proxy in your own app is covered step by step in
-[Serve private images](/guides/serve-private-images).
+[Serve private images](/docs/guides/serve-private-images).
 
 ## Sizing and alignment
 

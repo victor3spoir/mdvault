@@ -71,7 +71,7 @@ Two rules worth enforcing in code rather than in your head:
   flag separates them from what is live.
 - **Treat the filename as the identity.** MDVault never renames a file to
   follow a changed title, so the slug is stable and your permalinks survive
-  edits. The full field list is in [Frontmatter](/reference/frontmatter).
+  edits. The full field list is in [Frontmatter](/docs/reference/frontmatter).
 
 ## At runtime, over the GitHub API
 
@@ -135,7 +135,7 @@ for images applies unchanged to Markdown: keep an in-memory map keyed by
 `path + sha`, deduplicate concurrent requests for the same key so a burst
 produces one upstream call, and serve the stale copy when GitHub is failing
 rather than propagating a 502. That code is walked through in
-[Serve private images](/guides/serve-private-images) — the store there is
+[Serve private images](/docs/guides/serve-private-images) — the store there is
 content-agnostic.
 
 ## Rebuild when content changes
@@ -160,4 +160,4 @@ is unacceptable, you are in the runtime-fetch case above.
 ## Next
 
 Articles reference images as repository paths, and those need resolving —
-continue with [Serve private images](/guides/serve-private-images).
+continue with [Serve private images](/docs/guides/serve-private-images).

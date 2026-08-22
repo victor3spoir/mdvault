@@ -34,7 +34,7 @@ type and what is stored.
 Insert from the media library or upload on the spot. Once placed, an image can
 be resized to 25, 50, 75 or 100 percent, aligned left, centre or right, and
 given alt text and a caption. Those choices ride along in the Markdown link, as
-described in [Media](/features/media).
+described in [Media](/docs/features/media).
 
 Images from a private repository render correctly in the editor, because they
 are fetched through the app rather than from GitHub directly.

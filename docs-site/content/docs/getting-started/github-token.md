@@ -33,7 +33,7 @@ token; use a classic one only if your organization blocks them.
 The token is read from the `GITHUB_TOKEN` environment variable on the server. It
 is never sent to the browser: images from private repositories are fetched
 server-side and re-served through the app's own endpoint, precisely so the token
-stays out of the page. See [Media](/features/media).
+stays out of the page. See [Media](/docs/features/media).
 
 ## Rotating it
 

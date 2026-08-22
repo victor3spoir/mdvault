@@ -337,6 +337,6 @@ a silent failure.
 
 ## See also
 
-- [Media](/features/media) — the feature from the author's side
-- [HTTP endpoints](/reference/http-endpoints) — the exact contract
-- [Fetch articles](/guides/fetch-articles) — the text half of the problem
+- [Media](/docs/features/media) — the feature from the author's side
+- [HTTP endpoints](/docs/reference/http-endpoints) — the exact contract
+- [Fetch articles](/docs/guides/fetch-articles) — the text half of the problem

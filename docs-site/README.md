@@ -1,15 +1,16 @@
 # otapp docs
 
-Documentation site for the product app. It is a **separate TanStack Start
-project**: it installs, builds and deploys on its own, and nothing in `src/`
-imports from the app next door.
+Product website and documentation for MDVault. It is a **separate TanStack
+Start project**: `/` presents the product and `/docs` contains the searchable
+documentation. It installs, builds and deploys on its own, and nothing in
+`src/` imports from the app next door.
 
 ## Run it
 
 ```bash
 cd docs-site
 bun install
-bun run dev        # http://localhost:3001
+bun run dev        # http://localhost:3100
 ```
 
 | Script | Does |
@@ -37,8 +38,11 @@ order: 20
 
 The sidebar is derived from the file tree plus that frontmatter — there is no
 second nav list to maintain. Sections and their order live in
-`content/docs/docs.config.ts`, along with the landing card groups and the
-"edit this page" link.
+`content/docs/docs.config.ts`, along with the documentation card groups,
+homepage mode and the "edit this page" link.
+
+Set `homepage` to `landing`, `docs` or `changelog` to choose what appears at
+`/`. Documentation remains available at `/docs`.
 
 Fenced blocks are highlighted; a `mermaid` fence renders as a diagram.
 

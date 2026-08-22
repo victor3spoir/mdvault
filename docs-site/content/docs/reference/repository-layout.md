@@ -41,7 +41,7 @@ only, which is what lets you rename the media folder without rewriting every
 link.
 
 **Vault folders are named after type ids.** A type with id `projects` stores its
-assets in `vault/projects/`. See [Vault](/features/vault).
+assets in `vault/projects/`. See [Vault](/docs/features/vault).
 
 **Folders appear on first save.** A fresh repository is empty; nothing is
 scaffolded until you create content.

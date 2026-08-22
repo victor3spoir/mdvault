@@ -23,7 +23,7 @@ Changing a `*_PATH` after content exists moves nothing. The app reads the new
 folder; the old content stays in Git and disappears from the interface. Move
 the files in a commit, then restart.
 
-Token creation is covered in [GitHub token](/getting-started/github-token).
+Token creation is covered in [GitHub token](/docs/getting-started/github-token).
 
 ## Server and security
 
@@ -35,7 +35,7 @@ Token creation is covered in [GitHub token](/getting-started/github-token).
 `TRUSTED_PROXY` decides whether `X-Forwarded-For` is believed for rate
 limiting. Behind Traefik, Caddy or nginx that you configured, set it to `true`.
 Exposed directly, leave it unset — otherwise a client can spoof the header and
-hand itself an unlimited quota. See [Security model](/architecture/security).
+hand itself an unlimited quota. See [Security model](/docs/architecture/security).
 
 ## Example file
 

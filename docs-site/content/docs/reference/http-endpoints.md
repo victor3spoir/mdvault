@@ -9,7 +9,7 @@ through server functions bound to the interface, which are not a stable public
 contract. Two plain HTTP endpoints exist and can be relied on.
 
 If you want programmatic access to your content, read it from Git — see
-[Consume your content](/guides/consume-your-content).
+[Consume your content](/docs/guides/consume-your-content).
 
 ## `GET /api/media`
 
@@ -46,9 +46,9 @@ Serves an image from the repository's media folder.
 curl -i "http://127.0.0.1:3000/api/media?file=cover.png&v=8f2a...&w=800"
 ```
 
-Behaviour and rationale are covered in [Media](/features/media).
+Behaviour and rationale are covered in [Media](/docs/features/media).
 Reimplementing it elsewhere is covered in
-[Serve private images](/guides/serve-private-images).
+[Serve private images](/docs/guides/serve-private-images).
 
 ## `GET /api/ping`
 
@@ -70,4 +70,4 @@ dashboard is where you would see that.
 
 Both endpoints sit behind the same limiter: per client and per 60-second
 window, 300 read requests and 20 writes. Exceeding it returns `429` with
-`Retry-After`. Details in [Security model](/architecture/security).
+`Retry-After`. Details in [Security model](/docs/architecture/security).

@@ -19,7 +19,7 @@ export function DocsSidebar({
 	onNavigate?: () => void;
 }) {
 	const { pathname } = useLocation();
-	const isActive = (slug: string) => pathname === `/${slug}`;
+	const isActive = (slug: string) => pathname === `/docs/${slug}`;
 
 	return (
 		<nav aria-label="Documentation" className="flex flex-col gap-6 py-6 pr-4">
@@ -30,7 +30,7 @@ export function DocsSidebar({
 					{nav.top.map((link) => (
 						<li key={link.slug}>
 							<Link
-								to="/$"
+								to="/docs/$"
 								params={{ _splat: link.slug }}
 								onClick={onNavigate}
 								className={cn(
@@ -58,7 +58,7 @@ export function DocsSidebar({
 						{group.links.map((link) => (
 							<li key={link.slug}>
 								<Link
-									to="/$"
+									to="/docs/$"
 									params={{ _splat: link.slug }}
 									onClick={onNavigate}
 									title={link.title}

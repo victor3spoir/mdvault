@@ -31,7 +31,7 @@ The body starts here.
 ```
 
 Every field is validated on save; the exact rules are in
-[Frontmatter reference](/reference/frontmatter).
+[Frontmatter reference](/docs/reference/frontmatter).
 
 ## Draft and published
 
@@ -42,7 +42,7 @@ date rather than resurrecting the old one.
 
 Both states live in the same folder and are committed the same way. If your
 site generator should ignore drafts, filter on `published` when you read the
-repository — see [Consume your content](/guides/consume-your-content).
+repository — see [Consume your content](/docs/guides/consume-your-content).
 
 ## Tags
 
@@ -69,7 +69,7 @@ are not silently grouped under an empty key.
 `coverImage` accepts a repository path such as `media/cover.png` or an absolute
 URL. Repository paths are served through the app's image endpoint, which is
 what makes covers work even in a private repository — see
-[Media](/features/media).
+[Media](/docs/features/media).
 
 ## Reading and writing
 
@@ -80,4 +80,4 @@ is a link you can share or bookmark.
 
 Saving writes a commit named `Update article: <title>`; creating writes
 `Create article: <title>`. Concurrent edits are rejected rather than merged, as
-described in [Architecture overview](/architecture/overview).
+described in [Architecture overview](/docs/architecture/overview).

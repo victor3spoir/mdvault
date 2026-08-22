@@ -44,7 +44,7 @@ function PagerLink({
 
 	return (
 		<Link
-			to="/$"
+			to="/docs/$"
 			params={{ _splat: link.slug }}
 			className={`group flex flex-col gap-1 rounded-xl border p-4 transition-colors hover:border-foreground/30 hover:bg-accent/40 ${
 				isNext ? "sm:items-end sm:text-right" : ""

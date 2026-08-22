@@ -6,7 +6,7 @@ order: 10
 
 MDVault ships as a container image on GitHub Container Registry. You need two
 things before starting: a GitHub repository that will hold your content, and a
-token that can write to it — see [GitHub token](/getting-started/github-token).
+token that can write to it — see [GitHub token](/docs/getting-started/github-token).
 
 ## Run it with Docker
 
@@ -24,7 +24,7 @@ docker run -d \
 The `127.0.0.1:` prefix is deliberate. MDVault has **no login of its own** and
 runs with a token that can write to your repository, so binding it to loopback
 means only your machine can reach it. See
-[Security model](/architecture/security) before exposing it any further.
+[Security model](/docs/architecture/security) before exposing it any further.
 
 ## Or with Compose
 
@@ -68,4 +68,4 @@ exact repository.
 
 ## Running from source
 
-If you would rather build it yourself, see [Develop](/guides/develop).
+If you would rather build it yourself, see [Develop](/docs/guides/develop).

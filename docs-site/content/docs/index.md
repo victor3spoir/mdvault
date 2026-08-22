@@ -8,6 +8,6 @@ a GitHub repository you own: the text, its frontmatter, and every image it
 references. There is no database, no asset host, and nothing to migrate away
 from — clone the repository and you have the whole site's content.
 
-New here? Read the [Overview](/overview) first — it explains what MDVault is
-and how the pieces fit together. Then [Installation](/getting-started/installation)
+New here? Read the [Overview](/docs/overview) first — it explains what MDVault is
+and how the pieces fit together. Then [Installation](/docs/getting-started/installation)
 has it running in five minutes.

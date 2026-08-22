@@ -34,7 +34,7 @@ Do not publish it on a public port and hope the URL stays secret.
 MDVault acts as one GitHub identity. A fine-grained token scoped to a single
 repository with `Contents: read and write` limits the damage to that repository.
 A classic `repo` token exposes everything you own. Use fine-grained — see
-[GitHub token](/getting-started/github-token).
+[GitHub token](/docs/getting-started/github-token).
 
 The token never reaches the browser. Private-repository images are fetched
 server-side and re-served through `/api/media`, which exists partly for this

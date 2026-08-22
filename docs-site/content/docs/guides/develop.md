@@ -15,7 +15,7 @@ bun run dev
 ```
 
 The app is at **http://localhost:3000**. Fill `.env.local` with a token, an
-owner and a repository — see [Configuration](/getting-started/configuration).
+owner and a repository — see [Configuration](/docs/getting-started/configuration).
 Point it at a scratch repository: every save is a real commit.
 
 ## Scripts
@@ -96,4 +96,4 @@ layer. Fixing a bug in conflict detection fixes it for all of them.
 ## Working on the documentation
 
 The docs site is a separate project — see
-[Write the docs](/guides/write-the-docs).
+[Write the docs](/docs/guides/write-the-docs).

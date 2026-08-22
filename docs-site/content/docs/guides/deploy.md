@@ -46,7 +46,7 @@ Two details matter more than the rest.
 
 **The port is bound to loopback.** `127.0.0.1:33000:3000` means the container is
 unreachable from outside the host. MDVault has no login, so this is the default
-for a reason — read [Security model](/architecture/security) before changing it.
+for a reason — read [Security model](/docs/architecture/security) before changing it.
 
 **Memory is capped at 800 MiB.** Image resizing uses `sharp`, which is happy to
 use whatever it is given. The limit keeps a large upload from starving the host.
@@ -103,4 +103,4 @@ token is invalid, so a botched rotation is obvious rather than silent.
 ## Deploying the documentation site
 
 This documentation is a separate project in `docs-site/`, deployable on its own.
-See [Write the docs](/guides/write-the-docs).
+See [Write the docs](/docs/guides/write-the-docs).

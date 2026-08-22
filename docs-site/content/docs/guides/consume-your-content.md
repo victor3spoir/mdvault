@@ -8,8 +8,8 @@ MDVault writes; something else usually reads. Because the storage format is
 plain Markdown in Git, every reader you already know works — no export, no API
 client, no lock-in.
 
-Two pages go deeper than this overview: [Fetch articles](/guides/fetch-articles)
-for getting the text, and [Serve private images](/guides/serve-private-images)
+Two pages go deeper than this overview: [Fetch articles](/docs/guides/fetch-articles)
+for getting the text, and [Serve private images](/docs/guides/serve-private-images)
 for getting the pictures that text references.
 
 ## From a static site generator
@@ -52,7 +52,7 @@ const articles = await Promise.all(
 );
 ```
 
-The field list is in [Frontmatter](/reference/frontmatter).
+The field list is in [Frontmatter](/docs/reference/frontmatter).
 
 ## Over the GitHub API
 
@@ -65,7 +65,7 @@ https://raw.githubusercontent.com/you/my-content-repo/main/articles/my-post.md
 For a private one, use the contents API with a read-only token. Note the rate
 limits — 60 unauthenticated requests per hour, 5 000 authenticated — and cache
 accordingly. Working code, including the large-blob fallback and the retry
-rules, is in [Fetch articles](/guides/fetch-articles).
+rules, is in [Fetch articles](/docs/guides/fetch-articles).
 
 ## Images
 
@@ -76,7 +76,7 @@ has to map those to real URLs:
   `media/` folder into your build output and rewrite to a local path.
 - **Private repository**: copy the files during the build, or proxy them
   yourself. Do not expose a token in the browser.
-  [Serve private images](/guides/serve-private-images) walks through MDVault's
+  [Serve private images](/docs/guides/serve-private-images) walks through MDVault's
   own proxy — validation, caching, resizing and the framework traps.
 
 Remember the display fragment: `media/img.png#w=50&align=left`. Strip it before

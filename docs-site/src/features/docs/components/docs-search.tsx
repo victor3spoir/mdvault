@@ -66,7 +66,7 @@ export function DocsSearchDialog({
 	const go = (record: DocsSearchRecord) => {
 		onOpenChange(false);
 		navigate({
-			to: "/$",
+			to: "/docs/$",
 			params: { _splat: record.slug },
 			hash: record.headingId || undefined,
 		});

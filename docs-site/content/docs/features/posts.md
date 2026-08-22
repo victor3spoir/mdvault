@@ -37,7 +37,7 @@ longer piece.
 Posts are usually written in one sitting and rarely need tables or headings, so
 the editor is a textarea with Markdown syntax, not a rich editor. What you type
 is exactly what lands in the file. If a post grows into something that needs
-structure, it probably wants to be an [article](/features/articles).
+structure, it probably wants to be an [article](/docs/features/articles).
 
 Cards in the post list show an excerpt derived from the body: code blocks,
 images and Markdown syntax are stripped, and the text is truncated at a word

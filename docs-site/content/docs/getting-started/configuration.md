@@ -23,7 +23,7 @@ Three variables are required, three are optional:
 
 A missing required variable fails loudly at first use, naming every variable
 that is absent rather than the first one. The full list, including the security
-variables, is in [Environment reference](/reference/environment).
+variables, is in [Environment reference](/docs/reference/environment).
 
 Changing `ARTICLES_PATH` after you have content does **not** move anything.
 MDVault reads the new folder and your existing articles disappear from the list
@@ -51,7 +51,7 @@ updates it:
 |---|---|
 | `id` | Lowercase letters, digits and hyphens, starting with a letter, 2–30 characters. Becomes the folder name under `vault/` and a segment in the URL |
 | `label` | Shown in the sidebar, up to 40 characters |
-| `icon` | One of the twelve icons listed in [Vault](/features/vault) |
+| `icon` | One of the twelve icons listed in [Vault](/docs/features/vault) |
 | `editor` | `rich` for the WYSIWYG editor, `plain` for text only |
 
 Ids are validated against a reserved list — `articles`, `posts`, `media`,

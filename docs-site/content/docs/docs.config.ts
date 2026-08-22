@@ -28,6 +28,8 @@ export type DocsLandingCard = {
 export type DocsConfig = {
 	/** Product name shown in the header and in page titles. */
 	siteName: string;
+	/** Controls `/`; documentation remains available at `/docs`. */
+	homepage: "landing" | "docs" | "changelog";
 	title: string;
 	description: string;
 	contentRoot: string;
@@ -38,12 +40,20 @@ export type DocsConfig = {
 		lede: string;
 		groups: Array<{ label: string; cards: Array<DocsLandingCard> }>;
 	};
+	marketing: {
+		metaTitle: string;
+	};
+	changelog: {
+		title: string;
+		description: string;
+	};
 	/** "Edit this page" target, or `undefined` to hide the link. */
 	editUrl?: (slug: string) => string;
 };
 
 export const docsConfig: DocsConfig = {
 	siteName: "MDVault",
+	homepage: "landing",
 	title: "Documentation",
 	description:
 		"Learn how to run MDVault — GitHub-powered Markdown content management, where the repository is the database.",
@@ -116,6 +126,14 @@ export const docsConfig: DocsConfig = {
 				],
 			},
 		],
+	},
+	marketing: {
+		metaTitle: "MDVault · GitHub-powered Markdown content management",
+	},
+	changelog: {
+		title: "Changelog",
+		description:
+			"Product releases, security improvements and notable changes to MDVault.",
 	},
 
 	editUrl: (slug) =>

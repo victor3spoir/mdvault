@@ -30,7 +30,7 @@ export function DocsCards({ nav }: { nav: DocsNav }) {
 							{group.label}
 						</h2>
 
-						<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+						<div className="grid grid-cols-[repeat(auto-fill,minmax(15rem,1fr))] gap-3">
 							{cards.map((card) => {
 								const link = bySlug.get(card.slug);
 								if (!link) return null;
@@ -38,7 +38,7 @@ export function DocsCards({ nav }: { nav: DocsNav }) {
 								return (
 									<Link
 										key={card.slug}
-										to="/$"
+										to="/docs/$"
 										params={{ _splat: card.slug }}
 										className="group flex flex-col gap-2 rounded-xl border p-5 transition-colors hover:border-foreground/30 hover:bg-accent/40"
 									>

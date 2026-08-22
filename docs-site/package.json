@@ -1,6 +1,6 @@
 {
 	"name": "mdvault-docs-site",
-	"description": "Documentation site for MDVault — GitHub-powered Markdown content management.",
+	"description": "Product website and documentation for MDVault, GitHub-powered Markdown content management.",
 	"private": true,
 	"type": "module",
 	"imports": {

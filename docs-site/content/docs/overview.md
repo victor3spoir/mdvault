@@ -59,7 +59,7 @@ comfortable interface over both without giving up either. A developer's blog, a
 documentation repository, a portfolio, a personal knowledge base.
 
 It is **not** a multi-tenant CMS. MDVault has no login of its own and acts as a
-single GitHub identity — read [Security model](/architecture/security) before
+single GitHub identity — read [Security model](/docs/architecture/security) before
 putting it anywhere public.
 
 ## The shape of a repository
@@ -74,11 +74,11 @@ my-content-repo/
 ```
 
 A file's name is its identity. Frontmatter at the top, Markdown below, images
-beside it. Details in [Repository layout](/reference/repository-layout).
+beside it. Details in [Repository layout](/docs/reference/repository-layout).
 
 ## Where to go next
 
-- Running it: [Installation](/getting-started/installation)
-- Understanding the write path: [Architecture overview](/architecture/overview)
+- Running it: [Installation](/docs/getting-started/installation)
+- Understanding the write path: [Architecture overview](/docs/architecture/overview)
 - Reading the content from your own site:
-  [Consume your content](/guides/consume-your-content)
+  [Consume your content](/docs/guides/consume-your-content)
