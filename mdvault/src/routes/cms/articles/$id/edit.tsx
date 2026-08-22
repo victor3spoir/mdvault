@@ -1,15 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { articleQueryOptions } from "#/features/articles/articles.queries";
 import { ArticleEditor } from "#/features/articles/components/article-editor";
+import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
 
 export const Route = createFileRoute("/cms/articles/$id/edit")({
-	loader: ({ context, params }) =>
-		context.queryClient.ensureQueryData(articleQueryOptions(params.id)),
+	loader: async ({ context, params }) => {
+		const [article, config] = await Promise.all([
+			context.queryClient.ensureQueryData(articleQueryOptions(params.id)),
+			context.queryClient.ensureQueryData(vaultConfigQueryOptions()),
+		]);
+		return { article, config };
+	},
 	component: EditArticlePage,
 });
 
 function EditArticlePage() {
-	const article = Route.useLoaderData();
+	const { article, config } = Route.useLoaderData();
 
 	if (!article) {
 		return (
@@ -19,5 +25,12 @@ function EditArticlePage() {
 		);
 	}
 
-	return <ArticleEditor article={article} mode="edit" />;
+	return (
+		<ArticleEditor
+			article={article}
+			mode="edit"
+			locales={config.locales}
+			defaultLocale={config.defaultLocale}
+		/>
+	);
 }

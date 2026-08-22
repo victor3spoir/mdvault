@@ -16,27 +16,20 @@ const rateLimiter = createRateLimiter({
 });
 
 /**
- * `X-Forwarded-For` is attacker controlled unless a reverse proxy in front of
- * this app is known to rewrite it. Trusting it by default would let any caller
- * mint a fresh rate limit bucket per request, so it is opt-in.
+ * `X-Forwarded-For` is attacker controlled without a trusted proxy in front,
+ * so honouring it is opt-in.
  */
 function isProxyTrusted() {
 	return process.env.TRUSTED_PROXY === "true";
 }
 
 function getClientKey() {
-	// MDVault runs on the machine using it, so a single local bucket is the
-	// correct default when no trusted proxy is configured.
 	return getRequestIP({ xForwardedFor: isProxyTrusted() }) ?? "local";
 }
 
 /**
- * Cross-site requests must not drive mutations. CSRF tokens (see `src/start.ts`)
- * are the primary defence; these checks are the cheap second line.
- *
- * `Sec-Fetch-Site` is set by the browser and cannot be forged from script, so a
- * write that declares itself cross-site is rejected outright. `Origin` is then
- * required to match whenever it is present.
+ * Second line behind the CSRF tokens in `src/start.ts`: `Sec-Fetch-Site` cannot
+ * be forged from script, and `Origin` must match whenever present.
  */
 export function isTrustedOrigin(request: Request, serverUrl?: string) {
 	const fetchSite = request.headers.get("sec-fetch-site");
@@ -55,10 +48,7 @@ export function isTrustedOrigin(request: Request, serverUrl?: string) {
 	return origin === new URL(request.url).origin || origin === serverUrl;
 }
 
-/**
- * The request body is also bounded where it actually matters - the upload
- * validator caps the decoded image - so this only rejects obvious abuse early.
- */
+/** Early rejection only: the upload validator caps the decoded image. */
 function isBodyTooLarge(request: Request) {
 	const contentLength = Number(request.headers.get("content-length") ?? 0);
 	return Number.isFinite(contentLength) && contentLength > MAX_REQUEST_BYTES;

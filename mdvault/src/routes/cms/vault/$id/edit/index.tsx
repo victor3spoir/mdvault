@@ -55,5 +55,12 @@ function EditVaultAssetPage() {
 		);
 	}
 
-	return <VaultEditor typeConfig={typeConfig} asset={asset} />;
+	return (
+		<VaultEditor
+			typeConfig={typeConfig}
+			asset={asset}
+			locales={config.locales}
+			defaultLocale={config.defaultLocale}
+		/>
+	);
 }

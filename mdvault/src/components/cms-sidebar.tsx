@@ -139,7 +139,7 @@ export function CmsSidebar() {
 
 	return (
 		<Sidebar variant="inset" collapsible="icon">
-			<SidebarHeader className="border-b border-sidebar-border px-4 py-4 h-16 group-data-[collapsible=icon]:px-0">
+			<SidebarHeader className="border-b border-sidebar-border px-4 py-1 h-14 group-data-[collapsible=icon]:px-0">
 				<Link
 					to="/cms"
 					className="flex items-center gap-3 group-data-[collapsible=icon]:justify-center"
@@ -147,7 +147,7 @@ export function CmsSidebar() {
 					<Logo />
 					{!isCollapsed ? (
 						<span className="text-xl font-bold tracking-tight">
-							md<span className="text-primary">vault</span>
+							MD<span className="text-primary">Vault</span>
 						</span>
 					) : null}
 				</Link>

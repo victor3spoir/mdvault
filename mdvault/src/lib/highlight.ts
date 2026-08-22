@@ -9,6 +9,7 @@ import { js } from "@tanstack/highlight/languages/js";
 import { json } from "@tanstack/highlight/languages/json";
 import { jsx } from "@tanstack/highlight/languages/jsx";
 import { markdown } from "@tanstack/highlight/languages/markdown";
+import { mermaid } from "@tanstack/highlight/languages/mermaid";
 import { nginx } from "@tanstack/highlight/languages/nginx";
 import { plaintext } from "@tanstack/highlight/languages/plaintext";
 import { python } from "@tanstack/highlight/languages/python";
@@ -18,10 +19,8 @@ import { toml } from "@tanstack/highlight/languages/toml";
 import { ts } from "@tanstack/highlight/languages/ts";
 import { tsx } from "@tanstack/highlight/languages/tsx";
 import { yaml } from "@tanstack/highlight/languages/yaml";
-import { createThemeCss } from "@tanstack/highlight/theme";
-import { githubDarkTheme } from "@tanstack/highlight/themes/github-dark";
-import { githubLightTheme } from "@tanstack/highlight/themes/github-light";
 import { csharp } from "#/lib/highlight-csharp";
+import { hcl } from "#/lib/highlight-hcl";
 
 /**
  * Isomorphic highlighter shared by SSR and the browser. Unknown languages
@@ -34,6 +33,7 @@ export const highlighter = createHighlighter({
 		css,
 		diff,
 		dockerfile,
+		hcl,
 		env,
 		html,
 		http,
@@ -41,6 +41,7 @@ export const highlighter = createHighlighter({
 		json,
 		jsx,
 		markdown,
+		mermaid,
 		nginx,
 		python,
 		shell,
@@ -50,11 +51,4 @@ export const highlighter = createHighlighter({
 		tsx,
 		yaml,
 	],
-});
-
-export const highlightThemeCss = createThemeCss({
-	light: githubLightTheme,
-	dark: githubDarkTheme,
-	lightSelector: ":root",
-	darkSelector: ".dark",
 });

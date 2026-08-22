@@ -1,8 +1,6 @@
-import { type QueryClient, queryOptions } from "@tanstack/react-query";
+import { queryOptions } from "@tanstack/react-query";
 import { getImages, getMediaDataUrlFn } from "#/features/media/media.functions";
-import type { MediaFile } from "#/features/media/media.types";
 import {
-	collectImageSources,
 	isExternalImageSource,
 	normalizeMediaSource,
 } from "#/features/media/media.utils";
@@ -31,20 +29,3 @@ export const mediaDataUrlQueryOptions = (src: string) =>
 		staleTime: Infinity,
 		gcTime: Infinity,
 	});
-
-export async function prefetchMediaDataUrls(
-	queryClient: QueryClient,
-	sources: Array<string | undefined | null>,
-) {
-	const uniqueSources = collectImageSources(sources);
-
-	await Promise.all(
-		uniqueSources.map((source) =>
-			queryClient.prefetchQuery(mediaDataUrlQueryOptions(source)),
-		),
-	);
-}
-
-export function getMediaSources(media: MediaFile[]) {
-	return media.flatMap((file) => [file.url]);
-}

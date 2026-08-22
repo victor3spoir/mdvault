@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { LocaleSchema } from "#/features/shared/locales";
 
 /** Shape every content kind (articles, posts, vault assets) satisfies. */
 export interface FilterableContent {
 	title: string;
 	content: string;
-	lang: "fr" | "en";
+	lang: string;
 	createdAt: string;
 	published: boolean;
 	description?: string;
@@ -13,7 +14,7 @@ export interface FilterableContent {
 }
 
 export type ContentStatusFilter = "all" | "published" | "draft";
-export type ContentLangFilter = "all" | "fr" | "en";
+export type ContentLangFilter = "all" | string;
 export type ContentSortBy = "date" | "title";
 export type ContentSortOrder = "asc" | "desc";
 
@@ -40,7 +41,7 @@ const tagsSchema = z.preprocess((value) => {
 export const contentFiltersSchema = z.object({
 	searchQuery: z.string().default(""),
 	status: z.enum(["all", "published", "draft"]).default("all"),
-	lang: z.enum(["all", "fr", "en"]).default("all"),
+	lang: z.union([z.literal("all"), LocaleSchema]).default("all"),
 	sortBy: z.enum(["date", "title"]).default("date"),
 	sortOrder: z.enum(["asc", "desc"]).default("desc"),
 	tags: tagsSchema,

@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-08-22
+
+### Features
+- Added article and Vault translations: link content across languages from a translations section in the editor, with locale flags and language filters on every list.
+- Added content language settings so each vault defines which locales it publishes in.
+- Added Mermaid diagram rendering in articles and previews, plus HCL syntax highlighting.
+- Added slash commands (`/`) in the editor for inserting headings, lists, tables, images, callouts, video embeds and more.
+- Added callout blocks (note, tip, warning, etc.) round-tripped to plain Markdown.
+- Added YouTube and Vimeo video embeds in articles.
+- Added find & replace inside the editor.
+- Added a document outline panel for jumping between headings.
+- Added drag-handle block reordering and keyboard block move commands.
+- Added paste cleanup: pasted HTML and text are normalised into clean Markdown-friendly content.
+- Added content checks (missing alt text, empty headings and similar issues) surfaced in a popover before publishing.
+- Added checklist (task list) support to the rich text editor.
+- Added a toggle between the rich editor and the raw Markdown source.
+- Added TOML and TSX to the code block language picker.
+- Accepted SVG uploads, optimised images on upload and allowed media downloads.
+- Served images through an `/api/media` proxy.
+- Launched the new documentation site (`docs-site/`): marketing landing page, `/docs` documentation and a `/changelog` page.
+
+### Fixes
+- Stopped the breadcrumb overflowing its header.
+- Kept plain-text posts free of markdown artefacts.
+- Made preview and settings panels mutually exclusive in the editor.
+- Aligned code blocks and tables consistently between the editor and the rendered page.
+- Polished the site header, theme toggle and editor title input.
+
+### Refactors
+- Centralised post-mutation refresh logic.
+- Tightened the article and asset type grids and dropped dead style rules in favour of theme tokens.
+- Removed dead code and unused dependencies.
+
 ## [1.1.0] - 2026-08-02
 
 ### Features

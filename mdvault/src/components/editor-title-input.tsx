@@ -52,7 +52,7 @@ export function EditorTitleInput({
 				}
 			}}
 			className={cn(
-				"w-full resize-none overflow-hidden bg-transparent text-3xl leading-tight font-bold tracking-tight outline-none [field-sizing:content] placeholder:text-muted-foreground/40",
+				"w-full resize-none overflow-hidden bg-transparent text-2xl leading-snug font-bold tracking-tight outline-none [field-sizing:content] placeholder:text-muted-foreground/40",
 				className,
 			)}
 		/>

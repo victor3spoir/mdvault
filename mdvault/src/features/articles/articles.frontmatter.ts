@@ -1,11 +1,7 @@
 import { ArticleFrontmatterSchema } from "#/features/articles/article.schema";
 import type { ArticleFrontmatter } from "#/features/articles/articles.types";
 import { InvalidContentError } from "#/features/shared/content-revision";
-import { parseFrontmatter, stringifyFrontmatter } from "#/lib/frontmatter";
-
-export function generateFrontmatter(data: ArticleFrontmatter): string {
-	return stringifyFrontmatter(data as unknown as Record<string, unknown>);
-}
+import { parseFrontmatter } from "#/lib/frontmatter";
 
 export function parseArticleFrontmatter(content: string): {
 	frontmatter: ArticleFrontmatter;

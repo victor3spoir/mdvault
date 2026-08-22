@@ -7,6 +7,7 @@ import {
 	IconEye,
 	IconFileText,
 	IconLoader2,
+	IconMarkdown,
 	IconSettings,
 	IconTrash,
 	IconWorldOff,
@@ -31,9 +32,11 @@ interface ArticleEditorHeaderProps {
 	hasUnsavedChanges: boolean;
 	sidebarCollapsed: boolean;
 	previewMode: boolean;
+	sourceMode: boolean;
 	onSave: () => void;
 	onToggleSidebar: () => void;
 	onTogglePreview: () => void;
+	onToggleSource: () => void;
 	onTogglePublish: () => void;
 	onDelete: () => void;
 }
@@ -46,14 +49,16 @@ export function ArticleEditorHeader({
 	hasUnsavedChanges,
 	sidebarCollapsed,
 	previewMode,
+	sourceMode,
 	onSave,
 	onToggleSidebar,
 	onTogglePreview,
+	onToggleSource,
 	onTogglePublish,
 	onDelete,
 }: ArticleEditorHeaderProps) {
 	return (
-		<header className="flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
+		<header className="flex h-12 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-backdrop-filter:bg-background/60">
 			<div className="flex items-center gap-3">
 				<Tooltip>
 					<TooltipTrigger asChild>
@@ -74,20 +79,7 @@ export function ArticleEditorHeader({
 
 				<Separator orientation="vertical" className="h-5" />
 
-				<nav className="flex items-center gap-2 text-sm">
-					<Link
-						to="/cms/articles"
-						className="text-muted-foreground transition-colors hover:text-foreground"
-					>
-						Articles
-					</Link>
-					<span className="text-muted-foreground/50">›</span>
-					<span className="max-w-60 truncate font-medium">
-						{title || "Untitled"}
-					</span>
-				</nav>
-
-				<div className="ml-3 flex items-center gap-2">
+				<div className="flex items-center gap-2">
 					<Badge
 						variant="secondary"
 						className={
@@ -124,6 +116,24 @@ export function ArticleEditorHeader({
 			</div>
 
 			<div className="flex items-center gap-1.5">
+				<Tooltip>
+					<TooltipTrigger asChild>
+						<Button
+							variant={sourceMode ? "secondary" : "ghost"}
+							size="icon"
+							className="size-8 rounded-lg"
+							aria-label="Toggle markdown source"
+							aria-pressed={sourceMode}
+							onClick={onToggleSource}
+						>
+							<IconMarkdown className="size-4" />
+						</Button>
+					</TooltipTrigger>
+					<TooltipContent side="bottom">
+						{sourceMode ? "Back to the editor" : "Markdown source"}
+					</TooltipContent>
+				</Tooltip>
+
 				<Tooltip>
 					<TooltipTrigger asChild>
 						<Button

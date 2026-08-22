@@ -15,7 +15,7 @@ export function PageLayout({
 	actions,
 }: PageLayoutProps) {
 	return (
-		<div className="flex min-h-screen flex-1 flex-col bg-background">
+		<div className="flex min-h-[calc(100svh-4rem)] flex-1 flex-col bg-background">
 			<main className="flex-1 p-6">
 				<div className="space-y-6">
 					<PageHeader

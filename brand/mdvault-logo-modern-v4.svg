@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Modern MDVault logo</title>
+  <desc id="desc">An open secure chest with a Markdown article stored vertically inside.</desc>
+  <defs>
+    <linearGradient id="lidShell" x1="91" y1="69" x2="429" y2="242" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FAFAFF"/>
+      <stop offset="1" stop-color="#CDD3EA"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="163" y1="124" x2="330" y2="328" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EEF0F8"/>
+    </linearGradient>
+    <linearGradient id="front" x1="62" y1="269" x2="350" y2="438" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8F8FC"/>
+      <stop offset="1" stop-color="#D7DBE9"/>
+    </linearGradient>
+    <linearGradient id="side" x1="350" y1="305" x2="438" y2="421" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#C6CBE0"/>
+      <stop offset="1" stop-color="#AEB5D0"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="92" y1="238" x2="422" y2="330" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A5B4FC"/>
+      <stop offset="1" stop-color="#6366F1"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="15" stdDeviation="14" flood-color="#272A3A" flood-opacity=".22"/>
+    </filter>
+  </defs>
+
+  <ellipse cx="258" cy="447" rx="181" ry="25" fill="#282B3A" opacity=".14"/>
+
+  <!-- The original curved chest lid, simplified into cleaner modern surfaces. -->
+  <g filter="url(#shadow)" stroke="#414455" stroke-width="9" stroke-linejoin="round">
+    <path d="M111 231 79 143q-6-18 7-32l38-41q12-13 30-10l216 36q22 4 36 21l27 37q10 13 5 29l-22 76Z" fill="url(#lidShell)"/>
+    <path d="m125 207-23-65 40-44 204 34q18 3 29 18l34 45-17 48Z" fill="#5C6071"/>
+    <path d="m137 188-14-40 33-28 177 29q15 3 24 14l22 29-9 27Z" fill="#73788C"/>
+    <path d="m127 76 24 35 229 39 25-25" fill="none" stroke="#FFFFFF" stroke-opacity=".72" stroke-width="7"/>
+    <path d="m383 101-24 29 12 67 35 43" fill="none" stroke="#9298B1" stroke-width="8"/>
+  </g>
+
+  <!-- Dark opening: the article is placed within this cavity. -->
+  <path d="m72 257 86-49 277 49-87 58Z" fill="#2E3140" stroke="#414455" stroke-width="9" stroke-linejoin="round"/>
+  <path d="m100 257 66-34 234 41-61 38Z" fill="#171A24"/>
+
+  <!-- Markdown article standing inside the chest. -->
+  <g filter="url(#shadow)" stroke-linejoin="round">
+    <path d="M159 139q0-16 16-16h103l49 49v164q0 17-17 17H176q-17 0-17-17Z" fill="url(#paper)" stroke="#414455" stroke-width="9"/>
+    <path d="M278 123v37q0 21 21 21h28" fill="#C7D2FE" stroke="#414455" stroke-width="8"/>
+    <path d="M190 224v-43l25 30 25-30v43" fill="none" stroke="#4C4F60" stroke-width="13" stroke-linecap="round"/>
+    <path d="M282 181v53m0 0-18-18m18 18 18-18" fill="none" stroke="#6366F1" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M190 269h104M190 298h75" fill="none" stroke="#A6ABBE" stroke-width="9" stroke-linecap="round"/>
+  </g>
+
+  <!-- Chest body is drawn after the article so its front hides the lower page. -->
+  <g filter="url(#shadow)" stroke="#414455" stroke-width="9" stroke-linejoin="round">
+    <path d="m63 270 286 57v116L63 386Z" fill="url(#front)"/>
+    <path d="m349 327 89-59v116l-89 59Z" fill="url(#side)"/>
+    <path d="m63 246 286 57 89-58v30l-89 59-286-57Z" fill="url(#accent)"/>
+    <path d="m93 304 227 45v58L93 362Z" fill="#FFFFFF" fill-opacity=".2" stroke="#AEB4CB" stroke-width="8"/>
+    <path d="m375 342 38-25v52l-38 25Z" fill="#FFFFFF" fill-opacity=".12" stroke="#8D94AF" stroke-width="8"/>
+    <path d="m63 246 286 57 89-58" fill="none" stroke="#FFFFFF" stroke-opacity=".72" stroke-width="7"/>
+    <path d="m63 277 286 57 89-59" fill="none" stroke="#565A70" stroke-width="7"/>
+  </g>
+
+  <!-- Lock attached to the chest front, matching the original composition. -->
+  <g filter="url(#shadow)" stroke="#414455" stroke-linejoin="round">
+    <path d="M159 350v-18q0-34 34-34t34 34v18" fill="none" stroke-width="13" stroke-linecap="round"/>
+    <rect x="141" y="343" width="104" height="85" rx="26" fill="#F8F8FC" stroke-width="9"/>
+    <circle cx="193" cy="378" r="10" fill="#6366F1" stroke="none"/>
+    <path d="M193 386v15" stroke="#6366F1" stroke-width="10" stroke-linecap="round"/>
+  </g>
+
+  <path d="m86 395 33 7-19 22-33-7Z" fill="#B8BED4" stroke="#414455" stroke-width="8" stroke-linejoin="round"/>
+  <path d="m320 442 30 7 24-18-29-6Z" fill="#959DBA" stroke="#414455" stroke-width="8" stroke-linejoin="round"/>
+</svg>

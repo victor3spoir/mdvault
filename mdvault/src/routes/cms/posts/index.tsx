@@ -1,8 +1,7 @@
 import { IconPlus } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { ContentFilterBar } from "#/components/content-filter-bar";
 import { ContentListEmptyState } from "#/components/content-list-empty-state";
 import { PageLayout } from "#/components/page-layout";
@@ -10,10 +9,7 @@ import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
 import { PostCard } from "#/features/posts/components/post-card";
-import {
-	postsListQueryOptions,
-	prefetchPostsMedia,
-} from "#/features/posts/posts.queries";
+import { postsListQueryOptions } from "#/features/posts/posts.queries";
 import {
 	type ContentFilters,
 	collectContentTags,
@@ -21,22 +17,23 @@ import {
 	DEFAULT_CONTENT_FILTERS,
 	filterAndSortContent,
 } from "#/features/shared/content-filters";
+import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
 
 export const Route = createFileRoute("/cms/posts/")({
 	validateSearch: zodValidator(contentFiltersSchema),
 	loader: async ({ context }) => {
-		const posts = await context.queryClient.ensureQueryData(
-			postsListQueryOptions(),
-		);
-		return posts;
+		const [posts, config] = await Promise.all([
+			context.queryClient.ensureQueryData(postsListQueryOptions()),
+			context.queryClient.ensureQueryData(vaultConfigQueryOptions()),
+		]);
+		return { posts, config };
 	},
 	pendingComponent: PostsPending,
 	component: PostsPage,
 });
 
 function PostsPage() {
-	const posts = Route.useLoaderData();
-	const queryClient = useQueryClient();
+	const { posts, config } = Route.useLoaderData();
 	const filters = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const allTags = collectContentTags(posts);
@@ -45,10 +42,6 @@ function PostsPage() {
 		() => filterAndSortContent(posts, filters),
 		[posts, filters],
 	);
-
-	useEffect(() => {
-		void prefetchPostsMedia(queryClient, posts);
-	}, [posts, queryClient]);
 
 	const updateFilters = (patch: Partial<ContentFilters>) => {
 		navigate({ search: (prev) => ({ ...prev, ...patch }) });
@@ -87,8 +80,10 @@ function PostsPage() {
 				<ContentFilterBar
 					filters={filters}
 					onChange={updateFilters}
+					onClear={clearFilters}
 					label="posts"
 					availableTags={allTags}
+					locales={config.locales}
 				/>
 			) : null}
 

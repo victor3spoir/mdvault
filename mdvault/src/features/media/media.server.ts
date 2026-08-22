@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { listArticles } from "#/features/articles/articles.server";
 import type { MediaFile, MediaUsage } from "#/features/media/media.types";
+import { isSvgDocument, sanitizeSvg } from "#/features/media/svg-sanitize";
 import { listPosts } from "#/features/posts/posts.server";
 import type { ActionResult } from "#/features/shared/shared.types";
 import { getGitHubClient } from "#/integrations/github/github-client.server";
@@ -78,6 +79,7 @@ export async function listImages(): Promise<ActionResult<MediaFile[]>> {
 					url: file.path,
 					uploadedAt: "",
 					sha: file.sha ?? "",
+					size: file.size ?? 0,
 				};
 			}),
 		};
@@ -95,7 +97,7 @@ export async function listImages(): Promise<ActionResult<MediaFile[]>> {
 	}
 }
 
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 export const MAX_IMAGE_BASE64_LENGTH = Math.ceil(MAX_IMAGE_BYTES / 3) * 4;
 
 /**
@@ -113,13 +115,11 @@ const MEDIA_MIME_TYPES: Record<string, string> = {
 };
 
 /**
- * SVG can carry scripts, so it is never accepted from an upload. Existing SVGs
- * already committed to the repository are still listed and served, because they
- * are only ever rendered through `<img>`, where scripts cannot execute.
+ * SVG is accepted, but never as-is: it is a document that can carry scripts,
+ * event handlers and remote references. Uploads are sanitised before they are
+ * committed (see `sanitizeSvg`), so what lands in the repository is inert.
  */
-const UPLOADABLE_EXTENSIONS = Object.keys(MEDIA_MIME_TYPES).filter(
-	(extension) => extension !== "svg",
-);
+const UPLOADABLE_EXTENSIONS = Object.keys(MEDIA_MIME_TYPES);
 
 function mediaExtension(path: string) {
 	return path.split(".").pop()?.toLowerCase() ?? "";
@@ -168,6 +168,9 @@ function hasAvifSignature(bytes: Uint8Array) {
 
 function hasValidImageSignature(extension: string, bytes: Uint8Array) {
 	switch (extension) {
+		case "svg":
+			// SVG is text: no magic number, so the payload itself is checked.
+			return isSvgDocument(new TextDecoder().decode(bytes.slice(0, 2048)));
 		case "jpg":
 		case "jpeg":
 			return startsWithBytes(bytes, [0xff, 0xd8, 0xff]);
@@ -193,11 +196,17 @@ function hasValidImageSignature(extension: string, bytes: Uint8Array) {
 	}
 }
 
+/**
+ * Validates an upload and returns what should actually be committed.
+ *
+ * For raster formats that is the original payload. For SVG it is the sanitised
+ * document, so a file carrying scripts is stored inert rather than rejected.
+ */
 function validateUploadImage(
 	fileName: string,
 	mimeType: string,
 	base64: string,
-) {
+): { extension: string; content: string; removed: string[] } | null {
 	const bytes = decodeUploadBase64(base64);
 	if (!bytes) {
 		return null;
@@ -218,7 +227,16 @@ function validateUploadImage(
 		return null;
 	}
 
-	return extension;
+	if (extension === "svg") {
+		const { svg, removed } = sanitizeSvg(new TextDecoder().decode(bytes));
+		return {
+			extension,
+			content: Buffer.from(svg, "utf8").toString("base64"),
+			removed,
+		};
+	}
+
+	return { extension, content: base64, removed: [] };
 }
 
 function normalizeMediaFilePath(filePath: string, mediaPath: string) {
@@ -263,7 +281,7 @@ function normalizeMediaFilePath(filePath: string, mediaPath: string) {
 	return normalizeRepositoryPath(normalized, mediaPath);
 }
 
-export async function getMediaFile(filePath: string): Promise<
+async function getMediaFile(filePath: string): Promise<
 	ActionResult<{
 		content: Uint8Array;
 		contentType: string;
@@ -279,7 +297,6 @@ export async function getMediaFile(filePath: string): Promise<
 			return { success: false, error: "Missing file path" };
 		}
 
-		// Only media this app understands is ever served back to the browser.
 		if (!isSupportedMediaPath(trimmedPath)) {
 			return { success: false, error: "Unsupported media type" };
 		}
@@ -352,20 +369,27 @@ export async function uploadImage(input: {
 	base64: string;
 }): Promise<ActionResult<MediaFile>> {
 	try {
-		const extension = validateUploadImage(
+		const upload = validateUploadImage(
 			input.fileName,
 			input.mimeType,
 			input.base64,
 		);
 
-		if (!extension) {
+		if (!upload) {
 			return { success: false, error: "Invalid or unsupported image upload" };
+		}
+
+		if (upload.removed.length > 0) {
+			logger.warn("Sanitized SVG upload", {
+				fileName: input.fileName,
+				removed: upload.removed,
+			});
 		}
 
 		const env = getGitHubEnv();
 		const octokit = getGitHubClient();
 
-		const fileName = `${randomUUID()}.${extension}`;
+		const fileName = `${randomUUID()}.${upload.extension}`;
 		const filePath = `${env.MEDIA_PATH}/${fileName}`;
 
 		await octokit.repos.createOrUpdateFileContents({
@@ -373,7 +397,7 @@ export async function uploadImage(input: {
 			repo: env.GITHUB_REPO,
 			path: filePath,
 			message: `Upload image: ${fileName}`,
-			content: input.base64,
+			content: upload.content,
 		});
 
 		return {
@@ -385,6 +409,7 @@ export async function uploadImage(input: {
 				url: filePath,
 				uploadedAt: new Date().toISOString(),
 				sha: "",
+				size: base64ToBytes(upload.content).length,
 			},
 		};
 	} catch (error) {

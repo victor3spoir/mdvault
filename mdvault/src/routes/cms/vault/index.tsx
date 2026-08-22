@@ -10,6 +10,7 @@ import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { Skeleton } from "#/components/ui/skeleton";
+import { groupTranslations } from "#/features/shared/article-translations";
 import {
 	type ContentFilters,
 	collectContentTags,
@@ -22,11 +23,29 @@ import {
 	vaultAssetsQueryOptions,
 	vaultConfigQueryOptions,
 } from "#/features/vault/vault.queries";
+import type { VaultAsset } from "#/features/vault/vault.types";
 import { getAssetIcon } from "#/features/vault/vault-icons";
 
 const vaultSearchSchema = contentFiltersSchema.extend({
 	type: z.string().default(""),
 });
+
+function indexLinkedLocales(assets: readonly VaultAsset[]) {
+	const index = new Map<string, string[]>();
+
+	for (const group of groupTranslations(assets)) {
+		if (group.members.length < 2) {
+			continue;
+		}
+
+		const locales = group.members.map((member) => member.lang);
+		for (const member of group.members) {
+			index.set(member.id, locales);
+		}
+	}
+
+	return index;
+}
 
 export const Route = createFileRoute("/cms/vault/")({
 	validateSearch: zodValidator(vaultSearchSchema),
@@ -58,6 +77,7 @@ function VaultListPage() {
 	});
 
 	const items = useMemo(() => assets.data ?? [], [assets.data]);
+	const linkedLocalesByAsset = indexLinkedLocales(items);
 	const allTags = collectContentTags(items);
 	const filtered = useMemo(
 		() => filterAndSortContent(items, search),
@@ -150,8 +170,10 @@ function VaultListPage() {
 				<ContentFilterBar
 					filters={search}
 					onChange={updateFilters}
+					onClear={clearFilters}
 					label={label.toLowerCase()}
 					availableTags={allTags}
+					locales={config.locales}
 				/>
 			) : null}
 
@@ -196,7 +218,12 @@ function VaultListPage() {
 			) : (
 				<div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-6">
 					{filtered.map((asset) => (
-						<VaultAssetCard key={asset.id} asset={asset} type={activeType} />
+						<VaultAssetCard
+							key={asset.id}
+							asset={asset}
+							type={activeType}
+							linkedLocales={linkedLocalesByAsset.get(asset.id)}
+						/>
 					))}
 				</div>
 			)}

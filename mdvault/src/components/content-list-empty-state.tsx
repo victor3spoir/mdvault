@@ -1,14 +1,7 @@
 import { IconFileText } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
-/**
- * Shown when a collection has no content yet.
- *
- * This is a rare, first-time moment, so it earns a small staged entrance: the
- * icon settles in first, then the copy and the action. Everything animates
- * `opacity` and `translate` only, and the operating system's reduced-motion
- * preference caps it globally (see `styles.css`).
- */
+/** A rare first-time moment, so it earns a small staged entrance. */
 export function ContentListEmptyState({
 	title,
 	description,

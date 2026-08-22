@@ -1,14 +1,13 @@
 import { IconFileText } from "@tabler/icons-react";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { LocaleFlag } from "#/components/locale-flag";
 import { PageLayout } from "#/components/page-layout";
 import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { PrivateImage } from "#/features/media/components/private-image";
-import { prefetchMediaDataUrls } from "#/features/media/media.queries";
-import {
-	collectPostImageSources,
-	postQueryOptions,
-} from "#/features/posts/posts.queries";
+import { PostContent } from "#/features/posts/components/post-content";
+import { postQueryOptions } from "#/features/posts/posts.queries";
+import { getLocaleLabel } from "#/features/shared/locales";
 import { formatDate } from "#/lib/date";
 
 export const Route = createFileRoute("/cms/posts/$slug/")({
@@ -18,10 +17,6 @@ export const Route = createFileRoute("/cms/posts/$slug/")({
 		);
 
 		if (post) {
-			await prefetchMediaDataUrls(
-				context.queryClient,
-				collectPostImageSources(post),
-			);
 		}
 
 		return post;
@@ -77,7 +72,8 @@ function PostDetailPage() {
 								<span>{formatDate(post.createdAt)}</span>
 								{post.author ? <span>• By {post.author}</span> : null}
 								<Badge variant="outline" className="text-[10px]">
-									{post.lang === "fr" ? "Français" : "English"}
+									<LocaleFlag locale={post.lang} />
+									{getLocaleLabel(post.lang)}
 								</Badge>
 							</div>
 						</div>
@@ -95,10 +91,8 @@ function PostDetailPage() {
 						</Button>
 					) : null}
 
-					<div className="prose prose-sm dark:prose-invert mt-6 max-w-none">
-						<p className="whitespace-pre-wrap text-foreground">
-							{post.content}
-						</p>
+					<div className="mt-6">
+						<PostContent content={post.content} />
 					</div>
 				</div>
 			</div>

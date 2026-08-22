@@ -6,11 +6,7 @@ import { parse, stringify } from "yaml";
  */
 export const MAX_FRONTMATTER_BYTES = 64 * 1024;
 
-/**
- * `yaml` refuses to expand more aliases than this, which is what stops YAML
- * expansion bombs ("billion laughs") from exhausting memory while parsing
- * repository content. Frontmatter never legitimately uses anchors.
- */
+/** Caps alias expansion: frontmatter never legitimately uses anchors. */
 const MAX_ALIAS_COUNT = 100;
 
 const FORBIDDEN_KEYS = new Set(["__proto__", "constructor", "prototype"]);
@@ -42,12 +38,7 @@ function toPlainRecord(value: unknown): Record<string, unknown> {
 	);
 }
 
-/**
- * Splits a markdown document into its YAML frontmatter and its body.
- *
- * Documents without frontmatter are returned unchanged with empty data, which
- * lets callers treat "no metadata yet" and "metadata present" identically.
- */
+/** Splits a document into frontmatter and body. No frontmatter yields empty data. */
 export function parseFrontmatter(raw: string): ParsedFrontmatter {
 	const source = raw.replace(/^\uFEFF/, "");
 	const lines = source.split(/\r?\n/);
@@ -101,10 +92,7 @@ function isEmptyValue(value: unknown) {
 	);
 }
 
-/**
- * Serializes metadata into a `---` delimited YAML block. Empty values are
- * dropped so absent metadata never lands in the repository as `null`.
- */
+/** Empty values are dropped so absent metadata never lands as `null`. */
 export function stringifyFrontmatter(data: Record<string, unknown>): string {
 	const cleaned = Object.fromEntries(
 		Object.entries(data).filter(([, value]) => !isEmptyValue(value)),

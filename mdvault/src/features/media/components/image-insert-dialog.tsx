@@ -98,7 +98,7 @@ export function ImageInsertDialog({
 								aria-selected={tab === id}
 								onClick={() => setTab(id)}
 								className={cn(
-									"flex items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-150 ease-out",
+									"flex items-center justify-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors duration-150 ease-out focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none",
 									tab === id
 										? "bg-background text-foreground shadow-xs"
 										: "text-muted-foreground hover:text-foreground",
@@ -185,12 +185,13 @@ export function ImageInsertDialog({
 					</div>
 				) : null}
 				<div className="flex shrink-0 items-center justify-between gap-3 border-t bg-muted/30 px-6 py-4">
-					<div className="flex min-w-0 items-center gap-3">
+					<div className="flex min-w-0 items-center gap-3" aria-live="polite">
 						{selectedImage ? (
 							<>
 								<div className="relative size-10 shrink-0 overflow-hidden rounded-lg border shadow-xs">
 									<PrivateImage
 										src={selectedImage.url}
+										width={400}
 										alt={selectedImage.name}
 										className="h-full w-full object-cover"
 									/>

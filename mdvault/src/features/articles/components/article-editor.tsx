@@ -1,4 +1,3 @@
-import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useRouter } from "@tanstack/react-router";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -10,7 +9,6 @@ import {
 	unpublishArticleMutation,
 	updateArticleMutation,
 } from "#/features/articles/articles.functions";
-import { invalidateArticleQueries } from "#/features/articles/articles.queries";
 import type { Article } from "#/features/articles/articles.types";
 import { getContentStats } from "#/features/articles/articles.utils";
 import { ArticleEditorHeader } from "#/features/articles/components/article-editor-header";
@@ -25,11 +23,14 @@ import { compressImage } from "#/features/media/media.compress";
 import { uploadImageMutation } from "#/features/media/media.functions";
 import type { MediaFile } from "#/features/media/media.types";
 import type { ContentRevision } from "#/features/shared/content-revision";
+import { includeCurrentLocale } from "#/features/shared/locales";
+import { useContentRefresh } from "#/features/shared/use-content-refresh";
 import {
 	clearDraft,
 	loadDraft,
 	useAutosaveDraft,
 } from "#/hooks/use-autosave-draft";
+import { DELETE_DESCRIPTION, useConfirm } from "#/hooks/use-confirm";
 import { useUnsavedChanges } from "#/hooks/use-unsaved-changes";
 import { formatDate } from "#/lib/date";
 import { cn } from "#/lib/utils";
@@ -37,6 +38,8 @@ import { cn } from "#/lib/utils";
 interface ArticleEditorProps {
 	article?: Article | null;
 	mode: "create" | "edit";
+	locales: readonly string[];
+	defaultLocale: string;
 }
 
 interface ArticleDraft {
@@ -44,7 +47,7 @@ interface ArticleDraft {
 	description: string;
 	tags: string[];
 	coverImage: string;
-	lang: "fr" | "en";
+	lang: string;
 	published: boolean;
 	content: string;
 }
@@ -58,21 +61,37 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
 	return btoa(binary);
 }
 
-export function ArticleEditor({ article, mode }: ArticleEditorProps) {
+export function ArticleEditor({
+	article,
+	mode,
+	locales,
+	defaultLocale,
+}: ArticleEditorProps) {
 	const navigate = useNavigate();
 	const router = useRouter();
-	const queryClient = useQueryClient();
+	const refreshContent = useContentRefresh("articles");
 	const editorRef = useRef<RichTextEditorHandle>(null);
 	const [isPending, startTransition] = useTransition();
+	const { confirm, confirmDialog } = useConfirm();
 	const [title, setTitle] = useState(article?.title ?? "");
-	const [lang, setLang] = useState<"fr" | "en">(article?.lang ?? "en");
+	const [lang, setLang] = useState(article?.lang ?? defaultLocale);
+	const localeOptions = includeCurrentLocale(locales, article?.lang);
 	const [description, setDescription] = useState(article?.description ?? "");
 	const [tags, setTags] = useState<string[]>(article?.tags ?? []);
 	const [coverImage, setCoverImage] = useState(article?.coverImage ?? "");
 	const [published, setPublished] = useState(article?.published ?? false);
 	const [editorContent, setEditorContent] = useState(article?.content ?? "");
-	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-	const [previewMode, setPreviewMode] = useState(false);
+	/**
+	 * Preview and settings compete for the same half of the workspace, so one
+	 * state with three values makes them exclusive by construction rather than
+	 * by two booleans that have to be kept in agreement.
+	 */
+	const [panel, setPanel] = useState<"none" | "preview" | "settings">("none");
+	/**
+	 * The rich editor stays mounted while the source is shown: remounting it
+	 * would reload the article as it was fetched and drop unsaved edits.
+	 */
+	const [sourceMode, setSourceMode] = useState(false);
 	const [imageInsertDialogOpen, setImageInsertDialogOpen] = useState(false);
 	const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 	const [revision, setRevision] = useState<ContentRevision | null>(
@@ -172,7 +191,11 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 
 		startTransition(async () => {
 			try {
-				const content = editorRef.current?.getMarkdown() ?? "";
+				// In source mode the raw text never reached the rich editor, so the
+				// state is the only place holding what the author actually typed.
+				const content = sourceMode
+					? editorContent
+					: (editorRef.current?.getMarkdown() ?? "");
 				const input = {
 					title,
 					lang,
@@ -188,7 +211,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					const id = await createArticleMutation({ data: input });
 					setHasUnsavedChanges(false);
 					clearDraft(draftKey);
-					await invalidateArticleQueries(queryClient);
+					await refreshContent();
 					allowNavigation();
 					await navigate({ to: "/cms/articles/$id/edit", params: { id } });
 				} else if (article && revision) {
@@ -198,7 +221,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					setRevision(nextRevision);
 					setHasUnsavedChanges(false);
 					clearDraft(draftKey);
-					await invalidateArticleQueries(queryClient);
+					await refreshContent();
 				}
 
 				toast.success("Article saved");
@@ -223,7 +246,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 						});
 				setRevision(nextRevision);
 				setPublished(!published);
-				await invalidateArticleQueries(queryClient);
+				await refreshContent();
 				toast.success(published ? "Article unpublished" : "Article published");
 			} catch (error) {
 				toast.error(
@@ -233,13 +256,18 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 		});
 	};
 
-	const handleDelete = () => {
+	const handleDelete = async () => {
 		const currentArticle = article;
-		if (
-			!currentArticle ||
-			!revision ||
-			!window.confirm("Delete this article?")
-		) {
+		if (!currentArticle || !revision) {
+			return;
+		}
+
+		const confirmed = await confirm({
+			title: `Delete "${currentArticle.title}"?`,
+			description: DELETE_DESCRIPTION,
+		});
+
+		if (!confirmed) {
 			return;
 		}
 		startTransition(async () => {
@@ -248,7 +276,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					data: { id: currentArticle.id, revision },
 				});
 				clearDraft(draftKey);
-				await invalidateArticleQueries(queryClient);
+				await refreshContent();
 				toast.success("Article deleted");
 				allowNavigation();
 				await navigate({ to: "/cms/articles" });
@@ -262,13 +290,21 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 
 	const stats = getContentStats(editorContent);
 
-	const handleTogglePreview = () => {
-		setPreviewMode((value) => {
-			const next = !value;
-			if (next) {
-				setSidebarCollapsed(true);
+	const previewMode = panel === "preview";
+	const settingsOpen = panel === "settings";
+
+	const togglePanel = (target: "preview" | "settings") => {
+		setPanel((current) => (current === target ? "none" : target));
+	};
+
+	const toggleSourceMode = () => {
+		setSourceMode((current) => {
+			// Leaving the source: hand the edited markdown back to the rich editor.
+			if (current) {
+				editorRef.current?.setMarkdown(editorContent);
 			}
-			return next;
+
+			return !current;
 		});
 	};
 
@@ -280,23 +316,32 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				article={article ? { ...article, published } : undefined}
 				isSaving={isPending}
 				hasUnsavedChanges={hasUnsavedChanges}
-				sidebarCollapsed={sidebarCollapsed}
+				sidebarCollapsed={!settingsOpen}
 				previewMode={previewMode}
+				sourceMode={sourceMode}
 				onSave={handleSave}
-				onToggleSidebar={() => setSidebarCollapsed((value) => !value)}
-				onTogglePreview={handleTogglePreview}
+				onToggleSidebar={() => togglePanel("settings")}
+				onTogglePreview={() => togglePanel("preview")}
+				onToggleSource={toggleSourceMode}
 				onTogglePublish={handleTogglePublish}
 				onDelete={handleDelete}
 			/>
 
-			<div className="flex flex-1 overflow-hidden">
+			{/*
+			 * A container, not the viewport: the CMS sidebar can be open or closed, so
+			 * the workspace is narrower than the window by an amount media queries
+			 * cannot see. The split is decided by the space actually available.
+			 */}
+			<div className="@container/workspace flex flex-1 overflow-hidden">
 				<div
 					className={cn(
 						"flex-col overflow-hidden",
-						previewMode ? "hidden lg:flex lg:w-1/2" : "flex flex-1",
+						previewMode
+							? "hidden @3xl/workspace:flex @3xl/workspace:w-1/2"
+							: "flex flex-1",
 					)}
 				>
-					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-6">
+					<div className="shrink-0 border-b bg-linear-to-b from-muted/30 to-transparent px-8 py-3">
 						<EditorTitleInput
 							value={title}
 							placeholder="Article title..."
@@ -306,7 +351,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 								setHasUnsavedChanges(true);
 							}}
 						/>
-						<div className="mt-2 flex items-center gap-4 text-xs text-muted-foreground">
+						<div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-[11px] text-muted-foreground">
 							<span>{stats.wordCount} words</span>
 							<span>•</span>
 							<span>{stats.readTime} min read</span>
@@ -331,21 +376,36 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					</div>
 
 					<div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-						<RichTextEditor
-							ref={editorRef}
-							markdown={article?.content ?? ""}
-							onImageUpload={handleImageUpload}
-							onImageInsertClick={() => setImageInsertDialogOpen(true)}
-							onChange={(value) => {
-								setEditorContent(value);
-								setHasUnsavedChanges(true);
-							}}
-						/>
+						<div className={cn("flex min-h-0 flex-1", sourceMode && "hidden")}>
+							<RichTextEditor
+								ref={editorRef}
+								markdown={article?.content ?? ""}
+								onImageUpload={handleImageUpload}
+								onImageInsertClick={() => setImageInsertDialogOpen(true)}
+								onChange={(value) => {
+									setEditorContent(value);
+									setHasUnsavedChanges(true);
+								}}
+							/>
+						</div>
+
+						{sourceMode ? (
+							<textarea
+								value={editorContent}
+								aria-label="Markdown source"
+								spellCheck={false}
+								onChange={(event) => {
+									setEditorContent(event.target.value);
+									setHasUnsavedChanges(true);
+								}}
+								className="min-h-0 flex-1 resize-none bg-transparent px-8 py-6 font-mono text-sm leading-7 outline-none"
+							/>
+						) : null}
 					</div>
 				</div>
 
 				{previewMode ? (
-					<div className="flex min-h-0 flex-1 flex-col overflow-y-auto border-l bg-background lg:w-1/2">
+					<div className="flex min-h-0 flex-1 flex-col overflow-y-auto border-l bg-background @3xl/workspace:w-1/2">
 						<div className="sticky top-0 z-10 flex shrink-0 items-center border-b bg-background/95 px-8 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground backdrop-blur">
 							Live Preview
 						</div>
@@ -371,7 +431,10 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 					description={description}
 					tags={tags}
 					coverImage={coverImage}
-					collapsed={sidebarCollapsed}
+					collapsed={!settingsOpen}
+					articleId={article?.id}
+					locales={localeOptions}
+					revision={revision}
 					onLangChange={(value) => {
 						setLang(value);
 						setHasUnsavedChanges(true);
@@ -388,6 +451,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 						setCoverImage(value);
 						setHasUnsavedChanges(true);
 					}}
+					onRevisionChange={setRevision}
 				/>
 			</div>
 
@@ -397,6 +461,7 @@ export function ArticleEditor({ article, mode }: ArticleEditorProps) {
 				onSelect={handleImageInsert}
 				withDetails
 			/>
+			{confirmDialog}
 		</div>
 	);
 }

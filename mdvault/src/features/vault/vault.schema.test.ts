@@ -43,6 +43,38 @@ describe("VaultConfigSchema", () => {
 			],
 		});
 		expect(config.assetTypes).toHaveLength(2);
+		expect(config.locales).toEqual(["en", "fr"]);
+		expect(config.defaultLocale).toBe("en");
+	});
+
+	it("keeps old config files compatible with locale defaults", () => {
+		expect(
+			VaultConfigSchema.parse({ version: 1, assetTypes: [] }),
+		).toMatchObject({
+			locales: ["en", "fr"],
+			defaultLocale: "en",
+		});
+	});
+
+	it("uses the first configured locale when an old config has no default", () => {
+		expect(
+			VaultConfigSchema.parse({
+				version: 1,
+				assetTypes: [],
+				locales: ["de", "fr"],
+			}).defaultLocale,
+		).toBe("de");
+	});
+
+	it("requires the default locale to be enabled", () => {
+		expect(() =>
+			VaultConfigSchema.parse({
+				version: 1,
+				assetTypes: [],
+				locales: ["en", "fr"],
+				defaultLocale: "de",
+			}),
+		).toThrow();
 	});
 
 	it("rejects duplicate ids", () => {
@@ -81,5 +113,40 @@ describe("VaultAssetFrontmatterSchema", () => {
 		});
 		expect(parsed.type).toBe("note");
 		expect(parsed.lang).toBe("fr");
+	});
+
+	it("keeps frontmatter without a translation key backward-compatible", () => {
+		const parsed = VaultAssetFrontmatterSchema.parse({
+			type: "note",
+			title: "Legacy note",
+			published: false,
+			lang: "en",
+		});
+
+		expect(parsed.translationKey).toBeUndefined();
+	});
+
+	it("accepts a slug-safe translation key in frontmatter", () => {
+		const parsed = VaultAssetFrontmatterSchema.parse({
+			type: "note",
+			title: "Translated note",
+			published: false,
+			lang: "fr",
+			translationKey: "translated-note-a1b2c3",
+		});
+
+		expect(parsed.translationKey).toBe("translated-note-a1b2c3");
+	});
+
+	it("rejects a malformed translation key in frontmatter", () => {
+		expect(() =>
+			VaultAssetFrontmatterSchema.parse({
+				type: "note",
+				title: "Broken note",
+				published: false,
+				lang: "fr",
+				translationKey: "Broken Note!",
+			}),
+		).toThrow();
 	});
 });

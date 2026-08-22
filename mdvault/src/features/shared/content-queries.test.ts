@@ -36,9 +36,11 @@ describe("content query keys", () => {
 		expect(invalidateQueries).toHaveBeenCalledTimes(2);
 		expect(invalidateQueries).toHaveBeenCalledWith({
 			queryKey: articleKeys.all,
+			refetchType: "all",
 		});
 		expect(invalidateQueries).toHaveBeenCalledWith({
 			queryKey: dashboardKeys.all,
+			refetchType: "all",
 		});
 	});
 
@@ -48,9 +50,26 @@ describe("content query keys", () => {
 		expect(invalidateQueries).toHaveBeenCalledTimes(2);
 		expect(invalidateQueries).toHaveBeenCalledWith({
 			queryKey: postKeys.all,
+			refetchType: "all",
 		});
 		expect(invalidateQueries).toHaveBeenCalledWith({
 			queryKey: dashboardKeys.all,
+			refetchType: "all",
 		});
+	});
+
+	/**
+	 * The lists render from route loader data rather than a useQuery hook, so
+	 * the queries have no active observer. Without refetchType "all" they are
+	 * marked stale but never refetched, and ensureQueryData in the loader hands
+	 * back the stale cache - a published post keeps showing "Draft" until the
+	 * page is reloaded.
+	 */
+	it("forces a refetch even without an active observer", async () => {
+		await invalidatePostQueries(queryClient);
+
+		for (const call of invalidateQueries.mock.calls) {
+			expect(call[0]).toMatchObject({ refetchType: "all" });
+		}
 	});
 });

@@ -1,0 +1,219 @@
+{
+  "execution_step": "step-03-execute.md",
+  "orchestration_policy": "direct",
+  "assumptions": [
+    "Internal links initially target existing CMS detail routes because public permalink configuration does not exist yet.",
+    "Content checks warn but do not block saving.",
+    "The document outline and diagnostics use popovers/status controls so the existing editor width and page layout remain unchanged.",
+    "Image work is limited to confirmed gaps; existing width, alignment, alt, and caption controls are preserved."
+  ],
+  "replan_triggers": [
+    "Repository state or requested scope changes.",
+    "A shared editor interface changes outside a task's declared boundary.",
+    "Validation reveals an incompatible Tiptap or Markdown round-trip behavior.",
+    "A task needs a new dependency or touches an undeclared feature area.",
+    "Two tasks contend for the same editor component."
+  ],
+  "tasks": [
+    {
+      "id": "editor-analysis-utilities",
+      "objective": "Provide tested pure utilities for heading outline, content diagnostics, safe link handling, internal target URLs, and paste cleanup.",
+      "dependencies": [],
+      "read_set": [
+        "mdvault/src/features/articles/components/editor",
+        "mdvault/src/features/content",
+        "mdvault/src/features/articles/articles.types.ts",
+        "mdvault/src/features/vault/vault.types.ts"
+      ],
+      "write_set": [
+        "mdvault/src/features/articles/components/editor/editor-document.ts",
+        "mdvault/src/features/articles/components/editor/paste-cleanup.ts",
+        "mdvault/src/features/articles/components/editor/editor-document.test.ts",
+        "mdvault/src/features/articles/components/editor/paste-cleanup.test.ts"
+      ],
+      "side_effects": [],
+      "owner": "coordinator",
+      "inputs": [
+        "Tiptap document JSON",
+        "pasted HTML and text",
+        "known internal link targets"
+      ],
+      "expected_outputs": [
+        "Outline entries with positions",
+        "warning issues for duplicate headings, fragments, internal links, and image alt text",
+        "sanitized paste content"
+      ],
+      "validation": [
+        "Targeted unit tests",
+        "Biome check on touched files"
+      ],
+      "evidence_required": [
+        "Passing unit tests for each check and sanitizer behavior"
+      ],
+      "stop_condition": "Utilities pass focused tests or an incompatible editor schema is documented.",
+      "status": "pending"
+    },
+    {
+      "id": "editor-link-outline-checks",
+      "objective": "Replace prompt-based links with a reusable edit/internal-link popover and add outline and warning popovers without layout shift.",
+      "dependencies": [
+        "editor-analysis-utilities"
+      ],
+      "read_set": [
+        "mdvault/src/components/command-palette.tsx",
+        "mdvault/src/features/articles/articles.queries.ts",
+        "mdvault/src/features/vault/vault.queries.ts",
+        "mdvault/src/features/articles/components/editor"
+      ],
+      "write_set": [
+        "mdvault/src/features/articles/components/editor/link-popover.tsx",
+        "mdvault/src/features/articles/components/editor/internal-link-targets.ts",
+        "mdvault/src/features/articles/components/editor/document-outline.tsx",
+        "mdvault/src/features/articles/components/editor/content-checks-popover.tsx",
+        "mdvault/src/features/articles/components/editor/toolbar.tsx",
+        "mdvault/src/features/articles/components/editor/selection-menu.tsx",
+        "mdvault/src/features/articles/components/editor/rich-text-editor.tsx"
+      ],
+      "side_effects": [
+        "Loads existing article and vault lists while the link picker is open."
+      ],
+      "owner": "coordinator",
+      "inputs": [
+        "Current editor selection",
+        "article and vault query data"
+      ],
+      "expected_outputs": [
+        "Create, edit, open, remove, and search internal links",
+        "outline navigation",
+        "non-blocking content issue list"
+      ],
+      "validation": [
+        "Component and utility tests",
+        "TypeScript",
+        "React Doctor"
+      ],
+      "evidence_required": [
+        "No window.prompt remains",
+        "Controls render as overlays rather than persistent columns"
+      ],
+      "stop_condition": "All controls work against one shared editor interface without changing page layout.",
+      "status": "pending"
+    },
+    {
+      "id": "editor-table-image-polish",
+      "objective": "Improve table affordances and close confirmed image-control gaps while preserving existing behavior.",
+      "dependencies": [],
+      "read_set": [
+        "mdvault/src/features/articles/components/editor/table-menu.tsx",
+        "mdvault/src/features/articles/components/editor/private-image-extension.tsx",
+        "mdvault/src/features/media/components/image-insert-dialog.tsx",
+        "mdvault/src/features/vault/components/vault-editor.tsx"
+      ],
+      "write_set": [
+        "mdvault/src/features/articles/components/editor/table-menu.tsx",
+        "mdvault/src/features/articles/components/editor/private-image-extension.tsx",
+        "mdvault/src/features/articles/components/editor/rich-text-editor.tsx",
+        "mdvault/src/features/vault/components/vault-editor.tsx",
+        "mdvault/src/styles.css"
+      ],
+      "side_effects": [],
+      "owner": "coordinator",
+      "inputs": [
+        "Current table selection",
+        "existing media picker"
+      ],
+      "expected_outputs": [
+        "Clearer table controls and active states",
+        "image replacement path",
+        "Vault image insertion with meaningful alt/caption handling"
+      ],
+      "validation": [
+        "Focused editor tests",
+        "responsive visual structure inspection",
+        "TypeScript"
+      ],
+      "evidence_required": [
+        "Existing image presentation attributes survive replacement",
+        "Table menu remains compact"
+      ],
+      "stop_condition": "Confirmed gaps are addressed without rebuilding existing controls.",
+      "status": "pending"
+    },
+    {
+      "id": "vault-source-mode",
+      "objective": "Add article-equivalent Markdown source mode to rich Vault items only.",
+      "dependencies": [],
+      "read_set": [
+        "mdvault/src/features/articles/components/article-editor.tsx",
+        "mdvault/src/features/articles/components/article-editor-header.tsx",
+        "mdvault/src/features/vault/components/vault-editor.tsx"
+      ],
+      "write_set": [
+        "mdvault/src/features/vault/components/vault-editor.tsx"
+      ],
+      "side_effects": [],
+      "owner": "coordinator",
+      "inputs": [
+        "Vault rich content state",
+        "RichTextEditor handle"
+      ],
+      "expected_outputs": [
+        "Rich/source toggle",
+        "two-way content synchronization",
+        "source-mode save behavior",
+        "no toggle for plain-text types"
+      ],
+      "validation": [
+        "Focused tests where practical",
+        "TypeScript",
+        "manual state-flow inspection"
+      ],
+      "evidence_required": [
+        "Editor remains mounted while hidden",
+        "Save selects the current source"
+      ],
+      "stop_condition": "Rich Vault items round-trip source edits and plain items remain unchanged.",
+      "status": "pending"
+    },
+    {
+      "id": "editor-integration-validation",
+      "objective": "Validate all editor improvements together and obtain independent review.",
+      "dependencies": [
+        "editor-analysis-utilities",
+        "editor-link-outline-checks",
+        "editor-table-image-polish",
+        "vault-source-mode"
+      ],
+      "read_set": [
+        "mdvault"
+      ],
+      "write_set": [],
+      "side_effects": [
+        "Runs local test and build commands."
+      ],
+      "owner": "coordinator",
+      "inputs": [
+        "Completed implementation"
+      ],
+      "expected_outputs": [
+        "Biome, TypeScript, tests, and build results",
+        "independent review findings"
+      ],
+      "validation": [
+        "bunx biome check on touched files",
+        "bun run typecheck",
+        "bun run test",
+        "bun run build",
+        "React Doctor",
+        "independent code review"
+      ],
+      "evidence_required": [
+        "Command outputs",
+        "review verdict",
+        "classified pre-existing failures if any"
+      ],
+      "stop_condition": "All introduced failures are resolved and material review findings are handled.",
+      "status": "pending"
+    }
+  ]
+}

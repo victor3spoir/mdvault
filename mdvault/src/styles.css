@@ -7,25 +7,11 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --sea-ink: #173a40;
-  --sea-ink-soft: #416166;
-  --lagoon: #4fb8b2;
-  --lagoon-deep: #328f97;
-  --palm: #2f6a4a;
-  --sand: #e7f0e8;
-  --foam: #f3faf5;
-  --surface: rgba(255, 255, 255, 0.74);
   --surface-strong: rgba(255, 255, 255, 0.9);
   --line: rgba(23, 58, 64, 0.14);
-  --inset-glint: rgba(255, 255, 255, 0.82);
-  --kicker: rgba(47, 106, 74, 0.9);
-  --bg-base: #e7f3ec;
-  --header-bg: rgba(251, 255, 248, 0.84);
-  --chip-bg: rgba(255, 255, 255, 0.8);
-  --chip-line: rgba(47, 106, 74, 0.18);
-  --link-bg-hover: rgba(255, 255, 255, 0.9);
-  --hero-a: rgba(79, 184, 178, 0.36);
-  --hero-b: rgba(47, 106, 74, 0.2);
+
+  --code-surface: #f6f8fa;
+  --code-border: rgba(23, 58, 64, 0.12);
 
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);
@@ -63,25 +49,11 @@
 }
 
 .dark {
-  --sea-ink: #d7ece8;
-  --sea-ink-soft: #afcdc8;
-  --lagoon: #60d7cf;
-  --lagoon-deep: #8de5db;
-  --palm: #6ec89a;
-  --sand: #0f1a1e;
-  --foam: #101d22;
-  --surface: rgba(16, 30, 34, 0.8);
   --surface-strong: rgba(15, 27, 31, 0.92);
   --line: rgba(141, 229, 219, 0.18);
-  --inset-glint: rgba(194, 247, 238, 0.14);
-  --kicker: #b8efe5;
-  --bg-base: #0a1418;
-  --header-bg: rgba(10, 20, 24, 0.8);
-  --chip-bg: rgba(13, 28, 32, 0.9);
-  --chip-line: rgba(141, 229, 219, 0.24);
-  --link-bg-hover: rgba(24, 44, 49, 0.8);
-  --hero-a: rgba(96, 215, 207, 0.18);
-  --hero-b: rgba(110, 200, 154, 0.12);
+
+  --code-surface: #0f1720;
+  --code-border: rgba(141, 229, 219, 0.16);
 
   --background: oklch(0.141 0.005 285.823);
   --foreground: oklch(0.985 0 0);
@@ -165,45 +137,18 @@ body,
 
 body {
   margin: 0;
-  color: var(--sea-ink);
+  /*
+   * The theme tokens, not the old palette: the page content sits on
+   * --background, so a different colour here only ever showed up as a band at
+   * the edges when the scroll rubber-bands.
+   */
+  color: var(--foreground);
   font-family: var(--font-sans);
-  background-color: var(--bg-base);
-  /* background:
-    radial-gradient(1100px 620px at -8% -10%, var(--hero-a), transparent 58%),
-    radial-gradient(1050px 620px at 112% -12%, var(--hero-b), transparent 62%),
-    radial-gradient(720px 380px at 50% 115%, rgba(79, 184, 178, 0.1), transparent 68%),
-    linear-gradient(180deg, color-mix(in oklab, var(--sand) 68%, white) 0%, var(--foam) 44%, var(--bg-base) 100%); */
+  background-color: var(--background);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-/* body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.28;
-  background:
-    radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.8), transparent 34%),
-    radial-gradient(circle at 78% 26%, rgba(79, 184, 178, 0.2), transparent 42%),
-    radial-gradient(circle at 42% 82%, rgba(47, 106, 74, 0.14), transparent 36%);
-}
-
-body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  opacity: 0.14;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(circle at 50% 30%, black, transparent 78%);
-} */
 
 code {
   font-size: 0.9em;
@@ -222,116 +167,31 @@ pre code {
   color: inherit;
 }
 
-.prose pre {
-  border: 1px solid var(--line);
+.prose pre,
+.code-block {
+  border: 1px solid var(--code-border);
   border-radius: 12px;
-  background: #1d2e45;
-  color: #e8efff;
+  background: var(--code-surface);
+  color: var(--th-token);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  tab-size: 2;
 }
 
-.page-wrap {
-  width: min(1080px, calc(100% - 2rem));
-  margin-inline: auto;
-}
-
-.display-title {
-  font-family: 'Fraunces', Georgia, serif;
-}
-
-.island-shell {
-  border: 1px solid var(--line);
-  background: linear-gradient(165deg, var(--surface-strong), var(--surface));
-  box-shadow:
-    0 1px 0 var(--inset-glint) inset,
-    0 22px 44px rgba(30, 90, 72, 0.1),
-    0 6px 18px rgba(23, 58, 64, 0.08);
-  backdrop-filter: blur(4px);
-}
-
-.feature-card {
-  background: linear-gradient(165deg, color-mix(in oklab, var(--surface-strong) 93%, white 7%), var(--surface));
-  box-shadow:
-    0 1px 0 var(--inset-glint) inset,
-    0 18px 34px rgba(30, 90, 72, 0.1),
-    0 4px 14px rgba(23, 58, 64, 0.06);
-}
-
-.feature-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in oklab, var(--lagoon-deep) 35%, var(--line));
+.code-block {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
+    Consolas, 'Liberation Mono', monospace);
 }
 
 button,
-.island-shell,
 a {
   transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease,
     transform 180ms ease;
 }
 
-.island-kicker {
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  font-weight: 700;
-  font-size: 0.69rem;
-  color: var(--kicker);
-}
-
-.nav-link {
-  position: relative;
-  text-decoration: none;
-  color: var(--sea-ink-soft);
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -8px;
-  width: 100%;
-  height: 2px;
-  transform: scaleX(0);
-  transform-origin: left;
-  background: linear-gradient(90deg, var(--lagoon), #7ed3bf);
-  transition: transform 170ms ease;
-}
-
-.nav-link:hover,
-.nav-link.is-active {
-  color: var(--sea-ink);
-}
-
-.nav-link:hover::after,
-.nav-link.is-active::after {
-  transform: scaleX(1);
-}
-
-.rise-in {
-  animation: rise-in 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-@keyframes rise-in {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.site-footer {
-  border-top: 1px solid var(--line);
-  background: color-mix(in oklab, var(--header-bg) 84%, transparent 16%);
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
-  }
-  body {
-    background-color: var(--background);
-    color: var(--foreground);
   }
 }
 
@@ -399,6 +259,37 @@ a {
   list-style: disc;
 }
 
+.tiptap-editor ul[data-type='taskList'] {
+  list-style: none;
+  padding-left: 0.25rem;
+}
+
+.tiptap-editor ul[data-type='taskList'] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.tiptap-editor ul[data-type='taskList'] li > label {
+  margin-top: 0.4rem;
+  user-select: none;
+}
+
+.tiptap-editor ul[data-type='taskList'] li > div {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.tiptap-editor ul[data-type='taskList'] input[type='checkbox'] {
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.tiptap-editor ul[data-type='taskList'] li[data-checked='true'] > div {
+  color: var(--muted-foreground);
+  text-decoration: line-through;
+}
+
 .tiptap-editor ol {
   list-style: decimal;
 }
@@ -423,18 +314,88 @@ a {
 }
 
 .tiptap-editor pre {
-  background-color: var(--muted);
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  padding: 1rem;
-  margin: 1rem 0;
+  background-color: var(--code-surface);
+  border: 1px solid var(--code-border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin: 1.5rem 0;
   overflow-x: auto;
+  color: var(--th-token);
+  font-size: 0.875rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+.tiptap-callout,
+.markdown-callout {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--muted) 55%, transparent);
+}
+
+.tiptap-callout[data-callout='note'],
+.markdown-callout[data-callout='note'] {
+  border-color: color-mix(in oklab, oklch(0.62 0.15 245) 45%, var(--border));
+}
+
+.tiptap-callout[data-callout='tip'],
+.markdown-callout[data-callout='tip'] {
+  border-color: color-mix(in oklab, oklch(0.66 0.15 155) 45%, var(--border));
+}
+
+.tiptap-callout[data-callout='important'],
+.markdown-callout[data-callout='important'] {
+  border-color: color-mix(in oklab, oklch(0.62 0.16 305) 45%, var(--border));
+}
+
+.tiptap-callout[data-callout='warning'],
+.markdown-callout[data-callout='warning'] {
+  border-color: color-mix(in oklab, oklch(0.72 0.16 75) 55%, var(--border));
+}
+
+.tiptap-callout[data-callout='caution'],
+.markdown-callout[data-callout='caution'] {
+  border-color: color-mix(in oklab, oklch(0.62 0.2 28) 50%, var(--border));
+}
+
+.tiptap-callout-content > :first-child {
+  margin-top: 0;
+}
+
+.tiptap-callout-content > :last-child {
+  margin-bottom: 0;
+}
+
+.find-replace-match {
+  border-radius: 2px;
+  background: color-mix(in oklab, oklch(0.82 0.15 85) 62%, transparent);
+}
+
+.find-replace-match-active {
+  background: color-mix(in oklab, oklch(0.72 0.18 65) 82%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 30%, transparent);
+}
+
+.editor-drag-handle {
+  z-index: 30;
+  padding-right: 0.35rem;
 }
 
 .tiptap-editor pre code {
   background: none;
+  border: 0;
   padding: 0;
-  font-size: 0.875rem;
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+}
+
+.tiptap-code-block {
+  margin: 1.5rem 0;
+}
+
+.tiptap-code-block pre {
+  margin: 0;
+  padding-right: 6rem;
 }
 
 .tiptap-editor a {
@@ -449,11 +410,23 @@ a {
   margin: 2rem 0;
 }
 
+.tiptap-editor .tableWrapper {
+  margin: 1rem 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .tiptap-editor table {
   border-collapse: collapse;
+  table-layout: fixed;
   width: 100%;
+  max-width: 100%;
   margin: 1rem 0;
   font-size: 0.9375rem;
+}
+
+.tiptap-editor .tableWrapper table {
+  margin: 0;
 }
 
 .tiptap-editor th,
@@ -461,6 +434,8 @@ a {
   border: 1px solid var(--border);
   padding: 0.5rem 0.75rem;
   vertical-align: top;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .tiptap-editor th {
@@ -487,7 +462,6 @@ a {
 /* ── TanStack Highlight theme (github-light / github-dark) ── */
 
 :root {
-  --th-background: #ffffff;
   --th-token: #24292f;
   --th-attr: #0550ae;
   --th-code-inline: #953800;
@@ -512,7 +486,6 @@ a {
 }
 
 .dark {
-  --th-background: #0d1117;
   --th-token: #c9d1d9;
   --th-attr: #79c0ff;
   --th-code-inline: #ffa657;
@@ -536,13 +509,6 @@ a {
   --th-variable: #ffa657;
 }
 
-pre.th-code {
-  overflow-x: auto;
-  padding: 1rem;
-  background: var(--th-background);
-  color: var(--th-token);
-}
-
 .th-token { color: var(--th-token); }
 .th-keyword { color: var(--th-keyword); }
 .th-string { color: var(--th-string); }
@@ -564,22 +530,21 @@ pre.th-code {
 .th-code-inline { color: var(--th-code-inline); }
 .th-selector { color: var(--th-selector); }
 .th-command { color: var(--th-command); }
-.th-line { display: inline-block; min-width: 100%; width: max-content; }
-.th-code--line-numbers code { counter-reset: th-line; }
-.th-code--line-numbers .th-line::before {
-  display: inline-block;
-  width: 2.5em;
-  padding-right: 1em;
-  color: var(--th-comment);
-  content: attr(data-line);
-  text-align: right;
-  user-select: none;
-}
 
 /* ── Plain text post editor ─────────────────────────────────── */
 
 .tiptap-plain p {
-  margin: 0.625rem 0;
+  margin: 0.25rem 0 0;
+}
+
+.tiptap-plain p:first-child {
+  margin-top: 0;
+}
+
+/* A blank line the author typed becomes a real breathing gap. */
+.tiptap-plain p:empty {
+  height: 1rem;
+  margin: 0;
 }
 
 .tiptap-plain p.is-editor-empty:first-child::before {
@@ -591,18 +556,7 @@ pre.th-code {
   pointer-events: none;
 }
 
-/* ── Reduced motion ─────────────────────────────────────────── */
 
-/*
- * Respect the operating system's reduced-motion preference.
- *
- * Keyframe animations (dialog slides, accordion sweeps) are effectively
- * removed, while transitions are capped rather than killed so colour and
- * opacity still change smoothly - asking for less motion is not asking for no
- * feedback. `transform` itself is deliberately left alone: Radix positions
- * popovers, dropdowns and tooltips with it, and overriding it would send them
- * to the wrong corner of the screen.
- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
