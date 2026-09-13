@@ -1,0 +1,84 @@
+name: Lint, Test & Security
+
+on:
+  push:
+    branches-ignore:
+      - main
+      - dev
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets-dectect:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.before }}
+          head: ${{ github.sha }}
+          extra_args: --sarif --results=verified,unknown
+
+  codeql:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Auto build
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Analyze code with CodeQL
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: codeql-js
+  # audit-job:
+  #   name: Security Scan
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     security-events: write
+  #   defaults:
+  #     run:
+  #       working-directory: ./mdvault
+  #   steps:
+  #     - uses: actions/checkout@v6
+
+  #     - uses: oven-sh/setup-bun@v2
+  #       with:
+  #         bun-version-file: mdvault/package.json
+
+  #     - run: bun install --frozen-lockfile
+
+  #     - run: bun audit --json > bun-audit-report.json
+
+  #     - name: Upload bun audit report
+  #       if: hashFiles('bun-audit-report.json') != ''
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: bun-audit-report-${{ github.run_id }}
+  #         path: ./mdvault/bun-audit-report.json

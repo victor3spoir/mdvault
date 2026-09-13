@@ -2,17 +2,12 @@
 pre-commit:
   parallel: true
   commands:
-    format:
-      root: mdvault/
-      run: bun biome format --write
-      stage_fixed: true
-
     check:
       root: mdvault/
       run: bun biome check --write --unsafe
 
-    secrets:
-      run: gitleaks protect --staged
+    # secrets:
+    #   run: gitleaks protect --staged
 
 pre-push:
   commands:
