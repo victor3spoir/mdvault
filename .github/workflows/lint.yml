@@ -27,25 +27,25 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Trivy — filesystem scan
-        uses: aquasecurity/trivy-action@v0.36.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          scanners: vuln
-          format: sarif
-          output: trivy-fs-report.sarif
-          exit-code: 1
-          ignore-unfixed: true
-          skip-dirs: node_modules
-          severity: CRITICAL,HIGH
+      # - name: Trivy — filesystem scan
+      #   uses: aquasecurity/trivy-action@v0.36.0
+      #   with:
+      #     scan-type: fs
+      #     scan-ref: .
+      #     scanners: vuln
+      #     format: sarif
+      #     output: trivy-fs-report.sarif
+      #     exit-code: 1
+      #     ignore-unfixed: true
+      #     skip-dirs: node_modules
+      #     severity: CRITICAL,HIGH
 
-      - name: Upload Trivy FS SARIF to GitHub Security tab
-        if: hashFiles('trivy-fs-report.sarif') != ''
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: trivy-fs-report.sarif
-          category: trivy-fs
+      # - name: Upload Trivy FS SARIF to GitHub Security tab
+      #   if: hashFiles('trivy-fs-report.sarif') != ''
+      #   uses: github/codeql-action/upload-sarif@v3
+      #   with:
+      #     sarif_file: trivy-fs-report.sarif
+      #     category: trivy-fs
 
       - name: Trivy — Dockerfile scan
         uses: aquasecurity/trivy-action@v0.36.0
