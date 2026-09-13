@@ -4,7 +4,7 @@ pre-commit:
   commands:
     format:
       root: mdvault/
-      run: bun biome format --check .
+      run: bun biome format --write
       stage_fixed: true
 
     check:

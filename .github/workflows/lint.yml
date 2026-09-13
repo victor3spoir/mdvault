@@ -37,7 +37,7 @@ jobs:
           output: trivy-fs-report.sarif
           exit-code: 1
           ignore-unfixed: true
-          skip-dirs: "**/node_modules"
+          skip-dirs: node_modules
           severity: CRITICAL,HIGH
 
       - name: Upload Trivy FS SARIF to GitHub Security tab
