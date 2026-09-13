@@ -32,14 +32,16 @@ jobs:
         with:
           scan-type: fs
           scan-ref: .
+          scanners: vuln
           format: sarif
           output: trivy-fs-report.sarif
           exit-code: 1
           ignore-unfixed: true
+          skip-dirs: "**/node_modules"
           severity: CRITICAL,HIGH
 
       - name: Upload Trivy FS SARIF to GitHub Security tab
-        if: always()
+        if: hashFiles('trivy-fs-report.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-fs-report.sarif
@@ -57,7 +59,7 @@ jobs:
           severity: CRITICAL,HIGH
 
       - name: Upload Trivy Dockerfile SARIF to GitHub Security tab
-        if: always()
+        if: hashFiles('trivy-dockerfile-report.sarif') != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: trivy-dockerfile-report.sarif
@@ -72,7 +74,7 @@ jobs:
         run: bun install --frozen-lockfile && bun audit --json > bun-audit-report.json
 
       - name: Upload bun audit report
-        if: always()
+        if: hashFiles('bun-audit-report.json') != ''
         uses: actions/upload-artifact@v4
         with:
           name: bun-audit-report-${{ github.run_id }}
@@ -99,8 +101,8 @@ jobs:
           head: ${{ github.sha }}
           extra_args: --sarif --results=verified,unknown
 
-  lint:
-    name: Lint (Biome)
+  lint-job:
+    name: Lintting
     runs-on: ubuntu-latest
     defaults:
       run:
