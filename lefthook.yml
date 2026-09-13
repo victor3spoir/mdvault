@@ -1,0 +1,21 @@
+# lefthook.yml
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      root: mdvault/
+      run: bun biome format --check .
+      stage_fixed: true
+
+    check:
+      root: mdvault/
+      run: bun biome check --write --unsafe
+
+    secrets:
+      run: gitleaks protect --staged
+
+pre-push:
+  commands:
+    check:
+      root: mdvault/
+      run: bun check && bun typecheck
