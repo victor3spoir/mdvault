@@ -47,14 +47,18 @@ describe("plain post rendering", () => {
 		}
 	});
 
-	it("keeps Markdown literal and escapes HTML in social copy", () => {
-		const html = renderToStaticMarkup(
-			createElement(PostContent, {
-				content: "## Topic\n**Not bold**\n<script>alert(1)</script>",
-			}),
-		);
-		expect(html).not.toMatch(/<(h2|strong|script)[ >]/);
-		expect(html).toContain("**Not bold**");
-		expect(html).toContain("&lt;script&gt;");
+	it.each([
+		"<script>alert(1)</script>",
+		"<SCRIPT>alert(1)</SCRIPT>",
+		"<ScRiPt >alert(1)</ScRiPt>",
+	])("keeps Markdown literal and escapes HTML in social copy: %s", (script) => {
+		const content = `## Topic\n**Not bold**\n${script}`;
+		const html = renderToStaticMarkup(createElement(PostContent, { content }));
+		const preview = document.createElement("div");
+		preview.innerHTML = html;
+		expect(preview.querySelector("h2, strong, script")).toBeNull();
+		expect(
+			Array.from(preview.querySelectorAll("p"), (line) => line.textContent),
+		).toEqual(content.split("\n"));
 	});
 });
