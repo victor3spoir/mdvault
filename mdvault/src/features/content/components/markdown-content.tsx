@@ -260,6 +260,12 @@ const components = {
 			className="scroll-mt-24 mt-8 mb-3 text-2xl font-semibold tracking-tight"
 		/>
 	),
+	h4: (props) => (
+		<h4
+			{...props}
+			className="scroll-mt-24 mt-6 mb-3 text-xl leading-7 font-semibold tracking-tight first:mt-0"
+		/>
+	),
 	p: ({ children, ...props }) => {
 		const text = reactNodeText(children).trim();
 		const media = parseMediaEmbed(text);

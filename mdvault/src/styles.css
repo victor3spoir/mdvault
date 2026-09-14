@@ -531,20 +531,20 @@ a {
 .th-selector { color: var(--th-selector); }
 .th-command { color: var(--th-command); }
 
-/* ── Plain text post editor ─────────────────────────────────── */
+/* ── Shared plain text editor and preview typography ───────── */
 
-.tiptap-plain p {
-  margin: 0.25rem 0 0;
+.plain-text-content {
+  max-width: 68ch;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--foreground);
+  overflow-wrap: anywhere;
 }
 
-.tiptap-plain p:first-child {
-  margin-top: 0;
-}
-
-/* A blank line the author typed becomes a real breathing gap. */
-.tiptap-plain p:empty {
-  height: 1rem;
+.plain-text-content p {
   margin: 0;
+  min-height: 1lh;
+  white-space: pre-wrap;
 }
 
 .tiptap-plain p.is-editor-empty:first-child::before {

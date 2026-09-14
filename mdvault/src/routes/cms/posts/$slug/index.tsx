@@ -40,7 +40,6 @@ function PostDetailPage() {
 	return (
 		<PageLayout
 			title={post.title}
-			description={post.content.substring(0, 100)}
 			actions={
 				<div className="flex items-center gap-2">
 					<Button asChild variant="outline">
@@ -66,9 +65,9 @@ function PostDetailPage() {
 				) : null}
 
 				<div className="space-y-4">
-					<div className="flex items-start justify-between gap-4">
+					<div className="flex flex-wrap items-start justify-between gap-4">
 						<div>
-							<div className="mt-2 flex items-center gap-3 text-sm text-muted-foreground">
+							<div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-muted-foreground">
 								<span>{formatDate(post.createdAt)}</span>
 								{post.author ? <span>• By {post.author}</span> : null}
 								<Badge variant="outline" className="text-[10px]">

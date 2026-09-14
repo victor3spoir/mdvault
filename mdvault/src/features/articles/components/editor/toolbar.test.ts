@@ -7,6 +7,7 @@ import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
 import { TooltipProvider } from "#/components/ui/tooltip";
 import { CalloutExtension } from "#/features/articles/components/editor/callout-extension";
+import { HeadingExtension } from "#/features/articles/components/editor/heading-extension";
 import { EditorToolbar } from "#/features/articles/components/editor/toolbar";
 
 it("inserts a portable callout from the toolbar and updates its active state", async () => {
@@ -47,6 +48,58 @@ it("inserts a portable callout from the toolbar and updates its active state", a
 		});
 		expect(editor.getText()).toBe("");
 		expect(button?.getAttribute("aria-pressed")).toBe("false");
+	} finally {
+		await act(async () => {
+			root.unmount();
+			editor.destroy();
+		});
+		container.remove();
+		vi.unstubAllGlobals();
+	}
+});
+
+it("offers H2 to H4 only and toggles H4 with Markdown output", async () => {
+	vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
+	const editor = new Editor({
+		extensions: [
+			StarterKit.configure({ heading: false }),
+			HeadingExtension,
+			Markdown,
+		],
+		content: "Sous-section",
+		contentType: "markdown",
+	});
+	const container = document.createElement("div");
+	document.body.append(container);
+	const root = createRoot(container);
+	try {
+		await act(async () => {
+			root.render(
+				createElement(
+					TooltipProvider,
+					null,
+					createElement(EditorToolbar, { editor }),
+				),
+			);
+		});
+		expect(
+			Array.from(
+				container.querySelectorAll('button[aria-label^="Heading"]'),
+				(button) => button.getAttribute("aria-label"),
+			),
+		).toEqual(["Heading 2", "Heading 3", "Heading 4"]);
+		const button = container.querySelector<HTMLButtonElement>(
+			'button[aria-label="Heading 4"]',
+		);
+		await act(async () => {
+			button?.click();
+		});
+		expect(editor.getMarkdown().trimEnd()).toBe("#### Sous-section");
+		expect(button?.getAttribute("aria-pressed")).toBe("true");
+		await act(async () => {
+			button?.click();
+		});
+		expect(editor.getMarkdown().trimEnd()).toBe("Sous-section");
 	} finally {
 		await act(async () => {
 			root.unmount();

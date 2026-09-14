@@ -8,7 +8,7 @@ interface EditorLoadingProps {
 const TOOL_GROUPS = [
 	["undo", "redo"],
 	["bold", "italic", "strike", "code"],
-	["h2", "h3", "h4", "h5", "h6"],
+	["h2", "h3", "h4"],
 	["bullets", "numbers", "tasks", "quote", "callout", "code-block"],
 	["find", "outline", "link", "image", "table", "rule"],
 ];
@@ -43,14 +43,15 @@ export function EditorLoading({ withToolbar = false }: EditorLoadingProps) {
 			<div
 				aria-hidden="true"
 				data-editor-skeleton="body"
-				className="min-h-0 flex-1 overflow-hidden"
+				className={cn(
+					"min-h-0 flex-1 overflow-hidden",
+					!withToolbar && "px-6 py-6 sm:px-8",
+				)}
 			>
 				<div
 					className={cn(
 						"flex w-full flex-col gap-6",
-						withToolbar
-							? "mx-auto max-w-3xl px-8 py-6"
-							: "max-w-[68ch] px-6 py-5",
+						withToolbar ? "mx-auto max-w-3xl px-8 py-6" : "max-w-[68ch]",
 					)}
 				>
 					{withToolbar ? <Skeleton className="h-7 w-2/5" /> : null}

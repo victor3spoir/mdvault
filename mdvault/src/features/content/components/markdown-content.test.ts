@@ -8,6 +8,16 @@ function render(source: string) {
 }
 
 describe("advanced Markdown rendering", () => {
+	it("styles H4 headings in the shared live and page preview renderer", () => {
+		const html = render("#### Une **sous-section**\n\nSon contenu.");
+		expect(html).toMatch(
+			/<h4[^>]*class="[^"]*text-xl[^"]*font-semibold[^"]*"[^>]*>/,
+		);
+		expect(html).toContain('id="une-sous-section"');
+		expect(html).toContain("Une <strong>sous-section</strong></h4>");
+		expect(html).toContain("Son contenu.");
+	});
+
 	it("renders GitHub-style alerts as callouts without the marker", () => {
 		const html = render(
 			"> [!WARNING]\n>\n> Back up the repository before continuing.",

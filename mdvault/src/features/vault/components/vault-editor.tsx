@@ -64,6 +64,7 @@ import {
 	PlainTextEditor,
 	type PlainTextEditorHandle,
 } from "#/features/posts/components/plain-text-editor";
+import { PostContent } from "#/features/posts/components/post-content";
 import type { ContentRevision } from "#/features/shared/content-revision";
 import {
 	getLocaleLabel,
@@ -613,7 +614,11 @@ export function VaultEditor({
 								</h1>
 							) : null}
 							{content.trim() ? (
-								<MarkdownContent source={content} />
+								isRich ? (
+									<MarkdownContent source={content} />
+								) : (
+									<PostContent content={content} />
+								)
 							) : (
 								<p className="text-sm text-muted-foreground">
 									Nothing to preview yet. Start writing to see it here.

@@ -19,6 +19,7 @@ import { CodeBlockExtension } from "#/features/articles/components/editor/code-b
 import { ContentChecksPopover } from "#/features/articles/components/editor/content-checks-popover";
 import { FindReplaceBar } from "#/features/articles/components/editor/find-replace-bar";
 import { FindReplaceExtension } from "#/features/articles/components/editor/find-replace-extension";
+import { HeadingExtension } from "#/features/articles/components/editor/heading-extension";
 import { MediaEmbedExtension } from "#/features/articles/components/editor/media-embed-extension";
 import {
 	normalizePastedText,
@@ -52,10 +53,11 @@ export const RichTextEditor = forwardRef<
 		immediatelyRender: false,
 		extensions: [
 			StarterKit.configure({
-				heading: { levels: [2, 3, 4, 5, 6] },
+				heading: false,
 				link: { openOnClick: false },
 				codeBlock: false,
 			}),
+			HeadingExtension,
 			CodeBlockExtension,
 			Markdown,
 			Placeholder.configure({ placeholder: "Start writing your article..." }),
