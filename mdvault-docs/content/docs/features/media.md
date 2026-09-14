@@ -26,31 +26,76 @@ Before anything is uploaded, the browser compresses the image:
 Compression happens client-side, so the server never handles the original
 multi-megabyte file.
 
-## Organizing and checking usage
+## Download and reuse
+
+Use **Download** on an asset to download the stored image, or copy its URL or
+Markdown reference. Downloads are individual files, not a bulk ZIP. The stored
+image may be compressed compared with the original upload. New uploads receive
+generated filenames at the media root; use **Move** afterwards to organize them.
+
+## Move assets into folders
 
 Search by filename or folder, filter by format, and select up to 100 assets at
-a time. **Move** accepts a folder relative to `MEDIA_PATH`; leave it empty to
-move files back to the root. New folders are created automatically.
+a time. Choose **Move**, enter a folder relative to `MEDIA_PATH`, and inspect
+the count of documents containing detected references. Leave the destination
+empty to move back to the root. New folders are created automatically. The
+dialog shows a document count, not a per-file diff.
+
+![Selected media assets with bulk move and delete actions](/screenshots/media-selected.png)
 
 Moving updates image references in articles, posts and Vault entries in the
 same Git commit as the files. Existing destination files are never overwritten.
 A changed file revision or concurrent repository update blocks the operation.
+Names are preserved: two selected files that would have the same destination
+filename cannot be moved together. There is no filename-renaming control.
+
+## Scan usage and find missing images
 
 **Scan usage** reads managed Markdown and MDX content on the default branch:
 
 - **Unused** lists images with no detected references in that content.
 - **Missing** lists referenced images absent from the library, with links to
   the affected entries.
-- Deletion rechecks usage on the server and blocks files still referenced.
-  Bulk deletion is one atomic commit; files remain recoverable in Git history.
+
+**All** returns to the full library. There is no separate Used tab. A missing
+reference needs manual repair: open the linked entry to correct/remove the
+path, or restore its file. The scan does not repair content automatically.
+
+![Media usage scan with All, Unused and Missing views](/screenshots/media-usage.png)
+
+## Delete media safely
+
+Choose Delete for an asset or a selection. MDVault checks references before
+confirmation and rechecks on the server before writing. If any selected file
+is referenced or has changed, the entire batch is blocked. There is no force
+option or partial-success mode. Successful bulk deletion is one atomic commit;
+restore removed files through Git history, not an application trash bin.
+
+Deleting an image **inside the editor** is different: it only removes the
+document's image block and leaves the media file intact.
 
 External sites, unsaved drafts, other branches and files outside the managed
 content folders are not scanned. Check these consumers before moving or deleting.
 Code examples count conservatively as references. Remote images outside the
-configured repository are not checked for availability.
+configured repository are not checked for availability. Both published content
+and drafts count, including Markdown in old Vault folders after a type was
+removed. Detected references in code examples can also be rewritten by moves.
 
 Scans fail closed on unreadable documents, ambiguous references or incomplete
 repository trees. Limits are 2,500 documents, 20 MB total and 2 MB per document.
+
+### Current limitations
+
+Prefer full repository paths such as `media/tutorials/cover.png`.
+Document-relative paths containing `../` may be detected by the scanner but
+rejected by the image renderer. Absolute URLs to MDVault's own image proxy are
+not included in usage scans.
+
+Escaped paths in YAML frontmatter can remain unchanged during moves even when
+another reference to the same image is rewritten. Inspect the resulting Git
+diff, including cover images, and keep a recoverable revision before moving
+such content. **Unused means no detected references within scan scope, not no
+consumers anywhere.** These issues are listed in the [changelog](/changelog).
 
 ## Serving
 
@@ -121,3 +166,9 @@ Traversal segments (`..`, `.`), NUL bytes, unsupported file types and paths
 outside the media root are rejected.
 
 SVG uploads are sanitised before being stored, since an SVG can carry script.
+
+## Verify
+
+After a move, check the destination in Media, review the Git commit and reopen
+the affected entries. Run Scan usage again to look for missing references.
+After deletion, the selected assets should be absent from the gallery.

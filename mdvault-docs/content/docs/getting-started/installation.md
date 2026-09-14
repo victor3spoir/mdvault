@@ -59,7 +59,7 @@ type it finds, and the sidebar links to Articles, Posts and Media straight away.
 
 MDVault does not create anything until you save something. The first article you
 write creates `articles/` in the repository; the first image you upload creates
-`media/`. Custom types are declared in **Settings → Asset types** and create
+`media/`. Custom types are declared in **Settings → Dynamic Content** and create
 their folder under `vault/` on first save.
 
 If the app starts but every list is empty and the dashboard shows an error, the

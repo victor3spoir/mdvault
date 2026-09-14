@@ -34,10 +34,17 @@ longer piece.
 
 ## Why plain text
 
-Posts are usually written in one sitting and rarely need tables or headings, so
-the editor is a textarea with Markdown syntax, not a rich editor. What you type
-is exactly what lands in the file. If a post grows into something that needs
-structure, it probably wants to be an [article](/docs/features/articles).
+Posts are usually written in one sitting and rarely need tables or headings.
+Their editor accepts text, paragraphs and line breaks, with undo/redo, and
+flattens pasted rich text. It does not interpret Markdown or HTML: `**bold**`
+and `<strong>` remain literal text. If a post needs structure, use an
+[article](/docs/features/articles).
+
+The editor, preview and reading page share typography and preserve blank lines
+and repeated spaces. Long strings wrap within the content area. The reading
+page displays the body once, without a duplicate excerpt above it.
+
+![A post in the current plain-text editor, with publishing and article settings](/screenshots/post-editor.png)
 
 Cards in the post list show an excerpt derived from the body: code blocks,
 images and Markdown syntax are stripped, and the text is truncated at a word
@@ -50,3 +57,15 @@ articles, minus the tag filter, and keeps its state in the URL the same way.
 
 Commits follow the same naming: `Create post: <title>`,
 `Update post: <title>`, `Publish post: <title>`.
+
+## Publish and delete
+
+Publish or unpublish from the card or editor. Delete opens a confirmation
+before removing the post file. After a successful action, the list and
+dashboard refresh and the active filters are reapplied. Deleting a post does
+not delete its linked article or library images; recovery is through Git
+history.
+
+## Next
+
+- [Draft recovery and editor controls](/docs/features/editor)

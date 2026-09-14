@@ -45,11 +45,11 @@ goal, not a side effect.
 
 | | |
 |---|---|
-| **Articles** | Long-form Markdown with description, tags, cover image, and FR/EN translation pairs |
+| **Articles** | Long-form Markdown with description, tags, cover image, and linked translations in configured languages |
 | **Posts** | Short plain-text notes, optionally attached to an article |
-| **Vault** | Content types you define yourself — projects, notes, recipes — each with its own folder and icon |
-| **Media** | Drag-and-drop uploads, compressed in the browser, served through the app so private repositories work |
-| **Editor** | WYSIWYG with tables, code highlighting, image sizing and alignment; plain text where you prefer it |
+| **Vault** | Your own content types with folders, icons, rich/plain editors and linked translations |
+| **Media** | Uploads, downloads, bulk folder moves, reference updates and scans for unused or missing images |
+| **Editor** | Rich Markdown with block controls, callouts, code highlighting and image replacement; literal plain text for posts |
 | **Search** | Command palette on `Ctrl/Cmd + K`, plus filters that live in the URL |
 
 ## Who it is for
@@ -78,6 +78,7 @@ beside it. Details in [Repository layout](/docs/reference/repository-layout).
 
 ## Where to go next
 
+- [v1.3.0 release notes and version history](/changelog)
 - Running it: [Installation](/docs/getting-started/installation)
 - Understanding the write path: [Architecture overview](/docs/architecture/overview)
 - Reading the content from your own site:

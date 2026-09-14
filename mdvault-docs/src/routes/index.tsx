@@ -26,13 +26,13 @@ const features = [
 		icon: IconFileText,
 		title: "Write without leaving Markdown",
 		description:
-			"Create articles, short posts and custom content types with structured frontmatter and a focused editor.",
+			"Shape articles with block controls, callouts and image replacement, or keep posts and custom text types plain.",
 	},
 	{
 		icon: IconPhoto,
 		title: "Keep media beside the content",
 		description:
-			"Upload and reuse images from the same repository, without adding a separate media service.",
+			"Upload, organize and move images with reference updates. Scan managed content for unused assets and missing images.",
 	},
 	{
 		icon: IconGitBranch,
@@ -54,7 +54,7 @@ const productViews = [
 		label: "Editor",
 		title: "A writing surface that keeps structure close",
 		description:
-			"Draft rich articles, manage metadata and preview the result without losing the portable Markdown underneath.",
+			"Reorder or delete blocks, replace images in place, and preview your article while keeping portable Markdown underneath.",
 	},
 	{
 		src: "/screenshots/dashboard.png",
@@ -68,7 +68,7 @@ const productViews = [
 		label: "Media",
 		title: "Manage repository-backed assets",
 		description:
-			"Search, upload and reuse media while MDVault keeps paths stable for the content that references it.",
+			"Select assets, preview folder moves and inspect usage before cleanup. Detected references in managed content move with the files.",
 	},
 ];
 
@@ -132,6 +132,12 @@ function HomePage() {
 
 							<p className="mt-5 text-sm text-muted-foreground">
 								Plain Markdown. Your Git history. No content lock-in.
+							</p>
+							<p className="mt-3 text-sm text-muted-foreground">
+								Explore MDVault v1.3.0.{" "}
+								<Link to="/changelog" className="underline underline-offset-4">
+									Read the release notes
+								</Link>
 							</p>
 						</div>
 

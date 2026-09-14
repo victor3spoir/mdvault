@@ -52,11 +52,13 @@ shows up immediately as a tag with a single article behind it.
 
 ## Translations
 
-An article declares a language, `fr` or `en`. Two articles that are versions of
-the same text share a `translationKey`, generated from the title plus a random
-suffix — titles collide, random suffixes do not.
+An article declares one of the content languages configured in
+**Settings → Languages**, such as `en`, `fr` or `pt-BR`. Two articles that are
+versions of the same text share a `translationKey`, generated from the title
+plus a random suffix. This links existing content; it does not translate text
+automatically.
 
-The editor sidebar links an article to a candidate in the other language, and
+The editor sidebar links an article to a candidate in another language, and
 the list shows which languages a group covers and which are missing. When two
 articles in the same group claim the same language, the group is flagged as
 conflicting: a reader following the key cannot tell which one to show.
@@ -81,3 +83,22 @@ is a link you can share or bookmark.
 Saving writes a commit named `Update article: <title>`; creating writes
 `Create article: <title>`. Concurrent edits are rejected rather than merged, as
 described in [Architecture overview](/docs/architecture/overview).
+
+## Delete an article
+
+Use the trash action on its card or the delete action in the editor, then
+confirm the deletion. This removes the article file from the content repository
+and refreshes the list and dashboard. It does not delete the entire blog,
+repository or the media files that article used. Git history retains the file
+if you need to restore it.
+
+![The article deletion confirmation, before any file is removed](/screenshots/article-delete.png)
+
+Publishing, unpublishing and deletion update the current filtered list without
+a manual reload. For example, publishing from a Drafts view removes that card
+from the view. A failed action keeps the existing content visible.
+
+## Next
+
+- [Use the editor's block and image controls](/docs/features/editor)
+- [Check unused media after deleting content](/docs/features/media)

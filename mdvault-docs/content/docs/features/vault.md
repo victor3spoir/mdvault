@@ -15,10 +15,10 @@ folder in the repository — none of which required touching the code:
 
 ## Declaring a type
 
-**Settings → Asset types** writes `mdvault.config.json` at the root of your
+**Settings → Dynamic Content** writes `mdvault.config.json` at the root of your
 repository:
 
-![The settings screen, showing the connected GitHub account and repository](/screenshots/settings.png)
+![The Dynamic Content settings tab, listing custom types and their editors](/screenshots/settings.png)
 
 ```json
 {
@@ -38,8 +38,8 @@ repository:
 | `editor` | `rich` for WYSIWYG, `plain` for text |
 
 Available icons: `note`, `book`, `school`, `bulb`, `checklist`, `bookmark`,
-`folder`, `flask`, `code`, `pencil`, `star`, `archive`. An unknown value falls
-back to `note` rather than breaking the page.
+`folder`, `flask`, `code`, `pencil`, `star`, `archive`. Use a supported value;
+unknown icon names make the stored configuration invalid.
 
 Ids must be unique, cannot exceed twenty types, and cannot use a reserved word:
 `articles`, `posts`, `media`, `settings`, `vault`, `new`, `edit`, `cms` — each
@@ -48,30 +48,35 @@ of those already names a route.
 ## Where the content goes
 
 Assets of a type live in `vault/<id>/`. A type declared as `projects` stores
-`vault/projects/my-first-project.md`. The folder is created on first save, so
-declaring a type you never use costs nothing.
+`vault/projects/my-first-project.md`. Adding the type writes the configuration
+first, then creates its folder with a `.gitkeep` placeholder.
 
 ```mermaid
 flowchart LR
-  Settings["Settings → Asset types"] -->|writes| Config["mdvault.config.json"]
+  Settings["Settings → Dynamic Content"] -->|writes| Config["mdvault.config.json"]
   Config -->|read at load| Sidebar["Sidebar entry"]
-  Sidebar -->|first save| Folder["vault/&lt;id&gt;/"]
+  Config -->|type creation adds .gitkeep| Folder["vault/&lt;id&gt;/"]
   Folder -->|one file per asset| Asset["&lt;id&gt;.md"]
 ```
 
 ## Frontmatter
 
 A vault asset carries the same fields as an article — title, description,
-published, lang, author, tags, coverImage, dates — plus `type`, which repeats
-the type id. It has no `translationKey`: translation grouping is an article
-feature.
+published, lang, author, tags, coverImage, dates and optional `translationKey`,
+plus `type`, which repeats the type id. Translations link entries of the same
+custom type across configured content languages. They do not generate translated
+text automatically.
+
+Rich types share the article editor's block deletion, image replacement,
+callouts and preview tools. Plain types keep text literal in both the editor
+and the reading page. See [Editor](/docs/features/editor).
 
 ## Renaming and deleting a type
 
-Changing an `id` does **not** move files. The old folder stays in Git,
-untouched and invisible in the interface, and the new one starts empty. Move
-the files yourself in a commit if that is what you meant. Changing only the
-`label` or the `icon` is safe — those are display concerns.
+The type id cannot be changed through the edit form. You can update its label,
+icon or rich/plain editor choice. A different id requires a new type and an
+explicit content migration in Git; changing configuration alone does not move
+files. Changing the label or icon affects display, not file paths.
 
 Deleting a type removes it from the sidebar. The content remains in the
 repository, which is the point of storing everything in Git.

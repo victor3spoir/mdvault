@@ -2,8 +2,9 @@
 
 Where MDVault is going, and what it will deliberately never become.
 
-Current release: **v1.1.0** — GitHub-backed content management, rich editor,
-media library, custom content types, live preview.
+Release in preparation: **v1.3.0**. See the
+[v1.3.0 release notes](./CHANGELOG.md#130---2026-09-14) for implemented features
+and known limitations.
 
 > Dates are intentions, not commitments. This is a single-maintainer project;
 > the order matters more than the calendar. Items are open to discussion —
@@ -20,7 +21,7 @@ Every item below has to survive these:
    deleted.
 4. **Self-hostable in one container.** No mandatory hosted service.
 
-## Next — v1.2
+## v1.3.0 and follow-up work
 
 **Media completeness — implemented in the working branch**
 

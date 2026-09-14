@@ -62,8 +62,8 @@ client looks like the proxy and shares one quota. Exposed directly, leave it
 unset, or a client can spoof the header and give itself an unlimited quota.
 
 **Path validation.** Absolute paths, `..`, `.` and NUL bytes are rejected;
-identifiers must match `^[A-Za-z0-9][A-Za-z0-9._-]*$`; media files must sit
-exactly one level under the media root.
+identifiers must match `^[A-Za-z0-9][A-Za-z0-9._-]*$`. Media may use nested
+folders, but each requested path must remain under the configured media root.
 
 **SVG sanitisation** on upload, because an SVG can carry script and is served
 with the same origin as the app.

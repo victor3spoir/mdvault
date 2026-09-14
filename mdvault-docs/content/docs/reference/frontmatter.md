@@ -15,7 +15,7 @@ than written and forgotten.
 | `title` | string | Required, ≤ 200 characters, cannot be only digits and dots |
 | `description` | string | ≤ 500 characters |
 | `published` | boolean | Defaults to `false` |
-| `lang` | `fr` \| `en` | Defaults to `en` |
+| `lang` | string | Valid locale such as `en`, `fr` or `pt-BR`; new entries use the configured default language |
 | `author` | string | ≤ 100 characters |
 | `tags` | string[] | ≤ 10 entries, each matching `^[a-zA-Z0-9\-_]+$` |
 | `coverImage` | string | Repository path or absolute URL |
@@ -36,7 +36,7 @@ Same as an article, minus `description`, `tags` and `translationKey`, plus:
 
 ## Vault asset
 
-Same as an article, minus `translationKey`, plus:
+Same as an article, including optional `translationKey`, plus:
 
 | Field | Type | Rule |
 |---|---|---|

@@ -8,7 +8,9 @@ Markdown written in MDVault references images as repository paths —
 `media/cover.png`. In a private repository those bytes are unreachable from a
 browser: fetching them needs a token, and a token cannot go to the client. The
 fix is a proxy endpoint on your own server. This page is MDVault's own
-implementation, generalised.
+implementation, generalised. The snippets are architectural examples, not a
+complete standalone server; the current route contract is documented in
+[HTTP endpoints](/docs/reference/http-endpoints).
 
 ## First: do you need a proxy at all?
 
@@ -30,8 +32,8 @@ sequenceDiagram
   participant R as /api/media
   participant S as Media store
   participant G as GitHub API
-  B->>R: GET ?file=cover.png&v=<sha>&w=800
-  R->>R: validate filename, reject traversal
+  B->>R: GET ?path=media%2Fcover.png&v=<sha>&w=800
+  R->>R: validate path under media root, reject traversal
   R->>S: get(path, version, width)
   alt cached
     S-->>R: bytes from memory or disk
@@ -74,10 +76,9 @@ export function mediaUrl(source: string, options: { version?: string; width?: nu
 	if (/^(https?:|data:)/.test(source)) return source;
 
 	const { path } = splitImageSource(source);
-	const file = path.split("/").pop();
-	if (!file) return undefined;
+	if (!path) return undefined;
 
-	const query = new URLSearchParams({ file });
+	const query = new URLSearchParams({ path });
 	if (options.version) query.set("v", options.version);
 	if (options.width) query.set("w", String(options.width));
 
@@ -115,10 +116,10 @@ export const ServerRoute = createFileRoute("/api/media")({
 		handlers: {
 			GET: async ({ request }) => {
 				const url = new URL(request.url);
-				const file = url.searchParams.get("file");
-				if (!file) return new Response("missing file", { status: 400 });
+				const requestedPath = url.searchParams.get("path");
+				if (!requestedPath) return new Response("missing path", { status: 400 });
 
-				const path = resolveMediaPath(file);
+				const path = resolveMediaPath(requestedPath, mediaRoot);
 				if (!path) return new Response("not found", { status: 404 });
 
 				const version = url.searchParams.get("v") ?? undefined;
@@ -167,7 +168,7 @@ bytes actually change.
 
 ## 3. Path validation
 
-The `file` parameter is attacker-controlled. Decode it, normalise separators,
+The `path` parameter is attacker-controlled. Decode it, normalise separators,
 and reject anything that could climb:
 
 ```ts
@@ -182,10 +183,14 @@ export function pathSegments(input: string) {
 }
 ```
 
-Then require **exactly one segment** under the media root, and match the name
-against `^[A-Za-z0-9][A-Za-z0-9._-]*$`. A media file is a flat filename; any
-request with a folder in it is either a bug or an attack, and both deserve a
-404.
+Then require the normalised path to remain **inside the configured media
+root**, validate each segment, and allow only supported image extensions.
+Nested paths such as `media/tutorials/cover.png` are valid. Reject traversal
+instead of resolving it against arbitrary server directories.
+
+MDVault retains `file=cover.png` for legacy root-level images, but `file` cannot
+contain folders. Use `path` for nested images; never discard folders with
+`split("/").pop()`, because different folders may contain the same filename.
 
 ## 4. The cache
 
@@ -283,7 +288,7 @@ These are the ones that cost real time:
 
 1. **A URL ending in `.png` never reaches your router.** Static-asset
    middleware claims it first. Keep the filename in a query parameter, which is
-   why the endpoint is `?file=cover.png` and not `/api/media/cover.png`.
+   why the endpoint is `?path=media%2Fcover.png` and not `/api/media/cover.png`.
 2. **Register an exact route.** In TanStack Start a splat route around
    `/api/media` silently falls through to a 404 with no error to search for.
 3. **Vite dev short-circuits image requests.** Requests carrying
@@ -302,21 +307,23 @@ These are the ones that cost real time:
      },
    }
    ```
-4. **Send the filename, not the path.** `media/cover.png` as `file` fails
-   validation. So does leaving the `#w=50` fragment in the query, and so does
-   passing an absolute URL through the helper. Four different ways to get the
-   same 404.
+4. **Keep folders in `path`.** Sending a repository path as legacy `file`
+   fails validation; stripping the folders can select the wrong image. Remove
+   display fragments before constructing the proxy URL. Prefer full repository
+   paths over `../media/...`, which the current renderer does not resolve
+   consistently.
 
 ## Verifying
 
 ```bash
-curl -i "http://127.0.0.1:3000/api/media?file=cover.png&v=8f2a&w=400"
-curl -i -H 'If-None-Match: "8f2a-w400"' "http://127.0.0.1:3000/api/media?file=cover.png&v=8f2a&w=400"
-curl -i "http://127.0.0.1:3000/api/media?file=../secrets.env"
+curl -i "http://127.0.0.1:3000/api/media?path=media%2Fcover.png&w=400"
+curl -i -H 'If-None-Match: <etag-from-first-response>' "http://127.0.0.1:3000/api/media?path=media%2Fcover.png&w=400"
+curl -i "http://127.0.0.1:3000/api/media?path=..%2Fsecrets.env"
 ```
 
-Expect `200` then `304` then `404`. Check that the first response carries
-`immutable`, and that dropping `v` switches it to `max-age=60`.
+Use an image that exists in your repository and copy the exact ETag from the
+first response. Expect `200` then `304` then `404`. Add `v=<image-blob-sha>`
+to request immutable caching; without `v`, check for `max-age=60`.
 
 What it buys, measured on a page of 39 images totalling 30.9 MB in the
 repository:
