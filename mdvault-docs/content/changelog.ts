@@ -16,6 +16,60 @@ export type ProductRelease = {
  */
 export const productReleases: Array<ProductRelease> = [
 	{
+		version: "1.3.0",
+		date: "2026-09-14",
+		summary:
+			"Block and image actions, bulk media management, usage scans and more reliable content refresh, with updated screenshots and feature guides.",
+		sections: [
+			{
+				title: "Editor",
+				items: [
+					"Delete the hovered block from its drag controls or the current block from the footer, with Undo to restore it. Nested selections act on their containing top-level block.",
+					"Replace images in place while preserving width, alignment, alt text and captions, or remove an image from the document without deleting its library file.",
+					"Insert note callouts directly from the toolbar.",
+					"Author H2–H4 consistently, with H4 in slash commands, previews and article tables of contents. Existing H1/H5/H6 remain preserved.",
+					"Load article, post and Vault editors with layout-matched placeholders; preserve selection when moving image blocks and prevent stale hover deletions.",
+				],
+			},
+			{
+				title: "Media management",
+				items: [
+					"Move up to 100 selected assets into a folder, with an affected-document count. Existing bulk deletion now uses one atomic commit with server-side guards.",
+					"Move images and update detected references in managed articles, posts and Vault entries in one Git commit, without overwriting existing destinations.",
+					"Scan usage to browse All, Unused and Missing views, with reference counts and links to affected entries.",
+					"Block deletion of referenced assets and stop cleanup when scans are incomplete. Bulk deletion is atomic and recoverable through Git history.",
+					"Keep nested image paths intact in previews, downloads and copied links; search full paths in image pickers with clearer errors and retry controls.",
+					"Scans cover managed Markdown/MDX on the default branch only, not external consumers, unsaved drafts, other branches or unmanaged files.",
+				],
+			},
+			{
+				title: "Content and interface fixes",
+				items: [
+					"Refresh article/post cards and dashboard counts after creation, saves, publishing, unpublishing and deletion, while reapplying active filters.",
+					"Refresh media galleries, pickers, audits and affected content together after media operations.",
+					"Match plain-text typography across editing and reading, preserve whitespace and wrap long strings. Plain Vault previews no longer interpret Markdown.",
+					"Remove duplicate post excerpts and display Markdown-like text and HTML literally in plain-text content.",
+				],
+			},
+			{
+				title: "Documentation and maintenance",
+				items: [
+					"Refresh product screenshots, feature guides and release notes, including language settings, Vault translations and safe deletion workflows.",
+					"Consolidate the website in mdvault-docs, remove the legacy docs site and obsolete brand sources, and preserve README imagery under images.",
+					"Update Sharp and container packages, exclude local build output from Docker, and correct image tags and security-report handling.",
+				],
+			},
+			{
+				title: "Known limitations",
+				items: [
+					"Escaped frontmatter paths may survive a move unchanged. Review the resulting Git diff for those documents.",
+					"Document-relative image paths containing ../ are not consistently rendered, and absolute app-proxy URLs are not included in usage scans. Prefer full repository paths and check external consumers.",
+					"Dashboard media activity can label move/delete commits as uploads.",
+				],
+			},
+		],
+	},
+	{
 		version: "1.2.0",
 		date: "2026-08-22",
 		summary:

@@ -16,7 +16,7 @@ my-content-repo/
 │   └── deployer-avec-docker.md
 ├── posts/                  # POSTS_PATH
 │   └── release-1-4.md
-├── media/                  # MEDIA_PATH, one level deep only
+├── media/                  # MEDIA_PATH, nested folders supported
 │   ├── docker-cover.png
 │   └── diagram.webp
 └── vault/
@@ -35,22 +35,23 @@ separate identifier to keep in sync.
 **`.md` and `.mdx` are both accepted** when reading a document. New files are
 written as `.md`.
 
-**Media is flat.** Files must sit exactly one level under the media root.
-`media/2026/cover.png` is not served — the image endpoint uses the filename
-only, which is what lets you rename the media folder without rewriting every
-link.
+**Media supports nested folders.** The image endpoint accepts the complete
+repository path, such as `media/2026/cover.png`. Use Media's Move action to
+organize files and update detected managed-content references. Review the
+[scan scope and known limitations](/docs/features/media) before bulk moves.
 
 **Vault folders are named after type ids.** A type with id `projects` stores its
 assets in `vault/projects/`. See [Vault](/docs/features/vault).
 
-**Folders appear on first save.** A fresh repository is empty; nothing is
-scaffolded until you create content.
+**Git tracks files, not empty folders.** Adding a Vault type writes its
+configuration and creates a `.gitkeep` in the type folder. Article/post folders
+appear as content is written.
 
 ## `mdvault.config.json`
 
 The only file MDVault writes outside the content folders. It is always at the
 repository root, always named exactly that, and holds a `version` integer plus
-the `assetTypes` array. Edit it through Settings rather than by hand — the
+the `assetTypes` array, enabled `locales` and `defaultLocale`. Edit it through Settings rather than by hand — the
 interface validates ids, labels, icons and reserved words before committing.
 
 ## Path validation

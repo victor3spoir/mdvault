@@ -2,6 +2,52 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-09-14
+
+Changes since **v1.2.0 (2026-08-22)**.
+
+### Features
+- Added block deletion beside the rich editor's drag handle and in its footer, with undo/redo support. Deleting inside a list, table or callout removes the containing top-level block.
+- Added in-place image replacement and removal in the editor. Replacement preserves size, alignment, alt text and caption; removing an image from a document leaves its library file untouched.
+- Added a toolbar shortcut for inserting note callouts.
+- Added folder moves for up to 100 selected media assets and upgraded existing bulk deletion with atomic, server-side guards.
+- Added a destination-folder dialog showing the number of referenced documents. Media moves update detected references in managed articles, posts and Vault entries in the same Git commit, without overwriting destination files.
+- Added on-demand media usage scans with All, Unused and Missing views, reference counts and links to affected content.
+- Added deletion checks across managed content, including cover images. Referenced assets cannot be deleted; an incomplete or unreadable scan blocks cleanup. Bulk deletion creates one atomic commit.
+
+### Editor & interface
+- Standardised heading authoring on H2–H4 and added H4 to slash commands, styled previews and article tables of contents. Existing H1, H5 and H6 headings remain readable and preserved.
+- Replaced editor spinners with layout-matched loading placeholders for articles, posts and rich/plain Vault entries.
+- Unified plain-text editor and reader typography, preserving spaces, blank lines and long-word wrapping. Plain Vault content now stays literal text in previews and detail pages.
+- Improved media selection, empty/error states and retry controls; image pickers search filenames and complete folder paths.
+
+### Fixes
+- Fixed stale article/post cards and dashboard counts after creating, saving, publishing, unpublishing or deleting content. Active filters are reapplied without a manual reload.
+- Kept media galleries, image pickers, usage audits and affected content views in sync after media changes.
+- Preserved selected-image selection when moving blocks, and prevented stale hover controls from deleting a different block.
+- Kept nested media paths intact in previews, downloads, copied links and Markdown, including images with the same filename in different folders.
+- Removed the duplicated body excerpt from post detail pages and kept Markdown-like text and HTML literal in plain-text rendering.
+
+### Documentation
+- Consolidated the product website in `mdvault-docs/`, removed the legacy `docs/` site and obsolete brand source files, and retained README screenshots and diagrams under `images/`.
+- Refreshed application screenshots, feature guides and the website changelog for v1.3.0.
+- Corrected documentation for configurable languages, Vault translations, heading controls and plain-text editing.
+
+### Maintenance
+- Updated Sharp and its image-processing dependencies, refreshed runtime container packages and excluded local build output from the Docker context.
+- Corrected Docker image tags and security-report handling while retaining separate lint/test, security and release workflows.
+
+**Media scan scope:** only managed Markdown/MDX content on the repository's
+default branch is scanned. External consumers, unsaved drafts, other branches
+and unmanaged files are not covered. Check those consumers before moving or
+deleting media. Files removed from Git remain recoverable from repository history.
+
+### Known limitations
+- Escaped paths in frontmatter can remain unchanged during a media move even when another reference to the same image is rewritten. Review the resulting Git diff before relying on bulk moves for such files.
+- Document-relative image paths containing `../` are detected by scans but are not consistently rendered by the image proxy. Prefer full repository paths under `MEDIA_PATH`.
+- Absolute MDVault proxy URLs are not included in usage detection. An Unused result is not proof that an image has no consumers.
+- Dashboard media activity can label move/delete commits as uploads.
+
 ## [1.2.0] - 2026-08-22
 
 ### Features

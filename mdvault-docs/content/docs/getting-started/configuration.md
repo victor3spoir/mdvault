@@ -32,10 +32,10 @@ while staying in Git. Move the files yourself, in a commit, then restart.
 ## Content types
 
 Custom types live in `mdvault.config.json` at the root of your content
-repository. You do not write it by hand — **Settings → Asset types** creates and
+repository. You do not write it by hand — **Settings → Dynamic Content** creates and
 updates it:
 
-![Settings, showing the connected GitHub account, the target repository and the asset types manager](/screenshots/settings.png)
+![Settings with the Dynamic Content tab and configured content types](/screenshots/settings.png)
 
 ```json
 {
@@ -57,6 +57,19 @@ updates it:
 Ids are validated against a reserved list — `articles`, `posts`, `media`,
 `settings`, `vault`, `new`, `edit`, `cms` — because each of those already names
 a route. A maximum of twenty types is enforced, and ids must be unique.
+
+## Content languages
+
+Use **Settings → Languages** to enable content locales and choose a default.
+The configuration stores `locales` and `defaultLocale` alongside `assetTypes`
+in `mdvault.config.json`. New installations default to English and French,
+with English as the default.
+
+You can enable up to twenty unique locales, including regional forms such as
+`pt-BR`. The default must be one of the enabled locales. This controls content
+language choices and translation links, not the language of the interface.
+
+![Content language settings with enabled locales and the default language](/screenshots/settings-languages.png)
 
 ## Local development
 

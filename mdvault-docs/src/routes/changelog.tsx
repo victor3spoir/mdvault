@@ -52,7 +52,9 @@ function ChangelogPage() {
 							>
 								<div>
 									<h2 className="text-2xl font-semibold tracking-tight">
-										v{release.version}
+										{release.version === "Unreleased"
+											? "Unreleased"
+											: `v${release.version}`}
 									</h2>
 									{release.date ? (
 										<time

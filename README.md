@@ -93,6 +93,9 @@ Open **http://127.0.0.1:3000** and start writing — or go to **Settings → Dyn
 
 ## Screenshots
 
+These captures show v1.3.0. See the
+[v1.3.0 release notes](./CHANGELOG.md#130---2026-09-14) for the full changes.
+
 ### Dashboard
 Metrics per content section — articles, posts and every custom type you define — plus a log of the commits MDVault made for you.
 ![Dashboard](./images/screenshots/dashboard.png)
@@ -104,6 +107,10 @@ Cards with cover, status, tags and inline publish, edit and delete actions — w
 ### Editor
 Distraction-free writing surface with word count, read time and save status, plus a collapsible settings sidebar for language, description, tags and cover image.
 ![Editor](./images/screenshots/editor.png)
+
+Block drag/delete controls and in-place image replacement keep structural edits close to the content. Undo restores removed blocks; deleting an image here does not delete its media-library file.
+![Block controls](./images/screenshots/editor-blocks.png)
+![Image replacement and deletion](./images/screenshots/editor-image.png)
 
 ### Posts
 Short-form, plain-text content — enforced by the schema, not by disabled buttons — that can reference a related article.
@@ -118,7 +125,7 @@ Upload, filter and reuse images across your content, with usage checks before de
 ![Media](./images/screenshots/media.png)
 
 ### Settings
-Connected GitHub account, repository info, and the asset types manager where new content types are defined.
+The Dynamic Content tab defines custom content types; Languages configures enabled locales and the default language.
 ![Settings](./images/screenshots/settings.png)
 
 ## How it works
