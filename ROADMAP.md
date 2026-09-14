@@ -22,12 +22,14 @@ Every item below has to survive these:
 
 ## Next — v1.2
 
-**Media completeness**
+**Media completeness — implemented in the working branch**
 
-- Download action in the media library
-- Bulk operations: select, move, delete with usage checks
-- Better orphan detection: media referenced by nothing, content referencing
-  missing media
+- [x] Download action in the media library
+- [x] Bulk selection, folder moves with reference updates, and guarded deletion
+- [x] Unused and missing-media scans across articles, posts and Vault entries
+
+Scans cover managed content on the default branch, not external consumers or
+unsaved drafts. Incomplete scans block cleanup. See the media documentation.
 
 **Custom content types, second iteration**
 

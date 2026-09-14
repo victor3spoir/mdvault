@@ -1,20 +1,17 @@
 import { randomUUID } from "node:crypto";
-import { listArticles } from "#/features/articles/articles.server";
 import type { MediaFile, MediaUsage } from "#/features/media/media.types";
+import { normalizeMediaSource } from "#/features/media/media.utils";
+import {
+	auditMedia,
+	deleteMedia,
+} from "#/features/media/media-management.server";
+import { resolveMediaPath } from "#/features/media/media-path";
 import { isSvgDocument, sanitizeSvg } from "#/features/media/svg-sanitize";
-import { listPosts } from "#/features/posts/posts.server";
 import type { ActionResult } from "#/features/shared/shared.types";
 import { getGitHubClient } from "#/integrations/github/github-client.server";
 import { getGitHubEnv } from "#/integrations/github/github-env.server";
-import {
-	getRepositoryMediaFilePath,
-	normalizeRepositoryPath,
-} from "#/lib/repository-path";
-import {
-	base64ToBytes,
-	bytesToBase64,
-	deleteRepositoryFile,
-} from "#/lib/server/github-files.server";
+import { getRepositoryMediaFilePath } from "#/lib/repository-path";
+import { base64ToBytes, bytesToBase64 } from "#/lib/server/github-files.server";
 import { createSafeErrorMessage, logger } from "#/lib/server/logger";
 
 async function getRepositoryTreeEntries(
@@ -28,6 +25,10 @@ async function getRepositoryTreeEntries(
 		recursive: "true",
 	});
 
+	if (tree.data.truncated)
+		throw new Error(
+			"The media listing is incomplete. Please use a smaller repository.",
+		);
 	return tree.data.tree;
 }
 
@@ -73,7 +74,7 @@ export async function listImages(): Promise<ActionResult<MediaFile[]>> {
 				const name = file.path.split("/").pop() ?? file.path;
 
 				return {
-					id: name.split(".")[0],
+					id: file.path,
 					name,
 					path: file.path,
 					url: file.path,
@@ -240,45 +241,10 @@ function validateUploadImage(
 }
 
 function normalizeMediaFilePath(filePath: string, mediaPath: string) {
-	let normalized = decodeURIComponent(filePath).trim();
-
-	if (normalized.startsWith("http://") || normalized.startsWith("https://")) {
-		const url = new URL(normalized);
-		if (url.hostname === "github.com") {
-			const parts = url.pathname.split("/").filter(Boolean);
-			const blobIndex = parts.indexOf("blob");
-			if (blobIndex >= 0 && blobIndex + 2 < parts.length) {
-				normalized = parts.slice(blobIndex + 2).join("/");
-			} else {
-				normalized = url.pathname;
-			}
-		} else if (url.hostname === "raw.githubusercontent.com") {
-			const parts = url.pathname.split("/").filter(Boolean);
-			if (parts.length > 4) {
-				normalized = parts.slice(4).join("/");
-			} else {
-				normalized = url.pathname;
-			}
-		} else if (url.pathname === "/api/image") {
-			normalized = url.searchParams.get("path")?.trim() ?? "";
-		} else if (url.pathname.startsWith("/api/image/")) {
-			normalized = url.pathname.slice("/api/image/".length);
-		}
-	}
-
-	normalized = normalized.replace(/^\/+/, "");
-
-	if (!normalized) {
-		return "";
-	}
-
-	const mediaPrefix = `${mediaPath}/`;
-	if (!normalized.startsWith(mediaPrefix)) {
-		const fileName = normalized.split("/").pop();
-		normalized = fileName ? `${mediaPrefix}${fileName}` : normalized;
-	}
-
-	return normalizeRepositoryPath(normalized, mediaPath);
+	return resolveMediaPath(
+		normalizeMediaSource(filePath).split(/[?#]/)[0],
+		mediaPath,
+	);
 }
 
 async function getMediaFile(filePath: string): Promise<
@@ -428,11 +394,7 @@ export async function deleteImage(input: {
 		if (!path) {
 			return { success: false, error: "Invalid media file name" };
 		}
-		await deleteRepositoryFile(
-			path,
-			`Delete image: ${input.fileName}`,
-			input.sha,
-		);
+		await deleteMedia([{ path, sha: input.sha }]);
 
 		return { success: true, data: true };
 	} catch (error) {
@@ -445,45 +407,15 @@ export async function checkMediaUsage(
 	imageUrl: string,
 ): Promise<ActionResult<MediaUsage>> {
 	try {
-		const [articlesResult, postsResult] = await Promise.all([
-			listArticles(),
-			listPosts(),
-		]);
-
-		const usedInEntries = [
-			...(articlesResult.success
-				? articlesResult.data
-						.filter(
-							(article) =>
-								article.coverImage === imageUrl ||
-								article.content.includes(imageUrl),
-						)
-						.map((article) => ({
-							id: article.id,
-							title: article.title,
-							type: "article" as const,
-						}))
-				: []),
-			...(postsResult.success
-				? postsResult.data
-						.filter(
-							(post) =>
-								post.coverImage === imageUrl || post.content.includes(imageUrl),
-						)
-						.map((post) => ({
-							id: post.id,
-							title: post.title,
-							type: "post" as const,
-						}))
-				: []),
-		];
-
+		const audit = await auditMedia();
+		const path = resolveMediaPath(
+			normalizeMediaSource(imageUrl).split(/[?#]/)[0],
+			audit.mediaRoot,
+		);
+		if (!path) throw new Error("Invalid media path");
 		return {
 			success: true,
-			data: {
-				isUsed: usedInEntries.length > 0,
-				usedInEntries,
-			},
+			data: audit.usage[path] ?? { isUsed: false, usedInEntries: [] },
 		};
 	} catch (error) {
 		logger.error("Failed to check media usage", error, { imageUrl });

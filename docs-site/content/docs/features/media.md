@@ -26,12 +26,38 @@ Before anything is uploaded, the browser compresses the image:
 Compression happens client-side, so the server never handles the original
 multi-megabyte file.
 
+## Organizing and checking usage
+
+Search by filename or folder, filter by format, and select up to 100 assets at
+a time. **Move** accepts a folder relative to `MEDIA_PATH`; leave it empty to
+move files back to the root. New folders are created automatically.
+
+Moving updates image references in articles, posts and Vault entries in the
+same Git commit as the files. Existing destination files are never overwritten.
+A changed file revision or concurrent repository update blocks the operation.
+
+**Scan usage** reads managed Markdown and MDX content on the default branch:
+
+- **Unused** lists images with no detected references in that content.
+- **Missing** lists referenced images absent from the library, with links to
+  the affected entries.
+- Deletion rechecks usage on the server and blocks files still referenced.
+  Bulk deletion is one atomic commit; files remain recoverable in Git history.
+
+External sites, unsaved drafts, other branches and files outside the managed
+content folders are not scanned. Check these consumers before moving or deleting.
+Code examples count conservatively as references. Remote images outside the
+configured repository are not checked for availability.
+
+Scans fail closed on unreadable documents, ambiguous references or incomplete
+repository trees. Limits are 2,500 documents, 20 MB total and 2 MB per document.
+
 ## Serving
 
 Images are not linked directly to GitHub. They are requested from the app:
 
 ```
-/api/media?file=cover.png&v=<sha>&w=800
+/api/media?path=media%2Ftutorials%2Fcover.png&v=<sha>&w=800
 ```
 
 ```mermaid
@@ -55,7 +81,8 @@ resize.
 
 | Parameter | Effect |
 |---|---|
-| `file` | Filename only, no folders. Required |
+| `path` | Full repository path under `MEDIA_PATH`, including subfolders |
+| `file` | Legacy filename-only alternative for files directly in `MEDIA_PATH` |
 | `v` | Any version marker, usually the blob SHA. Makes the response `immutable` for a year |
 | `w` | Target width; returns a downscaled WebP |
 
@@ -88,9 +115,9 @@ renderer that ignores fragments simply shows the image full width.
 
 ## Path safety
 
-A media file must sit exactly one level under the media root. Absolute paths,
-`..`, `.` and NUL bytes are rejected, and filenames must match
-`^[A-Za-z0-9][A-Za-z0-9._-]*$`. A crafted `file` parameter cannot reach the
-rest of the repository.
+A media file must remain under the configured media root. Nested folders are
+supported through `path`; `file` remains restricted to a single filename.
+Traversal segments (`..`, `.`), NUL bytes, unsupported file types and paths
+outside the media root are rejected.
 
 SVG uploads are sanitised before being stored, since an SVG can carry script.

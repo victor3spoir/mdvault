@@ -64,7 +64,7 @@ export async function mapWithConcurrency<TInput, TOutput>(
 	return results;
 }
 
-function invalidateRepositoryListings() {
+export function invalidateRepositoryListings() {
 	listingCache.clear();
 }
 

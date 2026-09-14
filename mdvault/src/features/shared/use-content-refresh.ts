@@ -32,6 +32,7 @@ export function useContentRefresh(scope: ContentScope) {
 				queryKey: dashboardKeys.all,
 				refetchType: "all",
 			}),
+			queryClient.invalidateQueries({ queryKey: ["media", "audit"] }),
 		]);
 
 		await router.invalidate({ sync: true });
