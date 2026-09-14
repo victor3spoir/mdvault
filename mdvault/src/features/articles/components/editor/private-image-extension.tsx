@@ -3,6 +3,8 @@ import {
 	IconAlignCenter,
 	IconAlignLeft,
 	IconAlignRight,
+	IconReplace,
+	IconTrash,
 } from "@tabler/icons-react";
 import Image from "@tiptap/extension-image";
 import {
@@ -11,6 +13,8 @@ import {
 	ReactNodeViewRenderer,
 } from "@tiptap/react";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "#/components/ui/button";
+import { ImageInsertDialog } from "#/features/media/components/image-insert-dialog";
 import {
 	mediaUrl,
 	PrivateImage,
@@ -40,6 +44,7 @@ function PrivateImageView({
 	updateAttributes,
 	editor,
 	getPos,
+	deleteNode,
 }: NodeViewProps) {
 	const src = typeof node.attrs.src === "string" ? node.attrs.src : "";
 	const alt = typeof node.attrs.alt === "string" ? node.attrs.alt : "";
@@ -51,6 +56,7 @@ function PrivateImageView({
 			: "center";
 
 	const [altOpen, setAltOpen] = useState(false);
+	const [replaceOpen, setReplaceOpen] = useState(false);
 	const altInputRef = useRef<HTMLInputElement>(null);
 
 	useEffect(() => {
@@ -89,7 +95,7 @@ function PrivateImageView({
 					align === "right" && "justify-end",
 				)}
 			>
-				<div className="relative" style={{ width: `${width}%` }}>
+				<div style={{ width: `${width}%` }}>
 					<PrivateImage
 						src={src}
 						alt={alt}
@@ -105,7 +111,7 @@ function PrivateImageView({
 							contentEditable={false}
 							className="absolute inset-x-0 top-2 z-10 flex flex-col items-center gap-1"
 						>
-							<div className="flex items-center gap-0.5 rounded-lg border bg-popover p-1 shadow-lg">
+							<div className="flex w-max max-w-[min(28rem,calc(100vw-5rem))] flex-wrap items-center justify-center gap-0.5 rounded-lg border bg-popover p-1 shadow-lg">
 								{WIDTH_OPTIONS.map((option) => (
 									<button
 										key={option}
@@ -159,6 +165,35 @@ function PrivateImageView({
 									<IconAccessible className="size-3.5" />
 									Alt
 								</button>
+								<Button
+									type="button"
+									variant="ghost"
+									size="xs"
+									aria-label="Replace image"
+									title="Replace image"
+									onMouseDown={(event) => event.preventDefault()}
+									onClick={(event) => {
+										event.stopPropagation();
+										setReplaceOpen(true);
+									}}
+								>
+									<IconReplace data-icon="inline-start" /> Replace
+								</Button>
+								<Button
+									type="button"
+									variant="ghost"
+									size="icon-xs"
+									aria-label="Delete image"
+									title="Delete image (Undo to restore)"
+									onMouseDown={(event) => event.preventDefault()}
+									onClick={(event) => {
+										event.stopPropagation();
+										deleteNode();
+										editor.commands.focus();
+									}}
+								>
+									<IconTrash />
+								</Button>
 							</div>
 
 							{altOpen ? (
@@ -215,6 +250,25 @@ function PrivateImageView({
 					) : null}
 				</div>
 			</div>
+			{replaceOpen ? (
+				<ImageInsertDialog
+					open
+					mode="replace"
+					onClose={() => setReplaceOpen(false)}
+					onSelect={(image) => {
+						if (
+							editor.isDestroyed ||
+							!editor.isEditable ||
+							typeof getPos() !== "number"
+						)
+							return;
+						updateAttributes({ src: image.url });
+						setReplaceOpen(false);
+						selectNode();
+						editor.commands.focus();
+					}}
+				/>
+			) : null}
 		</NodeViewWrapper>
 	);
 }

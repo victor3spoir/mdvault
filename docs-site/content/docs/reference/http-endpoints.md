@@ -17,7 +17,8 @@ Serves an image from the repository's media folder.
 
 | Query parameter | Required | Meaning |
 |---|---|---|
-| `file` | Yes | Filename only, no folders |
+| `path` | Unless `file` is provided | Full repository path under `MEDIA_PATH`, including subfolders |
+| `file` | Unless `path` is provided | Legacy filename-only alternative, no folders |
 | `v` | No | Version marker, usually the blob SHA |
 | `w` | No | Target width in pixels; returns a downscaled WebP |
 
@@ -27,7 +28,7 @@ Serves an image from the repository's media folder.
 |---|---|
 | `200` | Image bytes |
 | `304` | `If-None-Match` matches the current ETag |
-| `400` | `file` is missing |
+| `400` | Both `path` and `file` are missing |
 | `404` | Path rejected by validation, or the file does not exist |
 | `429` | Rate limited. `Retry-After` gives the delay in seconds |
 | `502` | GitHub returned an error |

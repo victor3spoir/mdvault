@@ -63,8 +63,11 @@ export const PlainTextEditor = forwardRef<
 		content: textToDocument(markdown),
 		editorProps: {
 			attributes: {
+				role: "textbox",
+				"aria-label": "Post content",
+				"aria-multiline": "true",
 				class:
-					"tiptap-plain w-full max-w-[68ch] px-6 py-5 text-[0.9375rem] leading-[1.55] focus:outline-none",
+					"tiptap-plain plain-text-content min-h-full w-full focus:outline-none",
 			},
 		},
 		onUpdate: ({ editor: current }) => {
@@ -89,7 +92,7 @@ export const PlainTextEditor = forwardRef<
 
 	return (
 		<div className="min-h-0 flex-1 overflow-y-auto">
-			<EditorContent editor={editor} className="h-full" />
+			<EditorContent editor={editor} className="h-full px-6 py-6 sm:px-8" />
 		</div>
 	);
 });

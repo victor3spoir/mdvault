@@ -36,7 +36,7 @@ export const articleTranslationsQueryOptions = (id: string) =>
 		staleTime: 30_000,
 	});
 
-/** `refetchType: "all"` required: see `invalidatePostQueries`. */
+/** Include inactive lists so returning from the editor uses fresh data. */
 export async function invalidateArticleQueries(queryClient: QueryClient) {
 	await Promise.all([
 		queryClient.invalidateQueries({

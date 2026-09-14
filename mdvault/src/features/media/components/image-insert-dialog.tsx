@@ -33,6 +33,7 @@ interface ImageInsertDialogProps {
 	onSelect: (image: MediaFile, details: ImageInsertDetails) => void;
 	/** Show alt text and caption fields before inserting (for in-content images). */
 	withDetails?: boolean;
+	mode?: "insert" | "replace";
 }
 
 type InsertTab = "library" | "upload";
@@ -47,6 +48,7 @@ export function ImageInsertDialog({
 	onClose,
 	onSelect,
 	withDetails = false,
+	mode = "insert",
 }: ImageInsertDialogProps) {
 	const [selectedImage, setSelectedImage] = useState<MediaFile | null>(null);
 	const [refreshKey, setRefreshKey] = useState(0);
@@ -78,10 +80,12 @@ export function ImageInsertDialog({
 				<SheetHeader className="shrink-0 space-y-3 border-b px-6 pt-6 pb-4">
 					<div>
 						<SheetTitle className="text-xl font-bold tracking-tight">
-							Insert Image
+							{mode === "replace" ? "Replace Image" : "Insert Image"}
 						</SheetTitle>
 						<SheetDescription>
-							Pick from your library or upload something new
+							{mode === "replace"
+								? "Choose a replacement. Size, alignment, alt text, and caption will be kept."
+								: "Pick from your library or upload something new"}
 						</SheetDescription>
 					</div>
 
@@ -204,7 +208,9 @@ export function ImageInsertDialog({
 										{selectedImage.name}
 									</p>
 									<p className="text-[11px] text-muted-foreground">
-										Ready to insert
+										{mode === "replace"
+											? "Ready to replace"
+											: "Ready to insert"}
 									</p>
 								</div>
 							</>
@@ -231,7 +237,7 @@ export function ImageInsertDialog({
 							}}
 							disabled={!selectedImage}
 						>
-							Insert Image
+							{mode === "replace" ? "Replace Image" : "Insert Image"}
 						</Button>
 					</div>
 				</div>

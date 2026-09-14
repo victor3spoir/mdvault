@@ -6,6 +6,7 @@ import { Badge } from "#/components/ui/badge";
 import { Button } from "#/components/ui/button";
 import { MarkdownContent } from "#/features/content/components/markdown-content";
 import { PrivateImage } from "#/features/media/components/private-image";
+import { PostContent } from "#/features/posts/components/post-content";
 import {
 	vaultAssetQueryOptions,
 	vaultConfigQueryOptions,
@@ -122,7 +123,11 @@ function ViewVaultAssetPage() {
 			) : null}
 
 			<article>
-				<MarkdownContent source={asset.content} />
+				{typeConfig.editor === "rich" ? (
+					<MarkdownContent source={asset.content} />
+				) : (
+					<PostContent content={asset.content} />
+				)}
 			</article>
 		</div>
 	);

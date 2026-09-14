@@ -35,7 +35,7 @@ function collectHeadings(source: string): HeadingNode[] {
 			continue;
 		}
 
-		const match = /^(#{1,3})\s+(.+)$/.exec(line);
+		const match = /^(#{1,4})\s+(.+)$/.exec(line);
 		if (!match) {
 			continue;
 		}

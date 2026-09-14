@@ -1,102 +1,123 @@
-import { IconPhotoOff, IconTrash } from "@tabler/icons-react";
-import { useMemo } from "react";
+import { IconFolder, IconPhotoOff, IconTrash } from "@tabler/icons-react";
 import { Button } from "#/components/ui/button";
-import { MediaCard } from "#/features/media/components/media-card";
-import { MediaDeleteDialog } from "#/features/media/components/media-delete-dialog";
+import {
+	Empty,
+	EmptyDescription,
+	EmptyHeader,
+	EmptyMedia,
+	EmptyTitle,
+} from "#/components/ui/empty";
 import type { MediaFile } from "#/features/media/media.types";
+import { MediaCard } from "./media-card";
+import { MediaDeleteDialog } from "./media-delete-dialog";
+import { MediaMoveDialog } from "./media-move-dialog";
 
 interface MediaGalleryProps {
 	media: MediaFile[];
-	search?: string;
-	filter?: string;
 	selectedPaths: string[];
-	onToggleSelect: (path: string, checked: boolean) => void;
-	onClearSelection: () => void;
-	onDelete: (image: MediaFile) => Promise<void>;
-	onDeleteMany: (images: MediaFile[]) => Promise<void>;
+	onSelectionChange: (paths: string[]) => void;
+	onDelete: (images: MediaFile[]) => Promise<void>;
+	pending?: boolean;
 }
 
 export function MediaGallery({
 	media,
-	search = "",
-	filter = "all",
 	selectedPaths,
-	onToggleSelect,
-	onClearSelection,
+	onSelectionChange,
 	onDelete,
-	onDeleteMany,
+	pending,
 }: MediaGalleryProps) {
-	const filteredMedia = useMemo(() => {
-		return media.filter((item) => {
-			const matchesSearch =
-				!search || item.name.toLowerCase().includes(search.toLowerCase());
-
-			if (filter === "all") {
-				return matchesSearch;
-			}
-
-			const ext = item.name.split(".").pop()?.toLowerCase() || "unknown";
-			const normalizedExt = ext === "jpeg" ? "jpg" : ext;
-			return matchesSearch && normalizedExt === filter;
-		});
-	}, [media, search, filter]);
-
-	const selectedMedia = filteredMedia.filter((item) =>
-		selectedPaths.includes(item.path),
-	);
-
-	if (filteredMedia.length === 0) {
+	const selectedSet = new Set(selectedPaths);
+	const selected = media.filter((image) => selectedSet.has(image.path));
+	if (!media.length)
 		return (
-			<div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/30 py-24 text-center">
-				<div className="mb-3 rounded-lg bg-muted/20 p-3">
-					<IconPhotoOff className="size-8 text-muted-foreground/60" />
-				</div>
-				<div className="max-w-sm space-y-1">
-					<p className="text-sm font-semibold text-foreground">
-						{media.length === 0 ? "No media found" : "No results"}
-					</p>
-					<p className="text-xs text-muted-foreground">
-						{media.length === 0
-							? "Upload your first asset to get started"
-							: "Try adjusting your search or filters"}
-					</p>
+			<Empty className="border border-dashed">
+				<EmptyHeader>
+					<EmptyMedia variant="icon">
+						<IconPhotoOff />
+					</EmptyMedia>
+					<EmptyTitle>No matching assets</EmptyTitle>
+					<EmptyDescription>
+						Upload an image or adjust the search and filters.
+					</EmptyDescription>
+				</EmptyHeader>
+			</Empty>
+		);
+	return (
+		<div className="flex flex-col gap-4">
+			<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-card px-4 py-3">
+				<p aria-live="polite" className="text-sm text-muted-foreground">
+					{selected.length
+						? `${selected.length} selected`
+						: `${media.length} assets`}
+				</p>
+				<div className="flex flex-wrap items-center gap-2">
+					{selected.length ? (
+						<>
+							<MediaMoveDialog images={selected}>
+								<Button
+									variant="outline"
+									size="sm"
+									disabled={pending || selected.length > 100}
+								>
+									<IconFolder data-icon="inline-start" />
+									Move
+								</Button>
+							</MediaMoveDialog>
+							<MediaDeleteDialog images={selected} onConfirm={onDelete}>
+								<Button
+									variant="destructive"
+									size="sm"
+									disabled={pending || selected.length > 100}
+								>
+									<IconTrash data-icon="inline-start" />
+									Delete
+								</Button>
+							</MediaDeleteDialog>
+							<Button
+								variant="ghost"
+								size="sm"
+								disabled={pending}
+								onClick={() => onSelectionChange([])}
+							>
+								Clear
+							</Button>
+						</>
+					) : (
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={pending}
+							onClick={() =>
+								onSelectionChange(
+									media.slice(0, 100).map((image) => image.path),
+								)
+							}
+						>
+							{media.length > 100 ? "Select first 100" : "Select all"}
+						</Button>
+					)}
 				</div>
 			</div>
-		);
-	}
-
-	return (
-		<div className="space-y-4">
-			{selectedMedia.length > 0 ? (
-				<div className="flex items-center justify-between rounded-xl border bg-card/50 px-4 py-3">
-					<p className="text-sm text-muted-foreground">
-						{selectedMedia.length} asset
-						{selectedMedia.length > 1 ? "s" : ""} selected
-					</p>
-					<div className="flex gap-2">
-						<MediaDeleteDialog images={selectedMedia} onConfirm={onDeleteMany}>
-							<Button variant="destructive" size="sm" className="gap-2">
-								<IconTrash className="size-4" />
-								Delete Selected
-							</Button>
-						</MediaDeleteDialog>
-						<Button variant="ghost" size="sm" onClick={onClearSelection}>
-							Clear
-						</Button>
-					</div>
-				</div>
+			{selected.length > 100 ? (
+				<p role="alert" className="text-sm text-destructive">
+					Select up to 100 assets per operation.
+				</p>
 			) : null}
-
-			<div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4">
-				{filteredMedia.map((item) => (
+			<div className="grid grid-cols-[repeat(auto-fill,minmax(min(180px,100%),1fr))] gap-4">
+				{media.map((image) => (
 					<MediaCard
-						key={item.path}
-						media={item}
-						selected={selectedPaths.includes(item.path)}
+						key={image.path}
+						media={image}
+						selected={selectedSet.has(image.path)}
 						onSelectedChange={(checked) =>
-							onToggleSelect(item.path, checked === true)
+							onSelectionChange(
+								checked
+									? [...new Set([...selectedPaths, image.path])]
+									: selectedPaths.filter((path) => path !== image.path),
+							)
 						}
-						onDelete={onDelete}
+						onDelete={(target) => onDelete([target])}
 					/>
 				))}
 			</div>

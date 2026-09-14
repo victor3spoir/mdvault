@@ -7,8 +7,7 @@ import {
 	IconH2,
 	IconH3,
 	IconH4,
-	IconH5,
-	IconH6,
+	IconInfoCircle,
 	IconItalic,
 	IconLink,
 	IconList,
@@ -116,12 +115,11 @@ export function EditorToolbar({
 			h2: current.isActive("heading", { level: 2 }),
 			h3: current.isActive("heading", { level: 3 }),
 			h4: current.isActive("heading", { level: 4 }),
-			h5: current.isActive("heading", { level: 5 }),
-			h6: current.isActive("heading", { level: 6 }),
 			bulletList: current.isActive("bulletList"),
 			orderedList: current.isActive("orderedList"),
 			taskList: current.isActive("taskList"),
 			blockquote: current.isActive("blockquote"),
+			callout: current.isActive("callout"),
 			codeBlock: current.isActive("codeBlock"),
 			link: current.isActive("link"),
 			canUndo: current.can().undo(),
@@ -224,24 +222,6 @@ export function EditorToolbar({
 				>
 					<IconH4 className="size-4" />
 				</ToolbarButton>
-				<ToolbarButton
-					label="Heading 5"
-					active={state.h5}
-					onClick={() =>
-						editor.chain().focus().toggleHeading({ level: 5 }).run()
-					}
-				>
-					<IconH5 className="size-4" />
-				</ToolbarButton>
-				<ToolbarButton
-					label="Heading 6"
-					active={state.h6}
-					onClick={() =>
-						editor.chain().focus().toggleHeading({ level: 6 }).run()
-					}
-				>
-					<IconH6 className="size-4" />
-				</ToolbarButton>
 			</ToolbarGroup>
 
 			<ToolbarDivider />
@@ -274,6 +254,13 @@ export function EditorToolbar({
 					onClick={() => editor.chain().focus().toggleBlockquote().run()}
 				>
 					<IconBlockquote className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Insert callout"
+					active={state.callout}
+					onClick={() => editor.chain().focus().setCallout().run()}
+				>
+					<IconInfoCircle className="size-4" />
 				</ToolbarButton>
 				<ToolbarButton
 					label="Code block"

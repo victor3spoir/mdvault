@@ -3,6 +3,7 @@ import { zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { Button } from "#/components/ui/button";
 import { VaultEditor } from "#/features/vault/components/vault-editor";
+import { VaultEditorLoading } from "#/features/vault/components/vault-editor-loading";
 import {
 	vaultAssetQueryOptions,
 	vaultConfigQueryOptions,
@@ -27,6 +28,7 @@ export const Route = createFileRoute("/cms/vault/$id/edit/")({
 		return { config, asset };
 	},
 	component: EditVaultAssetPage,
+	pendingComponent: VaultEditorLoading,
 });
 
 function EditVaultAssetPage() {

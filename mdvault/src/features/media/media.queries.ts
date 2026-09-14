@@ -1,5 +1,9 @@
 import { queryOptions } from "@tanstack/react-query";
-import { getImages, getMediaDataUrlFn } from "#/features/media/media.functions";
+import {
+	getImages,
+	getMediaAudit,
+	getMediaDataUrlFn,
+} from "#/features/media/media.functions";
 import {
 	isExternalImageSource,
 	normalizeMediaSource,
@@ -10,6 +14,15 @@ export const mediaListQueryOptions = () =>
 		queryKey: ["media", "list"],
 		queryFn: () => getImages(),
 		staleTime: 30_000,
+	});
+
+export const mediaAuditQueryOptions = () =>
+	queryOptions({
+		queryKey: ["media", "audit"],
+		queryFn: () => getMediaAudit(),
+		staleTime: 30_000,
+		retry: false,
+		refetchOnWindowFocus: false,
 	});
 
 export const mediaDataUrlQueryOptions = (src: string) =>

@@ -59,11 +59,8 @@ describe("content query keys", () => {
 	});
 
 	/**
-	 * The lists render from route loader data rather than a useQuery hook, so
-	 * the queries have no active observer. Without refetchType "all" they are
-	 * marked stale but never refetched, and ensureQueryData in the loader hands
-	 * back the stale cache - a published post keeps showing "Draft" until the
-	 * page is reloaded.
+	 * Lists are inactive while editing. Refetch them before navigation so
+	 * ensureQueryData cannot hand back an outdated cached list.
 	 */
 	it("forces a refetch even without an active observer", async () => {
 		await invalidatePostQueries(queryClient);

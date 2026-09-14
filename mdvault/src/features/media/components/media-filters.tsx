@@ -24,7 +24,7 @@ export function MediaFilters({
 				<Input
 					value={search}
 					onChange={(event) => onSearchChange(event.target.value)}
-					placeholder="Search assets by filename..."
+					placeholder="Search assets by filename or folder..."
 					aria-label="Search assets"
 					className="h-11 rounded-2xl border-none bg-muted/50 pr-4 pl-11 focus-visible:ring-1 focus-visible:ring-primary/20"
 				/>

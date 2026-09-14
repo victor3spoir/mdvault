@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { resolveMediaPath } from "#/features/media/media-path";
 import { getMedia, parseWidth } from "#/features/media/media-store.server";
 import { getGitHubEnv } from "#/integrations/github/github-env.server";
 import { getRepositoryMediaFilePath } from "#/lib/repository-path";
@@ -16,13 +17,16 @@ export const Route = createFileRoute("/api/media")({
 			GET: async ({ request }) => {
 				const url = new URL(request.url);
 				const file = url.searchParams.get("file");
+				const requestedPath = url.searchParams.get("path");
 
-				if (!file) {
+				if (!file && !requestedPath) {
 					return new Response("Missing file", { status: 400 });
 				}
 
 				const env = getGitHubEnv();
-				const path = getRepositoryMediaFilePath(env.MEDIA_PATH, file);
+				const path = requestedPath
+					? resolveMediaPath(requestedPath, env.MEDIA_PATH)
+					: getRepositoryMediaFilePath(env.MEDIA_PATH, file ?? "");
 
 				if (!path) {
 					return new Response("Not found", { status: 404 });

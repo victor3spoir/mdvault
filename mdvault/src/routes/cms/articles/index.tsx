@@ -1,4 +1,5 @@
 import { IconPlus } from "@tabler/icons-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useMemo } from "react";
@@ -52,7 +53,8 @@ function indexLinkedLocales(articles: readonly Article[]) {
 }
 
 function ArticlesPage() {
-	const { articles, config } = Route.useLoaderData();
+	const { data: articles } = useSuspenseQuery(articlesListQueryOptions());
+	const { data: config } = useSuspenseQuery(vaultConfigQueryOptions());
 	const filters = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const allTags = collectContentTags(articles);

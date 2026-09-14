@@ -1,5 +1,5 @@
-import { IconLoader2 } from "@tabler/icons-react";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { type ReactNode, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
 	AlertDialog,
@@ -12,11 +12,14 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "#/components/ui/alert-dialog";
-import { checkMediaUsageFn } from "#/features/media/media.functions";
-import type { MediaFile, MediaUsage } from "#/features/media/media.types";
+import { Button } from "#/components/ui/button";
+import { Skeleton } from "#/components/ui/skeleton";
+import { mediaAuditQueryOptions } from "#/features/media/media.queries";
+import type { MediaFile } from "#/features/media/media.types";
+import { MediaUsageLinks } from "./media-usage-links";
 
 interface MediaDeleteDialogProps {
-	children: React.ReactNode;
+	children?: ReactNode;
 	image?: MediaFile;
 	images?: MediaFile[];
 	onConfirm: (images: MediaFile[]) => Promise<void> | void;
@@ -28,112 +31,89 @@ export function MediaDeleteDialog({
 	images,
 	onConfirm,
 }: MediaDeleteDialogProps) {
-	const targets = useMemo(
-		() => images ?? (image ? [image] : []),
-		[image, images],
-	);
+	const targets = images ?? (image ? [image] : []);
 	const [open, setOpen] = useState(false);
-	const [usage, setUsage] = useState<Record<string, MediaUsage>>({});
-	const [isLoadingUsage, setIsLoadingUsage] = useState(false);
 	const [isPending, startTransition] = useTransition();
-
-	useEffect(() => {
-		if (!open || targets.length === 0) {
-			setUsage((current) => (Object.keys(current).length === 0 ? current : {}));
-			setIsLoadingUsage(false);
-			return;
-		}
-
-		let cancelled = false;
-		setIsLoadingUsage(true);
-		Promise.all(
-			targets.map(async (target) => {
-				try {
-					const result = await checkMediaUsageFn({
-						data: { imageUrl: target.url },
-					});
-					return [target.path, result] as const;
-				} catch {
-					return [target.path, { isUsed: false, usedInEntries: [] }] as const;
-				}
-			}),
-		)
-			.then((entries) => {
-				if (!cancelled) {
-					setUsage(Object.fromEntries(entries));
-				}
-			})
-			.finally(() => {
-				if (!cancelled) {
-					setIsLoadingUsage(false);
-				}
-			});
-
-		return () => {
-			cancelled = true;
-		};
-	}, [open, targets]);
-
-	const usedTargets = targets.filter((target) => usage[target.path]?.isUsed);
+	const audit = useQuery({ ...mediaAuditQueryOptions(), enabled: open });
+	const used = targets.filter(
+		(target) => audit.data?.usage[target.path]?.isUsed,
+	);
+	const unknown = targets.some((target) => !audit.data?.usage[target.path]);
+	const blocked =
+		!targets.length ||
+		unknown ||
+		used.length > 0 ||
+		audit.isFetching ||
+		audit.isError;
 
 	return (
-		<AlertDialog open={open} onOpenChange={setOpen}>
+		<AlertDialog
+			open={open}
+			onOpenChange={(value) => {
+				if (!isPending) setOpen(value);
+			}}
+		>
 			<AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
 			<AlertDialogContent>
 				<AlertDialogHeader>
 					<AlertDialogTitle>
-						{targets.length > 1 ? "Delete selected assets" : "Delete asset"}
+						Delete {targets.length > 1 ? `${targets.length} assets` : "asset"}?
 					</AlertDialogTitle>
-					<AlertDialogDescription asChild>
-						<div className="space-y-3 pt-2 text-sm">
-							{isLoadingUsage ? (
-								<div className="flex items-center gap-2">
-									<IconLoader2 className="size-4 animate-spin" />
-									<span>Checking media usage...</span>
-								</div>
-							) : (
-								<>
-									<p>
-										{targets.length > 1
-											? `You are about to delete ${targets.length} assets.`
-											: `Permanently delete "${targets[0]?.name}"?`}
-									</p>
-									{usedTargets.length > 0 ? (
-										<div className="space-y-2 rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-											<p className="font-medium text-destructive">
-												Some selected assets are currently in use.
-											</p>
-											<ul className="space-y-2">
-												{usedTargets.map((target) => (
-													<li key={target.path}>
-														<p className="font-medium text-foreground">
-															{target.name}
-														</p>
-														<ul className="mt-1 space-y-1 text-muted-foreground">
-															{usage[target.path]?.usedInEntries.map(
-																(entry) => (
-																	<li
-																		key={`${target.path}-${entry.type}-${entry.id}`}
-																	>
-																		{entry.type}: {entry.title}
-																	</li>
-																),
-															)}
-														</ul>
-													</li>
-												))}
-											</ul>
-										</div>
-									) : null}
-								</>
-							)}
-						</div>
+					<AlertDialogDescription>
+						Only assets with no references in articles, posts or Vault entries
+						can be deleted. External sites and unsaved drafts are not scanned.
+						You can recover files from Git history.
 					</AlertDialogDescription>
 				</AlertDialogHeader>
+				{audit.isFetching ? (
+					<div aria-busy="true" className="flex flex-col gap-2">
+						<p className="text-sm text-muted-foreground">
+							Checking media usage…
+						</p>
+						<Skeleton className="h-5 w-full" />
+					</div>
+				) : audit.isError ? (
+					<div role="alert" className="flex flex-col gap-2">
+						<p className="text-sm text-destructive">
+							Usage could not be verified. Deletion is blocked.
+						</p>
+						<Button variant="outline" onClick={() => void audit.refetch()}>
+							Retry scan
+						</Button>
+					</div>
+				) : used.length ? (
+					<div className="max-h-64 overflow-y-auto">
+						<p className="mb-3 text-sm font-medium">
+							Remove these references before deleting:
+						</p>
+						<ul className="flex flex-col gap-3">
+							{used.map((target) => (
+								<li key={target.path}>
+									<p className="break-all text-sm font-medium">{target.path}</p>
+									<MediaUsageLinks
+										entries={
+											audit.data?.usage[target.path]?.usedInEntries ?? []
+										}
+									/>
+								</li>
+							))}
+						</ul>
+					</div>
+				) : unknown ? (
+					<p role="alert" className="text-sm text-destructive">
+						Some assets changed or could not be checked. Refresh the library.
+					</p>
+				) : (
+					<p className="text-sm">
+						No references found in managed content. Usage will be checked again
+						before deletion.
+					</p>
+				)}
 				<AlertDialogFooter>
-					<AlertDialogCancel>Cancel</AlertDialogCancel>
+					<AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
 					<AlertDialogAction
 						variant="destructive"
+						disabled={blocked || isPending}
 						onClick={(event) => {
 							event.preventDefault();
 							startTransition(async () => {
@@ -144,23 +124,13 @@ export function MediaDeleteDialog({
 									toast.error(
 										error instanceof Error
 											? error.message
-											: "Failed to delete assets",
+											: "Could not delete media",
 									);
 								}
 							});
 						}}
-						disabled={isPending || isLoadingUsage}
 					>
-						{isPending ? (
-							<>
-								<IconLoader2 className="mr-2 size-4 animate-spin" />
-								Deleting...
-							</>
-						) : targets.length > 1 ? (
-							"Delete Selected"
-						) : (
-							"Delete"
-						)}
+						{isPending ? "Deleting…" : "Delete"}
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

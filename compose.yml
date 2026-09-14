@@ -2,7 +2,7 @@ name: mdvault
 
 services:
   mdvault:
-    image: ghcr.io/victor3spoir/mdvault:dev
+    image: ghcr.io/victor3spoir/mdvault:1.2.0
     restart: unless-stopped
     deploy:
       resources:

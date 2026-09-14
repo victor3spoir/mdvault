@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { PostEditorPageLoading } from "#/components/editor-page-loading";
 import { articlesListQueryOptions } from "#/features/articles/articles.queries";
 import { PostEditor } from "#/features/posts/components/post-editor";
 import { postQueryOptions } from "#/features/posts/posts.queries";
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/cms/posts/$slug/edit/")({
 		return { post, articles, config };
 	},
 	component: EditPostPage,
+	pendingComponent: PostEditorPageLoading,
 });
 
 function EditPostPage() {
