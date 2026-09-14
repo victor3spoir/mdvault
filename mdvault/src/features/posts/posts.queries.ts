@@ -24,8 +24,7 @@ export const postQueryOptions = (slug: string) =>
 	});
 
 /**
- * `refetchType: "all"` is required: lists render from loader data, so the
- * queries have no active observer and would be marked stale without refetching.
+ * Include inactive lists so returning from the editor uses fresh data.
  */
 export async function invalidatePostQueries(queryClient: QueryClient) {
 	await Promise.all([

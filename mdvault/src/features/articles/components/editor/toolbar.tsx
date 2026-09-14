@@ -9,6 +9,7 @@ import {
 	IconH4,
 	IconH5,
 	IconH6,
+	IconInfoCircle,
 	IconItalic,
 	IconLink,
 	IconList,
@@ -122,6 +123,7 @@ export function EditorToolbar({
 			orderedList: current.isActive("orderedList"),
 			taskList: current.isActive("taskList"),
 			blockquote: current.isActive("blockquote"),
+			callout: current.isActive("callout"),
 			codeBlock: current.isActive("codeBlock"),
 			link: current.isActive("link"),
 			canUndo: current.can().undo(),
@@ -274,6 +276,13 @@ export function EditorToolbar({
 					onClick={() => editor.chain().focus().toggleBlockquote().run()}
 				>
 					<IconBlockquote className="size-4" />
+				</ToolbarButton>
+				<ToolbarButton
+					label="Insert callout"
+					active={state.callout}
+					onClick={() => editor.chain().focus().setCallout().run()}
+				>
+					<IconInfoCircle className="size-4" />
 				</ToolbarButton>
 				<ToolbarButton
 					label="Code block"

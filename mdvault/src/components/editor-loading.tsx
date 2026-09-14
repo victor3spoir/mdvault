@@ -1,37 +1,78 @@
-import { IconLoader2 } from "@tabler/icons-react";
 import { Skeleton } from "#/components/ui/skeleton";
+import { cn } from "#/lib/utils";
 
 interface EditorLoadingProps {
-	/** Show a skeleton toolbar strip above the message (rich editor). */
 	withToolbar?: boolean;
 }
 
+const TOOL_GROUPS = [
+	["undo", "redo"],
+	["bold", "italic", "strike", "code"],
+	["h2", "h3", "h4", "h5", "h6"],
+	["bullets", "numbers", "tasks", "quote", "callout", "code-block"],
+	["find", "outline", "link", "image", "table", "rule"],
+];
+
 export function EditorLoading({ withToolbar = false }: EditorLoadingProps) {
 	return (
-		<div className="flex min-h-0 flex-1 flex-col">
+		<div
+			aria-busy="true"
+			className="flex min-h-0 min-w-0 flex-1 flex-col [&_[data-slot=skeleton]]:motion-reduce:animate-none"
+		>
+			<output className="sr-only">Loading editor</output>
 			{withToolbar ? (
-				<div className="flex shrink-0 items-center justify-center gap-1.5 border-b px-3 py-2">
-					{Array.from({ length: 10 }, (_, index) => (
-						// biome-ignore lint/suspicious/noArrayIndexKey: static placeholder strip
-						<Skeleton key={index} className="size-7 rounded-lg" />
+				<div
+					aria-hidden="true"
+					data-editor-skeleton="toolbar"
+					className="@container/toolbar flex shrink-0 flex-wrap items-center justify-center gap-x-2 gap-y-1 border-b bg-background/95 px-3 py-1.5"
+				>
+					{TOOL_GROUPS.map((group, index) => (
+						<div key={group[0]} className="flex items-center gap-2">
+							{index > 0 ? (
+								<span className="mx-1 hidden h-5 w-px bg-border @3xl/toolbar:block" />
+							) : null}
+							<div className="flex items-center gap-0.5">
+								{group.map((tool) => (
+									<Skeleton key={tool} className="size-8 rounded-lg" />
+								))}
+							</div>
+						</div>
 					))}
 				</div>
 			) : null}
-
-			<div className="flex flex-1 flex-col items-center justify-center gap-4 py-16">
-				<div className="relative">
-					<div className="absolute inset-0 animate-ping rounded-full bg-primary/10" />
-					<div className="relative flex size-14 items-center justify-center rounded-2xl border bg-card shadow-sm">
-						<IconLoader2 className="size-6 animate-spin text-primary" />
-					</div>
-				</div>
-				<div className="space-y-1 text-center">
-					<p className="text-sm font-medium">Setting up your editor</p>
-					<p className="text-xs text-muted-foreground">
-						This should only take a moment...
-					</p>
+			<div
+				aria-hidden="true"
+				data-editor-skeleton="body"
+				className="min-h-0 flex-1 overflow-hidden"
+			>
+				<div
+					className={cn(
+						"flex w-full flex-col gap-6",
+						withToolbar
+							? "mx-auto max-w-3xl px-8 py-6"
+							: "max-w-[68ch] px-6 py-5",
+					)}
+				>
+					{withToolbar ? <Skeleton className="h-7 w-2/5" /> : null}
+					{["first", "second", "third"].map((paragraph) => (
+						<div key={paragraph} className="flex flex-col gap-3">
+							<Skeleton className="h-4 w-full" />
+							<Skeleton className="h-4 w-11/12" />
+							<Skeleton className="h-4 w-3/4" />
+						</div>
+					))}
 				</div>
 			</div>
+			{withToolbar ? (
+				<div
+					aria-hidden="true"
+					data-editor-skeleton="footer"
+					className="flex h-9 shrink-0 items-center justify-between gap-3 border-t px-3 py-1"
+				>
+					<Skeleton className="h-7 w-24" />
+					<Skeleton className="h-3 w-44 max-w-1/2" />
+				</div>
+			) : null}
 		</div>
 	);
 }

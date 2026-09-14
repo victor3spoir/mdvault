@@ -3,6 +3,7 @@ import { zodValidator } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { Button } from "#/components/ui/button";
 import { VaultEditor } from "#/features/vault/components/vault-editor";
+import { VaultEditorLoading } from "#/features/vault/components/vault-editor-loading";
 import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
 
 const newAssetSearchSchema = z.object({
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/cms/vault/new/")({
 	loader: ({ context }) =>
 		context.queryClient.ensureQueryData(vaultConfigQueryOptions()),
 	component: NewVaultAssetPage,
+	pendingComponent: VaultEditorLoading,
 });
 
 function NewVaultAssetPage() {

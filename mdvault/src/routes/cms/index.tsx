@@ -1,3 +1,4 @@
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { PageLayout } from "#/components/page-layout";
 import { ContentSectionCard } from "#/features/dashboard/components/content-section-card";
@@ -11,7 +12,9 @@ export const Route = createFileRoute("/cms/")({
 });
 
 function DashboardPage() {
-	const { sections, activities } = Route.useLoaderData();
+	const {
+		data: { sections, activities },
+	} = useSuspenseQuery(dashboardOverviewQueryOptions());
 	const totalDocuments = sections.reduce(
 		(count, section) => count + section.total,
 		0,

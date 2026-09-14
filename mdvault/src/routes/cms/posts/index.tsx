@@ -1,4 +1,5 @@
 import { IconPlus } from "@tabler/icons-react";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { useMemo } from "react";
@@ -33,7 +34,8 @@ export const Route = createFileRoute("/cms/posts/")({
 });
 
 function PostsPage() {
-	const { posts, config } = Route.useLoaderData();
+	const { data: posts } = useSuspenseQuery(postsListQueryOptions());
+	const { data: config } = useSuspenseQuery(vaultConfigQueryOptions());
 	const filters = Route.useSearch();
 	const navigate = useNavigate({ from: Route.fullPath });
 	const allTags = collectContentTags(posts);

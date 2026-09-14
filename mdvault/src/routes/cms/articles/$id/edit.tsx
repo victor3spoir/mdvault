@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { EditorPageLoading } from "#/components/editor-page-loading";
 import { articleQueryOptions } from "#/features/articles/articles.queries";
 import { ArticleEditor } from "#/features/articles/components/article-editor";
 import { vaultConfigQueryOptions } from "#/features/vault/vault.queries";
@@ -12,6 +13,7 @@ export const Route = createFileRoute("/cms/articles/$id/edit")({
 		return { article, config };
 	},
 	component: EditArticlePage,
+	pendingComponent: EditorPageLoading,
 });
 
 function EditArticlePage() {

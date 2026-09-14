@@ -15,8 +15,8 @@ const SCOPES = {
 export type ContentScope = keyof typeof SCOPES;
 
 /**
- * Lists render from loader data, so their queries have no active observer:
- * `refetchType: "all"` and a router invalidation are both required.
+ * Refresh inactive lists before navigation as well as visible query subscribers.
+ * Reload route snapshots synchronously for detail and editor screens.
  */
 export function useContentRefresh(scope: ContentScope) {
 	const queryClient = useQueryClient();
@@ -34,6 +34,6 @@ export function useContentRefresh(scope: ContentScope) {
 			}),
 		]);
 
-		await router.invalidate();
+		await router.invalidate({ sync: true });
 	}, [queryClient, router, scope]);
 }

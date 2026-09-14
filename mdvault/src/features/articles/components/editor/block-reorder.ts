@@ -1,9 +1,29 @@
 import type { Editor } from "@tiptap/core";
-import { TextSelection } from "@tiptap/pm/state";
+import { NodeSelection, TextSelection } from "@tiptap/pm/state";
 
 export function currentTopLevelBlockPosition(editor: Editor) {
 	const { $from } = editor.state.selection;
-	return $from.depth > 0 ? $from.before(1) : -1;
+	return $from.depth > 0 ? $from.before(1) : $from.pos;
+}
+
+export function deleteTopLevelBlock(editor: Editor, position: number) {
+	const { doc } = editor.state;
+	if (position < 0 || position >= doc.content.size) {
+		return false;
+	}
+	const node = doc.nodeAt(position);
+	if (
+		!editor.isEditable ||
+		doc.resolve(position).depth !== 0 ||
+		!node?.isBlock
+	) {
+		return false;
+	}
+
+	return editor.commands.deleteRange({
+		from: position,
+		to: position + node.nodeSize,
+	});
 }
 
 export function moveTopLevelBlock(
@@ -12,8 +32,11 @@ export function moveTopLevelBlock(
 	direction: -1 | 1,
 ) {
 	const { doc } = editor.state;
+	if (position < 0 || position >= doc.content.size) {
+		return false;
+	}
 	const node = doc.nodeAt(position);
-	if (!node) {
+	if (!node || doc.resolve(position).depth !== 0) {
 		return false;
 	}
 
@@ -38,11 +61,13 @@ export function moveTopLevelBlock(
 		.insert(insertPosition, node);
 	transaction
 		.setSelection(
-			TextSelection.create(
-				transaction.doc,
-				insertPosition + selectionFromOffset,
-				insertPosition + selectionToOffset,
-			),
+			editor.state.selection instanceof NodeSelection
+				? NodeSelection.create(transaction.doc, insertPosition)
+				: TextSelection.create(
+						transaction.doc,
+						insertPosition + selectionFromOffset,
+						insertPosition + selectionToOffset,
+					),
 		)
 		.scrollIntoView();
 	editor.view.dispatch(transaction);
