@@ -1,4 +1,4 @@
-name: Lint, Test & Security
+name: Security
 
 on:
   push:
@@ -26,12 +26,16 @@ jobs:
       security-events: write
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: TruffleHog OSS
         uses: trufflesecurity/trufflehog@main
         with:
           path: ./
-          base: ${{ github.event.before }}
+          base: >-
+            ${{ github.event.before != '0000000000000000000000000000000000000000' &&
+              github.event.before || '' }}
           head: ${{ github.sha }}
           extra_args: --sarif --results=verified,unknown
 
@@ -56,29 +60,3 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: codeql-js
-  # audit-job:
-  #   name: Security Scan
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     security-events: write
-  #   defaults:
-  #     run:
-  #       working-directory: ./mdvault
-  #   steps:
-  #     - uses: actions/checkout@v6
-
-  #     - uses: oven-sh/setup-bun@v2
-  #       with:
-  #         bun-version-file: mdvault/package.json
-
-  #     - run: bun install --frozen-lockfile
-
-  #     - run: bun audit --json > bun-audit-report.json
-
-  #     - name: Upload bun audit report
-  #       if: hashFiles('bun-audit-report.json') != ''
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: bun-audit-report-${{ github.run_id }}
-  #         path: ./mdvault/bun-audit-report.json

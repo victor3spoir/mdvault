@@ -1,4 +1,4 @@
-name: Lint, Test & Security
+name: Lint & Test
 
 on:
   push:
@@ -43,11 +43,13 @@ jobs:
         run: bun run typecheck
 
       - name: Unit tests
-        run: bun run test
+        run: bun run test --reporter=default --reporter=junit --outputFile=test-report.xml
 
-      - name: Upload lint report
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Publish test report
+        if: ${{ always() && hashFiles('mdvault/test-report.xml') != '' }}
+        uses: dorny/test-reporter@v3
         with:
-          name: lint-report-${{ github.run_id }}
-          path: ./mdvault/lint-report.txt
+          name: Unit Tests
+          path: mdvault/test-report.xml
+          reporter: java-junit
+          use-actions-summary: true
