@@ -102,5 +102,5 @@ token is invalid, so a botched rotation is obvious rather than silent.
 
 ## Deploying the documentation site
 
-This documentation is a separate project in `docs-site/`, deployable on its own.
+This documentation is a separate project in `mdvault-docs/`, deployable on its own.
 See [Write the docs](/docs/guides/write-the-docs).

@@ -4,7 +4,7 @@ description: How this documentation site is built, and how to add a page to it.
 order: 40
 ---
 
-The site you are reading lives in `docs-site/`, a standalone TanStack Start
+The site you are reading lives in `mdvault-docs/`, a standalone TanStack Start
 project next to the application. It has its own dependencies, its own build and
 its own deployment. Changing the documentation never rebuilds the app, and vice
 versa.
@@ -12,7 +12,7 @@ versa.
 ## Running it
 
 ```bash
-cd docs-site
+cd mdvault-docs
 bun install
 bun run dev
 ```
@@ -88,7 +88,7 @@ bun run build
 
 ## Deploying
 
-The docs site deploys independently. On Vercel: Root Directory `docs-site`,
+The docs site deploys independently. On Vercel: Root Directory `mdvault-docs`,
 build command `bun run build`, output `.output/`. Any Nitro-capable host works
 the same way, since the build is a Nitro server bundle.
 

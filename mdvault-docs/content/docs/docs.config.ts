@@ -137,5 +137,5 @@ export const docsConfig: DocsConfig = {
 	},
 
 	editUrl: (slug) =>
-		`https://github.com/victor3spoir/mdvault/blob/main/docs-site/content/docs/${slug}.md`,
+		`https://github.com/victor3spoir/mdvault/blob/main/mdvault-docs/content/docs/${slug}.md`,
 };

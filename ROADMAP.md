@@ -54,8 +54,6 @@ unsaved drafts. Incomplete scans block cleanup. See the media documentation.
 - Native spellchecking driven by the current content language
 - Optional grammar and style diagnostics through a configurable provider
 - Explicit AI-assisted editing before considering inline autocompletion
-- See the detailed
-  [writing assistance perspective](./docs/writing-assistance-perspective.md)
 
 **Publishing integrations**
 

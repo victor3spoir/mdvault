@@ -56,7 +56,9 @@ jobs:
             docker-bake.hcl
             ${{ steps.meta.outputs.bake-file }}
           push: true
+          pull: true
           targets: mdvault
+          set: mdvault.no-cache-filter=runtime
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_OWNER: ${{ github.repository_owner }}
@@ -89,6 +91,7 @@ jobs:
           exit-code: 1
           ignore-unfixed: true
           severity: CRITICAL,HIGH
+          limit-severities-for-sarif: true
 
       - name: Upload Trivy image SARIF to GitHub Security tab
         if: ${{ always() && hashFiles('trivy-image-report.sarif') != '' }}
