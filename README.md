@@ -17,7 +17,7 @@
 </p>
 </div>
 
-![Dashboard](./docs/public/screenshots/dashboard.png)
+![Dashboard](./images/screenshots/dashboard.png)
 
 ## What is MDVault?
 
@@ -95,35 +95,35 @@ Open **http://127.0.0.1:3000** and start writing — or go to **Settings → Dyn
 
 ### Dashboard
 Metrics per content section — articles, posts and every custom type you define — plus a log of the commits MDVault made for you.
-![Dashboard](./docs/public/screenshots/dashboard.png)
+![Dashboard](./images/screenshots/dashboard.png)
 
 ### Articles
 Cards with cover, status, tags and inline publish, edit and delete actions — with shared search, status, language and tag filters.
-![Articles](./docs/public/screenshots/articles.png)
+![Articles](./images/screenshots/articles.png)
 
 ### Editor
 Distraction-free writing surface with word count, read time and save status, plus a collapsible settings sidebar for language, description, tags and cover image.
-![Editor](./docs/public/screenshots/editor.png)
+![Editor](./images/screenshots/editor.png)
 
 ### Posts
 Short-form, plain-text content — enforced by the schema, not by disabled buttons — that can reference a related article.
-![Posts](./docs/public/screenshots/posts.png)
+![Posts](./images/screenshots/posts.png)
 
 ### Custom content types (Vault)
 Your own types, each with its own list, editor and repository folder under `vault/`.
-![Vault](./docs/public/screenshots/vault.png)
+![Vault](./images/screenshots/vault.png)
 
 ### Media library
 Upload, filter and reuse images across your content, with usage checks before deleting.
-![Media](./docs/public/screenshots/media.png)
+![Media](./images/screenshots/media.png)
 
 ### Settings
 Connected GitHub account, repository info, and the asset types manager where new content types are defined.
-![Settings](./docs/public/screenshots/settings.png)
+![Settings](./images/screenshots/settings.png)
 
 ## How it works
 
-![How MDVault works](./docs/public/diagrams/mdvault-flow.png)
+![How MDVault works](./images/diagrams/mdvault-flow.png)
 
 1. **Point it at a repository** — provide a GitHub token, owner and repo name. MDVault reads and writes through the GitHub API; there is no other data store.
 2. **Write and upload in the browser** — content is edited as rich text and serialized to Markdown with YAML frontmatter. Images dropped into the editor are optimized, uploaded to the repository's media folder and linked by relative path.
@@ -223,7 +223,7 @@ HOST=127.0.0.1 PORT=3000 bun .output/server/index.mjs
 
 ## Documentation site
 
-The presentation site is live at **[mdvault-docs.vercel.app](https://mdvault-docs.vercel.app/)** and lives in [`docs/`](./docs). It deploys to Vercel with the project's **Root Directory** set to `docs`; everything else is read from `docs/vercel.json`. See [`docs/README.md`](./docs/README.md) for details.
+The website and documentation live in [`mdvault-docs/`](./mdvault-docs), a separate project. The public site is **[mdvault-docs.vercel.app](https://mdvault-docs.vercel.app/)**. Screenshots and diagrams used by this README are stored in [`images/`](./images).
 
 ## Contributing
 

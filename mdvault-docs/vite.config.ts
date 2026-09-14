@@ -10,7 +10,7 @@ import { defineConfig } from "vite";
  *
  * Nesting a second TanStack Start app inside the product app is not possible:
  * one Vite config owns one route tree, one router generator and one React copy.
- * Keeping `docs-site/` beside the app means it builds, versions and deploys on
+ * Keeping `mdvault-docs/` beside the app means it builds, versions and deploys on
  * its own — and can be moved to its own repository with a single `git mv`.
  */
 export default defineConfig({

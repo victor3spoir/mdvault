@@ -8,7 +8,7 @@ documentation. It installs, builds and deploys on its own, and nothing in
 ## Run it
 
 ```bash
-cd docs-site
+cd mdvault-docs
 bun install
 bun run dev        # http://localhost:3100
 ```
@@ -48,13 +48,13 @@ Fenced blocks are highlighted; a `mermaid` fence renders as a diagram.
 
 ## Deploy it
 
-Point the host at `docs-site/` as project root, build with `bun run build`, and
+Point the host at `mdvault-docs/` as project root, build with `bun run build`, and
 serve `.output/`. It is a standard Nitro build, so any Node host works.
 
 To move the docs into their own repository:
 
 ```bash
-git mv docs-site ../otapp-docs
+git mv mdvault-docs ../otapp-docs
 cd ../otapp-docs && git init
 ```
 
