@@ -43,10 +43,15 @@ export function normalizeMediaSource(src: string) {
 				return decodeBase64Url(token);
 			}
 
-			return url.pathname.replace(/^\/+/, "");
+			return value;
 		}
 	} catch {
 		return value.replace(/^\/+/, "");
+	}
+
+	if (value.startsWith("/api/media?") || value.startsWith("/api/image?")) {
+		const url = new URL(value, "https://example.invalid");
+		return url.searchParams.get("path") ?? url.searchParams.get("file") ?? "";
 	}
 
 	if (value.startsWith("/api/image/")) {
@@ -74,11 +79,13 @@ function normalizeGitHubMediaPath(pathname: string) {
 
 function normalizeRawGitHubMediaPath(pathname: string) {
 	const parts = pathname.split("/").filter(Boolean);
-	if (parts.length <= 4) {
+	if (parts.length < 4) {
 		return "";
 	}
 
-	return parts.slice(4).join("/");
+	return parts
+		.slice(parts[2] === "refs" && parts[3] === "heads" ? 5 : 3)
+		.join("/");
 }
 
 function decodeBase64Url(token: string) {

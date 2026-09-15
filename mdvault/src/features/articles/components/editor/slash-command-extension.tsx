@@ -3,6 +3,7 @@ import {
 	IconCode,
 	IconH2,
 	IconH3,
+	IconH4,
 	IconList,
 	IconListCheck,
 	IconListNumbers,
@@ -143,6 +144,14 @@ function commandItems(onImageInsertClick?: () => void): SlashCommandItem[] {
 			icon: IconH3,
 			command: (editor) =>
 				editor.chain().focus().setHeading({ level: 3 }).run(),
+		},
+		{
+			title: "Heading 4",
+			description: "Subsection heading",
+			keywords: "heading h4 subtitle",
+			icon: IconH4,
+			command: (editor) =>
+				editor.chain().focus().setHeading({ level: 4 }).run(),
 		},
 		{
 			title: "Bullet list",

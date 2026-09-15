@@ -2,8 +2,9 @@
 
 Where MDVault is going, and what it will deliberately never become.
 
-Current release: **v1.1.0** — GitHub-backed content management, rich editor,
-media library, custom content types, live preview.
+Release in preparation: **v1.3.0**. See the
+[v1.3.0 release notes](./CHANGELOG.md#130---2026-09-14) for implemented features
+and known limitations.
 
 > Dates are intentions, not commitments. This is a single-maintainer project;
 > the order matters more than the calendar. Items are open to discussion —
@@ -20,14 +21,16 @@ Every item below has to survive these:
    deleted.
 4. **Self-hostable in one container.** No mandatory hosted service.
 
-## Next — v1.2
+## v1.3.0 and follow-up work
 
-**Media completeness**
+**Media completeness — implemented in the working branch**
 
-- Download action in the media library
-- Bulk operations: select, move, delete with usage checks
-- Better orphan detection: media referenced by nothing, content referencing
-  missing media
+- [x] Download action in the media library
+- [x] Bulk selection, folder moves with reference updates, and guarded deletion
+- [x] Unused and missing-media scans across articles, posts and Vault entries
+
+Scans cover managed content on the default branch, not external consumers or
+unsaved drafts. Incomplete scans block cleanup. See the media documentation.
 
 **Custom content types, second iteration**
 
@@ -52,8 +55,6 @@ Every item below has to survive these:
 - Native spellchecking driven by the current content language
 - Optional grammar and style diagnostics through a configurable provider
 - Explicit AI-assisted editing before considering inline autocompletion
-- See the detailed
-  [writing assistance perspective](./docs/writing-assistance-perspective.md)
 
 **Publishing integrations**
 

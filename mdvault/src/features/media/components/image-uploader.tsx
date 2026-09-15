@@ -10,6 +10,7 @@ import {
 	IconUpload,
 	IconX,
 } from "@tabler/icons-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "#/components/ui/button";
@@ -61,6 +62,7 @@ export function ImageUploader({
 	maxSize = 5,
 	onUploadSuccess,
 }: ImageUploaderProps) {
+	const queryClient = useQueryClient();
 	const [isDragging, setIsDragging] = useState(false);
 	const [queue, setQueue] = useState<UploadQueueItem[]>([]);
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -143,6 +145,7 @@ export function ImageUploader({
 				isUploading: false,
 				uploadedSize: prepared.size,
 			});
+			void queryClient.invalidateQueries({ queryKey: ["media"] });
 			onUploadSuccess?.(uploaded);
 
 			setTimeout(() => removeItem(target.id), 1400);

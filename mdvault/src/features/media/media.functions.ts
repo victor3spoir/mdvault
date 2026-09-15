@@ -10,6 +10,8 @@ import {
 } from "#/features/media/media.server";
 import { normalizeMediaSource } from "#/features/media/media.utils";
 import { securityMiddleware } from "#/lib/security-middleware";
+import { MediaTargetsSchema, MoveMediaSchema } from "./media-management.schema";
+import { auditMedia, deleteMedia, moveMedia } from "./media-management.server";
 
 export const getImages = createServerFn({ method: "GET" })
 	.middleware([securityMiddleware])
@@ -17,7 +19,7 @@ export const getImages = createServerFn({ method: "GET" })
 		const result = await listImages();
 
 		if (!result.success) {
-			return [];
+			throw new Error(result.error);
 		}
 
 		return result.data;
@@ -43,6 +45,20 @@ export const uploadImageMutation = createServerFn({ method: "POST" })
 
 		return result.data;
 	});
+
+export const getMediaAudit = createServerFn({ method: "GET" })
+	.middleware([securityMiddleware])
+	.handler(() => auditMedia());
+
+export const moveMediaMutation = createServerFn({ method: "POST" })
+	.middleware([securityMiddleware])
+	.validator((data) => MoveMediaSchema.parse(data))
+	.handler(({ data }) => moveMedia(data));
+
+export const deleteMediaMutation = createServerFn({ method: "POST" })
+	.middleware([securityMiddleware])
+	.validator((data) => MediaTargetsSchema.parse(data))
+	.handler(({ data }) => deleteMedia(data));
 
 export const deleteImageMutation = createServerFn({ method: "POST" })
 	.middleware([securityMiddleware])

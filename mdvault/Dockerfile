@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.14 AS base
+FROM oven/bun:1.4 AS base
 
 WORKDIR /app
 
@@ -11,6 +11,10 @@ COPY . .
 RUN bun run build
 
 FROM base AS runtime
+RUN apt-get update \
+  && apt-get upgrade -y --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/*
+
 ENV NODE_ENV=production \
   HOST=0.0.0.0 \
   PORT=3000

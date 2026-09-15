@@ -1,9 +1,11 @@
 import { IconCheck, IconPhoto, IconSearch } from "@tabler/icons-react";
-import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { Button } from "#/components/ui/button";
 import { Input } from "#/components/ui/input";
 import { Skeleton } from "#/components/ui/skeleton";
 import { PrivateImage } from "#/features/media/components/private-image";
-import { getImages } from "#/features/media/media.functions";
+import { mediaListQueryOptions } from "#/features/media/media.queries";
 import type { MediaFile } from "#/features/media/media.types";
 import { cn } from "#/lib/utils";
 
@@ -16,27 +18,15 @@ export function ImageSelector({
 	selectedImageUrl = "",
 	onSelectImage,
 }: ImageSelectorProps) {
-	const [images, setImages] = useState<MediaFile[]>([]);
-	const [loading, setLoading] = useState(true);
+	const query = useQuery(mediaListQueryOptions());
+	const images = query.data ?? [];
 	const [searchQuery, setSearchQuery] = useState("");
 
-	useEffect(() => {
-		setLoading(true);
-		getImages()
-			.then((data) => setImages(data))
-			.catch(() => setImages([]))
-			.finally(() => setLoading(false));
-	}, []);
-
-	const filteredImages = useMemo(
-		() =>
-			images.filter((image) =>
-				image.name.toLowerCase().includes(searchQuery.toLowerCase()),
-			),
-		[images, searchQuery],
+	const filteredImages = images.filter((image) =>
+		image.path.toLowerCase().includes(searchQuery.toLowerCase()),
 	);
 
-	if (loading) {
+	if (query.isPending) {
 		return (
 			<div className="space-y-4">
 				<div className="h-10 w-full animate-pulse rounded-xl bg-muted" />
@@ -45,6 +35,19 @@ export function ImageSelector({
 						<Skeleton key={id} className="aspect-square rounded-2xl" />
 					))}
 				</div>
+			</div>
+		);
+	}
+
+	if (query.isError) {
+		return (
+			<div role="alert" className="flex flex-col gap-3">
+				<p className="text-sm text-destructive">
+					Could not load the media library.
+				</p>
+				<Button variant="outline" onClick={() => void query.refetch()}>
+					Retry
+				</Button>
 			</div>
 		);
 	}
@@ -96,7 +99,8 @@ export function ImageSelector({
 					<div className="grid grid-cols-[repeat(auto-fill,minmax(min(140px,100%),1fr))] gap-3">
 						{filteredImages.map((image) => (
 							<button
-								key={image.id}
+								key={image.path}
+								aria-label={`Select ${image.path}`}
 								type="button"
 								onClick={() => onSelectImage(image)}
 								className={cn(
@@ -130,7 +134,7 @@ export function ImageSelector({
 								) : null}
 								<div className="absolute inset-x-0 bottom-0 translate-y-full bg-linear-to-t from-black/80 to-transparent p-2 transition-transform duration-300 group-hover:translate-y-0">
 									<p className="truncate text-[10px] font-medium text-white">
-										{image.name}
+										{image.path}
 									</p>
 								</div>
 							</button>

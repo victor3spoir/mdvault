@@ -1,9 +1,4 @@
-import {
-	IconArrowDown,
-	IconArrowUp,
-	IconGripVertical,
-} from "@tabler/icons-react";
-import DragHandle from "@tiptap/extension-drag-handle-react";
+import { IconArrowDown, IconArrowUp, IconTrash } from "@tabler/icons-react";
 import { TaskItem, TaskList } from "@tiptap/extension-list";
 import { TableKit } from "@tiptap/extension-table";
 import { CharacterCount, Placeholder } from "@tiptap/extensions";
@@ -12,8 +7,11 @@ import { EditorContent, useEditor, useEditorState } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { EditorLoading } from "#/components/editor-loading";
+import { Button } from "#/components/ui/button";
+import { BlockDragControls } from "#/features/articles/components/editor/block-drag-controls";
 import {
 	currentTopLevelBlockPosition,
+	deleteTopLevelBlock,
 	moveTopLevelBlock,
 } from "#/features/articles/components/editor/block-reorder";
 import { CalloutExtension } from "#/features/articles/components/editor/callout-extension";
@@ -21,6 +19,7 @@ import { CodeBlockExtension } from "#/features/articles/components/editor/code-b
 import { ContentChecksPopover } from "#/features/articles/components/editor/content-checks-popover";
 import { FindReplaceBar } from "#/features/articles/components/editor/find-replace-bar";
 import { FindReplaceExtension } from "#/features/articles/components/editor/find-replace-extension";
+import { HeadingExtension } from "#/features/articles/components/editor/heading-extension";
 import { MediaEmbedExtension } from "#/features/articles/components/editor/media-embed-extension";
 import {
 	normalizePastedText,
@@ -54,10 +53,11 @@ export const RichTextEditor = forwardRef<
 		immediatelyRender: false,
 		extensions: [
 			StarterKit.configure({
-				heading: { levels: [2, 3, 4, 5, 6] },
+				heading: false,
 				link: { openOnClick: false },
 				codeBlock: false,
 			}),
+			HeadingExtension,
 			CodeBlockExtension,
 			Markdown,
 			Placeholder.configure({ placeholder: "Start writing your article..." }),
@@ -172,21 +172,7 @@ export const RichTextEditor = forwardRef<
 			<SelectionMenu editor={editor} />
 			<TableMenu editor={editor} />
 			<div className="relative min-h-0 flex-1 overflow-y-auto">
-				<DragHandle
-					editor={editor}
-					className="editor-drag-handle"
-					computePositionConfig={{ placement: "left-start" }}
-				>
-					<button
-						type="button"
-						tabIndex={-1}
-						aria-hidden="true"
-						title="Drag block"
-						className="flex size-7 cursor-grab items-center justify-center rounded-md border bg-background text-muted-foreground shadow-sm hover:bg-muted hover:text-foreground active:cursor-grabbing"
-					>
-						<IconGripVertical className="size-4" />
-					</button>
-				</DragHandle>
+				<BlockDragControls editor={editor} />
 				<EditorContent editor={editor} className="h-full" />
 			</div>
 			<EditorCounts editor={editor} />
@@ -246,6 +232,24 @@ function EditorCounts({
 				>
 					<IconArrowDown className="size-3.5" />
 				</button>
+				<Button
+					type="button"
+					variant="ghost"
+					size="icon-sm"
+					className="size-7"
+					aria-label="Delete current block"
+					title="Delete current block (Undo to restore)"
+					onMouseDown={(event) => event.preventDefault()}
+					onClick={() => {
+						if (
+							deleteTopLevelBlock(editor, currentTopLevelBlockPosition(editor))
+						) {
+							editor.commands.focus();
+						}
+					}}
+				>
+					<IconTrash />
+				</Button>
 			</div>
 			<div className="flex items-center gap-3">
 				<ContentChecksPopover editor={editor} />

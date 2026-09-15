@@ -83,13 +83,13 @@ export function MediaCard({
 			<div
 				className={cn(
 					"absolute top-2.5 left-2.5 z-10 rounded-md bg-background/80 p-0.5 shadow-sm backdrop-blur transition-opacity",
-					selected ? "opacity-100" : "opacity-0 group-hover:opacity-100",
+					"opacity-100",
 				)}
 			>
 				<Checkbox
 					checked={selected}
 					onCheckedChange={onSelectedChange}
-					aria-label={`Select ${media.name}`}
+					aria-label={`Select ${media.path}`}
 				/>
 			</div>
 
@@ -100,7 +100,7 @@ export function MediaCard({
 			 * capped so it wraps predictably into 3 + 2 and stays centred, instead
 			 * of squeezing against the card edges.
 			 */}
-			<div className="absolute inset-0 flex items-center justify-center p-3 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+			<div className="absolute inset-0 flex items-center justify-center p-3 opacity-100 transition-opacity duration-200 [@media(hover:hover)]:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100">
 				<div className="flex max-w-[8.75rem] flex-wrap items-center justify-center gap-2">
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -205,12 +205,12 @@ export function MediaCard({
 				</div>
 			</div>
 
-			<div className="absolute inset-x-0 bottom-0 p-2.5 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+			<div className="pointer-events-none absolute inset-x-0 bottom-0 bg-background/90 p-2.5">
 				<p
-					className="truncate text-xs font-medium text-white"
-					title={media.name}
+					className="truncate text-xs font-medium text-foreground"
+					title={media.path}
 				>
-					{media.name}
+					{media.path}
 				</p>
 			</div>
 		</div>

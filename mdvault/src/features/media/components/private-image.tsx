@@ -28,13 +28,14 @@ export function mediaUrl(
 		return path;
 	}
 
-	// Media is flat, so the filename alone identifies it.
-	const filename = path.split("/").pop() ?? "";
-	if (!filename) {
+	const cleanPath = path.split(/[?#]/)[0];
+	if (!cleanPath) {
 		return "";
 	}
 
-	const params = new URLSearchParams({ file: filename });
+	const params = new URLSearchParams(
+		cleanPath.includes("/") ? { path: cleanPath } : { file: cleanPath },
+	);
 	if (version) {
 		params.set("v", version);
 	}
