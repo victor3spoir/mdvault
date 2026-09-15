@@ -8,6 +8,40 @@ function render(source: string) {
 }
 
 describe("advanced Markdown rendering", () => {
+	it("renders code with a persistent language and copy header above the source", () => {
+		const html = render("```bash\nmultipass launch 26.04 --name srv-demo\n```");
+		expect(html).toContain('class="code-block-frame"');
+		expect(html).toContain('class="code-block-language">bash</span>');
+		expect(html).toContain('aria-label="Copy code"');
+		expect(html.indexOf('class="code-block-header"')).toBeLessThan(
+			html.indexOf("<pre"),
+		);
+		expect(html).toContain('class="th-token th-command"');
+		expect(html).not.toContain("group-hover");
+	});
+
+	it.each([
+		"",
+		"text",
+		"plaintext",
+	])("labels an unhighlighted %s fence as plain text", (language) => {
+		const html = render(`\`\`\`${language}\nunchanged source\n\`\`\``);
+		expect(html).toContain('class="code-block-language">Plain text</span>');
+		expect(html).toContain("unchanged source");
+	});
+
+	it("preserves an unknown language label and escapes its code", () => {
+		const html = render("```custom-lang\n<script>hello</script>\n```");
+		expect(html).toContain('class="code-block-language">custom-lang</span>');
+		expect(html).toContain("&lt;script&gt;hello&lt;/script&gt;");
+	});
+
+	it("keeps inline code out of the block frame", () => {
+		const html = render("Use `multipass` here.");
+		expect(html).not.toContain("code-block-frame");
+		expect(html).toContain("<code>multipass</code>");
+	});
+
 	it("styles H4 headings in the shared live and page preview renderer", () => {
 		const html = render("#### Une **sous-section**\n\nSon contenu.");
 		expect(html).toMatch(

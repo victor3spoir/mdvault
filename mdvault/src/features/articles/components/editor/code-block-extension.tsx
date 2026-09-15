@@ -1,4 +1,3 @@
-import { IconCheck, IconCopy } from "@tabler/icons-react";
 import { CodeBlock } from "@tiptap/extension-code-block";
 import {
 	NodeViewContent,
@@ -6,9 +5,8 @@ import {
 	NodeViewWrapper,
 	ReactNodeViewRenderer,
 } from "@tiptap/react";
-import { useState } from "react";
-import { Button } from "#/components/ui/button";
 import { createCodeBlockHighlightPlugin } from "#/features/articles/components/editor/code-block-highlight";
+import { CodeBlockHeader } from "#/features/content/components/code-block-header";
 import { MermaidDiagram } from "#/features/content/components/mermaid-diagram";
 
 const LANGUAGES = [
@@ -26,6 +24,8 @@ const LANGUAGES = [
 	{ value: "markdown", label: "Markdown" },
 	{ value: "mermaid", label: "Mermaid" },
 	{ value: "php", label: "PHP" },
+	{ value: "powershell", label: "PowerShell" },
+	{ value: "pwsh", label: "PowerShell (pwsh)" },
 	{ value: "python", label: "Python" },
 	{ value: "rust", label: "Rust" },
 	{ value: "sql", label: "SQL" },
@@ -40,59 +40,37 @@ function CodeBlockView({ node, updateAttributes }: NodeViewProps) {
 		typeof node.attrs.language === "string" && node.attrs.language
 			? node.attrs.language
 			: "plaintext";
-	const [copied, setCopied] = useState(false);
-
-	const handleCopy = async () => {
-		const code = node.textContent;
-		if (!code) {
-			return;
-		}
-		try {
-			await navigator.clipboard.writeText(code);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
-		} catch {}
-	};
+	const knownLanguage = LANGUAGES.some((item) => item.value === language);
 
 	return (
-		<NodeViewWrapper className="tiptap-code-block group relative">
-			<div
-				contentEditable={false}
-				className="absolute top-3 right-3 z-10 flex items-center gap-2"
-			>
-				<Button
-					type="button"
-					onMouseDown={(event) => event.preventDefault()}
-					onClick={handleCopy}
-					size="icon-sm"
-					variant="secondary"
-					className="border bg-background/60 backdrop-blur transition-opacity md:opacity-0 md:group-hover:opacity-100"
-					title="Copy code"
-				>
-					{copied ? (
-						<IconCheck className="size-4 text-emerald-500" />
-					) : (
-						<IconCopy className="size-4" />
-					)}
-				</Button>
-				<select
-					value={language}
-					aria-label="Code block language"
-					onChange={(event) =>
-						updateAttributes({ language: event.target.value })
+		<NodeViewWrapper className="tiptap-code-block">
+			<div className="code-block-frame">
+				<CodeBlockHeader
+					getCode={() => node.textContent}
+					language={
+						<select
+							value={language}
+							aria-label="Code block language"
+							onChange={(event) =>
+								updateAttributes({ language: event.target.value })
+							}
+							className="code-block-language code-block-language-select"
+						>
+							{!knownLanguage ? (
+								<option value={language}>{language}</option>
+							) : null}
+							{LANGUAGES.map((item) => (
+								<option key={item.value} value={item.value}>
+									{item.label}
+								</option>
+							))}
+						</select>
 					}
-					className="rounded-md border bg-background/60 px-2 py-1 font-mono text-[11px] uppercase tracking-wide text-muted-foreground backdrop-blur transition-opacity focus:opacity-100 md:opacity-0 md:group-hover:opacity-100"
-				>
-					{LANGUAGES.map((item) => (
-						<option key={item.value} value={item.value}>
-							{item.label}
-						</option>
-					))}
-				</select>
+				/>
+				<pre className="code-block" spellCheck={false}>
+					<NodeViewContent<"code"> as="code" style={{ whiteSpace: "pre" }} />
+				</pre>
 			</div>
-			<pre spellCheck={false}>
-				<NodeViewContent<"code"> as="code" />
-			</pre>
 			{language === "mermaid" ? (
 				<div contentEditable={false} suppressContentEditableWarning>
 					<MermaidDiagram chart={node.textContent} className="mt-2" />
@@ -103,7 +81,7 @@ function CodeBlockView({ node, updateAttributes }: NodeViewProps) {
 }
 
 /**
- * Code block with a per-block language selector (shown on hover) and live
+ * Code block with a persistent language/copy header and live
  * TanStack Highlight syntax colors while editing. The chosen language
  * serializes to the markdown fence info string (```lang), so the rendered
  * article view applies the same highlighting.

@@ -21,6 +21,7 @@ import { tsx } from "@tanstack/highlight/languages/tsx";
 import { yaml } from "@tanstack/highlight/languages/yaml";
 import { csharp } from "#/lib/highlight-csharp";
 import { hcl } from "#/lib/highlight-hcl";
+import { powershell } from "#/lib/highlight-powershell";
 
 /**
  * Isomorphic highlighter shared by SSR and the browser. Unknown languages
@@ -43,6 +44,7 @@ export const highlighter = createHighlighter({
 		markdown,
 		mermaid,
 		nginx,
+		powershell,
 		python,
 		shell,
 		sql,

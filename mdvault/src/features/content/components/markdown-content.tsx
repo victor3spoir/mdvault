@@ -3,9 +3,7 @@ import {
 	IconBrandVimeo,
 	IconBrandYoutube,
 	IconBulb,
-	IconCheck,
 	IconCircleCheck,
-	IconCopy,
 	IconInfoCircle,
 	IconStar,
 } from "@tabler/icons-react";
@@ -18,9 +16,7 @@ import {
 	isValidElement,
 	type ReactNode,
 	useRef,
-	useState,
 } from "react";
-import { Button } from "#/components/ui/button";
 import {
 	type CalloutType,
 	calloutLabel,
@@ -28,6 +24,7 @@ import {
 	normalizeCalloutMarkdown,
 	normalizeCalloutType,
 } from "#/features/content/callout";
+import { CodeBlockHeader } from "#/features/content/components/code-block-header";
 import { MermaidDiagram } from "#/features/content/components/mermaid-diagram";
 import { parseMediaEmbed } from "#/features/content/media-embed";
 import { PrivateImage } from "#/features/media/components/private-image";
@@ -182,52 +179,29 @@ function MediaEmbed({ source }: { source: string }) {
 
 function CodeBlockFrame({
 	"data-lang": lang,
+	className,
 	...props
 }: ComponentPropsWithoutRef<"pre"> & { "data-lang"?: string }) {
 	const preRef = useRef<HTMLPreElement>(null);
-	const [copied, setCopied] = useState(false);
-
-	const handleCopy = async () => {
-		const code = preRef.current?.querySelector("code")?.textContent ?? "";
-		if (!code) {
-			return;
-		}
-		try {
-			await navigator.clipboard.writeText(code);
-			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
-		} catch {}
-	};
 
 	return (
-		<div className="group relative my-6">
+		<div className="code-block-frame">
+			<CodeBlockHeader
+				language={
+					<span className="code-block-language">
+						{!lang || lang === "plaintext" || lang === "text"
+							? "Plain text"
+							: lang}
+					</span>
+				}
+				getCode={() => preRef.current?.querySelector("code")?.textContent ?? ""}
+			/>
 			<pre
 				{...props}
 				ref={preRef}
 				data-lang={lang}
-				className="code-block overflow-x-auto p-5 pr-24"
+				className={cn("code-block", className)}
 			/>
-			<div className="absolute top-3 right-3 flex items-center gap-2">
-				<Button
-					type="button"
-					onClick={handleCopy}
-					size="icon-sm"
-					variant="secondary"
-					className="border bg-background/60 backdrop-blur transition-opacity md:opacity-0 md:group-hover:opacity-100"
-					title="Copy code"
-				>
-					{copied ? (
-						<IconCheck className="size-4 text-emerald-500" />
-					) : (
-						<IconCopy className="size-4" />
-					)}
-				</Button>
-				{lang && lang !== "plaintext" && lang !== "text" ? (
-					<div className="rounded-md border bg-background/60 px-2 py-1 font-mono text-[11px] uppercase tracking-wide text-muted-foreground backdrop-blur transition-opacity md:opacity-0 md:group-hover:opacity-100">
-						{lang}
-					</div>
-				) : null}
-			</div>
 		</div>
 	);
 }
